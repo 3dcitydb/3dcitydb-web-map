@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>TMS Streaming demo</title>
+  <script src="../../Cesium/Build/Cesium/Cesium.js"></script>  
+  <script src="../js/3dcitydb-web-map.js"></script>
+  <script src="../js/tmsobjectprovider.js"></script>
+  <script src="../js/tmsobjectlayer.js"></script>  
+  <style>
+      @import url(../../Cesium/Build/Cesium/Widgets/widgets.css);
+      html, body, #cesiumContainer {
+          top: 0px;
+          left: 0px;
+          position: absolute;
+          width: 100%; 
+          height: 100%; 
+          margin: 0; 
+          padding: 0; 
+          overflow: hidden;
+          z-index: -1;
+      }
+      #uiMenu {
+          border-radius:5px;
+          padding: 10px;
+          position:absolute;
+          left: 20px;
+          font-family: "Arial";
+          z-index: 99999;
+      }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+   <div id="uiMenu">
+    <button type="button" onclick="addLayer()">add Layer</button> 
+    <button type="button" onclick="removeLayer()">remove Layer</button> 
+    <br />
+    <button type="button" onclick="activateClickListener(true)">activateClickListener</button> 
+    <button type="button" onclick="activateClickListener(false)">deactivateClickListener</button>
+    <br />
+    <button type="button" onclick="activateMoveListener(true)">activateMoveListener</button> 
+    <button type="button" onclick="activateMoveListener(false)">deactivateMoveListener</button>
+    <br />
+    <button type="button" onclick="addEventListenerOnClick()">addEventListener</button> 
+    <button type="button" onclick="removeEventListenerOnClick(false)">removeEventListener</button>
+    
+  </div>
+  <script>
+
+  var terrainProvider = new Cesium.CesiumTerrainProvider({
+	    url : '/berlin_data'
+	});
+   var eventCallback = function(id){
+	   alert(id);
+   }
+   var addEventListenerOnClick = function(){
+	   tmsLayer.registerEventHandler("CLICK", eventCallback);
+   }
+   var removeEventListenerOnClick = function(){
+	   tmsLayer.removeEventHandler("CLICK", eventCallback);
+   }
+   var activateMoveListener = function(active){
+		webMap.activateMouseMoveEvents(active);
+	} 
+  	var activateClickListener = function(active){
+  		webMap.activateMouseClickEvents(active);
+  	} 
+  	var tmsLayer;
+  	var addLayer = function(){
+  		var buildingsextent = new Cesium.Rectangle.fromDegrees(13.3703613, 52.5036621, 13.4143066, 52.5256348);
+  	    var options = {url:'/temp/berlin/tms', name:"buildingslayer", minLevel:15, maxLevel:17, region:buildingsextent, id:"tmsOLayer"};
+  	    
+  	    tmsLayer = new TMSObjectLayer(options);
+  	    webMap.addLayer(tmsLayer);	  		
+  	}
+  	var removeLayer = function(){
+  		webMap.removeLayer("tmsOLayer");  		
+  	}
+    var viewer = new Cesium.Viewer('cesiumContainer', {baseLayerPicker : false}); 
+    	//terrainProvider:terrainProvider
+
+    var extent = new Cesium.Rectangle.fromDegrees(13.3703613, 52.5036621, 13.4143066, 52.5256348);
+    viewer.camera.viewRectangle(extent);
+
+    viewer.extend(Cesium.viewerCesiumInspectorMixin);  
+    
+    var webMap = new WebMap3DCityDB(viewer);
+    
+
+    
+  </script>
+</body>
+</html>
