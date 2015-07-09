@@ -191,7 +191,7 @@ TMSObjectLayer.prototype.highlight = function(toHighlight){
 		if (tile.data.primitive){
 			for (var id in toHighlight){
 				var model = tile.data.primitive;
-				if(model){
+				if(model && model.ready){
 					if (model.getMaterial("material_" + id)){
 						var material = model.getMaterial("material_" + id);
 						model.getMaterial("material_" + id).setValue("diffuse", new Cesium.Cartesian4(toHighlight[id].red, toHighlight[id].blue, toHighlight[id].green, toHighlight[id].alpha));
@@ -212,7 +212,7 @@ TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
 	var highlightedObjects = this._highlightedObjects;
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
 		var model = tile.data.primitive;
-		if(model){
+		if(model && model.ready){
 			for(var i = 0; i < toUnHighlight.length; i++){
 				if (model.getMaterial("material_" + toUnHighlight[i])){
 					model.getMaterial("material_" + toUnHighlight[i]).setValue("diffuse", new Cesium.Cartesian4(0.8, 0.8, 0.8, 1));
@@ -241,7 +241,7 @@ TMSObjectLayer.prototype.hideObjects = function(toHide){
 	var hiddenObjects = this._hiddenObjects;
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
 		var model = tile.data.primitive;
-		if (model){
+		if (model && model.ready){
 			for (var j=0; j < toHide.length; j++){
 				if (model.getNode("BUILDING_" + toHide[j])){
 					model.getNode("BUILDING_" + toHide[j]).show = false;

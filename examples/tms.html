@@ -94,13 +94,12 @@
   	
   	var addHighlightingListenerOnMouse = function(){
   		tmsLayer.registerEventHandler("MOUSEIN",highlightInEventCallback);
-  		tmsLayer.registerEventHandler("MOUSEOUT",highlightOutEventCallback)
+  		tmsLayer.registerEventHandler("MOUSEOUT",highlightOutEventCallback);
   	};
   	
   	var removeHighlightingListenerOnMouse = function(){
   		tmsLayer.removeEventHandler("MOUSEIN",highlightInEventCallback);
-  		tmsLayer.removeEventHandler("MOUSEOUT",highlightOutEventCallback)
-
+  		tmsLayer.removeEventHandler("MOUSEOUT",highlightOutEventCallback);
   	};
   
   	var activateMoveListener = function(active){

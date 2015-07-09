@@ -57,14 +57,6 @@ WebMap3DCityDB.prototype.activateMouseClickEvents = function(active){
 	if(active){
 		var that = this;
 		this._eventHandler.setInputAction(function(event){
-			// When camera is moved do not trigger any other events
-			if (that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.LEFT_DRAG) ||
-					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.MIDDLE_DRAG) ||
-					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.PINCH ) ||
-					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.RIGHT_DRAG ) ||
-					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.WHEEL)){
-				return;
-			}
 			var object = that._cesiumViewerInstance.scene.pick(event.position);
 			if(object){
 				if(object.id.layerId){

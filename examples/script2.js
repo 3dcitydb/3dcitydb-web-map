@@ -71,6 +71,11 @@ function addEvent(obj, evType, fn) {
     var highlight = document.getElementById("highlight");
     var dehighlight = document.getElementById("dehighlight");
     var hide = document.getElementById("hide");
+    var mouseactive = document.getElementById("mouseactive");
+    var mousedeactive = document.getElementById("mousedeactive");
+    var addHighlightingListenerOnMouse = document.getElementById("addHighlightingListenerOnMouse");
+    var removeHighlightingListenerOnMouse = document.getElementById("removeHighlightingListenerOnMouse");
+
 
     var tmsLayer = null;
     addEvent(add,"click", function(){
@@ -182,6 +187,43 @@ unHighlightThis.push("node_1");
         var showThis = ["DEB_LOD2_UUID_fdf1a5fa-c9dc-49fe-bc85-871b32aa3074"];
         tmsLayer.showObjects(showThis); 
     });
+    
+    addEvent(moveactive,"click", function(){
+    	webMap.activateMouseMoveEvents(true);
+	}); 
+	
+	addEvent(movedeactive, "click",function(){
+		webMap.activateMouseMoveEvents(false);
+	});
+	
+	addEvent(moveactive,"click", function(){
+    	webMap.activateMouseMoveEvents(true);
+	}); 
+	
+	addEvent(movedeactive, "click",function(){
+		webMap.activateMouseMoveEvents(false);
+	});
+	
+	addEvent(addHighlightingListenerOnMouse, "click",function(){
+		tmsLayer.registerEventHandler("MOUSEIN",highlightInEventCallback);
+  		tmsLayer.registerEventHandler("MOUSEOUT",highlightOutEventCallback);
+	});
+	
+	addEvent(removeHighlightingListenerOnMouse, "click",function(){
+		tmsLayer.removeEventHandler("MOUSEIN",highlightInEventCallback);
+  		tmsLayer.removeEventHandler("MOUSEOUT",highlightOutEventCallback);
+	});
+	
+	var highlightInEventCallback = function(id){
+  		var highlightThis = {};
+  		highlightThis[id] = Cesium.Color.CRIMSON;
+  		
+  		tmsLayer.highlight(highlightThis);
+  	};
+  	
+  	var highlightOutEventCallback = function(id){
+  		tmsLayer.unHighlight([id]);
+  	};
 
     function addEvent(obj, evType, fn) {
     if (obj.addEventListener) {
