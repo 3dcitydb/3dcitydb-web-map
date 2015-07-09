@@ -22,13 +22,13 @@ function TMSObjectLayer(options){
 	this._id = options.id;
 	this._name = options.name;
 	this._region = options.region;
-	this._highlightedObjects = [];
+	this._highlightedObjects = {};
 	this._active = false;
 	this._hiddenObjects = [];
 	this._cameraPosition = {};	
 	this._maxLevel = options.maxLevel;	
 	this._minLevel = options.minLevel;
-	this._tileProvider = new TMSObjectTileProvider(options);
+	this._tileProvider = new TMSObjectTileProvider(options, this._highlightedObjects, this._hiddenObjects);
 	/**
 	 * handles ClickEvents
 	 * @type {Cesium.Event} clickEvent
@@ -171,21 +171,79 @@ TMSObjectLayer.prototype.activate = function(active){
  * highlights one or more object with a given color;
  * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
  */
-TMSObjectLayer.prototype.highlight = function(values){
-	
-}
+TMSObjectLayer.prototype.highlight = function(toHighlight){
+	outermost:
+	for (var id in toHighlight){
+		if (toHighlight.hasOwnProperty(id)){
+			for( i in this._highlightedObjects){
+				if (id == i){
+					break outermost;
+				}
+			}
+			this._quadTreePrimitive.forEachLoadedTile(function(tile){
+				if (tile.data.primitive){
+					var model = tile.data.primitive;
+					if(model){
+						if (model.getMaterial("material_" + id)){
+							var material = model.getMaterial("material_" + id);
+							model.getMaterial("material_" + id).setValue("diffuse", new Cesium.Cartesian4(toHighlight[id].red, toHighlight[id].blue, toHighlight[id].green, toHighlight[id].alpha));						
+						}
+					}
+				}
+			});
+			this._highlightedObjects[id] = toHighlight[id];
+		}
+	}
+};
 
 /**
  * undo highlighting
  * @param {Array<String>} A list of Object Ids. The default material will be restored
  */
-TMSObjectLayer.prototype.unHighlight = null;
+TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
+	//TO DO perhaps check if toUnHighlight is fully contained in this._highlightedObjects
+	var highlightedObjects = this._highlightedObjects;
+	this._quadTreePrimitive.forEachLoadedTile(function(tile){
+		if (tile.data.primitive){
+			var model = tile.data.primitive;
+			if(model){
+				for(var i = 0; i < toUnHighlight.length; i++){
+					if (model.getMaterial("material_" + toUnHighlight[i])){
+						model.getMaterial("material_" + toUnHighlight[i]).setValue("diffuse", new Cesium.Cartesian4(0.8, 0.8, 0.8, 1));
+					}
+				}
+			}
+		}
+	});
+	for (var i = 0; i < toUnHighlight.length; i++){
+		delete this._highlightedObjects[toUnHighlight[i]];
+	}
+};
 
 /**
  * hideObjects
  * @param {Array<String>} A list of Object Ids which will be hidden
  */
-TMSObjectLayer.prototype.hideObjects = null;
+TMSObjectLayer.prototype.hideObjects = function(values){
+	outermost:
+	for (var i = 0; i < values.length; i++){
+		for(var i = 0; i < this._hiddenObjects.length; i++){
+			if (values[i] == this._hiddenObjects[i]){
+				break outermost;
+			}
+		}
+		this._quadTreePrimitive.forEachRenderedTile(function(tile){
+			var model = tile.data.primitive;
+			if(model){
+				if (model.getNode("BUILDING_" + values[i])){
+					model.getNode("BUILDING_" + values[i]).show = false;
+				}
+			}
+		});
+		this._hiddenObjects.push(values[i]);
+	}
+};
+
 
 /**
  * showObjects, to undo hideObjects

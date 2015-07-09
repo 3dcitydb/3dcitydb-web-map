@@ -49,39 +49,59 @@
     <br />
     <button type="button" onclick="addEventListenerOnClick()">addEventListener</button> 
     <button type="button" onclick="removeEventListenerOnClick(false)">removeEventListener</button>
+    <br />
+    <button type="button" onclick="highlight()">activateHighlighting</button>
     
   </div>
   <script>
+  
+  //var terrainProvider = new Cesium.CesiumTerrainProvider({
+  //	  
+  //	    url : '/berlin_data'
+  //	});
+  
+  
+  
+  var eventCallback = function(id){
+	  alert(id);
+  };
 
-  var terrainProvider = new Cesium.CesiumTerrainProvider({
-	    url : '/berlin_data'
-	});
-   var eventCallback = function(id){
-	   alert(id);
-   }
-   var addEventListenerOnClick = function(){
+  var addEventListenerOnClick = function(){
 	   tmsLayer.registerEventHandler("CLICK", eventCallback);
-   }
-   var removeEventListenerOnClick = function(){
-	   tmsLayer.removeEventHandler("CLICK", eventCallback);
-   }
-   var activateMoveListener = function(active){
-		webMap.activateMouseMoveEvents(active);
-	} 
-  	var activateClickListener = function(active){
-  		webMap.activateMouseClickEvents(active);
-  	} 
-  	var tmsLayer;
-  	var addLayer = function(){
-  		var buildingsextent = new Cesium.Rectangle.fromDegrees(13.3703613, 52.5036621, 13.4143066, 52.5256348);
-  	    var options = {url:'/temp/berlin/tms', name:"buildingslayer", minLevel:15, maxLevel:17, region:buildingsextent, id:"tmsOLayer"};
+  };
+
+  var removeEventListenerOnClick = function(){
+	  tmsLayer.removeEventHandler("CLICK", eventCallback);
+  };
+  var activateMoveListener = function(active){
+    webMap.activateMouseMoveEvents(active);
+	}; 
+
+  var activateClickListener = function(active){
+  	webMap.activateMouseClickEvents(active);
+  };
+  
+  var tmsLayer;
+  
+  var addLayer = function(){
+  	var buildingsextent = new Cesium.Rectangle.fromDegrees(13.3703613, 52.5036621, 13.4143066, 52.5256348);
+      var options = {url:'http://localhost/www/berlintms', name:"buildingslayer", minLevel:15, maxLevel:17, region:buildingsextent, id:"tmsOLayer"};
   	    
-  	    tmsLayer = new TMSObjectLayer(options);
-  	    webMap.addLayer(tmsLayer);	  		
-  	}
-  	var removeLayer = function(){
-  		webMap.removeLayer("tmsOLayer");  		
-  	}
+      tmsLayer = new TMSObjectLayer(options);
+      webMap.addLayer(tmsLayer);	  		
+  };
+
+  var removeLayer = function(){
+  	webMap.removeLayer("tmsOLayer");  		
+  };
+
+  var highlight = function(){
+    var highlightThis = {
+        "DEB_LOD2_UUID_fdf1a5fa-c9dc-49fe-bc85-871b32aa3074" : Cesium.Color.CRIMSON
+    };
+    tmsLayer.highlight(highlightThis);
+  };
+
     var viewer = new Cesium.Viewer('cesiumContainer', {baseLayerPicker : false}); 
     	//terrainProvider:terrainProvider
 

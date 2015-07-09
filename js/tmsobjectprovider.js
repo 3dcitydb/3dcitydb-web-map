@@ -1,7 +1,7 @@
 /* The tile will be empty if the tile size (north->south) is below minSize or above maxsize
  */
-function TMSObjectTileProvider(options){	
-    this._quadtree = undefined;
+function TMSObjectTileProvider(options, highlightedObjects, hiddenObjects){	
+	this._quadtree = undefined;
     this._tilingScheme = new Cesium.GeographicTilingScheme({
             numberOfLevelZeroTilesX : 2,
             numberOfLevelZeroTilesY : 1
@@ -16,6 +16,9 @@ function TMSObjectTileProvider(options){
     this._maxLevel = options.maxLevel;
     this._minLevel = options.minLevel;
     this._region = options.region;
+    
+    this._highlightedObjects = highlightedObjects;
+    this._hiddenObjects = hiddenObjects;
 }
 
 Object.defineProperties(TMSObjectTileProvider.prototype, {
@@ -56,55 +59,60 @@ TMSObjectTileProvider.prototype.getLevelMaximumGeometricError = function(level) 
 };
 
 TMSObjectTileProvider.prototype.loadTile = function(context, frameState, tile) {
-  if (tile.state === Cesium.QuadtreeTileLoadState.START) {
-    tile.data = {
-        primitive: undefined,
-        freeResources: function() {
-            if (Cesium.defined(this.primitive)) {
-                this.primitive.destroy();
-                this.primitive = undefined;
-            }
-        }
-    };
+	if (tile.state === Cesium.QuadtreeTileLoadState.START) {
+		tile.data = {
+				primitive: undefined,
+				freeResources: function() {
+					if (Cesium.defined(this.primitive)) {
+						this.primitive.destroy();
+						this.primitive = undefined;
+					}
+				}
+		};
     
-    tile.state = Cesium.QuadtreeTileLoadState.DONE;   
-    tile.renderable = true;
+		tile.state = Cesium.QuadtreeTileLoadState.DONE;   
+		tile.renderable = true;
     
-    var yTiles = this._tilingScheme.getNumberOfYTilesAtLevel(tile.level);
-    var tmsY = (yTiles - tile.y - 1);
-    var tmsX = tile.x;
+		var yTiles = this._tilingScheme.getNumberOfYTilesAtLevel(tile.level);
+		var tmsY = (yTiles - tile.y - 1);
+		var tmsX = tile.x;
     
-    if(tile.level >= this._minLevel && tile.level <= this._maxLevel){
-      var intersection = Cesium.Rectangle.intersection(tile._rectangle, this._region);
-      if(intersection && intersection.width > 0.0000001 && intersection.height > 0.0000001 ){
+		if(tile.level >= this._minLevel && tile.level <= this._maxLevel){
+			var intersection = Cesium.Rectangle.intersection(tile._rectangle, this._region);
+			if(intersection && intersection.width > 0.0000001 && intersection.height > 0.0000001 ){
       
-        var url = this._url + "/" + tile.level + "/" + tile.x + "/" + tmsY + ".bgltf";
-        var dx = ( tile._rectangle.east - tile._rectangle.west ) / 2 +  tile._rectangle.west;
-        var dy = ( tile._rectangle.north - tile._rectangle.south ) / 2 + tile._rectangle.south;
-        var modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(new Cesium.Cartesian3.fromRadians(dx, dy, 0.0), 3.14159265, 0, 0);
+				var url = this._url + "/" + tile.level + "/" + tile.x + "/" + tmsY + ".bgltf";
+				var dx = ( tile._rectangle.east - tile._rectangle.west ) / 2 +  tile._rectangle.west;
+				var dy = ( tile._rectangle.north - tile._rectangle.south ) / 2 + tile._rectangle.south;
+				var modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(new Cesium.Cartesian3.fromRadians(dx, dy, 0.0), 3.14159265, 0, 0);
         
-        tile.data.primitive = Cesium.Model.fromGltf({id:{layerId:this._id}, url:url, modelMatrix:modelMatrix, scale:1, allowPicking:true, show:false});
-        tile.renderable = false;
-        tile.state = Cesium.QuadtreeTileLoadState.LOADING;  
-      }
-    }  
-    if(tile.level > this._maxLevel){
-      tile.renderable = false;
-      tile.state = Cesium.QuadtreeTileLoadState.DONE;
-    }else{
-      var earthRadius = 6371000;
-      tile.data.boundingSphere3D = Cesium.BoundingSphere.fromRectangle3D(tile.rectangle);
-      tile.data.boundingSphere2D = Cesium.BoundingSphere.fromRectangle2D(tile.rectangle,  frameState.mapProjection);
-    }        
-  }
-  if (tile.state === Cesium.QuadtreeTileLoadState.LOADING) {
-    tile.data.primitive.update(context, frameState, []);
-    if (tile.data.primitive.ready) {
-      tile.data.primitive.show = true;
-      tile.state = Cesium.QuadtreeTileLoadState.DONE;
-      tile.renderable = true;
-    }
-  } 
+				tile.data.primitive = Cesium.Model.fromGltf({id:{layerId:this._id}, url:url, modelMatrix:modelMatrix, scale:1, allowPicking:true, show:false});
+				tile.renderable = false;
+				tile.state = Cesium.QuadtreeTileLoadState.LOADING;  
+			}
+		}  
+		if(tile.level > this._maxLevel){
+			tile.renderable = false;
+			tile.state = Cesium.QuadtreeTileLoadState.DONE;
+		}else{
+			var earthRadius = 6371000;
+			tile.data.boundingSphere3D = Cesium.BoundingSphere.fromRectangle3D(tile.rectangle);
+			tile.data.boundingSphere2D = Cesium.BoundingSphere.fromRectangle2D(tile.rectangle,  frameState.mapProjection);
+		}        
+	}
+	if (tile.state === Cesium.QuadtreeTileLoadState.LOADING) {
+		tile.data.primitive.update(context, frameState, []);
+		if (tile.data.primitive.ready) {
+			for(var i in this._highlightedObjects){
+				if (tile.data.primitive.getMaterial("material_" + i)){
+					tile.data.primitive.getMaterial("material_" + i).setValue("diffuse", new Cesium.Cartesian4(this._highlightedObjects[i].red, this._highlightedObjects[i].blue, this._highlightedObjects[i].green, this._highlightedObjects[i].alpha));
+				}
+			}
+			tile.data.primitive.show = true;
+			tile.state = Cesium.QuadtreeTileLoadState.DONE;
+			tile.renderable = true;
+		}
+	} 
 };
 
 TMSObjectTileProvider.prototype.computeTileVisibility = function(tile, frameState, occluders) {
