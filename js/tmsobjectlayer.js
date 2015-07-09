@@ -185,7 +185,6 @@ TMSObjectLayer.prototype.highlight = function(toHighlight){
 			}
 		}
 	}
-
 	var highlightedObjects = this._highlightedObjects;	
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
 		if (tile.data.primitive){
@@ -212,15 +211,13 @@ TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
 	//TO DO perhaps check if toUnHighlight is fully contained in this._highlightedObjects
 	var highlightedObjects = this._highlightedObjects;
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
-		if (tile.data.primitive){
-			var model = tile.data.primitive;
-			if(model){
-				for(var i = 0; i < toUnHighlight.length; i++){
-					if (model.getMaterial("material_" + toUnHighlight[i])){
-						model.getMaterial("material_" + toUnHighlight[i]).setValue("diffuse", new Cesium.Cartesian4(0.8, 0.8, 0.8, 1));
-						delete highlightedObjects[toUnHighlight[i]];
-						toUnHighlight.splice(i,1);
-					}
+		var model = tile.data.primitive;
+		if(model){
+			for(var i = 0; i < toUnHighlight.length; i++){
+				if (model.getMaterial("material_" + toUnHighlight[i])){
+					model.getMaterial("material_" + toUnHighlight[i]).setValue("diffuse", new Cesium.Cartesian4(0.8, 0.8, 0.8, 1));
+					delete highlightedObjects[toUnHighlight[i]];
+					toUnHighlight.splice(i,1);
 				}
 			}
 		}
@@ -232,26 +229,29 @@ TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
  * @param {Array<String>} A list of Object Ids which will be hidden
  */
 TMSObjectLayer.prototype.hideObjects = function(toHide){
+	// First filter toHide-arry for already hidden objects
 	outermost:
 	for (var i = 0; i < toHide.length; i++){
 		for(var i = 0; i < this._hiddenObjects.length; i++){
 			if (toHide[i] == this._hiddenObjects[i]){
 				// Object is already hidden
+				delete toHide[i];
 				break outermost;
 			}
 		}
-		this._quadTreePrimitive.forEachLoadedTile(function(tile){
-			if (tile.data.primitive){
-				var model = tile.data.primitive;
-				if(model){
-					if (model.getNode("BUILDING_" + toHide[i])){
-						model.getNode("BUILDING_" + toHide[i]).show = false;
-					}
+	}
+	var hiddenObjects = this._hiddenObjects;
+	this._quadTreePrimitive.forEachLoadedTile(function(tile){
+		var model = tile.data.primitive;
+		if (model){
+			for (var j=0; j < toHide.length; j++){
+				if (model.getNode("BUILDING_" + toHide[j])){
+					model.getNode("BUILDING_" + toHide[j]).show = false;
+					hiddenObjects.push(toHide[j]);
 				}
 			}
-		});
-		this._hiddenObjects.push(toHide[i]);
-	}
+		}
+	});
 };
 
 
@@ -262,20 +262,16 @@ TMSObjectLayer.prototype.hideObjects = function(toHide){
 TMSObjectLayer.prototype.showObjects = function(toUnhide){
 	var hiddenObjects = this._hiddenObjects;
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
-		if (tile.data.primitive){
-			var model = tile.data.primitive;
-			if(model){
-				for(var i = 0; i < toUnhide.length; i++){
-					if (model.getNode("BUILDING_" + toHide[i])){
-						model.getNode("BUILDING_" + toHide[i]).show = true;
-					}
+		var model = tile.data.primitive;
+		if(model){
+			for(var i = 0; i < toUnhide.length; i++){
+				if (model.getNode("BUILDING_" + toUnhide[i])){
+					model.getNode("BUILDING_" + toUnhide[i]).show = true;
+					hiddenObjects.splice(toUnhide[i],1);
 				}
 			}
 		}
 	});
-	for (var i = 0; i < toUnHighlight.length; i++){
-		delete this._highlightedObjects[toUnHighlight[i]];
-	}
 };
 	
 

@@ -102,10 +102,17 @@ TMSObjectTileProvider.prototype.loadTile = function(context, frameState, tile) {
 	}
 	if (tile.state === Cesium.QuadtreeTileLoadState.LOADING) {
 		tile.data.primitive.update(context, frameState, []);
-		if (tile.data.primitive.ready) {
+		var model = tile.data.primitive;
+		if (model.ready) {
+			// Check which objects should be highlighted
 			for(var i in this._highlightedObjects){
-				if (tile.data.primitive.getMaterial("material_" + i)){
-					tile.data.primitive.getMaterial("material_" + i).setValue("diffuse", new Cesium.Cartesian4(this._highlightedObjects[i].red, this._highlightedObjects[i].blue, this._highlightedObjects[i].green, this._highlightedObjects[i].alpha));
+				if (model.getMaterial("material_" + i)){
+					model.getMaterial("material_" + i).setValue("diffuse", new Cesium.Cartesian4(this._highlightedObjects[i].red, this._highlightedObjects[i].blue, this._highlightedObjects[i].green, this._highlightedObjects[i].alpha));
+				}
+			}
+			for (var j = 0; j < this._hiddenObjects; j++){
+				if (model.getNode("BUILDING_" + this._hiddenObjects[j])){
+					model.getNode("BUILDING_" + toHide[j]).show = false;
 				}
 			}
 			tile.data.primitive.show = true;

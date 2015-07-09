@@ -103,6 +103,11 @@ function addEvent(obj, evType, fn) {
       var hideThis = ["DEB_LOD2_UUID_fdf1a5fa-c9dc-49fe-bc85-871b32aa3074"];
       tmsLayer.hideObjects(hideThis); 
    });
+    
+    addEvent(show,"click",function(){
+        var showThis = ["DEB_LOD2_UUID_fdf1a5fa-c9dc-49fe-bc85-871b32aa3074"];
+        tmsLayer.showObjects(showThis); 
+    });
 
     function addEvent(obj, evType, fn) {
     if (obj.addEventListener) {
