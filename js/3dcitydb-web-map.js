@@ -12,6 +12,7 @@ function WebMap3DCityDB(cesiumViewer){
 	this._mouseMoveEvents = false;
 	this._mouseClickEvents = false;
 	this._eventHandler = new Cesium.ScreenSpaceEventHandler(cesiumViewer.scene.canvas);
+	this._cameraEventAggregator = new Cesium.CameraEventAggregator(cesiumViewer.scene.canvas);
 }
 
 
@@ -55,7 +56,15 @@ WebMap3DCityDB.prototype.removeLayer = function(id){
 WebMap3DCityDB.prototype.activateMouseClickEvents = function(active){	
 	if(active){
 		var that = this;
-		this._eventHandler.setInputAction(function(event){			
+		this._eventHandler.setInputAction(function(event){
+			// When camera is moved do not trigger any other events
+			if (that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.LEFT_DRAG) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.MIDDLE_DRAG) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.PINCH ) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.RIGHT_DRAG ) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.WHEEL)){
+				return;
+			}
 			var object = that._cesiumViewerInstance.scene.pick(event.position);
 			if(object){
 				if(object.id.layerId){
@@ -82,7 +91,15 @@ WebMap3DCityDB.prototype.activateMouseMoveEvents = function(active){
 		var that = this;
 		var pickingInProgress = false;
 		var currentObject = null;
-		this._eventHandler.setInputAction(function(event){		
+		this._eventHandler.setInputAction(function(event){
+			// When camera is moved do not trigger any other events
+			if (that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.LEFT_DRAG) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.MIDDLE_DRAG) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.PINCH ) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.RIGHT_DRAG ) ||
+					that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.WHEEL)){
+				return;
+			}
 			if(pickingInProgress) return;
 			pickingInProgress = true;
 			var object = that._cesiumViewerInstance.scene.pick(event.endPosition);
