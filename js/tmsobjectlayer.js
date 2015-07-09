@@ -172,28 +172,36 @@ TMSObjectLayer.prototype.activate = function(active){
  * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
  */
 TMSObjectLayer.prototype.highlight = function(toHighlight){
+	// First filter toHighlight-object for already highlighted objects
 	outermost:
 	for (var id in toHighlight){
 		if (toHighlight.hasOwnProperty(id)){
 			for( i in this._highlightedObjects){
 				if (id == i){
+					// Object is already highlighted
+					delete toHighlight[id];
 					break outermost;
 				}
 			}
-			this._quadTreePrimitive.forEachLoadedTile(function(tile){
-				if (tile.data.primitive){
-					var model = tile.data.primitive;
-					if(model){
-						if (model.getMaterial("material_" + id)){
-							var material = model.getMaterial("material_" + id);
-							model.getMaterial("material_" + id).setValue("diffuse", new Cesium.Cartesian4(toHighlight[id].red, toHighlight[id].blue, toHighlight[id].green, toHighlight[id].alpha));						
-						}
-					}
-				}
-			});
-			this._highlightedObjects[id] = toHighlight[id];
 		}
 	}
+
+	var highlightedObjects = this._highlightedObjects;	
+	this._quadTreePrimitive.forEachLoadedTile(function(tile){
+		if (tile.data.primitive){
+			for (var id in toHighlight){
+				var model = tile.data.primitive;
+				if(model){
+					if (model.getMaterial("material_" + id)){
+						var material = model.getMaterial("material_" + id);
+						model.getMaterial("material_" + id).setValue("diffuse", new Cesium.Cartesian4(toHighlight[id].red, toHighlight[id].blue, toHighlight[id].green, toHighlight[id].alpha));
+						highlightedObjects[id] = toHighlight[id]
+						delete toHighlight[id];
+					}
+				}
+			}
+		}
+	});
 };
 
 /**
@@ -210,6 +218,56 @@ TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
 				for(var i = 0; i < toUnHighlight.length; i++){
 					if (model.getMaterial("material_" + toUnHighlight[i])){
 						model.getMaterial("material_" + toUnHighlight[i]).setValue("diffuse", new Cesium.Cartesian4(0.8, 0.8, 0.8, 1));
+						delete highlightedObjects[toUnHighlight[i]];
+						toUnHighlight.splice(i,1);
+					}
+				}
+			}
+		}
+	});
+};
+
+/**
+ * hideObjects
+ * @param {Array<String>} A list of Object Ids which will be hidden
+ */
+TMSObjectLayer.prototype.hideObjects = function(toHide){
+	outermost:
+	for (var i = 0; i < toHide.length; i++){
+		for(var i = 0; i < this._hiddenObjects.length; i++){
+			if (toHide[i] == this._hiddenObjects[i]){
+				// Object is already hidden
+				break outermost;
+			}
+		}
+		this._quadTreePrimitive.forEachLoadedTile(function(tile){
+			if (tile.data.primitive){
+				var model = tile.data.primitive;
+				if(model){
+					if (model.getNode("BUILDING_" + toHide[i])){
+						model.getNode("BUILDING_" + toHide[i]).show = false;
+					}
+				}
+			}
+		});
+		this._hiddenObjects.push(toHide[i]);
+	}
+};
+
+
+/**
+ * showObjects, to undo hideObjects
+ * @param {Array<String>} A list of Object Ids which will be unhidden. 
+ */
+TMSObjectLayer.prototype.showObjects = function(toUnhide){
+	var hiddenObjects = this._hiddenObjects;
+	this._quadTreePrimitive.forEachLoadedTile(function(tile){
+		if (tile.data.primitive){
+			var model = tile.data.primitive;
+			if(model){
+				for(var i = 0; i < toUnhide.length; i++){
+					if (model.getNode("BUILDING_" + toHide[i])){
+						model.getNode("BUILDING_" + toHide[i]).show = true;
 					}
 				}
 			}
@@ -219,37 +277,8 @@ TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
 		delete this._highlightedObjects[toUnHighlight[i]];
 	}
 };
+	
 
-/**
- * hideObjects
- * @param {Array<String>} A list of Object Ids which will be hidden
- */
-TMSObjectLayer.prototype.hideObjects = function(values){
-	outermost:
-	for (var i = 0; i < values.length; i++){
-		for(var i = 0; i < this._hiddenObjects.length; i++){
-			if (values[i] == this._hiddenObjects[i]){
-				break outermost;
-			}
-		}
-		this._quadTreePrimitive.forEachRenderedTile(function(tile){
-			var model = tile.data.primitive;
-			if(model){
-				if (model.getNode("BUILDING_" + values[i])){
-					model.getNode("BUILDING_" + values[i]).show = false;
-				}
-			}
-		});
-		this._hiddenObjects.push(values[i]);
-	}
-};
-
-
-/**
- * showObjects, to undo hideObjects
- * @param {Array<String>} A list of Object Ids which will be unhidden. 
- */
-TMSObjectLayer.prototype.showObjects = null;
 
 /**
  * removes an Eventhandler
