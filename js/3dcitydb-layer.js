@@ -85,7 +85,7 @@ defineProperties(Layer3DCityDB.prototype, {
      * @type {Boolean}
      */
     active : {
-        get : throw InstantiationError
+        get : Cesium.DeveloperError.throwInstantiationError
     },
     /**
      * Gets the currently highlighted Objects as an object hashmap {objectid, color}
@@ -93,7 +93,7 @@ defineProperties(Layer3DCityDB.prototype, {
      * @type {Object}
      */
     highlightedObjects : {
-        get : throw InstantiationError
+        get : Cesium.DeveloperError.throwInstantiationError
     },
     /**
      * Gets the currently hidden Objects as an array
@@ -101,7 +101,7 @@ defineProperties(Layer3DCityDB.prototype, {
      * @type {Array}
      */
     hiddenObjects : {
-        get : throw InstantiationError
+        get : Cesium.DeveloperError.throwInstantiationError
     },
     /**
      * Gets/Sets the CameraPosition.
@@ -110,8 +110,8 @@ defineProperties(Layer3DCityDB.prototype, {
      * see https://github.com/AnalyticalGraphicsInc/cesium/blob/1.11/Source/Scene/Camera.js#L2353 for options.
      */
     cameraPosition : {
-        get : throw InstantiationError,
-        set : throw InstantiationError
+        get : Cesium.DeveloperError.throwInstantiationError,
+        set : Cesium.DeveloperError.throwInstantiationError
     },
     /**
      * Gets the url of the layer
@@ -119,7 +119,7 @@ defineProperties(Layer3DCityDB.prototype, {
      * @type {String}
      */
     url : {
-        get : throw InstantiationError
+        get : Cesium.DeveloperError.throwInstantiationError
     },
     /**
      * Gets the name of this layer.
@@ -127,7 +127,7 @@ defineProperties(Layer3DCityDB.prototype, {
      * @type {String}
      */
     name : {
-        get : throw InstantiationError
+        get : Cesium.DeveloperError.throwInstantiationError
     },
     /**
      * Gets the id of this layer, the id should be unique.
@@ -135,15 +135,15 @@ defineProperties(Layer3DCityDB.prototype, {
      * @type {String}
      */
     id : {
-        get : throw InstantiationError
-    }
+        get : Cesium.DeveloperError.throwInstantiationError
+    },
     /**
      * Gets region/bbox of this layer as an Cesium Rectangle Object with longitude/latitude values in radians. 
      * @memberof Layer3DCityDB.prototype
      * @type {Cesium.Rectangle}
      */
     region : {
-        get : throw InstantiationError
+        get : Cesium.DeveloperError.throwInstantiationError
     }
     
 });
@@ -152,31 +152,36 @@ defineProperties(Layer3DCityDB.prototype, {
  * activates or deactivates the layer
  * @param {Boolean} value
  */
-Layer3DCityDB.prototype.activate = throw InstantiationError;
+Layer3DCityDB.prototype.activate = Cesium.DeveloperError.throwInstantiationError;
 
 /**
  * highlights one or more object with a given color;
  * @param {Object<String, Cesium.Color>} An object hashMap with the objectId and a cesium Color
  */
-Layer3DCityDB.prototype.highlight = throw InstantiationError;
+Layer3DCityDB.prototype.highlight = Cesium.DeveloperError.throwInstantiationError;
 
 /**
  * undo highlighting
  * @param {Array<String>} A list of Object Ids. The default material will be restored
  */
-Layer3DCityDB.prototype.unHighlight = throw InstantiationError;
+Layer3DCityDB.prototype.unHighlight = Cesium.DeveloperError.throwInstantiationError;
 
 /**
  * hideObjects
  * @param {Array<String>} A list of Object Ids which will be hidden
  */
-Layer3DCityDB.prototype.hideObjects = throw InstantiationError;
+Layer3DCityDB.prototype.hideObjects = Cesium.DeveloperError.throwInstantiationError;
 
 /**
  * showObjects, to undo hideObjects
  * @param {Array<String>} A list of Object Ids which will be unhidden. 
  */
-Layer3DCityDB.prototype.showObjects = throw InstantiationError;
+Layer3DCityDB.prototype.showObjects = Cesium.DeveloperError.throwInstantiationError;
+
+/**
+ * zooms to the layer cameraPostion
+ */
+Layer3DCityDB.prototype.zoomToStartPosition = Cesium.DeveloperError.throwInstantiationError;
 
 /**
  * removes an Eventhandler
@@ -225,10 +230,7 @@ Layer3DCityDB.prototype.triggerEvent = function(event, object){
 	}
 }
 
-/**
- * zooms to the layer cameraPostion
- */
-Layer3DCityDB.prototype.zoomToStartPosition = throw InstantiationError;
+
 
 
 
