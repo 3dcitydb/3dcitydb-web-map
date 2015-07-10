@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>TMS Streaming demo</title>
+  <script src="../../ThirdParty/Cesium-1-11/Cesium.js"></script>  
+  <script src="../../js/CitydbDataSource.js"></script>  
+  <style>
+      @import url(../../ThirdParty/Cesium-1-11/Widgets/widgets.css);
+      html, body, #cesiumContainer {
+          top: 0px;
+          left: 0px;
+          position: absolute;
+          width: 100%; 
+          height: 100%; 
+          margin: 0; 
+          padding: 0; 
+          overflow: hidden;
+          z-index: -1;
+      }
+      #uiMenu {
+          border-radius:5px;
+          padding: 10px;
+          position:absolute;
+          left: 20px;
+          font-family: "Arial";
+          z-index: 99999;
+      }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+   <div id="uiMenu">
+    <button type="button" onclick="addLayer()">add Layer</button> 
+    <button type="button" onclick="removeLayer()">remove Layer</button> 
+    <br />
+    <button type="button" onclick="activateClickListener(true)">activateClickListener</button> 
+    <button type="button" onclick="activateClickListener(false)">deactivateClickListener</button>
+    <br />
+    <button type="button" onclick="addEventListenerOnClick()">addEventListenerClick</button> 
+    <button type="button" onclick="removeEventListenerOnClick()">removeEventListenerClick</button>
+    <br />
+    <button type="button" onclick="activateMoveListener(true)">activateMoveListener</button> 
+    <button type="button" onclick="activateMoveListener(false)">deactivateMoveListener</button>
+    <br />
+    <button type="button" onclick="highlight()">activate Highlighting</button>
+    <button type="button" onclick="unhighlight()">deactivate Highlighting</button>
+    <br />
+    <button type="button" onclick="hide()">Hide</button>
+    <button type="button" onclick="unhide()">unHide</button>
+    <br />
+    <button type="button" onclick="addHighlightingListenerOnMouse()">addHighlightingListenerOnMouse</button> 
+    <button type="button" onclick="removeHighlightingListenerOnMouse()">removeHighlightingListenerOnMouse</button>
+    
+  </div>
+  <script>
+  	var extent = new Cesium.Rectangle.fromDegrees(13.52480719, 52.4564497, 13.527975, 52.458449);
+	var viewer = new Cesium.Viewer('cesiumContainer'); 	
+	viewer.camera.viewRectangle(extent); 
+	
+	var kmlUrl = "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_Tile_90_198_geometry.kmz"
+	var citydbDataSource = new CitydbDataSource();
+	citydbDataSource.load(kmlUrl).then(function() {
+		console.log(citydbDataSource);
+        viewer.dataSources.add(citydbDataSource);
+    });
+  </script>
+</body>
+</html>
