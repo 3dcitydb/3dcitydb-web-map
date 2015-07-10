@@ -1,10 +1,7 @@
 /**
- * A Web-Map3DCityDB class to visualize Layer3DCityDB with Cesium.
- * 
- * @alias Web-Map3DCityDB
- * @constructor
- * 
- * @param {CesiumViewer} cesiumViewer
+ * This is an extended version of the Cesium KmlDataSource class
+ * It should be specifically used to load KML/Gltf-Networklink data exported from a 3DCityDB instance using the 3DCityDB-KML/Collada Exporter
+ * @see {@link http://www.3dcitydb.net/3dcitydb/3dimpexp/|3D City Database Importer Exporter}
  */
 
 (function() {
