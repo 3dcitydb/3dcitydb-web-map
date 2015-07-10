@@ -172,25 +172,26 @@ TMSObjectLayer.prototype.activate = function(active){
  * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
  */
 TMSObjectLayer.prototype.highlight = function(toHighlight){
-	// First filter toHighlight-object for already highlighted objects
-	outermost:
+	/* don't filter anymore: overwrite existing highlighting
+	// filter toHighlight-object for already highlighted objects
 	for (var id in toHighlight){
 		if (toHighlight.hasOwnProperty(id)){
 			for( i in this._highlightedObjects){
 				if (id == i){
 					// Object is already highlighted
 					delete toHighlight[id];
-					break outermost;
+					break;
 				}
 			}
 		}
 	}
+	*/
 	var highlightedObjects = this._highlightedObjects;	
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
 		if (tile.data.primitive){
 			for (var id in toHighlight){
 				var model = tile.data.primitive;
-				if(model){
+				if(model && model.ready){
 					if (model.getMaterial("material_" + id)){
 						var material = model.getMaterial("material_" + id);
 						model.getMaterial("material_" + id).setValue("diffuse", new Cesium.Cartesian4(toHighlight[id].red, toHighlight[id].blue, toHighlight[id].green, toHighlight[id].alpha));
@@ -208,16 +209,14 @@ TMSObjectLayer.prototype.highlight = function(toHighlight){
  * @param {Array<String>} A list of Object Ids. The default material will be restored
  */
 TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
-	//TO DO perhaps check if toUnHighlight is fully contained in this._highlightedObjects
 	var highlightedObjects = this._highlightedObjects;
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
 		var model = tile.data.primitive;
-		if(model){
+		if(model && model.ready){
 			for(var i = 0; i < toUnHighlight.length; i++){
 				if (model.getMaterial("material_" + toUnHighlight[i])){
 					model.getMaterial("material_" + toUnHighlight[i]).setValue("diffuse", new Cesium.Cartesian4(0.8, 0.8, 0.8, 1));
 					delete highlightedObjects[toUnHighlight[i]];
-					toUnHighlight.splice(i,1);
 				}
 			}
 		}
@@ -229,21 +228,20 @@ TMSObjectLayer.prototype.unHighlight = function(toUnHighlight){
  * @param {Array<String>} A list of Object Ids which will be hidden
  */
 TMSObjectLayer.prototype.hideObjects = function(toHide){
-	// First filter toHide-arry for already hidden objects
-	outermost:
+	// filter toHide-array for already hidden objects
 	for (var i = 0; i < toHide.length; i++){
 		for(var i = 0; i < this._hiddenObjects.length; i++){
 			if (toHide[i] == this._hiddenObjects[i]){
 				// Object is already hidden
 				delete toHide[i];
-				break outermost;
+				break;
 			}
 		}
 	}
 	var hiddenObjects = this._hiddenObjects;
 	this._quadTreePrimitive.forEachLoadedTile(function(tile){
 		var model = tile.data.primitive;
-		if (model){
+		if (model && model.ready){
 			for (var j=0; j < toHide.length; j++){
 				if (model.getNode("BUILDING_" + toHide[j])){
 					model.getNode("BUILDING_" + toHide[j]).show = false;

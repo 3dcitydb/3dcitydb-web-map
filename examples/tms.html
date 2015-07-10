@@ -44,17 +44,20 @@
     <button type="button" onclick="activateClickListener(true)">activateClickListener</button> 
     <button type="button" onclick="activateClickListener(false)">deactivateClickListener</button>
     <br />
+    <button type="button" onclick="addEventListenerOnClick()">addEventListenerClick</button> 
+    <button type="button" onclick="removeEventListenerOnClick()">removeEventListenerClick</button>
+    <br />
     <button type="button" onclick="activateMoveListener(true)">activateMoveListener</button> 
     <button type="button" onclick="activateMoveListener(false)">deactivateMoveListener</button>
-    <br />
-    <button type="button" onclick="addEventListenerOnClick()">addEventListener</button> 
-    <button type="button" onclick="removeEventListenerOnClick(false)">removeEventListener</button>
     <br />
     <button type="button" onclick="highlight()">activate Highlighting</button>
     <button type="button" onclick="unhighlight()">deactivate Highlighting</button>
     <br />
     <button type="button" onclick="hide()">Hide</button>
     <button type="button" onclick="unhide()">unHide</button>
+    <br />
+    <button type="button" onclick="addHighlightingListenerOnMouse()">addHighlightingListenerOnMouse</button> 
+    <button type="button" onclick="removeHighlightingListenerOnMouse()">removeHighlightingListenerOnMouse</button>
     
   </div>
   <script>
@@ -64,9 +67,21 @@
   //	    url : '/berlin_data'
   //	});
   
-  
+    var tmsLayer;
+ 
 	var eventCallback = function(id){
 		alert(id);
+  	};
+  	
+  	var highlightInEventCallback = function(id){
+  		var highlightThis = {};
+  		highlightThis[id] = Cesium.Color.CRIMSON;
+  		
+  		tmsLayer.highlight(highlightThis);
+  	};
+  	
+  	var highlightOutEventCallback = function(id){
+  		tmsLayer.unHighlight([id]);
   	};
 
   	var addEventListenerOnClick = function(){
@@ -75,6 +90,16 @@
 
   	var removeEventListenerOnClick = function(){
 	  	tmsLayer.removeEventHandler("CLICK", eventCallback);
+  	};
+  	
+  	var addHighlightingListenerOnMouse = function(){
+  		tmsLayer.registerEventHandler("MOUSEIN",highlightInEventCallback);
+  		tmsLayer.registerEventHandler("MOUSEOUT",highlightOutEventCallback);
+  	};
+  	
+  	var removeHighlightingListenerOnMouse = function(){
+  		tmsLayer.removeEventHandler("MOUSEIN",highlightInEventCallback);
+  		tmsLayer.removeEventHandler("MOUSEOUT",highlightOutEventCallback);
   	};
   
   	var activateMoveListener = function(active){
@@ -85,7 +110,6 @@
   		webMap.activateMouseClickEvents(active);
   	};
   
-  	var tmsLayer;
   
   	var addLayer = function(){
   		var buildingsextent = new Cesium.Rectangle.fromDegrees(13.3703613, 52.5036621, 13.4143066, 52.5256348);
