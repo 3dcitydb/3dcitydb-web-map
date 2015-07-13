@@ -8,7 +8,12 @@
   <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
   <title>CitydbKmlLayer Streaming demo</title>
-  <script src="../../ThirdParty/Cesium-1-11/Cesium.js"></script>  
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>	
+  <script src="../../ThirdParty/Cesium-1-11/Cesium.js"></script> 
+  <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
+  <script src="../../js/CitydbUtil.js"></script>  
+  <script src="../../js/CitydbWebworker.js"></script>  
+  <script src="../../js/CitydbKmlLayerManager.js"></script>  
   <script src="../../js/CitydbKmlDataSource.js"></script>  
   <script src="../../js/CitydbKmlLayer.js"></script> 
   <style>
@@ -60,14 +65,18 @@
     
   </div>
   <script>
-  	var extent = new Cesium.Rectangle.fromDegrees(13.52480719, 52.4564497, 13.527975, 52.458449);
+  	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
 	var viewer = new Cesium.Viewer('cesiumContainer'); 	
 	viewer.camera.viewRectangle(extent); 
+//	viewer.extend(Cesium.viewerCesiumInspectorMixin);  
 	
     var options = {
     //	url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_Tile_90_198_geometry.kmz', 
-  		url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Web3D_Competition/Rotterdam_CityCenter_Geometry_Cesium/Rotterdam_CityCenter_Geometry_Cesium.kml',
-    	name:"buildingslayer"
+ 	//	url: 'https://dl.dropboxusercontent.com/u/24313387/KML/KML%20aus%203DCityDB/StatenIsland.kml',
+ 	//	url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
+  		url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture/Berlin_Center_Texture.kml',
+    	name: 'buildingslayer',
+    	cesiumViewer: viewer
    	};
     
     var citydbKmlLayer = new CitydbKmlLayer(options);

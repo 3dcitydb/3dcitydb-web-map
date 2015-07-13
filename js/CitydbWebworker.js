@@ -61,4 +61,5 @@
     	return this._isSleep;
     };
 	
+    window.CitydbWebworker = CitydbWebworker;
 })()

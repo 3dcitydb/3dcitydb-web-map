@@ -1402,7 +1402,7 @@
             var childNode = childNodes.item(i);
             var geometryProcessor = geometryTypes[childNode.localName];
             if (defined(geometryProcessor)) {
-                geometryProcessor(dataSource, childNode, entity, styleEntity);
+                geometryProcessor(dataSource, childNode, entity, styleEntity, sourceUri);
                 hasGeometry = true;
             }
         }

@@ -26,8 +26,10 @@
 		this._active = false;
 		this._hiddenObjects = [];
 		this._cameraPosition = {};	
+		this._cesiumViewer = options.cesiumViewer;
+		this._jsonLayerInfo = null;
 		this._citydbKmlDataSource = new CitydbKmlDataSource();
-//		this._citydbLayerManager = new CitydbLayerManager(options);
+		this._citydbKmlLayerManager = new CitydbKmlLayerManager(this);
 		
 		/**
 		 * handles ClickEvents
@@ -131,6 +133,27 @@
 	        get : function(){
 	        	return this._region;
 	        }
+	    },
+	    
+	    cesiumViewer : {
+	        get : function(){
+	        	return this._cesiumViewer;
+	        }
+	    },
+	    
+	    jsonLayerInfo : {
+	        get : function(){
+	        	return this._jsonLayerInfo;
+	        },
+	        set : function(json){
+	        	this._jsonLayerInfo = json;
+	        }
+	    },
+	    
+	    citydbKmlDataSource : {
+	        get : function(){
+	        	return this._citydbKmlDataSource;
+	        }
 	    }
 	    
 	});
@@ -142,10 +165,11 @@
 	 */
 	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
 		var that = this;
+		// TODO: we need load json layer 2 case!
 		this._citydbKmlDataSource.load(this._url).then(function() {
 			console.log(that._citydbKmlDataSource);
 			cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-		//	that._citydbLayerManager.doStart();
+			that._citydbKmlLayerManager.doStart();
 	    });
 	}
 
