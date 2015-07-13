@@ -225,6 +225,10 @@
         return entity;
     }
 
+    function createId(node) {
+        return defined(node) && defined(node.id) && node.id.length !== 0 ? node.id : createGuid();
+    }
+    
     function isExtrudable(altitudeMode, gxAltitudeMode) {
         return altitudeMode === 'absolute' || altitudeMode === 'relativeToGround' || gxAltitudeMode === 'relativeToSeaFloor';
     }
@@ -1290,12 +1294,36 @@
         };
     }
 
+    function processModel(dataSource, modelNode, entity, styleEntity, sourceUri) {
+		var locationNode = queryFirstNode(modelNode, 'Location', namespaces.kml);
+		var longitude = queryNumericValue(locationNode, 'longitude', namespaces.kml);
+		var latitude = queryNumericValue(locationNode, 'latitude', namespaces.kml);
+        var position = Cesium.Cartesian3.fromDegrees(longitude, latitude, 0);
+		var heading = Cesium.Math.toRadians(180);
+		var pitch = Cesium.Math.toRadians(180);
+		var roll = 0;
+		var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
+		
+		var linkNode = queryFirstNode(modelNode, 'Link', namespaces.kml);
+		var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
+		var uri = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".gltf").trim()); 
+		
+		entity.label = '';
+		entity.position = position;
+		entity.orientation = orientation;
+		entity.model = {
+			uri : uri,
+			asynchronous: false
+		};
+    }	
+    
     var geometryTypes = {
         Point : processPoint,
         LineString : processLineStringOrLinearRing,
         LinearRing : processLineStringOrLinearRing,
         Polygon : processPolygon,
         Track : processTrack,
+        Model : processModel,
         MultiTrack : processMultiTrack,
         MultiGeometry : processMultiGeometry
     };
@@ -1320,8 +1348,47 @@
     }
 
     function processFolder(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver) {
-        var r = processFeature(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver);
-        processDocument(dataSource, r.entity, node, entityCollection, styleCollection, sourceUri, uriResolver);
+        console.log("loding 3DCityDB KML Networklink files");
+		var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
+		
+		// "node" ist the <Folder> tag	
+		var folderNode = node;
+		var networklinkEntity = new Entity(createId(folderNode));
+		var networklinkNode = queryFirstNode(node, 'NetworkLink', namespaces.kml);
+		
+		if (typeof networklinkNode != 'undefined') {
+			// store the path of the coresponding Networklink
+			var linkNode = queryFirstNode(networklinkNode, 'Link', namespaces.kml);		
+			var networklinkUrl = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).trim()); 		
+			
+			// Store the boundingbox of each Networklink entity				
+			var latLonAltBoxNode = queryFirstNode(queryFirstNode(networklinkNode, 'Region', namespaces.kml), 'LatLonAltBox', namespaces.kml) ;
+			var minX = queryNumericValue(latLonAltBoxNode, 'west', namespaces.kml);
+			var minY = queryNumericValue(latLonAltBoxNode, 'south',namespaces.kml);
+			var maxX = queryNumericValue(latLonAltBoxNode, 'east', namespaces.kml);
+			var maxY = queryNumericValue(latLonAltBoxNode, 'north', namespaces.kml);
+			
+			// we use the attribute "_pathSubscription" as a hook to save the relevant information
+			networklinkEntity._pathSubscription = {
+				minX: minX,
+				minY: minY,
+				maxX: maxX,
+				maxY: maxY,
+				kmlUrl: networklinkUrl
+			};
+
+			// pass the name to the networklink entity which will be labeled in the layer tree	
+			networklinkEntity.name = queryStringValue(node, 'name', namespaces.kml);
+			
+			// add the networklink entity to the master entityCollection
+			entityCollection.add(networklinkEntity);
+		}
+		else {
+			parent = new Entity(createId(node));
+			parent.name = queryStringValue(node, 'name', namespaces.kml);
+			entityCollection.add(parent);
+			processDocument(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver);
+		}
     }
 
     function processPlacemark(dataSource, parent, placemark, entityCollection, styleCollection, sourceUri, uriResolver) {
@@ -1433,36 +1500,10 @@
         window.console.log('KML - Unsupported feature: ' + node.localName);
     }
 
-    function processNetworkLink(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver) {
-        var r = processFeature(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver);
-        var networkEntity = r.entity;
-
-        var link = queryFirstNode(node, 'Link', namespaces.kml);
-        if (defined(link)) {
-            var linkUrl = queryStringValue(link, 'href', namespaces.kml);
-            if (defined(linkUrl)) {
-                linkUrl = resolveHref(linkUrl, undefined, sourceUri, uriResolver);
-                var networkLinkSource = new CitydbDataSource(dataSource._proxy);
-                var promise = when(networkLinkSource.load(linkUrl), function() {
-                    var entities = networkLinkSource.entities.values;
-                    for (var i = 0; i < entities.length; i++) {
-                        dataSource._entityCollection.suspendEvents();
-                        entities[i].parent = networkEntity;
-                        dataSource._entityCollection.add(entities[i]);
-                        dataSource._entityCollection.resumeEvents();
-                    }
-                });
-
-                dataSource._promises.push(promise);
-            }
-        }
-    }
-
     var featureTypes = {
         Document : processDocument,
         Folder : processFolder,
         Placemark : processPlacemark,
-        NetworkLink : processNetworkLink,
         GroundOverlay : processGroundOverlay,
         PhotoOverlay : processUnsupported,
         ScreenOverlay : processUnsupported
