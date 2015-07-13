@@ -1348,7 +1348,7 @@
     }
 
     function processFolder(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver) {
-        console.log("loding 3DCityDB KML Networklink files");
+        console.log("loading 3DCityDB KML Networklink files...");
 		var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
 		
 		// "node" ist the <Folder> tag	
@@ -1647,7 +1647,7 @@
      * under the <code>kml</code> property.
      * </p>
      *
-     * @alias CitydbDataSource
+     * @alias CitydbKmlDataSource
      * @constructor
      *
      * @param {DefaultProxy} [proxy] A proxy to be used for loading external data.
@@ -1659,9 +1659,9 @@
      *
      * @example
      * var viewer = new Cesium.Viewer('cesiumContainer');
-     * viewer.dataSources.add(Cesium.CitydbDataSource.load('../../SampleData/facilities.kmz'));
+     * viewer.dataSources.add(Cesium.CitydbKmlDataSource.load('../../SampleData/facilities.kmz'));
      */
-    var CitydbDataSource = function(proxy) {
+    var CitydbKmlDataSource = function(proxy) {
         this._changed = new Event();
         this._error = new Event();
         this._loading = new Event();
@@ -1681,19 +1681,19 @@
      * @param {Object} [options] An object with the following properties:
      * @param {DefaultProxy} [options.proxy] A proxy to be used for loading external data.
      * @param {String} [options.sourceUri] Overrides the url to use for resolving relative links and other KML network features.
-     * @returns {Promise} A promise that will resolve to a new CitydbDataSource instance once the KML is loaded.
+     * @returns {Promise} A promise that will resolve to a new CitydbKmlDataSource instance once the KML is loaded.
      */
-    CitydbDataSource.load = function(data, options) {
+    CitydbKmlDataSource.load = function(data, options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
-        var dataSource = new CitydbDataSource(options.proxy);
+        var dataSource = new CitydbKmlDataSource(options.proxy);
         return dataSource.load(data, options);
     };
 
-    defineProperties(CitydbDataSource.prototype, {
+    defineProperties(CitydbKmlDataSource.prototype, {
         /**
          * Gets a human-readable name for this instance.
          * This will be automatically be set to the KML document name on load.
-         * @memberof CitydbDataSource.prototype
+         * @memberof CitydbKmlDataSource.prototype
          * @type {String}
          */
         name : {
@@ -1705,7 +1705,7 @@
          * Gets the clock settings defined by the loaded KML. This represents the total
          * availability interval for all time-dynamic data. If the KML does not contain
          * time-dynamic data, this value is undefined.
-         * @memberof CitydbDataSource.prototype
+         * @memberof CitydbKmlDataSource.prototype
          * @type {DataSourceClock}
          */
         clock : {
@@ -1715,7 +1715,7 @@
         },
         /**
          * Gets the collection of {@link Entity} instances.
-         * @memberof CitydbDataSource.prototype
+         * @memberof CitydbKmlDataSource.prototype
          * @type {EntityCollection}
          */
         entities : {
@@ -1725,7 +1725,7 @@
         },
         /**
          * Gets a value indicating if the data source is currently loading data.
-         * @memberof CitydbDataSource.prototype
+         * @memberof CitydbKmlDataSource.prototype
          * @type {Boolean}
          */
         isLoading : {
@@ -1735,7 +1735,7 @@
         },
         /**
          * Gets an event that will be raised when the underlying data changes.
-         * @memberof CitydbDataSource.prototype
+         * @memberof CitydbKmlDataSource.prototype
          * @type {Event}
          */
         changedEvent : {
@@ -1745,7 +1745,7 @@
         },
         /**
          * Gets an event that will be raised if an error is encountered during processing.
-         * @memberof CitydbDataSource.prototype
+         * @memberof CitydbKmlDataSource.prototype
          * @type {Event}
          */
         errorEvent : {
@@ -1755,7 +1755,7 @@
         },
         /**
          * Gets an event that will be raised when the data source either starts or stops loading.
-         * @memberof CitydbDataSource.prototype
+         * @memberof CitydbKmlDataSource.prototype
          * @type {Event}
          */
         loadingEvent : {
@@ -1773,7 +1773,7 @@
      * @param {Number} [options.sourceUri] Overrides the url to use for resolving relative links and other KML network features.
      * @returns {Promise} A promise that will resolve to this instances once the KML is loaded.
      */
-    CitydbDataSource.prototype.load = function(data, options) {
+    CitydbKmlDataSource.prototype.load = function(data, options) {
         //>>includeStart('debug', pragmas.debug);
         if (!defined(data)) {
             throw new DeveloperError('data is required.');
@@ -1840,7 +1840,7 @@
     };
 
     /**
-     * Contains KML Feature data loaded into the <code>Entity.kml</code> property by {@link CitydbDataSource}.
+     * Contains KML Feature data loaded into the <code>Entity.kml</code> property by {@link CitydbKmlDataSource}.
      * @alias KmlFeatureData
      * @constructor
      */
@@ -1955,7 +1955,7 @@
         this.extendedData = undefined;
     };
 
-    window.CitydbDataSource = CitydbDataSource;
+    window.CitydbKmlDataSource = CitydbKmlDataSource;
 })();
 
 

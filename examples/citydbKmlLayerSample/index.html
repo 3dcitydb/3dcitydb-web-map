@@ -7,9 +7,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
   <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-  <title>TMS Streaming demo</title>
+  <title>CitydbKmlLayer Streaming demo</title>
   <script src="../../ThirdParty/Cesium-1-11/Cesium.js"></script>  
-  <script src="../../js/CitydbDataSource.js"></script>  
+  <script src="../../js/CitydbKmlDataSource.js"></script>  
+  <script src="../../js/CitydbKmlLayer.js"></script> 
   <style>
       @import url(../../ThirdParty/Cesium-1-11/Widgets/widgets.css);
       html, body, #cesiumContainer {
@@ -63,12 +64,14 @@
 	var viewer = new Cesium.Viewer('cesiumContainer'); 	
 	viewer.camera.viewRectangle(extent); 
 	
-	var kmlUrl = "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_Tile_90_198_geometry.kmz"
-	var citydbDataSource = new CitydbDataSource();
-	citydbDataSource.load(kmlUrl).then(function() {
-		console.log(citydbDataSource);
-        viewer.dataSources.add(citydbDataSource);
-    });
+    var options = {
+    //	url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_Tile_90_198_geometry.kmz', 
+  		url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Web3D_Competition/Rotterdam_CityCenter_Geometry_Cesium/Rotterdam_CityCenter_Geometry_Cesium.kml',
+    	name:"buildingslayer"
+   	};
+    
+    var citydbKmlLayer = new CitydbKmlLayer(options);
+    citydbKmlLayer.addToCesium(viewer);
   </script>
 </body>
 </html>
