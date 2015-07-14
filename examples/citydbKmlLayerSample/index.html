@@ -71,17 +71,31 @@
 //	viewer.extend(Cesium.viewerCesiumInspectorMixin);  
 	
     var options = {
-    //	url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_Tile_90_198_geometry.kmz', 
- 	//	url: 'https://dl.dropboxusercontent.com/u/24313387/KML/KML%20aus%203DCityDB/StatenIsland.kml',
- 	//	url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
-  		url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture/Berlin_Center_Texture.kml',
-    	name: 'buildingslayer',
+  	//	url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture/Berlin_Center_Texture.kml',
+  		url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Texture/Berlin_All_Texture_MasterJSON.json',
+    	name: 'Berlin_Building_Texture',
     	cesiumViewer: viewer
    	};
     
     var citydbKmlLayer = new CitydbKmlLayer(options);
     citydbKmlLayer.addToCesium(viewer);
-
-  </script>
+  
+	var options2 = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
+		name : 'London_Geometry_Lod2',
+		cesiumViewer : viewer
+	};
+	var citydbKmlLayer2 = new CitydbKmlLayer(options2);
+	citydbKmlLayer2.addToCesium(viewer);
+	
+	var options3 = {
+		url : 'https://dl.dropboxusercontent.com/u/24313387/KML/KML%20aus%203DCityDB/StatenIsland.kml',
+		name : 'Newyork_building_Lod1',
+		cesiumViewer : viewer
+	};
+	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
+	citydbKmlLayer3.addToCesium(viewer);
+	
+	</script>
 </body>
 </html>

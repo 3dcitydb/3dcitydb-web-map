@@ -167,12 +167,31 @@
 	 */
 	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
 		var that = this;
-		// TODO: we need load json layer 2 case!
-		this._citydbKmlDataSource.load(this._url).then(function() {
-			console.log(that._citydbKmlDataSource);
-			cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-			that._citydbKmlLayerManager.doStart();
-	    });
+		if (this._url.indexOf(".json") >= 0) {	    		
+			jQuery.noConflict().ajax({		    	
+		        url: that._url +'?jsoncallback=?',   
+		        dataType: "jsonp",
+		        jsonpCallback: "handle_3DCityDB_data", // the function name was defined by 3DCityDB KML/collada Exporter
+		        timeout: 30000, // timeout in order to trigger the JQuery ajax error callback function
+		        success: function(json, status){		        	
+		        	that._citydbKmlDataSource._name = json.layername;	
+		        	that._citydbKmlDataSource._proxy = json;
+		    		console.log(that._citydbKmlDataSource);
+		            viewer.dataSources.add(that._citydbKmlDataSource);
+		            that._citydbKmlLayerManager.doStart();
+		        },
+		        error: function(XHR, textStatus, errorThrown){
+		        	console.log('can not find the json file for ' + kmlUrl);
+		        }
+		    });	
+    	}
+		else {
+			this._citydbKmlDataSource.load(this._url).then(function() {
+				console.log(that._citydbKmlDataSource);
+				cesiumViewer.dataSources.add(that._citydbKmlDataSource);
+				that._citydbKmlLayerManager.doStart();
+		    });
+		}		
 	}
 
 	/**

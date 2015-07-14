@@ -2,7 +2,6 @@
  * test
  * **/
 (function() {
-	var scope;
 	function CitydbKmlLayerManager(citydbKmlLayerInstance){	
 		scope = this;
 		console.log(CitydbUtil.retrieveURL("CitydbKmlLayerManager"))
@@ -12,6 +11,7 @@
 	}
 	
 	CitydbKmlLayerManager.prototype.doStart = function() {
+		var scope = this;
 		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
     	var dataSourceCollection = cesiumViewer._dataSourceCollection;
     	var scene = cesiumViewer.scene;
@@ -30,7 +30,7 @@
     	// check if one json layer or kml layer...
     	if (masterUrl.indexOf(".json") >= 0) {
     		// parsing layer infos..
-			var jsonLayerInfo = this.citydbKmlLayerInstance.jsonLayerInfo;			
+			var jsonLayerInfo = this.citydbKmlLayerInstance._citydbKmlDataSource._proxy;			
 			hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
 			layername = jsonLayerInfo.layername;
 			displayForm = jsonLayerInfo.displayform;
