@@ -1,5 +1,5 @@
 
-	var Util = { 
+	var CitydbUtil = { 
 		generateUUID: function() {
 		    var d = new Date().getTime();
 		    var uuid = 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -32,6 +32,16 @@
 		    }else{
 		    	return results[1];
 		    };
+		},
+		retrieveURL : function(filename) {
+		    var scripts = document.getElementsByTagName('script');
+		    if (scripts && scripts.length > 0) {
+		        for (var i in scripts) {
+		            if (scripts[i].src && scripts[i].src.match(new RegExp(filename+'\\.js$'))) {
+		                return scripts[i].src.replace(new RegExp('(.*)'+filename+'\\.js$'), '$1');
+		            }
+		        }
+		    }
 		},
 		check_for_URL: function (url) {
 	        var v = new RegExp();

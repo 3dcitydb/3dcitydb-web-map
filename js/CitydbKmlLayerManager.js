@@ -5,7 +5,8 @@
 	var scope;
 	function CitydbKmlLayerManager(citydbKmlLayerInstance){	
 		scope = this;
-		this.oTask = new CitydbWebworker("Webworkers/CitydbKmlLayerManagerWebworker.js");
+		console.log(CitydbUtil.retrieveURL("CitydbKmlLayerManager"))
+		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlLayerManager") + "Webworkers/CitydbKmlLayerManagerWebworker.js");
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
 		this.handler = null;
 	}
@@ -30,7 +31,7 @@
     	if (masterUrl.indexOf(".json") >= 0) {
     		// parsing layer infos..
 			var jsonLayerInfo = this.citydbKmlLayerInstance.jsonLayerInfo.get();			
-			hostAndPath = Util.get_host_and_path_from_URL(masterUrl);
+			hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
 			layername = jsonLayerInfo.layername;
 			displayForm = jsonLayerInfo.displayform;
 			fileextension = jsonLayerInfo.fileextension;
@@ -83,7 +84,7 @@
             		var polygon1 = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
     	        	var polygon2 = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
     	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
-    	        	var pixelCoveringSize = Math.sqrt(Util.polygonArea(intersectPolygon));
+    	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
     	        	if (pixelCoveringSize < 140) {
     	        		dataSourceCollection.remove(kmlDatasource);
     	        		delete dataPoolKml[objUrl];
@@ -137,7 +138,7 @@
         		var polygon1 = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
 	        	var polygon2 = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
 	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
-	        	var pixelCoveringSize = Math.sqrt(Util.polygonArea(intersectPolygon));
+	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
 	        	
 	        	if (networklinkCache.hasOwnProperty(objUrl)) {
 	        		if (pixelCoveringSize >= 140) { 
