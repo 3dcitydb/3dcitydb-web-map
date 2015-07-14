@@ -1,5 +1,4 @@
 
-
 /**
  * Defines the interface for a 3DCityDBLayer. This Object is an interface for
  * documentation purpose and is not intended to be instantiated directly.
@@ -144,15 +143,18 @@
 	    jsonLayerInfo : {
 	        get : function(){
 	        	return this._jsonLayerInfo;
-	        },
-	        set : function(json){
-	        	this._jsonLayerInfo = json;
 	        }
 	    },
 	    
 	    citydbKmlDataSource : {
 	        get : function(){
 	        	return this._citydbKmlDataSource;
+	        }
+	    },
+	    
+	    citydbKmlLayerManager : {
+	        get : function(){
+	        	return this._citydbKmlLayerManager;
 	        }
 	    }
 	    
@@ -180,8 +182,6 @@
 	CitydbKmlLayer.prototype.removeFromCesium = function(cesiumViewer){
 		// TODO
 	}
-
-
 
 	/**
 	 * activates or deactivates the layer
@@ -223,14 +223,12 @@
 	CitydbKmlLayer.prototype.showObjects = function(toUnhide){
 		// TODO
 	};
-		
-
 
 	/**
 	 * removes an Eventhandler
 	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
 	 * @param {function} callback function to be called
-	 */
+	 */	
 	CitydbKmlLayer.prototype.removeEventHandler = function(event, callback){
 		if(event == "CLICK"){
 			this._clickEvent.removeEventListener(callback, this);
@@ -274,31 +272,4 @@
 	}
 	window.CitydbKmlLayer = CitydbKmlLayer;
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -30,7 +30,7 @@
     	// check if one json layer or kml layer...
     	if (masterUrl.indexOf(".json") >= 0) {
     		// parsing layer infos..
-			var jsonLayerInfo = this.citydbKmlLayerInstance.jsonLayerInfo.get();			
+			var jsonLayerInfo = this.citydbKmlLayerInstance.jsonLayerInfo;			
 			hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
 			layername = jsonLayerInfo.layername;
 			displayForm = jsonLayerInfo.displayform;
@@ -259,7 +259,7 @@
 	 */
     CitydbKmlLayerManager.prototype.createBboxGeometry = function(bbox) {
     	var rectangle = Cesium.Rectangle.fromDegrees(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax);
-    	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer.get();
+    	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
         cesiumViewer.entities.add({
             rectangle : {
                 coordinates : rectangle,
