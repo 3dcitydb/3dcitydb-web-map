@@ -367,7 +367,11 @@
 
     function queryBooleanValue(node, tagName, namespace) {
         var result = queryFirstNode(node, tagName, namespace);
-        return defined(result) ? result.textContent === '1' : undefined;
+        if (defined(result)) {
+            var value = result.textContent.trim();
+            return value === '1' || /^true$/i.test(value);
+        }
+        return undefined;
     }
 
     function resolveHref(href, proxy, sourceUri, uriResolver) {
