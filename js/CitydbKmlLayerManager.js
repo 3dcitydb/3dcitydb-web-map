@@ -157,7 +157,7 @@
                 	}, 5);
         		}
     			else {
-    				var newKmlDatasource = new CitydbKmlDataSource();
+    				var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
     				var newNetworklinkItem = {
     					url: objUrl,
     					kmlDatasource: newKmlDatasource,

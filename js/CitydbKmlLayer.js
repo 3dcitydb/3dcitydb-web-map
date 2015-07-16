@@ -22,12 +22,12 @@
 		this._name = options.name;
 		this._region = options.region;
 		this._highlightedObjects = {};
-		this._active = false;
+		this._active = true;
 		this._hiddenObjects = [];
 		this._cameraPosition = {};	
-		this._cesiumViewer = options.cesiumViewer;
+		this._cesiumViewer = null;
 		this._jsonLayerInfo = null;
-		this._citydbKmlDataSource = new CitydbKmlDataSource();
+		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
 		this._citydbKmlLayerManager = new CitydbKmlLayerManager(this);
 		
 		/**
@@ -166,6 +166,7 @@
 	 * @param {CesiumViewer} cesiumViewer
 	 */
 	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
+		this._cesiumViewer = cesiumViewer;
 		var that = this;
 		if (this._url.indexOf(".json") >= 0) {	    		
 			jQuery.noConflict().ajax({		    	
@@ -280,13 +281,12 @@
 	 * @param {*} arguments, any number of arguments
 	 */
 	CitydbKmlLayer.prototype.triggerEvent = function(event, object){
-		var objectId = object.node.id;
 		if(event == "CLICK"){
-			this._clickEvent.raiseEvent(objectId);
+			this._clickEvent.raiseEvent(object);
 		}else if(event == "MOUSEIN"){
-			this._mouseInEvent.raiseEvent(objectId);
+			this._mouseInEvent.raiseEvent(object);
 		}else if(event == "MOUSEOUT"){
-			this._mouseOutEvent.raiseEvent(objectId);
+			this._mouseOutEvent.raiseEvent(object);
 		}
 	}
 	window.CitydbKmlLayer = CitydbKmlLayer;

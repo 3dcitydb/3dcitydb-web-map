@@ -220,7 +220,9 @@
         var entity = entityCollection.getOrCreateEntity(id);
         if (!defined(entity.kml)) {
             entity.addProperty('kml');
+            entity.addProperty('layerId');
             entity.kml = new KmlFeatureData();
+            entity.layerId = globeScope._layerId;
         }
         return entity;
     }
@@ -1356,8 +1358,7 @@
 		var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
 		
 		// "node" ist the <Folder> tag	
-		var folderNode = node;
-		var networklinkEntity = new Entity(createId(folderNode));
+		var networklinkEntity = new Entity(createId(node));		
 		var networklinkNode = queryFirstNode(node, 'NetworkLink', namespaces.kml);
 		
 		if (typeof networklinkNode != 'undefined') {
@@ -1665,7 +1666,9 @@
      * var viewer = new Cesium.Viewer('cesiumContainer');
      * viewer.dataSources.add(Cesium.CitydbKmlDataSource.load('../../SampleData/facilities.kmz'));
      */
-    var CitydbKmlDataSource = function(proxy) {
+    var globeScope;
+    var CitydbKmlDataSource = function(layerId, proxy) {
+    	globeScope = this;
         this._changed = new Event();
         this._error = new Event();
         this._loading = new Event();
@@ -1676,6 +1679,7 @@
         this._proxy = proxy;
         this._pinBuilder = new PinBuilder();
         this._promises = [];
+        this._layerId = layerId;
     };
 
     /**
