@@ -30,73 +30,49 @@
           overflow: hidden;
           z-index: -1;
       }
-      #uiMenu {
-          border-radius:5px;
-          padding: 10px;
-          position:absolute;
-          left: 20px;
-          font-family: "Arial";
-          z-index: 99999;
-      }
   </style>
 </head>
 <body>
-  <div id="cesiumContainer"></div>
-   <div id="uiMenu">
-    <button type="button" onclick="addLayer()">add Layer</button> 
-    <button type="button" onclick="removeLayer()">remove Layer</button> 
-    <br />
-    <button type="button" onclick="activateClickListener(true)">activateClickListener</button> 
-    <button type="button" onclick="activateClickListener(false)">deactivateClickListener</button>
-    <br />
-    <button type="button" onclick="addEventListenerOnClick()">addEventListenerClick</button> 
-    <button type="button" onclick="removeEventListenerOnClick()">removeEventListenerClick</button>
-    <br />
-    <button type="button" onclick="activateMoveListener(true)">activateMoveListener</button> 
-    <button type="button" onclick="activateMoveListener(false)">deactivateMoveListener</button>
-    <br />
-    <button type="button" onclick="highlight()">activate Highlighting</button>
-    <button type="button" onclick="unhighlight()">deactivate Highlighting</button>
-    <br />
-    <button type="button" onclick="hide()">Hide</button>
-    <button type="button" onclick="unhide()">unHide</button>
-    <br />
-    <button type="button" onclick="addHighlightingListenerOnMouse()">addHighlightingListenerOnMouse</button> 
-    <button type="button" onclick="removeHighlightingListenerOnMouse()">removeHighlightingListenerOnMouse</button>
-    
-  </div>
-  <script>
-	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
-	var viewer = new Cesium.Viewer('cesiumContainer'); 	
-	viewer.camera.viewRectangle(extent); 
- 	var webMap = new WebMap3DCityDB(viewer);
-	
-    var options = {
-  		url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture/Berlin_Center_Texture.kml',
-    	name: 'Berlin_Building_Texture',
-    	id: "kmlLayer"
-   	};
-    
-    var citydbKmlLayer = new CitydbKmlLayer(options);
-    	  
-    var eventCallback = function(object){
-    	var materials = object.mesh._materials;
-		var primitive = object.primitive;
-		for (i = 0; i < materials.length; i++){
-	    	if (Cesium.defined(materials[i].name.match(/textureAtlas/))){
-    			materialName = materials[i].name;
-    			var material = primitive.getMaterial(materialName);
-    			material.setValue('emission', new Cesium.Cartesian4(0.6, 0.6, 0.0, 0.3));
-	    	}
-	   }
-  	};  	
-
-  	citydbKmlLayer.registerEventHandler("CLICK", eventCallback);	
-  	
-  	webMap.addLayer(citydbKmlLayer);
-  	
-  	webMap.activateMouseClickEvents(true);
-  	
+	<div id="cesiumContainer"></div>
+	<script>	
+		// initiate 3Dcitydb-web-map instance
+		var webMap = new WebMap3DCityDB(new Cesium.Viewer('cesiumContainer'));
+		
+		// adding a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
+		var options = {
+			url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
+			name : 'Berlin_Building_Texture',
+			id : "kmlLayer"
+		};
+		var citydbKmlLayer = new CitydbKmlLayer(options);
+		webMap.addLayer(citydbKmlLayer);
+		
+		// enable Highlighting capability
+		var highlightedObject = null;
+		var eventCallback = function(object) {
+			if (highlightedObject != null) {
+				var materials = highlightedObject.mesh._materials;
+				for (i = 0; i < materials.length; i++) {
+					// dismiss highlighting
+					materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
+				}
+			}
+			highlightedObject = object;
+			var materials = object.mesh._materials;
+			for (i = 0; i < materials.length; i++) {
+				// performing highlighting
+				materials[i].setValue('emission', new Cesium.Cartesian4(0.4, 0.4, 0.0, 0.5));
+			}
+		};
+		citydbKmlLayer.registerEventHandler("CLICK", eventCallback);		
+		
+		// active mouseClick Event		
+		webMap.activateMouseClickEvents(true);
+		
+		// Zoom to target layer
+		var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
+		webMap._cesiumViewerInstance.camera.viewRectangle(extent);
+	//	webMap._cesiumViewerInstance.extend(Cesium.viewerCesiumInspectorMixin);
 	</script>
 </body>
 </html>
