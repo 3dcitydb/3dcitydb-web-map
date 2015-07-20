@@ -178,7 +178,7 @@
 		        	that._citydbKmlDataSource._name = json.layername;	
 		        	that._citydbKmlDataSource._proxy = json;
 		    		console.log(that._citydbKmlDataSource);
-		            viewer.dataSources.add(that._citydbKmlDataSource);
+		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
 		            that._citydbKmlLayerManager.doStart();
 		        },
 		        error: function(XHR, textStatus, errorThrown){
@@ -216,7 +216,12 @@
 	 * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
 	 */
 	CitydbKmlLayer.prototype.highlight = function(toHighlight){
-		// TODO
+		var highlightedObjects = this._highlightedObjects;	
+		for (var id in toHighlight){
+			highlightedObjects[id] = toHighlight[id]
+			console.log(id);
+			delete toHighlight[id];				
+		}
 	};
 
 	/**
