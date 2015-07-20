@@ -217,9 +217,21 @@
 	 */
 	CitydbKmlLayer.prototype.highlight = function(toHighlight){
 		var highlightedObjects = this._highlightedObjects;	
-		for (var id in toHighlight){
-			highlightedObjects[id] = toHighlight[id]
-			console.log(id);
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (var id in toHighlight){			
+			for (i = 0; i < primitives.length; i++) {
+				var primitive = primitives.get(i);
+				if (primitive instanceof Cesium.Model) {						
+					if (primitive._id._name === id) {
+						highlightedObjects[id] = id;
+						var materials = primitive._runtime.materialsByName;
+						for (var materialId in materials){
+							var highlightColor = toHighlight[id];
+							materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
+						}
+					}					
+				}
+			}
 			delete toHighlight[id];				
 		}
 	};
@@ -229,7 +241,22 @@
 	 * @param {Array<String>} A list of Object Ids. The default material will be restored
 	 */
 	CitydbKmlLayer.prototype.unHighlight = function(toUnHighlight){
-		// TODO
+		var primitives = this._cesiumViewer.scene.primitives;
+		var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
+		for (k = 0; k < toUnHighlight.length; k++){	
+			var id = toUnHighlight[k];
+			for (i = 0; i < primitives.length; i++) {
+				var primitive = primitives.get(i);
+				if (primitive instanceof Cesium.Model) {						
+					if (primitive._id._name === id) {
+						var materials = primitive._runtime.materialsByName;
+						for (var materialId in materials){
+							materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
+						}
+					}					
+				}
+			}			
+		}
 	};
 
 	/**
