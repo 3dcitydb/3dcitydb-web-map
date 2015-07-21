@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>Terrain and WMS</title>
+  <script src="../../ThirdParty/Cesium-1-11/Cesium.js"></script> 
+  <style>
+      @import url(../../ThirdParty/Cesium-1-11/Widgets/widgets.css);
+      html, body, #cesiumContainer {
+          top: 0px;
+          left: 0px;
+          position: absolute;
+          width: 100%; 
+          height: 100%; 
+          margin: 0; 
+          padding: 0; 
+          overflow: hidden;
+          z-index: -1;
+      }
+  </style>
+</head>
+<body>
+	<div id="cesiumContainer"></div>
+	<script>	
+		var terrainProvider = new Cesium.CesiumTerrainProvider({
+			url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/vorarlberg_DGM'
+		});
+
+		var viewer = new Cesium.Viewer('cesiumContainer', {
+			baseLayerPicker : false,
+			terrainProvider : terrainProvider
+		});
+		var extent = new Cesium.Rectangle.fromDegrees(9.706108, 47.220648, 9.796108, 47.320648);
+		viewer.camera.viewRectangle(extent);
+
+		viewer.extend(Cesium.viewerCesiumInspectorMixin);
+		viewer.scene.globe.maximumScreenSpaceError = 2;
+
+		var provider = new Cesium.WebMapServiceImageryProvider({
+			url: 'http://vogis.cnv.at/mapserver/mapserv',
+			layers : 'MS',
+			parameters: {
+				map: 'i_besonnung_r_wms.map'
+			},
+			proxy: new Cesium.DefaultProxy('/proxy/')
+		});
+
+		viewer.imageryLayers.addImageryProvider(provider);
+	</script>
+</body>
+</html>
