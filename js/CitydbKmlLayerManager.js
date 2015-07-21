@@ -252,6 +252,10 @@
 		this.runMonitoring();
     },
     
+    CitydbKmlLayerManager.prototype.isDataStreaming = function() {
+    	return !this.oTask.isSleep();   	 
+    },
+    
     /**
      * 
 	 * create and add bounding box geometry in Cesium
@@ -387,6 +391,7 @@
     		else {
     			scope.oTask.triggerEvent('abortAndnotifyWake');  
     		}
+    		scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
     	}            	
     },
     

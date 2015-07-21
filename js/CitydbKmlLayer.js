@@ -29,6 +29,7 @@
 		this._jsonLayerInfo = null;
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
 		this._citydbKmlLayerManager = new CitydbKmlLayerManager(this);
+		this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);
 		
 		/**
 		 * handles ClickEvents
@@ -156,6 +157,12 @@
 	        get : function(){
 	        	return this._citydbKmlLayerManager;
 	        }
+	    },
+	    
+	    citydbKmlHighlightingManager : {
+	        get : function(){
+	        	return this._citydbKmlHighlightingManager;
+	        }
 	    }
 	    
 	});
@@ -216,24 +223,11 @@
 	 * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
 	 */
 	CitydbKmlLayer.prototype.highlight = function(toHighlight){
-		var highlightedObjects = this._highlightedObjects;	
-		var primitives = this._cesiumViewer.scene.primitives;
-		for (var id in toHighlight){			
-			for (i = 0; i < primitives.length; i++) {
-				var primitive = primitives.get(i);
-				if (primitive instanceof Cesium.Model) {						
-					if (primitive._id._name === id) {
-						highlightedObjects[id] = id;
-						var materials = primitive._runtime.materialsByName;
-						for (var materialId in materials){
-							var highlightColor = toHighlight[id];
-							materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
-						}
-					}					
-				}
-			}
-			delete toHighlight[id];				
-		}
+		for (var id in toHighlight){
+			this._highlightedObjects[id] = toHighlight[id];
+			this.highlightObject(this.getObjectById(id));
+		}		
+		this._citydbKmlHighlightingManager.rebuildDataPool();
 	};
 
 	/**
@@ -241,23 +235,79 @@
 	 * @param {Array<String>} A list of Object Ids. The default material will be restored
 	 */
 	CitydbKmlLayer.prototype.unHighlight = function(toUnHighlight){
-		var primitives = this._cesiumViewer.scene.primitives;
-		var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
 		for (k = 0; k < toUnHighlight.length; k++){	
-			var id = toUnHighlight[k];
-			for (i = 0; i < primitives.length; i++) {
-				var primitive = primitives.get(i);
-				if (primitive instanceof Cesium.Model) {						
-					if (primitive._id._name === id) {
-						var materials = primitive._runtime.materialsByName;
-						for (var materialId in materials){
-							materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
-						}
-					}					
-				}
-			}			
+			var id = toUnHighlight[k];			
+			delete this.highlightedObjects[id];		
+		}
+		this._citydbKmlHighlightingManager.rebuildDataPool();
+		for (k = 0; k < toUnHighlight.length; k++){	
+			var id = toUnHighlight[k];			
+			this.unHighlightObject(this.getObjectById(id));
 		}
 	};
+	
+	/**
+	 * find and return the model object by Id (GMLID)
+	 * @param {String} Object Id
+	 * @return {Cesium.Model} Cesium Model instance having the corresponding GMLID
+	 */
+	CitydbKmlLayer.prototype.getObjectById = function(objectId){
+		var primitives = this._cesiumViewer.scene.primitives;			
+		for (i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Model) {
+				if (primitive.ready) {
+					if (primitive._id._name === objectId) {
+						return primitive;
+					}
+				}									
+			}
+		}
+		return null;		
+	};
+	
+	CitydbKmlLayer.prototype.isHighlightedObject = function(object){		
+		var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
+		var materials = object._runtime.materialsByName;
+		for (var materialId in materials){
+			if (materials[materialId].getValue('emission').equals(Cesium.Cartesian4.fromColor(unHighlightColor))) {
+				return false;
+			}			
+		}
+		return true;
+	};
+	
+	CitydbKmlLayer.prototype.highlightObject = function(object){	
+		if (object == null)
+			return;
+		if (object.ready) {
+			var highlightColor = this.highlightedObjects[object._id._name];
+			if (highlightColor) {
+				var materials = object._runtime.materialsByName;				
+				for (var materialId in materials){
+					materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
+				}
+			}			
+		}		
+	};
+	
+	CitydbKmlLayer.prototype.unHighlightObject = function(object){	
+		if (object == null)
+			return;
+		if (object.ready) {
+			var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
+			var materials = object._runtime.materialsByName;
+			
+			for (var materialId in materials){
+				materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
+			}
+		}		
+	};
+	
+	CitydbKmlLayer.prototype.hasHighlightedObjects = function(){	
+		return Object.keys(this.highlightedObjects).length > 0? true : false;
+	};
+	
 
 	/**
 	 * hideObjects
