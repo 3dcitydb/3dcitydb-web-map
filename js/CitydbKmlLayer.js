@@ -28,7 +28,7 @@
 		this._cesiumViewer = null;
 		this._jsonLayerInfo = null;
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
-		this._citydbKmlLayerManager = new CitydbKmlLayerManager(this);
+		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);
 		
 		/**
@@ -153,9 +153,9 @@
 	        }
 	    },
 	    
-	    citydbKmlLayerManager : {
+	    citydbKmlTilingManager : {
 	        get : function(){
-	        	return this._citydbKmlLayerManager;
+	        	return this._citydbKmlTilingManager;
 	        }
 	    },
 	    
@@ -186,7 +186,7 @@
 		        	that._citydbKmlDataSource._proxy = json;
 		    		console.log(that._citydbKmlDataSource);
 		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-		            that._citydbKmlLayerManager.doStart();
+		            that._citydbKmlTilingManager.doStart();
 		        },
 		        error: function(XHR, textStatus, errorThrown){
 		        	console.log('can not find the json file for ' + kmlUrl);
@@ -197,7 +197,7 @@
 			this._citydbKmlDataSource.load(this._url).then(function() {
 				console.log(that._citydbKmlDataSource);
 				cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-				that._citydbKmlLayerManager.doStart();
+				that._citydbKmlTilingManager.doStart();
 		    });
 		}		
 	}

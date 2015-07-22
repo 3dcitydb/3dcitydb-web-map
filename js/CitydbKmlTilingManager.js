@@ -2,15 +2,15 @@
  * test
  * **/
 (function() {
-	function CitydbKmlLayerManager(citydbKmlLayerInstance){	
+	function CitydbKmlTilingManager(citydbKmlLayerInstance){	
 		scope = this;
-		console.log(CitydbUtil.retrieveURL("CitydbKmlLayerManager"))
-		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlLayerManager") + "Webworkers/CitydbKmlLayerManagerWebworker.js");
+		console.log(CitydbUtil.retrieveURL("CitydbKmlTilingManager"))
+		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlTilingManager") + "Webworkers/CitydbKmlTilingManagerWebworker.js");
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
 		this.handler = null;
 	}
 	
-	CitydbKmlLayerManager.prototype.doStart = function() {
+	CitydbKmlTilingManager.prototype.doStart = function() {
 		var scope = this;
 		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
     	var dataSourceCollection = cesiumViewer._dataSourceCollection;
@@ -252,7 +252,7 @@
 		this.runMonitoring();
     },
     
-    CitydbKmlLayerManager.prototype.isDataStreaming = function() {
+    CitydbKmlTilingManager.prototype.isDataStreaming = function() {
     	return !this.oTask.isSleep();   	 
     },
     
@@ -261,7 +261,7 @@
 	 * create and add bounding box geometry in Cesium
 	 * 
 	 */
-    CitydbKmlLayerManager.prototype.createBboxGeometry = function(bbox) {
+    CitydbKmlTilingManager.prototype.createBboxGeometry = function(bbox) {
     	var rectangle = Cesium.Rectangle.fromDegrees(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax);
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
         cesiumViewer.entities.add({
@@ -280,7 +280,7 @@
 	 * create bounding box in monitor coordinate system
 	 * 
 	 */
-    CitydbKmlLayerManager.prototype.createFrameBbox = function() {
+    CitydbKmlTilingManager.prototype.createFrameBbox = function() {
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var cesiumWidget = cesiumViewer.cesiumWidget; 
     	var camera = cesiumWidget.scene.camera;
@@ -340,7 +340,7 @@
 	 * check if the networklink manager is started of not
 	 * 
 	 */
-    CitydbKmlLayerManager.prototype.isStarted = function() {
+    CitydbKmlTilingManager.prototype.isStarted = function() {
     	if (this.oTask == null) {
     		return false;
     	}
@@ -354,7 +354,7 @@
 	 * terminate the networklink manager
 	 * 
 	 */
-    CitydbKmlLayerManager.prototype.doTerminate = function() {
+    CitydbKmlTilingManager.prototype.doTerminate = function() {
     	if (this.oTask != null) {       		
     		this.oTask.terminate();
     		this.oTask = null;
@@ -371,7 +371,7 @@
 	 * get worker instance
 	 * 
 	 */
-    CitydbKmlLayerManager.prototype.getWorkerInstance = function() {
+    CitydbKmlTilingManager.prototype.getWorkerInstance = function() {
     	return this.oTask;
     },
     
@@ -380,7 +380,7 @@
 	 * public function to trigger Networklnk Manager
 	 * 
 	 */          
-    CitydbKmlLayerManager.prototype.triggerWorker = function() {
+    CitydbKmlTilingManager.prototype.triggerWorker = function() {
     	var scope = this;
     	if (scope.oTask != null) {       		
     		if (scope.oTask.isSleep()) {
@@ -400,7 +400,7 @@
 	 * control and manager the networklink manager and the highiting events
 	 * 
 	 */       
-    CitydbKmlLayerManager.prototype.runMonitoring = function() {
+    CitydbKmlTilingManager.prototype.runMonitoring = function() {
     	var scope = this;
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var scene = cesiumViewer.scene;
@@ -436,5 +436,5 @@
         }
     };
 		
-	window.CitydbKmlLayerManager = CitydbKmlLayerManager;
+	window.CitydbKmlTilingManager = CitydbKmlTilingManager;
 })()

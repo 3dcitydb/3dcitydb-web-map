@@ -32,7 +32,7 @@
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {	
-			if (isStillUpdating || scope.citydbKmlLayerInstance.citydbKmlLayerManager.isDataStreaming()) {
+			if (isStillUpdating || scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
 				setTimeout(function() {
 					scope.oTask.triggerEvent('checkDataPool');
 				}, 500)						
