@@ -45,23 +45,103 @@
 <body>
   <div id="cesiumContainer"></div>
    <div id="uiMenu">
+    <button type="button" onclick="generateLink()">generate Weblink</button>
     <button type="button" onclick="highlight()">activate Highlighting</button>
     <button type="button" onclick="unhighlight()">deactivate Highlighting</button>
     <br />
   </div>
   <script>
 	// initiate 3Dcitydb-web-map instance
-	var webMap = new WebMap3DCityDB(new Cesium.Viewer('cesiumContainer'));
+	var cesiumViewer = new Cesium.Viewer('cesiumContainer');
+	var cesiumCamera = cesiumViewer.scene.camera;
+	var webMap = new WebMap3DCityDB(cesiumViewer);
+
+  	var generateLink = function(){
+  		var cameraPostion = null;	    		    	   	
+    	var ray = cesiumCamera.getPickRay(new Cesium.Cartesian2(
+            Math.round(cesiumViewer.scene.canvas.clientWidth / 2),
+            Math.round(cesiumViewer.scene.canvas.clientHeight / 2)
+        ));
+        var position = cesiumViewer.scene.globe.pick(ray, cesiumViewer.scene);
+        if (Cesium.defined(position)) {
+            var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+            var range = Cesium.Cartesian3.distance(position, cesiumCamera.position);
+            cameraPostion = {
+	    		lat: Cesium.Math.toDegrees(cartographic.latitude),	
+	    		lon: Cesium.Math.toDegrees(cartographic.longitude),
+				range: range,
+				tilt: Cesium.Math.toDegrees(cesiumCamera.pitch)+ 90,
+				heading:  Cesium.Math.toDegrees(cesiumCamera.heading),
+				altitude: 0
+	    	};  
+			var	projectLink = location.protocol + '//' + location.host+location.pathname + '?' +
+			'lat=' + cameraPostion.lat +
+			'&lon=' + cameraPostion.lon +
+			'&range=' + cameraPostion.range +
+			'&tilt=' + cameraPostion.tilt +
+			'&heading=' + cameraPostion.heading +
+			'&altitude=' + cameraPostion.altitude;
+			window.open(projectLink);
+        }
+  	};
 	
-	// adding a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
-	var options = {
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
-		name : 'Berlin_Building_Texture',
-		id : "kmlLayer"
-	};
-	var citydbKmlLayer = new CitydbKmlLayer(options);
-	webMap.addLayer(citydbKmlLayer);
-	
+  	var citydbKmlLayer;
+  	
+	// Zoom to desired camera position
+	var latstr = CitydbUtil.parse_query_string('lat', window.location.href);
+    var lonstr = CitydbUtil.parse_query_string('lon', window.location.href);
+    
+    if (latstr && lonstr) {	    	
+        var lat = parseFloat(latstr);
+        var lon = parseFloat(lonstr);
+        var range = 800;
+        var heading = 6;
+        var tilt = 49;
+        var altitude = 40;
+
+        var rangestr = CitydbUtil.parse_query_string('range', window.location.href);
+        if (rangestr) 
+        	range = parseFloat(rangestr);
+
+        var headingstr = CitydbUtil.parse_query_string('heading', window.location.href);
+        if (headingstr) 
+        	heading = parseFloat(headingstr);
+
+        var tiltstr = CitydbUtil.parse_query_string('tilt', window.location.href);
+        if (tiltstr) 
+        	tilt = parseFloat(tiltstr);
+
+        var altitudestr = CitydbUtil.parse_query_string('altitude', window.location.href);
+        if (altitudestr) 
+        	altitude = parseFloat(altitudestr);
+
+        var _center = Cesium.Cartesian3.fromDegrees(lon, lat);
+        var _heading = Cesium.Math.toRadians(heading);
+        var _pitch = Cesium.Math.toRadians(tilt - 90);
+        var _range = range;
+        cesiumCamera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(lon, lat, _range),
+            complete: function() {
+            	cesiumCamera.lookAt(_center, new Cesium.HeadingPitchRange(_heading, _pitch, _range));
+            	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+            	// adding a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
+            	var options = {
+            		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
+            		name : 'Berlin_Building_Texture',
+            		activeHighlighting: true,
+            		id : "kmlLayer"
+            	};
+            	var citydbKmlLayer = new CitydbKmlLayer(options);
+            	webMap.addLayer(citydbKmlLayer);
+            }
+        })
+    } 
+    else {
+    	// default camera postion
+    	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
+    	cesiumCamera.viewRectangle(extent);
+    }
+    
 	// enable Highlighting capability
 	var highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 0.5)
   	var highlight = function(){
@@ -72,7 +152,7 @@
 			"BLDG_0003000a002edb0e": highlightColor,
 			"BLDG_0003000f00292bce": highlightColor 
 		};
-		citydbKmlLayer.highlight(highlightThis); 
+		webMap._layers[0].highlight(highlightThis); 
   	};
   	
   	var unhighlight = function(){
@@ -83,13 +163,9 @@
 			"BLDG_0003000a002edb0e",
 			"BLDG_0003000f00292bce" 
 		];
-		citydbKmlLayer.unHighlight(unHighlightThis); 
+		webMap._layers[0].unHighlight(unHighlightThis); 
   	};
-	
-	// Zoom to target layer
-	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
-	webMap._cesiumViewerInstance.camera.viewRectangle(extent);
-	
+
 	</script>
 </body>
 </html>

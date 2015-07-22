@@ -285,54 +285,44 @@
     	var cesiumWidget = cesiumViewer.cesiumWidget; 
     	var camera = cesiumWidget.scene.camera;
     	var canvas = cesiumWidget.scene.canvas;
-    	console.log(camera);
-    	
+
     	var frameWidth = canvas.clientWidth;
     	var frameHeight = canvas.clientHeight;
 
-    	var cartesian3OfFrameCorner1 = null;
-    	var cartesian3OfFrameCorner2 = null;
-    	var cartesian3OfFrameCorner3 = null;
-    	var cartesian3OfFrameCorner4 = null;
-    	var tilt = Math.abs((camera.pitch + 90) * 2) / Cesium.Math.PI;
-
-    	if (tilt < 1/3) {
-    		var tiltFactor = 1/tilt;
-    		cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
-    		cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight*(1 - 1/tiltFactor)));
-    		cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
-    		cartesian3OfFrameCorner4 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth, frameHeight*(1 - 1/tiltFactor)));
-    	}
-    	else {
-    		cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
-    		cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, 0));
-    		cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
-    		cartesian3OfFrameCorner4 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth, 0));
-    	}
+    	var factor = 0;
+    	var originHeight = 0;
+    	var cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, 0));
     	
-    	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
-    		var wgs84OfFrameCorner1  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
-			var wgs84OfFrameCorner2 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner2);			
-			var wgs84OfFrameCorner3 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner3);			
-			var wgs84OfFrameCorner4 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner4);
-			
-			var frameMinX = Math.min(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
-			var frameMaxX = Math.max(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
-			var frameMinY = Math.min(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
-			var frameMaxY = Math.max(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
-
-			// buffer for caching, 300 meter
-			var offzet = 300;
-			var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
-			var yOffzet = offzet / 111000;
-			
-			console.log(frameMinX - xOffzet + "; " + frameMaxY + yOffzet);
-			
-        	return [frameMinX - xOffzet, frameMinY - yOffzet, frameMaxX + xOffzet, frameMaxY + yOffzet];
+    	while (!Cesium.defined(cartesian3Indicator)) {
+    		factor++
+    		originHeight = originHeight + frameHeight*factor*0.1;
+    		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
     	}
-    	else {
-    		return [0,0,0,0];
-    	}			
+    	originHeight = originHeight + (frameHeight - originHeight) / 2;
+    	    	
+		var cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
+    	var cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));
+    	var cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
+    	var cartesian3OfFrameCorner4 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth, originHeight));    	    	
+
+		var wgs84OfFrameCorner1  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
+		var wgs84OfFrameCorner2 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner2);			
+		var wgs84OfFrameCorner3 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner3);			
+		var wgs84OfFrameCorner4 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner4);
+		
+		var frameMinX = Math.min(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
+		var frameMaxX = Math.max(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
+		var frameMinY = Math.min(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
+		var frameMaxY = Math.max(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
+
+		// buffer for caching, 300 meter
+		var offzet = 300;
+		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
+		var yOffzet = offzet / 111000;
+		
+		console.log(frameMinX - xOffzet + "; " + frameMaxY + yOffzet);
+		
+    	return [frameMinX - xOffzet, frameMinY - yOffzet, frameMaxX + xOffzet, frameMaxY + yOffzet];			
     };
 
     /**
@@ -391,7 +381,10 @@
     		else {
     			scope.oTask.triggerEvent('abortAndnotifyWake');  
     		}
-    		scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
+    		// trigger Highlighting Manager...
+    		if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
+    			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
+    		}    		
     	}            	
     },
     

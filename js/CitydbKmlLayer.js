@@ -29,7 +29,8 @@
 		this._jsonLayerInfo = null;
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
-		this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);
+		if (options.activeHighlighting == true)
+			this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);		
 		
 		/**
 		 * handles ClickEvents
@@ -162,6 +163,12 @@
 	    citydbKmlHighlightingManager : {
 	        get : function(){
 	        	return this._citydbKmlHighlightingManager;
+	        }
+	    },
+	    
+	    isHighlightingActivated : {
+	        get : function(){
+	        	return this._citydbKmlHighlightingManager == null? false: true;
 	        }
 	    }
 	    
