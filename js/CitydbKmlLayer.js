@@ -253,6 +253,14 @@
 		}
 	};
 	
+	CitydbKmlLayer.prototype.unHighlightAllObjects = function(){
+		for (var id in this.highlightedObjects){
+			delete this.highlightedObjects[id];	
+			this.unHighlightObject(this.getObjectById(id));
+		}
+		this._citydbKmlHighlightingManager.rebuildDataPool();
+	};
+	
 	/**
 	 * find and return the model object by Id (GMLID)
 	 * @param {String} Object Id
@@ -273,6 +281,11 @@
 		return null;		
 	};
 	
+	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
+		var object = this.getObjectById(id);
+		return this.isHighlightedObject(object);
+	};
+	
 	CitydbKmlLayer.prototype.isHighlightedObject = function(object){		
 		var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
 		var materials = object._runtime.materialsByName;
@@ -282,6 +295,10 @@
 			}			
 		}
 		return true;
+	};
+	
+	CitydbKmlLayer.prototype.isInHighlightedList = function(objectId){	
+		return this.highlightedObjects.hasOwnProperty(objectId);
 	};
 	
 	CitydbKmlLayer.prototype.highlightObject = function(object){	
@@ -314,7 +331,6 @@
 	CitydbKmlLayer.prototype.hasHighlightedObjects = function(){	
 		return Object.keys(this.highlightedObjects).length > 0? true : false;
 	};
-	
 
 	/**
 	 * hideObjects

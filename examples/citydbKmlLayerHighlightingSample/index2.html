@@ -46,8 +46,8 @@
   <div id="cesiumContainer"></div>
    <div id="uiMenu">
     <button type="button" onclick="generateLink()">generate Weblink</button>
-    <button type="button" onclick="highlight()">activate Highlighting</button>
-    <button type="button" onclick="unhighlight()">deactivate Highlighting</button>
+    <button type="button" onclick="highlight()">highlight Objects</button>
+    <button type="button" onclick="unhighlight()">unHighlight Objects</button>
     <br />
   </div>
   <script>
@@ -55,6 +55,10 @@
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer');
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);
+	
+	// active mouseClick Event		
+	webMap.activateMouseClickEvents(true);
+	webMap.activateMouseMoveEvents(true);
 
   	var generateLink = function(){
   		var cameraPostion = null;	    		    	   	
@@ -74,19 +78,79 @@
 				heading:  Cesium.Math.toDegrees(cesiumCamera.heading),
 				altitude: 0
 	    	};  
-			var	projectLink = location.protocol + '//' + location.host+location.pathname + '?' +
+			var	projectLink = location.protocol + '//' + location.host + location.pathname + '?' +
 			'lat=' + cameraPostion.lat +
 			'&lon=' + cameraPostion.lon +
 			'&range=' + cameraPostion.range +
 			'&tilt=' + cameraPostion.tilt +
 			'&heading=' + cameraPostion.heading +
 			'&altitude=' + cameraPostion.altitude;
-			window.open(projectLink);
+			window.history.pushState("string", "Title", projectLink);
         }
   	};
 	
-  	var citydbKmlLayer;
+    // creating a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
+	var options = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
+		name : 'Berlin_Building_Texture',
+		activeHighlighting: true,
+		id : "kmlLayer"
+	}; 
+  	var citydbKmlLayer = new CitydbKmlLayer(options);
+    
+	// enable Highlighting capability
+	var highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 0.5)
+  	var highlight = function(){
+		webMap._layers[0].unHighlightAllObjects(); 
+		var highlightThis = {
+			"BLDG_0003000e00768233": highlightColor,
+			"BLDG_0003000e00768236": highlightColor,
+			"BLDG_0003000f0012b2d3": highlightColor,
+			"BLDG_0003000a002edb0e": highlightColor,
+			"BLDG_0003000f00292bce": highlightColor 
+		};
+		citydbKmlLayer.highlight(highlightThis); 
+  	};
   	
+  	var unhighlight = function(){
+  		citydbKmlLayer.unHighlightAllObjects(); 
+  	};
+  	
+	// enable click Highlighting capability...	
+	citydbKmlLayer.registerEventHandler("CLICK", function(object) {
+		if (citydbKmlLayer.isInHighlightedList(object.id.name))
+			return; 
+		// clear all other Highlighting status and just highlight the clicked object...
+		citydbKmlLayer.unHighlightAllObjects();  		
+		var highlightThis = {};
+		highlightThis[object.id.name] = highlightColor;
+		citydbKmlLayer.highlight(highlightThis); 		
+	});
+	
+	var mouseOverhighlightColor = new Cesium.Color(0.0, 0.5, 0.0, 1.0);
+	citydbKmlLayer.registerEventHandler("MOUSEIN", function(object) {
+		if (object.primitive instanceof Cesium.Model) {
+			if (citydbKmlLayer.isHighlightedObject(object.primitive))
+				return;
+			var materials = object.mesh._materials;
+			for (i = 0; i < materials.length; i++) {
+				// do mouseOver highlighting
+				materials[i].setValue('emission', Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
+			} 
+		}
+	});
+	citydbKmlLayer.registerEventHandler("MOUSEOUT", function(object) {
+		if (object.primitive instanceof Cesium.Model) {
+			if (citydbKmlLayer.isInHighlightedList(object.id.name))
+				return; 
+			var materials = object.mesh._materials;
+			for (i = 0; i < materials.length; i++) {
+				// dismiss highlighting
+				materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
+			} 
+		}
+	});
+
 	// Zoom to desired camera position
 	var latstr = CitydbUtil.parse_query_string('lat', window.location.href);
     var lonstr = CitydbUtil.parse_query_string('lon', window.location.href);
@@ -124,15 +188,8 @@
             complete: function() {
             	cesiumCamera.lookAt(_center, new Cesium.HeadingPitchRange(_heading, _pitch, _range));
             	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-            	// adding a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
-            	var options = {
-            		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
-            		name : 'Berlin_Building_Texture',
-            		activeHighlighting: true,
-            		id : "kmlLayer"
-            	};
-            	var citydbKmlLayer = new CitydbKmlLayer(options);
-            	webMap.addLayer(citydbKmlLayer);
+  				// adding layer to Cesium Map          	          	
+            	webMap.addLayer(citydbKmlLayer);            		
             }
         })
     } 
@@ -141,31 +198,6 @@
     	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
     	cesiumCamera.viewRectangle(extent);
     }
-    
-	// enable Highlighting capability
-	var highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 0.5)
-  	var highlight = function(){
-		var highlightThis = {
-			"BLDG_0003000e00768233": highlightColor,
-			"BLDG_0003000e00768236": highlightColor,
-			"BLDG_0003000f0012b2d3": highlightColor,
-			"BLDG_0003000a002edb0e": highlightColor,
-			"BLDG_0003000f00292bce": highlightColor 
-		};
-		webMap._layers[0].highlight(highlightThis); 
-  	};
-  	
-  	var unhighlight = function(){
-		var unHighlightThis = [
-			"BLDG_0003000e00768233",
-			"BLDG_0003000e00768236",
-			"BLDG_0003000f0012b2d3",
-			"BLDG_0003000a002edb0e",
-			"BLDG_0003000f00292bce" 
-		];
-		webMap._layers[0].unHighlight(unHighlightThis); 
-  	};
-
 	</script>
 </body>
 </html>
