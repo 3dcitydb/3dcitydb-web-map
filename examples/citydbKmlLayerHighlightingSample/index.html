@@ -8,12 +8,14 @@
   <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
   <title>CitydbKmlLayer Streaming demo</title>
+  <link rel="icon" type="image/png" href="../../theme/img/favicon.png" sizes="16x16">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>	
   <script src="../../ThirdParty/Cesium-1-11/Cesium.js"></script> 
   <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
   <script src="../../js/3dcitydb-web-map.js"></script>  
   <script src="../../js/CitydbUtil.js"></script>  
-  <script src="../../js/CitydbWebworker.js"></script>  
+  <script src="../../js/CitydbWebworker.js"></script>
+  <script src="../../js/CitydbKmlHighlightingManager.js"></script>   
   <script src="../../js/CitydbKmlTilingManager.js"></script>  
   <script src="../../js/CitydbKmlDataSource.js"></script>  
   <script src="../../js/CitydbKmlLayer.js"></script> 
@@ -30,49 +32,65 @@
           overflow: hidden;
           z-index: -1;
       }
+      #uiMenu {
+          border-radius:5px;
+          padding: 10px;
+          position:absolute;
+          left: 20px;
+          font-family: "Arial";
+          z-index: 99999;
+      }
   </style>
 </head>
 <body>
-	<div id="cesiumContainer"></div>
-	<script>	
-		// initiate 3Dcitydb-web-map instance
-		var webMap = new WebMap3DCityDB(new Cesium.Viewer('cesiumContainer'));
-		
-		// adding a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
-		var options = {
-			url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
-			name : 'Berlin_Building_Texture',
-			id : "kmlLayer"
+  <div id="cesiumContainer"></div>
+   <div id="uiMenu">
+    <button type="button" onclick="highlight()">activate Highlighting</button>
+    <button type="button" onclick="unhighlight()">deactivate Highlighting</button>
+    <br />
+  </div>
+  <script>
+	// initiate 3Dcitydb-web-map instance
+	var webMap = new WebMap3DCityDB(new Cesium.Viewer('cesiumContainer'));
+	
+	// adding a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
+	var options = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
+		name : 'Berlin_Building_Texture',
+		activeHighlighting: true,
+		id : "kmlLayer"
+	};
+	var citydbKmlLayer = new CitydbKmlLayer(options);
+	webMap.addLayer(citydbKmlLayer);
+	
+	// enable Highlighting capability
+	var highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 0.5)
+  	var highlight = function(){
+		var highlightThis = {
+			"BLDG_0003000e00768233": highlightColor,
+			"BLDG_0003000e00768236": highlightColor,
+			"BLDG_0003000f0012b2d3": highlightColor,
+			"BLDG_0003000a002edb0e": highlightColor,
+			"BLDG_0003000f00292bce": highlightColor 
 		};
-		var citydbKmlLayer = new CitydbKmlLayer(options);
-		webMap.addLayer(citydbKmlLayer);
-		
-		// enable Highlighting capability
-		var highlightedObject = null;
-		var eventCallback = function(object) {
-			if (highlightedObject != null) {
-				var materials = highlightedObject.mesh._materials;
-				for (i = 0; i < materials.length; i++) {
-					// dismiss highlighting
-					materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
-				}
-			}
-			highlightedObject = object;
-			var materials = object.mesh._materials;
-			for (i = 0; i < materials.length; i++) {
-				// performing highlighting
-				materials[i].setValue('emission', new Cesium.Cartesian4(0.4, 0.4, 0.0, 0.5));
-			}
-		};
-		citydbKmlLayer.registerEventHandler("CLICK", eventCallback);		
-		
-		// active mouseClick Event		
-		webMap.activateMouseClickEvents(true);
-		
-		// Zoom to target layer
-		var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
-		webMap._cesiumViewerInstance.camera.viewRectangle(extent);
-	//	webMap._cesiumViewerInstance.extend(Cesium.viewerCesiumInspectorMixin);
+		citydbKmlLayer.highlight(highlightThis); 
+  	};
+  	
+  	var unhighlight = function(){
+		var unHighlightThis = [
+			"BLDG_0003000e00768233",
+			"BLDG_0003000e00768236",
+			"BLDG_0003000f0012b2d3",
+			"BLDG_0003000a002edb0e",
+			"BLDG_0003000f00292bce" 
+		];
+		citydbKmlLayer.unHighlight(unHighlightThis); 
+  	};
+	
+	// Zoom to target layer
+	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
+	webMap._cesiumViewerInstance.camera.viewRectangle(extent);
+	
 	</script>
 </body>
 </html>

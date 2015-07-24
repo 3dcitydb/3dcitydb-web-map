@@ -14,7 +14,8 @@
   <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
   <script src="../../js/3dcitydb-web-map.js"></script>  
   <script src="../../js/CitydbUtil.js"></script>  
-  <script src="../../js/CitydbWebworker.js"></script>  
+  <script src="../../js/CitydbWebworker.js"></script>
+  <script src="../../js/CitydbKmlHighlightingManager.js"></script>   
   <script src="../../js/CitydbKmlTilingManager.js"></script>  
   <script src="../../js/CitydbKmlDataSource.js"></script>  
   <script src="../../js/CitydbKmlLayer.js"></script> 
@@ -33,60 +34,253 @@
       }
       #uiMenu {
           border-radius:5px;
-          padding: 10px;
+          padding: 5px;
           position:absolute;
           left: 20px;
           font-family: "Arial";
           z-index: 99999;
       }
+      .loadingIndicator {
+	    display: block;
+	    position: absolute;
+	    top: 50%;
+	    left: 50%;
+	    margin-top: -33px;
+	    margin-left: -33px;
+	    width: 66px;
+	    height: 66px;
+	    background-position: center;
+	    background-repeat: no-repeat;
+	    background-image: url(../../theme/img/ajax-loader.gif);
+	}
   </style>
 </head>
 <body>
   <div id="cesiumContainer"></div>
-   <div id="uiMenu">    
+  <div id="loadingIndicator" class="loadingIndicator"></div>
+  <div id="uiMenu">	  
+	  <select id ='layerSelection' class="cesium-button"></select>
+	  <button type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
+	  <button type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>
   </div>
   <script>
-  	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
-	var viewer = new Cesium.Viewer('cesiumContainer'); 	
-	viewer.camera.viewRectangle(extent); 
-	var webMap = new WebMap3DCityDB(viewer);
-//	viewer.extend(Cesium.viewerCesiumInspectorMixin);  
+    document.getElementById('loadingIndicator').style.display = 'none';
+	// initiate 3Dcitydb-web-map instance
+	var cesiumViewer = new Cesium.Viewer('cesiumContainer');
+//	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
+	var cesiumCamera = cesiumViewer.scene.camera;
+	var webMap = new WebMap3DCityDB(cesiumViewer);	
 	
-    var options = {
-  	//	url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture/Berlin_Center_Texture.kml',
-  		url: 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Texture/Berlin_All_Texture_MasterJSON.json',
-    	name: 'Berlin_Building_Texture',
-    	id: 'Berlin_Building_Texture'
-   	};    
-    var citydbKmlLayer = new CitydbKmlLayer(options);
-    webMap.addLayer(citydbKmlLayer);
-  
+	// active mouseClick Event		
+	webMap.activateMouseClickEvents(true);
+	webMap.activateMouseMoveEvents(true);
+
+    // creating some layers which were exported from 3DCityDB using KML/Collada/Gltf Exporter
+	var options = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
+		name : 'Berlin_Building_Texture',
+		activeHighlighting: true,
+		id : "kmlLayer"
+	}; 
+  	var citydbKmlLayer = new CitydbKmlLayer(options);
+  	
 	var options2 = {
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
-		name : 'London_Geometry_Lod2',
-		id : 'London_Geometry_Lod2'
-	};
-	var citydbKmlLayer2 = new CitydbKmlLayer(options2);
-	webMap.addLayer(citydbKmlLayer2);
-	
-	var options3 = {
 		url : 'https://dl.dropboxusercontent.com/u/24313387/KML/KML%20aus%203DCityDB/StatenIsland.kml',
 		name : 'Newyork_building_Lod1',
+		activeHighlighting: false,
 		id : 'Newyork_building_Lod1'
 	};
+	var citydbKmlLayer2 = new CitydbKmlLayer(options2);
+	
+	var options3 = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
+		name : 'London_building_Lod2',
+		activeHighlighting: false,
+		id : 'London_building_Lod2'
+	};
 	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
-	webMap.addLayer(citydbKmlLayer3);
-	
-    var eventCallback = function(object){
-		console.log(object);
-  	};  	
+		
+	// Loading layers one by one...
+	var layers = [citydbKmlLayer, citydbKmlLayer2, citydbKmlLayer3];
 
-  	citydbKmlLayer.registerEventHandler("CLICK", eventCallback);
-  	citydbKmlLayer2.registerEventHandler("CLICK", eventCallback);
-  	citydbKmlLayer3.registerEventHandler("CLICK", eventCallback);
-
-  	webMap.activateMouseClickEvents(true);
+	var k = 0;
+	function loadLayer(_layer) {
+		var tempMenuOption;
+		_layer.registerEventHandler("STARTLOADING", function(thisLayer) {
+			document.getElementById('loadingIndicator').style.display = 'block';
+		});
+		_layer.registerEventHandler("FINISHLOADING", function(thisLayer) {
+			document.getElementById('loadingIndicator').style.display = 'none';
+			addLayerToMenu({
+			    text : thisLayer.name,
+			    onselect : function() {
+			    	console.log(thisLayer);
+			        thisLayer.zoomToLayer();
+			    }
+			});	 
+			k++;
+			if (k < layers.length) {
+				currentLayer = layers[k];
+				loadLayer(currentLayer);
+				webMap.addLayer(currentLayer);
+			}		 
+		});
+	}
+	loadLayer(layers[k]);
+			
+	// clickEvent Handler for Highlighting...	
+	var highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 0.5)
+	citydbKmlLayer.registerEventHandler("CLICK", function(object) {
+		if (citydbKmlLayer.isInHighlightedList(object.id.name))
+			return; 
+		// clear all other Highlighting status and just highlight the clicked object...
+		citydbKmlLayer.unHighlightAllObjects();  		
+		var highlightThis = {};
+		highlightThis[object.id.name] = highlightColor;
+		citydbKmlLayer.highlight(highlightThis); 		
+	});
 	
+	// CtrlclickEvent Handler for Multi-Selection and Highlighting...
+	citydbKmlLayer.registerEventHandler("CTRLCLICK", function(object) {
+		if (citydbKmlLayer.isInHighlightedList(object.id.name)) {
+			citydbKmlLayer.unHighlight([object.id.name]);
+		}else {
+			var highlightThis = {};
+			highlightThis[object.id.name] = highlightColor;
+			citydbKmlLayer.highlight(highlightThis); 
+		}		
+	});
+	
+	// MouseIn- and MouseOut-Event Handler for MouseOver-Highlighting
+	var mouseOverhighlightColor = new Cesium.Color(0.0, 0.5, 0.0, 1.0);
+	citydbKmlLayer.registerEventHandler("MOUSEIN", function(object) {
+		if (object.primitive instanceof Cesium.Model) {
+			if (citydbKmlLayer.isInHighlightedList(object.id.name))
+				return;
+			var materials = object.mesh._materials;
+			for (i = 0; i < materials.length; i++) {
+				// do mouseOver highlighting
+				materials[i].setValue('emission', Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
+			} 
+		}
+	});
+ 	citydbKmlLayer.registerEventHandler("MOUSEOUT", function(object) {
+		if (object.primitive instanceof Cesium.Model) {
+			if (citydbKmlLayer.isInHighlightedList(object.id.name))
+				return; 
+			var materials = object.mesh._materials;
+			for (i = 0; i < materials.length; i++) {
+				// dismiss highlighting
+				materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
+			} 
+		}
+	});	 
+
+	// Zoom to desired camera position
+	var latstr = CitydbUtil.parse_query_string('lat', window.location.href);
+    var lonstr = CitydbUtil.parse_query_string('lon', window.location.href);
+    
+    if (latstr && lonstr) {	    	
+        var lat = parseFloat(latstr);
+        var lon = parseFloat(lonstr);
+        var range = 800;
+        var heading = 6;
+        var tilt = 49;
+        var altitude = 40;
+
+        var rangestr = CitydbUtil.parse_query_string('range', window.location.href);
+        if (rangestr) 
+        	range = parseFloat(rangestr);
+
+        var headingstr = CitydbUtil.parse_query_string('heading', window.location.href);
+        if (headingstr) 
+        	heading = parseFloat(headingstr);
+
+        var tiltstr = CitydbUtil.parse_query_string('tilt', window.location.href);
+        if (tiltstr) 
+        	tilt = parseFloat(tiltstr);
+
+        var altitudestr = CitydbUtil.parse_query_string('altitude', window.location.href);
+        if (altitudestr) 
+        	altitude = parseFloat(altitudestr);
+
+        var _center = Cesium.Cartesian3.fromDegrees(lon, lat);
+        var _heading = Cesium.Math.toRadians(heading);
+        var _pitch = Cesium.Math.toRadians(tilt - 90);
+        var _range = range;
+        cesiumCamera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(lon, lat, _range),
+            complete: function() {
+            	cesiumCamera.lookAt(_center, new Cesium.HeadingPitchRange(_heading, _pitch, _range));
+            	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  				// adding layer to Cesium Map          	          	
+            	webMap.addLayer(citydbKmlLayer);    
+            }
+        })
+    } 
+    else {
+    	// default camera postion
+    	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
+    	cesiumCamera.viewRectangle(extent);
+    	// adding layer to Cesium Map          	          	
+    	webMap.addLayer(citydbKmlLayer);     
+    }
+    
+    //---------------------------------  Button ClickEvent Handler  ----------------------------------------// 
+    
+    // Creation of a weblink for sharing with other people..
+ 	var generateLink = function(){
+  		var cameraPostion = null;	    		    	   	
+    	var ray = cesiumCamera.getPickRay(new Cesium.Cartesian2(
+            Math.round(cesiumViewer.scene.canvas.clientWidth / 2),
+            Math.round(cesiumViewer.scene.canvas.clientHeight / 2)
+        ));
+        var position = cesiumViewer.scene.globe.pick(ray, cesiumViewer.scene);
+        if (Cesium.defined(position)) {
+            var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+            var range = Cesium.Cartesian3.distance(position, cesiumCamera.position);
+            cameraPostion = {
+	    		lat: Cesium.Math.toDegrees(cartographic.latitude),	
+	    		lon: Cesium.Math.toDegrees(cartographic.longitude),
+				range: range,
+				tilt: Cesium.Math.toDegrees(cesiumCamera.pitch)+ 90,
+				heading:  Cesium.Math.toDegrees(cesiumCamera.heading),
+				altitude: 0
+	    	};  
+			var	projectLink = location.protocol + '//' + location.host + location.pathname + '?' +
+			'lat=' + cameraPostion.lat +
+			'&lon=' + cameraPostion.lon +
+			'&range=' + cameraPostion.range +
+			'&tilt=' + cameraPostion.tilt +
+			'&heading=' + cameraPostion.heading +
+			'&altitude=' + cameraPostion.altitude;
+			window.history.pushState("string", "Title", projectLink);
+        }
+  	};
+  	
+  	// Clear Highlighting effect of all highlighted objects
+  	var clearhighlight = function(){
+  		citydbKmlLayer.unHighlightAllObjects(); 
+  	};
+  	
+  	var layerMenuOptions = new Array();
+    var layerMenu = document.getElementById('layerSelection');
+    layerMenu.onchange = function() {
+        var item = layerMenuOptions[layerMenu.selectedIndex];
+        if (item && typeof item.onselect === 'function') {
+            item.onselect();
+        }
+    };
+  	function addLayerToMenu(layerOption) {
+  		layerMenuOptions.push(layerOption);
+		var menuOption = document.createElement('option');
+		menuOption.textContent = layerOption.text;
+		layerMenu.appendChild(menuOption);	
+		return menuOption;
+	}
+  	function removeMenuOption(menuOption){
+  		layerMenu.removeChild(menuOption);
+  	}
 	</script>
 </body>
 </html>

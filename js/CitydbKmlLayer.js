@@ -38,6 +38,8 @@
 		 */
 		this._clickEvent = new Cesium.Event();
 		
+		this._ctrlClickEvent = new Cesium.Event();
+		
 		/**
 		 * handles ClickEvents
 		 * @type {Cesium.Event} clickEvent
@@ -49,6 +51,10 @@
 		 * @type {Cesium.Event} clickEvent
 		 */
 		this._mouseOutEvent = new Cesium.Event();
+		
+		this._startLoadingEvent = new Cesium.Event();
+		
+		this._finishLoadingEvent = new Cesium.Event();
 	}
 
 	Object.defineProperties(CitydbKmlLayer.prototype, {
@@ -180,6 +186,7 @@
 	 * @param {CesiumViewer} cesiumViewer
 	 */
 	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
+		this._startLoadingEvent.raiseEvent();
 		this._cesiumViewer = cesiumViewer;
 		var that = this;
 		if (this._url.indexOf(".json") >= 0) {	    		
@@ -194,19 +201,41 @@
 		    		console.log(that._citydbKmlDataSource);
 		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
 		            that._citydbKmlTilingManager.doStart();
+		            that._finishLoadingEvent.raiseEvent(that);
 		        },
 		        error: function(XHR, textStatus, errorThrown){
 		        	console.log('can not find the json file for ' + kmlUrl);
+		        	that._finishLoadingEvent.raiseEvent(that);
 		        }
 		    });	
     	}
 		else {
 			this._citydbKmlDataSource.load(this._url).then(function() {
-				console.log(that._citydbKmlDataSource);
+				that._cameraPosition = that._citydbKmlDataSource._lookAt;				
 				cesiumViewer.dataSources.add(that._citydbKmlDataSource);
 				that._citydbKmlTilingManager.doStart();
+				that._finishLoadingEvent.raiseEvent(that);
 		    });
 		}		
+	}
+	
+	CitydbKmlLayer.prototype.zoomToLayer = function(){
+		var that = this;
+		var lat = this._cameraPosition.lat;
+		var lon = this._cameraPosition.lon;
+		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
+        var heading = Cesium.Math.toRadians(this._cameraPosition.heading);
+        var pitch = Cesium.Math.toRadians(this._cameraPosition.tilt - 90);
+        var range = this._cameraPosition.range;
+        
+        cesiumCamera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(lon, lat, range),
+            complete: function() {
+            	cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+            	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
+            	that._citydbKmlTilingManager.triggerWorker();
+            }
+        })
 	}
 
 	/**
@@ -357,10 +386,16 @@
 	CitydbKmlLayer.prototype.removeEventHandler = function(event, callback){
 		if(event == "CLICK"){
 			this._clickEvent.removeEventListener(callback, this);
+		}else if(event == "CTRLCLICK"){
+			this._ctrlClickEvent.removeEventListener(callback, this);
 		}else if(event == "MOUSEIN"){
 			this._mouseInEvent.removeEventListener(callback, this);
 		}else if(event == "MOUSEOUT"){
 			this._mouseOutEvent.removeEventListener(callback, this);
+		}else if(event == "STARTLOADING"){
+			this._startLoadingEvent.removeEventListener(callback, this);
+		}else if(event == "FINISHLOADING"){
+			this._finishLoadingEvent.removeEventListener(callback, this);
 		}
 	}
 
@@ -373,10 +408,16 @@
 	CitydbKmlLayer.prototype.registerEventHandler = function(event, callback){
 		if(event == "CLICK"){
 			this._clickEvent.addEventListener(callback, this);
+		}else if(event == "CTRLCLICK"){
+			this._ctrlClickEvent.addEventListener(callback, this)
 		}else if(event == "MOUSEIN"){
 			this._mouseInEvent.addEventListener(callback, this);
 		}else if(event == "MOUSEOUT"){
 			this._mouseOutEvent.addEventListener(callback, this);
+		}else if(event == "STARTLOADING"){
+			this._startLoadingEvent.addEventListener(callback, this);
+		}else if(event == "FINISHLOADING"){
+			this._finishLoadingEvent.addEventListener(callback, this);
 		}
 	}
 
@@ -388,6 +429,8 @@
 	CitydbKmlLayer.prototype.triggerEvent = function(event, object){
 		if(event == "CLICK"){
 			this._clickEvent.raiseEvent(object);
+		}else if(event == "CTRLCLICK"){
+			this._ctrlClickEvent.raiseEvent(object);
 		}else if(event == "MOUSEIN"){
 			this._mouseInEvent.raiseEvent(object);
 		}else if(event == "MOUSEOUT"){
