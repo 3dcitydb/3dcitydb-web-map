@@ -1501,6 +1501,17 @@
         }
     }
 
+    function processLookAt(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver) {
+        dataSource._lookAt = {
+    		lat: queryNumericValue(node, 'latitude', namespaces.kml),	
+    		lon: queryNumericValue(node, 'longitude', namespaces.kml),
+			range: queryNumericValue(node, 'range', namespaces.kml),
+			tilt: queryNumericValue(node, 'tilt', namespaces.kml),
+			heading:  queryNumericValue(node, 'heading', namespaces.kml),
+			altitude: queryNumericValue(node, 'altitude', namespaces.kml)
+    	}
+    }
+    
     function processUnsupported(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver) {
         window.console.log('KML - Unsupported feature: ' + node.localName);
     }
@@ -1508,6 +1519,7 @@
     var featureTypes = {
         Document : processDocument,
         Folder : processFolder,
+        LookAt : processLookAt,
         Placemark : processPlacemark,
         GroundOverlay : processGroundOverlay,
         PhotoOverlay : processUnsupported,
@@ -1680,6 +1692,7 @@
         this._pinBuilder = new PinBuilder();
         this._promises = [];
         this._layerId = layerId;
+        this._lookAt = null;
     };
 
     /**
