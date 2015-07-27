@@ -9,12 +9,17 @@
 		this.handler = null;
 	}
 	
-	CitydbKmlTilingManager.prototype.doStart = function() {
+	CitydbKmlTilingManager.prototype.doStart = function() {		
 		var scope = this;
 		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
     	var dataSourceCollection = cesiumViewer._dataSourceCollection;
     	var scene = cesiumViewer.scene;
     	var canvas = scene.canvas; 
+    	
+    	// start Hihgighting Manager
+    	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
+    		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doStart();
+    	}
     	
     	// displayed layers
     	var dataPoolKml = new Object();
@@ -294,6 +299,8 @@
     	
     	while (!Cesium.defined(cartesian3Indicator)) {
     		factor++
+    		if (factor > 10)
+    			break;
     		originHeight = originHeight + frameHeight*factor*0.1;
     		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
     	}
@@ -400,31 +407,10 @@
     	var scope = this;
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var scene = cesiumViewer.scene;
-
-        if (this.handler == null) {
-        	this.handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-        	var isMouseDown = false;
-        	
-        	this.handler.setInputAction(function(position) {
-        		isMouseDown = true;
-        	}, Cesium.ScreenSpaceEventType.LEFT_DOWN);
-        	
-        	this.handler.setInputAction(function(position) {
-        		isMouseDown = false;
-        		scope.triggerWorker();
-        	}, Cesium.ScreenSpaceEventType.LEFT_UP);
-        	
-        	this.handler.setInputAction(function(position) {
-            }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-        	
-        	this.handler.setInputAction(function(position) {
-        		scope.triggerWorker();
-        	}, Cesium.ScreenSpaceEventType.WHEEL);
-        	
-        	this.handler.setInputAction(function(position) {
-        		scope.triggerWorker();
-        	}, Cesium.ScreenSpaceEventType.MIDDLE_UP);
-        }
+    	
+    	scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function() {
+    		scope.triggerWorker();
+		});
     };
 		
 	window.CitydbKmlTilingManager = CitydbKmlTilingManager;

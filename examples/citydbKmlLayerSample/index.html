@@ -74,6 +74,7 @@
 	// active mouseClick Event		
 	webMap.activateMouseClickEvents(true);
 	webMap.activateMouseMoveEvents(true);
+	webMap.activateViewChangedEvent(true);
 
     // creating some layers which were exported from 3DCityDB using KML/Collada/Gltf Exporter
 	var options = {
@@ -101,7 +102,10 @@
 	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
 		
 	// Loading layers one by one...
-	var layers = [citydbKmlLayer, citydbKmlLayer2, citydbKmlLayer3];
+	var layers = [citydbKmlLayer 
+	              ,citydbKmlLayer2 
+	              ,citydbKmlLayer3
+	              ];
 
 	var k = 0;
 	function loadLayer(_layer) {

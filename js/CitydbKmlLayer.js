@@ -30,7 +30,7 @@
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		if (options.activeHighlighting == true)
-			this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);		
+			this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);	
 		
 		/**
 		 * handles ClickEvents
@@ -55,6 +55,8 @@
 		this._startLoadingEvent = new Cesium.Event();
 		
 		this._finishLoadingEvent = new Cesium.Event();
+		
+		this._viewChangedEvent = new Cesium.Event();
 	}
 
 	Object.defineProperties(CitydbKmlLayer.prototype, {
@@ -233,7 +235,9 @@
             complete: function() {
             	cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
             	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
-            	that._citydbKmlTilingManager.triggerWorker();
+            	setTimeout(function(){
+            		that._citydbKmlTilingManager.triggerWorker();
+            	}, 3000)            	
             }
         })
 	}
@@ -295,8 +299,8 @@
 	 * @param {String} Object Id
 	 * @return {Cesium.Model} Cesium Model instance having the corresponding GMLID
 	 */
-	CitydbKmlLayer.prototype.getObjectById = function(objectId){
-		var primitives = this._cesiumViewer.scene.primitives;			
+	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
+		var primitives = this._cesiumViewer.scene.primitives;
 		for (i = 0; i < primitives.length; i++) {
 			var primitive = primitives.get(i);
 			if (primitive instanceof Cesium.Model) {
@@ -396,6 +400,8 @@
 			this._startLoadingEvent.removeEventListener(callback, this);
 		}else if(event == "FINISHLOADING"){
 			this._finishLoadingEvent.removeEventListener(callback, this);
+		}else if(event == "VIEWCHANGED"){
+			this._viewChangedEvent.removeEventListener(callback, this);
 		}
 	}
 
@@ -418,6 +424,8 @@
 			this._startLoadingEvent.addEventListener(callback, this);
 		}else if(event == "FINISHLOADING"){
 			this._finishLoadingEvent.addEventListener(callback, this);
+		}else if(event == "VIEWCHANGED"){
+			this._viewChangedEvent.addEventListener(callback, this);
 		}
 	}
 
@@ -435,6 +443,8 @@
 			this._mouseInEvent.raiseEvent(object);
 		}else if(event == "MOUSEOUT"){
 			this._mouseOutEvent.raiseEvent(object);
+		}else if(event == "VIEWCHANGED"){
+			this._viewChangedEvent.raiseEvent(object);
 		}
 	}
 	window.CitydbKmlLayer = CitydbKmlLayer;
