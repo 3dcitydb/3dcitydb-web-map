@@ -16,7 +16,6 @@ function WebMap3DCityDB(cesiumViewer){
 }
 
 
-
 /**
  * adds a 3DCityDBLayer to the cesiumViewer
  * @param {3DCityDBLayer} layer
@@ -49,6 +48,58 @@ WebMap3DCityDB.prototype.removeLayer = function(id){
 	return;
 }
 
+/** 
+ * activates viewchanged Event
+ * This event will be fired many times when the camera position or direction is changing  
+ * @param {Boolean} active
+ */
+WebMap3DCityDB.prototype.activateViewChangedEvent = function(active){
+	var that = this;
+	var cesiumWidget = cesiumViewer.cesiumWidget;
+    var camera = cesiumWidget.scene.camera;
+    var posX = camera.position.x;
+    var posY = camera.position.y;
+    var posZ = camera.position.z;
+    var dirX = camera.direction.x;
+    var dirY = camera.direction.y;
+    var dirZ = camera.direction.z;
+    
+    // tolerance
+    var posD = 3;
+	var dirD = 0.001;
+	
+	var listenerFunc = function() {
+    	var currentCamera = cesiumWidget.scene.camera;
+        var _posX = currentCamera.position.x;
+        var _posY = currentCamera.position.y;
+        var _posZ = currentCamera.position.z;
+        var _dirX = currentCamera.direction.x;
+        var _dirY = currentCamera.direction.y;
+        var _dirZ = currentCamera.direction.z;
+
+        if (Math.abs(posX - _posX) > posD ||
+	    		Math.abs(posY - _posY) > posD ||
+	    		Math.abs(posZ - _posZ) > posD ||
+	    		Math.abs(dirX - _dirX) > dirD ||
+	    		Math.abs(dirY - _dirY) > dirD ||
+	    		Math.abs(dirZ - _dirZ) > dirD) {
+            console.log('view changed');
+            posX = _posX;
+            posY = _posY;
+            posZ = _posZ;
+            dirX = _dirX;
+            dirY = _dirY;
+            dirZ = _dirZ;
+            for (var i = 0; i < that._layers.length; i++){
+				that._layers[i].triggerEvent("VIEWCHANGED");				
+			}
+        }
+    }
+	
+	if (active){		
+	    cesiumWidget.clock.onTick.addEventListener(listenerFunc);	
+	}	
+}
 /** 
  * activates mouseClick Events over objects 
  * @param {Boolean} active
