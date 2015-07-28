@@ -84,7 +84,7 @@ function addEvent(obj, evType, fn) {
         //Small extent
         //var buildingsextent = new Cesium.Rectangle.fromDegrees(13.3813476562, 52.5228881836, 13.3840942383, 52.5256347656);
       
-        var options = {url:'../../data/berlintms', name:"buildingslayer", minLevel:15, maxLevel:15, region:buildingsextent, id:"tmsOLayer"};
+        var options = {url:'../sampledata/berlintms', name:"buildingslayer", minLevel:15, maxLevel:15, region:buildingsextent, id:"tmsOLayer"};
         
         tmsLayer = new TMSObjectLayer(options);
         webMap.addLayer(tmsLayer);
