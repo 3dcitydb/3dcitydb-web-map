@@ -239,7 +239,11 @@
 		 *  
 		 */
 		scope.oTask.addListener("refreshView", function () {			
-			scope.oTask.sleep();				
+			scope.oTask.sleep();	
+			// trigger Highlighting Manager again...
+    		if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
+    			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
+    		} 
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
@@ -385,7 +389,7 @@
     	if (scope.oTask != null) {       		
     		if (scope.oTask.isSleep()) {
          		scope.oTask.wake();	
-         		console.log("triger starting...");
+         		console.log("trigger starting...");
  				scope.oTask.triggerEvent('notifyWake');  
  			}
     		else {

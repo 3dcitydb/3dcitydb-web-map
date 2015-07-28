@@ -13,7 +13,6 @@
 	
 	CitydbKmlHighlightingManager.prototype.doStart = function() {
     	var scope = this;
-    	var highlightedObjects = this.citydbKmlLayerInstance.highlightedObjects;
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {			
@@ -28,11 +27,9 @@
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {	
-			if (isStillUpdating || scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming() || scope.shouldRun) {
-				setTimeout(function(){   	
-					console.log("Highlighting manager repeat updating again...");
-    		    	scope.rebuildDataPool();    		    	
-    		    }, 1000); 
+			if (isStillUpdating || scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming() || scope.shouldRun) {	
+				console.log("Highlighting manager repeat updating again...");
+		    	scope.rebuildDataPool();    		    	
 			}
 			else {		
 				console.log("Highlighting Manager is sleeping...")
@@ -40,13 +37,14 @@
 			}					
 		});			
 
-		var dataPool = this.generateDataPool(highlightedObjects);
+		var dataPool = this.generateDataPool();
 
 		scope.oTask.triggerEvent('initWorker', dataPool);		
     }
 	
-	CitydbKmlHighlightingManager.prototype.generateDataPool = function(highlightedObjects) {
+	CitydbKmlHighlightingManager.prototype.generateDataPool = function() {
 		var dataPool = {};
+		this.objectCollection = {};
 		var primitives = this.citydbKmlLayerInstance._cesiumViewer.scene.primitives;
 		for (i = 0; i < primitives.length; i++) {
 			var primitive = primitives.get(i);
@@ -59,10 +57,17 @@
 					this.shouldRun = true;
 				}
 			}
+			else if (primitive instanceof Cesium.Primitive) {				
+ 				for (j = 0; j < primitive._instanceIds.length; j++){	
+ 					var targetEntity = primitive._instanceIds[j];
+ 					dataPool[targetEntity.name] = false;	
+ 					this.objectCollection[targetEntity.name] = targetEntity;
+				}							
+			}
 		}
 		return dataPool;
 	}
-		
+	
 	CitydbKmlHighlightingManager.prototype.doTerminate = function() {
     	if (this.oTask != null) {       		
     		clearInterval(this.monitor);
@@ -77,7 +82,7 @@
     		if (scope.oTask.isSleep()) {
          		scope.oTask.wake();	
          		console.log("trigger starting...");
- 				scope.oTask.triggerEvent('notifyWake');  
+         		scope.rebuildDataPool();  
  			}
     	}            	
     },
@@ -103,7 +108,7 @@
     CitydbKmlHighlightingManager.prototype.rebuildDataPool = function() {
     	if (this.oTask != null) {
     		this.shouldRun = false;
-			var dataPool = this.generateDataPool(this.citydbKmlLayerInstance.highlightedObjects);
+			var dataPool = this.generateDataPool();
 			this.oTask.triggerEvent('rebuildDataPool', dataPool);
 		}
     }
