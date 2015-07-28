@@ -113,7 +113,7 @@
   
   	var addLayer = function(){
   		var buildingsextent = new Cesium.Rectangle.fromDegrees(13.3703613, 52.5036621, 13.4143066, 52.5256348);
-      	var options = {url:'http://localhost/www/berlintms', name:"buildingslayer", minLevel:15, maxLevel:17, region:buildingsextent, id:"tmsOLayer"};
+      	var options = {url:'../data/berlintms', name:"buildingslayer", minLevel:15, maxLevel:15, region:buildingsextent, id:"tmsOLayer"};
   	    
       	tmsLayer = new TMSObjectLayer(options);
       	webMap.addLayer(tmsLayer);	  		
