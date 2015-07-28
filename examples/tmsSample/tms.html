@@ -8,12 +8,12 @@
   <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
   <title>TMS Streaming demo</title>
-  <script src="../../Cesium/Build/Cesium/Cesium.js"></script>  
-  <script src="../js/3dcitydb-web-map.js"></script>
-  <script src="../js/tmsobjectprovider.js"></script>
-  <script src="../js/tmsobjectlayer.js"></script>  
+  <script src="../../../Cesium/Build/Cesium/Cesium.js"></script>  
+  <script src="../../js/3dcitydb-web-map.js"></script>
+  <script src="../../js/tmsobjectprovider.js"></script>
+  <script src="../../js/tmsobjectlayer.js"></script>  
   <style>
-      @import url(../../Cesium/Build/Cesium/Widgets/widgets.css);
+      @import url(../../../Cesium/Build/Cesium/Widgets/widgets.css);
       html, body, #cesiumContainer {
           top: 0px;
           left: 0px;
@@ -113,7 +113,7 @@
   
   	var addLayer = function(){
   		var buildingsextent = new Cesium.Rectangle.fromDegrees(13.3703613, 52.5036621, 13.4143066, 52.5256348);
-      	var options = {url:'../data/berlintms', name:"buildingslayer", minLevel:15, maxLevel:15, region:buildingsextent, id:"tmsOLayer"};
+      	var options = {url:'../../data/berlintms', name:"buildingslayer", minLevel:15, maxLevel:15, region:buildingsextent, id:"tmsOLayer"};
   	    
       	tmsLayer = new TMSObjectLayer(options);
       	webMap.addLayer(tmsLayer);	  		
