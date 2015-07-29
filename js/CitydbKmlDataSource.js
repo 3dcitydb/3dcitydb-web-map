@@ -220,7 +220,9 @@
         var entity = entityCollection.getOrCreateEntity(id);
         if (!defined(entity.kml)) {
             entity.addProperty('kml');
+            entity.addProperty('layerId');
             entity.kml = new KmlFeatureData();
+            entity.layerId = globeScope._layerId;
         }
         return entity;
     }
@@ -367,7 +369,11 @@
 
     function queryBooleanValue(node, tagName, namespace) {
         var result = queryFirstNode(node, tagName, namespace);
-        return defined(result) ? result.textContent === '1' : undefined;
+        if (defined(result)) {
+            var value = result.textContent.trim();
+            return value === '1' || /^true$/i.test(value);
+        }
+        return undefined;
     }
 
     function resolveHref(href, proxy, sourceUri, uriResolver) {
@@ -1352,8 +1358,7 @@
 		var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
 		
 		// "node" ist the <Folder> tag	
-		var folderNode = node;
-		var networklinkEntity = new Entity(createId(folderNode));
+		var networklinkEntity = new Entity(createId(node));		
 		var networklinkNode = queryFirstNode(node, 'NetworkLink', namespaces.kml);
 		
 		if (typeof networklinkNode != 'undefined') {
@@ -1496,6 +1501,17 @@
         }
     }
 
+    function processLookAt(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver) {
+        dataSource._lookAt = {
+    		lat: queryNumericValue(node, 'latitude', namespaces.kml),	
+    		lon: queryNumericValue(node, 'longitude', namespaces.kml),
+			range: queryNumericValue(node, 'range', namespaces.kml),
+			tilt: queryNumericValue(node, 'tilt', namespaces.kml),
+			heading:  queryNumericValue(node, 'heading', namespaces.kml),
+			altitude: queryNumericValue(node, 'altitude', namespaces.kml)
+    	}
+    }
+    
     function processUnsupported(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver) {
         window.console.log('KML - Unsupported feature: ' + node.localName);
     }
@@ -1503,6 +1519,7 @@
     var featureTypes = {
         Document : processDocument,
         Folder : processFolder,
+        LookAt : processLookAt,
         Placemark : processPlacemark,
         GroundOverlay : processGroundOverlay,
         PhotoOverlay : processUnsupported,
@@ -1661,7 +1678,9 @@
      * var viewer = new Cesium.Viewer('cesiumContainer');
      * viewer.dataSources.add(Cesium.CitydbKmlDataSource.load('../../SampleData/facilities.kmz'));
      */
-    var CitydbKmlDataSource = function(proxy) {
+    var globeScope;
+    var CitydbKmlDataSource = function(layerId, proxy) {
+    	globeScope = this;
         this._changed = new Event();
         this._error = new Event();
         this._loading = new Event();
@@ -1672,6 +1691,8 @@
         this._proxy = proxy;
         this._pinBuilder = new PinBuilder();
         this._promises = [];
+        this._layerId = layerId;
+        this._lookAt = null;
     };
 
     /**

@@ -68,12 +68,28 @@ WebMap3DCityDB.prototype.activateMouseClickEvents = function(active){
 					}
 				}
 			}
-		}, Cesium.ScreenSpaceEventType.LEFT_CLICK);		
+		}, Cesium.ScreenSpaceEventType.LEFT_CLICK);	
+		
+		this._eventHandler.setInputAction(function(event){
+			var object = that._cesiumViewerInstance.scene.pick(event.position);
+			if(object){
+				if(object.id.layerId){
+					var layerid = object.id.layerId;
+					for(var i = 0; i < that._layers.length; i++){
+						if(that._layers[i].id == layerid){
+							that._layers[i].triggerEvent("CTRLCLICK", object);
+						}
+					}
+				}
+			}
+		}, Cesium.ScreenSpaceEventType.LEFT_CLICK, Cesium.KeyboardEventModifier.CTRL);		
 	}else{
 		this._eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+		this._eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK, Cesium.KeyboardEventModifier.CTRL);
 	}
 	this._mouseClickEvents = active;	
 }
+
 /** 
  * activates mouseMove Events over objects 
  * @param {Boolean} active
