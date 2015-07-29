@@ -149,7 +149,11 @@
 	        			if (!dataPoolKml.hasOwnProperty(objUrl)) {
 	        				var networklinkItem = networklinkCache[objUrl].networklinkItem;
     	        			var kmlDatasource = networklinkItem.kmlDatasource;
-    	        			dataSourceCollection.add(kmlDatasource);
+    	        			dataSourceCollection.add(kmlDatasource).then(function() {    					
+    	        				if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
+    	        	    			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
+    	        	    		} 	        										        							        			
+            				});
     	        			console.log("loading layer...");	
     	        			dataPoolKml[objUrl] = networklinkItem;
     	        			// status was changed...
@@ -174,7 +178,11 @@
     				       				
     				if (pixelCoveringSize >= 140) {
     					console.log("loading layer...");
-    					dataSourceCollection.add(newKmlDatasource);       						 
+    					dataSourceCollection.add(newKmlDatasource).then(function() {    					
+    						if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
+    			    			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
+    			    		} 	        										        							        			
+        				});       						 
 	        			dataPoolKml[objUrl] = newNetworklinkItem;
 	        			newKmlDatasource.load(objUrl).then(function() {    					
 	        				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			

@@ -267,7 +267,39 @@
 			this._highlightedObjects[id] = toHighlight[id];
 			this.highlightObject(this.getObjectById(id));
 		}		
-	//	this._citydbKmlHighlightingManager.rebuildDataPool();
+	};
+	
+	CitydbKmlLayer.prototype.highlightObject = function(object){	
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var highlightColor = this.highlightedObjects[object._id._name];
+				if (highlightColor) {
+					var materials = object._runtime.materialsByName;				
+					for (var materialId in materials){
+						materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
+					}
+				}			
+			}
+		}
+		else if (object instanceof Cesium.Entity) {
+			if (!Cesium.defined(object.originalMaterial)) {
+				object.addProperty("originalMaterial");
+			}	
+			object.originalMaterial = object.polygon.material;
+			object.polygon.material = this.highlightedObjects[object.name];
+		}	
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				if (!Cesium.defined(childEntity.originalMaterial)) {
+					childEntity.addProperty("originalMaterial");
+				}	
+				childEntity.originalMaterial = childEntity.polygon.material;
+				childEntity.polygon.material = this.highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')];
+			}		
+		}	
 	};
 
 	/**
@@ -279,10 +311,38 @@
 			var id = toUnHighlight[k];			
 			delete this.highlightedObjects[id];		
 		}
-	//	this._citydbKmlHighlightingManager.rebuildDataPool();
 		for (k = 0; k < toUnHighlight.length; k++){	
 			var id = toUnHighlight[k];			
 			this.unHighlightObject(this.getObjectById(id));
+		}
+	};
+	
+	CitydbKmlLayer.prototype.unHighlightObject = function(object){	
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
+				var materials = object._runtime.materialsByName;			
+				for (var materialId in materials){
+					materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
+				}
+			}	
+		}
+		else if (object instanceof Cesium.Entity) {
+			var originalMaterial = object.originalMaterial;
+			if (Cesium.defined(originalMaterial)) {
+				object.polygon.material = originalMaterial;
+			}			
+		}	
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				var originalMaterial = childEntity.originalMaterial;
+				if (Cesium.defined(originalMaterial)) {
+					childEntity.polygon.material = originalMaterial;
+				}
+			}		
 		}
 	};
 	
@@ -312,9 +372,16 @@
 			}
 			else if (primitive instanceof Cesium.Primitive) {					
  				for (j = 0; j < primitive._instanceIds.length; j++){	
-					if (primitive._instanceIds[j].name === objectId){						
-						var targetEntity = primitive._instanceIds[j];
-						console.log(targetEntity);
+ 					var tmpId = primitive._instanceIds[j].name;
+ 					// LOD2
+					if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
+						var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
+						var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
+						return roofEntites.concat(wallEntites);
+					}
+					// LOD1
+					else if (tmpId === objectId) {
+						var targetEntity = primitive._instanceIds[j]
 						return targetEntity;
 					}
 				}
@@ -368,56 +435,21 @@
 				return false;
 			}
 		}	
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				if (!childEntity.polygon.material.color._value.equals(this.highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')])) {
+					return false;
+				}
+			}		
+		}
 		return true;
 	};
 	
 	CitydbKmlLayer.prototype.isInHighlightedList = function(objectId){	
 		return this.highlightedObjects.hasOwnProperty(objectId);
 	};
-	
-	CitydbKmlLayer.prototype.highlightObject = function(object){	
-		if (object == null)
-			return;
-		if (object instanceof Cesium.Model) {
-			if (object.ready) {
-				var highlightColor = this.highlightedObjects[object._id._name];
-				if (highlightColor) {
-					var materials = object._runtime.materialsByName;				
-					for (var materialId in materials){
-						materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
-					}
-				}			
-			}
-		}
-		else if (object instanceof Cesium.Entity) {
-			if (!Cesium.defined(object.originalMaterial)) {
-				object.addProperty("originalMaterial");
-			}	
-			object.originalMaterial = object.polygon.material;
-			object.polygon.material = this.highlightedObjects[object.name];
-		}	
-	};
-	
-	CitydbKmlLayer.prototype.unHighlightObject = function(object){	
-		if (object == null)
-			return;
-		if (object instanceof Cesium.Model) {
-			if (object.ready) {
-				var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
-				var materials = object._runtime.materialsByName;			
-				for (var materialId in materials){
-					materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
-				}
-			}	
-		}
-		else if (object instanceof Cesium.Entity) {
-			var originalMaterial = object.originalMaterial;
-			if (Cesium.defined(originalMaterial)) {
-				object.polygon.material = originalMaterial;
-			}			
-		}			
-	};
-	
+
 	CitydbKmlLayer.prototype.hasHighlightedObjects = function(){	
 		return Object.keys(this.highlightedObjects).length > 0? true : false;
 	};

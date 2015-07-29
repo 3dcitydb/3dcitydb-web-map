@@ -36,6 +36,7 @@
 
 			console.log("Size of the generated datapool is: " + dataPool.length);
 			if (dataPool.length == 0 || dataPool.length > 200) {
+				stack = [];
 				eventlisteners["updateTaskStack"].apply(self);
 				return;
 			}
@@ -150,9 +151,6 @@
 
 		updateTaskStack : function() {
 			if (stack == null) {
-				shouldRun = false;
-				console.log("Tiling Manager is sleeping...");
-				reply("refreshView");
 				return;
 			}				
 	

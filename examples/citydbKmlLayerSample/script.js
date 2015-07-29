@@ -78,12 +78,14 @@
 		citydbKmlLayer.registerEventHandler("CLICK", function(object) {
 			var targetEntity = object.id;
 	 		var primitive = object.primitive;
-	 		if (citydbKmlLayer.isInHighlightedList(targetEntity.name))
+	 		var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+	 		if (citydbKmlLayer.isInHighlightedList(globeId))
 				return; 
 	 	    // clear all other Highlighting status and just highlight the clicked object...
 			citydbKmlLayer.unHighlightAllObjects();  									
 			var highlightThis = {};
-			highlightThis[targetEntity.name] = highlightColor;
+			
+			highlightThis[globeId] = highlightColor;
 			citydbKmlLayer.highlight(highlightThis); 								
 		});
 		
@@ -92,11 +94,12 @@
 			var targetEntity = object.id;
 	 		var primitive = object.primitive;
 
-			if (citydbKmlLayer.isInHighlightedList(targetEntity.name)) {
-				citydbKmlLayer.unHighlight([targetEntity.name]);
+	 		var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+			if (citydbKmlLayer.isInHighlightedList(globeId)) {
+				citydbKmlLayer.unHighlight([globeId]);
 			}else {
-				var highlightThis = {};
-				highlightThis[targetEntity.name] = highlightColor;
+				var highlightThis = {};				
+				highlightThis[globeId] = highlightColor;
 				citydbKmlLayer.highlight(highlightThis); 
 			}								
 		});
@@ -199,7 +202,7 @@
 						}
 						catch(e){
 							console.log(e);
-							/** escape the DeveloperError exception: "This object was destroyed..." **/
+							/* escape the DeveloperError exception: "This object was destroyed..." */
 						}
 					}
 				}

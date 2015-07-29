@@ -7,7 +7,6 @@
 		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlHighlightingManager") + "Webworkers/CitydbKmlHighlightingManagerWebworker.js");
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
 		this.monitor = null;
-		this.objectCollection = {};
 		this.shouldRun = true;
 	}
 	
@@ -17,7 +16,7 @@
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {			
 			if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {
-				var obj = scope.objectCollection[objectId];
+				var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
 				if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
 					scope.citydbKmlLayerInstance.highlightObject(obj);
 					scope.oTask.triggerEvent('updateDataPool');
@@ -44,14 +43,12 @@
 	
 	CitydbKmlHighlightingManager.prototype.generateDataPool = function() {
 		var dataPool = {};
-		this.objectCollection = {};
 		var primitives = this.citydbKmlLayerInstance._cesiumViewer.scene.primitives;
 		for (i = 0; i < primitives.length; i++) {
 			var primitive = primitives.get(i);
 			if (primitive instanceof Cesium.Model) {
 				if (primitive.ready) {
 					dataPool[primitive._id._name] = false;	
-					this.objectCollection[primitive._id._name] = primitive;	
 				}	
 				else {
 					this.shouldRun = true;
@@ -60,8 +57,7 @@
 			else if (primitive instanceof Cesium.Primitive) {				
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
- 					dataPool[targetEntity.name] = false;	
- 					this.objectCollection[targetEntity.name] = targetEntity;
+ 					dataPool[targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')] = false;	
 				}							
 			}
 		}
