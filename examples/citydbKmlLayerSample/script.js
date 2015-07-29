@@ -71,7 +71,9 @@
 	function addEventListeners(citydbKmlLayer) {
 		// clickEvent Handler for Highlighting...	
 		var highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
-		var mouseOverhighlightColor = new Cesium.Color(0.0, 0.5, 0.0, 1.0);
+		var mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
+		var mainMouseOverhighlightColor = new Cesium.Color(0.0, 0.4, 0.0, 1.0);
+		var subMouseOverhighlightColor = new Cesium.Color(0.0, 0.5, 0.0, 1.0);
 		
 		citydbKmlLayer.registerEventHandler("CLICK", function(object) {
 			var targetEntity = object.id;
@@ -107,19 +109,49 @@
 				return;
 			if (primitive instanceof Cesium.Model) {				
 				var materials = object.mesh._materials;
-				for (i = 0; i < materials.length; i++) {
+				for (var i = 0; i < materials.length; i++) {
 					// do mouseOver highlighting
 					materials[i].setValue('emission', Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
 				} 
 			}
-			else if (primitive instanceof Cesium.Primitive) {				
-				var attributes = primitive.getGeometryInstanceAttributes(targetEntity);
-				if (!Cesium.defined(targetEntity.originalSurfaceColor)) {
-					targetEntity.addProperty("originalSurfaceColor");
-				}						
-				targetEntity.originalSurfaceColor = attributes.color;
-				attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(mouseOverhighlightColor); 
-				attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
+			else if (primitive instanceof Cesium.Primitive) {	
+				if (targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1 ) {
+					var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+					var roofEntities = citydbKmlLayer.getEntitiesById(globeId + '_RoofSurface');
+					var wallEntities = citydbKmlLayer.getEntitiesById(globeId + '_WallSurface');
+					
+					if (roofEntities != null && wallEntities != null) {
+						if (targetEntity.name.indexOf('_RoofSurface') > -1) {
+							_doMouseoverHighlighting(roofEntities, primitive, mainMouseOverhighlightColor);
+							_doMouseoverHighlighting(wallEntities, primitive, subMouseOverhighlightColor);
+						}
+						else {
+							_doMouseoverHighlighting(roofEntities, primitive, subMouseOverhighlightColor);
+							_doMouseoverHighlighting(wallEntities, primitive, mainMouseOverhighlightColor);
+						}
+					}
+				}
+				else {
+					try{
+						var parentEntity = targetEntity._parent;	
+						var childrenEntities = parentEntity._children;						
+					}
+					catch(e){return;} // not valid entities
+					_doMouseoverHighlighting(childrenEntities, primitive, mouseOverhighlightColor);
+				}
+
+				function _doMouseoverHighlighting(_childrenEntities, _primitive, _mouseOverhighlightColor) {
+					for (var i = 0; i < _childrenEntities.length; i++){	
+						var childEntity = _childrenEntities[i];							
+						var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
+						if (!Cesium.defined(childEntity.originalSurfaceColor)) {
+							childEntity.addProperty("originalSurfaceColor");
+						}						
+						childEntity.originalSurfaceColor = attributes.color;
+						attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(_mouseOverhighlightColor); 
+						attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
+					}
+				}
 			}
 		});
 		
@@ -130,21 +162,47 @@
 				return; 
 			if (primitive instanceof Cesium.Model) {				
 				var materials = object.mesh._materials;
-				for (i = 0; i < materials.length; i++) {
+				for (var i = 0; i < materials.length; i++) {
 					// dismiss highlighting
 					materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
 				} 
 			}
-			else if (primitive instanceof Cesium.Primitive) {
-				var originalSurfaceColor = targetEntity.originalSurfaceColor;
-				try{
-					var attributes = primitive.getGeometryInstanceAttributes(targetEntity);
-					attributes.color = originalSurfaceColor; 
-					attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
+			else if (primitive instanceof Cesium.Primitive) {				
+				if (targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1 ) {
+					var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+					var roofEntities = citydbKmlLayer.getEntitiesById(globeId + '_RoofSurface');
+					var wallEntities = citydbKmlLayer.getEntitiesById(globeId + '_WallSurface');
+					
+					if (roofEntities != null && wallEntities != null) {
+						_dismissMouseoverHighlighting(roofEntities, primitive);
+						_dismissMouseoverHighlighting(wallEntities, primitive);
+					}
 				}
-				catch(e){
-					// escape the DeveloperError exception: "This object was destroyed..."
-				}			
+				else {
+					try{
+						var parentEntity = targetEntity._parent;	
+						var childrenEntities = parentEntity._children;		
+						
+					}
+					catch(e){return;} // not valid entities
+					_dismissMouseoverHighlighting(childrenEntities, primitive);	
+				}
+							
+				function _dismissMouseoverHighlighting(_childrenEntities, _primitive) {
+					for (var i = 0; i < _childrenEntities.length; i++){	
+						var childEntity = _childrenEntities[i];	
+						var originalSurfaceColor = childEntity.originalSurfaceColor;
+						try{
+							var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
+							attributes.color = originalSurfaceColor; 
+							attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
+						}
+						catch(e){
+							console.log(e);
+							/** escape the DeveloperError exception: "This object was destroyed..." **/
+						}
+					}
+				}
 			}
 		});	 
 	}

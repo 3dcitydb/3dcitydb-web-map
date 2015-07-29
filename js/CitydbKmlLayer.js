@@ -310,19 +310,43 @@
 					}
 				}									
 			}
-			else if (primitive instanceof Cesium.Primitive) {
-	 			if ((primitive._primitiveType == 4)){						
-	 				for (j = 0; j < primitive._instanceIds.length; j++){	
-						if (primitive._instanceIds[j].name === objectId){						
-							targetEntity = primitive._instanceIds[j];						
-							return targetEntity;
-						}
+			else if (primitive instanceof Cesium.Primitive) {					
+ 				for (j = 0; j < primitive._instanceIds.length; j++){	
+					if (primitive._instanceIds[j].name === objectId){						
+						var targetEntity = primitive._instanceIds[j];
+						console.log(targetEntity);
+						return targetEntity;
 					}
-				}  
+				}
 			}
 		}
 		return null;		
 	};
+	
+	CitydbKmlLayer.prototype.getEntitiesById = function(objectId){		
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Primitive) {					
+ 				for (j = 0; j < primitive._instanceIds.length; j++){	
+					if (primitive._instanceIds[j].name === objectId){						
+						var targetEntity = primitive._instanceIds[j];
+						try{
+							var parentEntity = targetEntity._parent;	
+							var childrenEntities = parentEntity._children;
+							return childrenEntities;
+						}
+						catch(e){
+							return null;
+						} 
+					}
+				}
+			}
+		}
+		return null;		
+	};
+	
+	
 	
 	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
 		var object = this.getObjectById(id);
