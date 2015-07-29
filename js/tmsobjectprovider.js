@@ -8,7 +8,7 @@ function TMSObjectTileProvider(options, highlightedObjects, hiddenObjects){
         });
     this._errorEvent = new Cesium.Event();
     this._levelZeroMaximumError = Cesium.QuadtreeTileProvider.computeDefaultLevelZeroMaximumGeometricError(this._tilingScheme);
-
+    this._available = options.available ? options.available : {};
     this._id = options.id;
     this._url = options.url;
     this._layerName = options.name;
@@ -16,6 +16,7 @@ function TMSObjectTileProvider(options, highlightedObjects, hiddenObjects){
     this._maxLevel = options.maxLevel;
     this._minLevel = options.minLevel;
     this._region = options.region;
+    this._surfaceHeight = options.surfaceHeight;
     
     this._highlightedObjects = highlightedObjects;
     this._hiddenObjects = hiddenObjects;
@@ -74,34 +75,45 @@ TMSObjectTileProvider.prototype.loadTile = function(context, frameState, tile) {
 		tile.renderable = true;
     
 		var yTiles = this._tilingScheme.getNumberOfYTilesAtLevel(tile.level);
-		var tmsY = (yTiles - tile.y - 1);
+		var tmsY = tile.y;
 		var tmsX = tile.x;
     
 		if(tile.level >= this._minLevel && tile.level <= this._maxLevel){
-			var intersection = Cesium.Rectangle.intersection(tile._rectangle, this._region);
-			if(intersection && intersection.width > 0.0000001 && intersection.height > 0.0000001 ){
-      
-				var url = this._url + "/" + tile.level + "/" + tile.x + "/" + tmsY + ".bgltf";
-				var dx = ( tile._rectangle.east - tile._rectangle.west ) / 2 +  tile._rectangle.west;
-				var dy = ( tile._rectangle.north - tile._rectangle.south ) / 2 + tile._rectangle.south;
-				var modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(new Cesium.Cartesian3.fromRadians(dx, dy, 0.0), 3.14159265, 0, 0);
-        
-				tile.data.primitive = Cesium.Model.fromGltf({id:{layerId:this._id}, url:url, modelMatrix:modelMatrix, scale:1, allowPicking:true, show:false});
-				tile.renderable = false;
-				tile.state = Cesium.QuadtreeTileLoadState.LOADING;  
-			}
+			if(tile.level != 15 || this.isAvailable(tile)){        
+		        var url = this._url + "/" + tile.level + "/" + tile.x + "/" + tmsY + ".bgltf";
+		        var dx = ( tile._rectangle.east - tile._rectangle.west ) / 2 +  tile._rectangle.west;
+		        var dy = ( tile._rectangle.north - tile._rectangle.south ) / 2 + tile._rectangle.south;
+		        var modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(new Cesium.Cartesian3.fromRadians(dx, dy, 0.0), 3.14159265, 0, 0);
+		          
+		        tile.data.primitive = Cesium.Model.fromGltf({id:{layerId:this._id}, url:url, modelMatrix:modelMatrix, scale:1, allowPicking:true, show:false});
+		        tile.renderable = false;
+		        tile.state = Cesium.QuadtreeTileLoadState.LOADING;  
+		      }else if(tile.level == 15){
+		    	  tile.renderable = true;
+		    	  tile.state = Cesium.QuadtreeTileLoadState.DONE;
+		      }else{
+		    	  tile.renderable = false;
+		    	  tile.state = Cesium.QuadtreeTileLoadState.DONE;
+		      }
 		}  
 		if(tile.level > this._maxLevel){
 			tile.renderable = false;
 			tile.state = Cesium.QuadtreeTileLoadState.DONE;
 		}else{
 			var earthRadius = 6371000;
-			tile.data.boundingSphere3D = Cesium.BoundingSphere.fromRectangle3D(tile.rectangle);
+			tile.data.boundingSphere3D = Cesium.BoundingSphere.fromRectangle3D(tile.rectangle, undefined, this._surfaceHeight);
 			tile.data.boundingSphere2D = Cesium.BoundingSphere.fromRectangle2D(tile.rectangle,  frameState.mapProjection);
 		}        
 	}
 	if (tile.state === Cesium.QuadtreeTileLoadState.LOADING) {
-		tile.data.primitive.update(context, frameState, []);
+		try{
+			tile.data.primitive.update(context, frameState, []);
+		}catch(Ex){
+			tile.state = Cesium.QuadtreeTileLoadState.DONE;
+			tile.renderable = true;
+			tile.data.primitive = undefined;
+			return;
+		}
 		var model = tile.data.primitive;
 		if (model.ready) {
 			// Check which objects should be highlighted
@@ -134,10 +146,6 @@ TMSObjectTileProvider.prototype.computeTileVisibility = function(tile, frameStat
 
 TMSObjectTileProvider.prototype.showTileThisFrame = function(tile, context, frameState, commandList) {
     if(tile.data.primitive){
-      //var material = tile.data.primitive.getMaterial("material_ID5");
-      //if(material){
-    	//  material.setValue("diffuse",new Cesium.Cartesian4(Math.random(), Math.random(), Math.random(), 1) );
-      //}
       tile.data.primitive.update(context, frameState, commandList);
     }
 };
@@ -162,4 +170,13 @@ TMSObjectTileProvider.prototype.isDestroyed = function() {
 TMSObjectTileProvider.prototype.destroy = function() {
     return Cesium.destroyObject(this);
 };
-
+TMSObjectTileProvider.prototype.isAvailable = function(tile){  
+  if(this._available[String(tile.level)]){
+    if(this._available[String(tile.level)][String(tile.x)]){
+      if(this._available[String(tile.level)][String(tile.x)].indexOf(tile.y) > -1){
+        return true;
+      }
+    }
+  }
+  return false;
+}
