@@ -28,6 +28,8 @@ function TMSObjectLayer(options){
 	this._cameraPosition = {};	
 	this._maxLevel = options.maxLevel;	
 	this._minLevel = options.minLevel;
+	this._available = options.available ? options.available : {};
+	this._surfaceHeight = options.surfaceHeight ? options.surfaceHeight : 0.0;
 	this._tileProvider = new TMSObjectTileProvider(options, this._highlightedObjects, this._hiddenObjects);
 	/**
 	 * handles ClickEvents
