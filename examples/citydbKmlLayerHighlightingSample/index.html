@@ -45,52 +45,14 @@
 <body>
   <div id="cesiumContainer"></div>
    <div id="uiMenu">
-    <button type="button" onclick="highlight()">activate Highlighting</button>
-    <button type="button" onclick="unhighlight()">deactivate Highlighting</button>
+    <button type="button" class="cesium-button" onclick="highlight()">activate Highlighting</button>
+    <button type="button" class="cesium-button" onclick="unhighlight()">deactivate Highlighting</button>
+<!--     <button type="button" class="cesium-button" onclick="doHideObjects()">hide Objects</button>
+    <button type="button" class="cesium-button" onclick="doShowObjects()">show Objects</button> -->
+    <button type="button" class="cesium-button" onclick="hideSelectedObject()">hide selected Object</button>
+    <button type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>    
     <br />
   </div>
-  <script>
-	// initiate 3Dcitydb-web-map instance
-	var webMap = new WebMap3DCityDB(new Cesium.Viewer('cesiumContainer'));
-	
-	// adding a new layer which was exported from 3DCityDB using KML/Collada/Gltf Exporter
-	var options = {
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
-		name : 'Berlin_Building_Texture',
-		activeHighlighting: true,
-		id : "kmlLayer"
-	};
-	var citydbKmlLayer = new CitydbKmlLayer(options);
-	webMap.addLayer(citydbKmlLayer);
-	
-	// enable Highlighting capability
-	var highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 0.5)
-  	var highlight = function(){
-		var highlightThis = {
-			"BLDG_0003000e00768233": highlightColor,
-			"BLDG_0003000e00768236": highlightColor,
-			"BLDG_0003000f0012b2d3": highlightColor,
-			"BLDG_0003000a002edb0e": highlightColor,
-			"BLDG_0003000f00292bce": highlightColor 
-		};
-		citydbKmlLayer.highlight(highlightThis); 
-  	};
-  	
-  	var unhighlight = function(){
-		var unHighlightThis = [
-			"BLDG_0003000e00768233",
-			"BLDG_0003000e00768236",
-			"BLDG_0003000f0012b2d3",
-			"BLDG_0003000a002edb0e",
-			"BLDG_0003000f00292bce" 
-		];
-		citydbKmlLayer.unHighlight(unHighlightThis); 
-  	};
-	
-	// Zoom to target layer
-	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
-	webMap._cesiumViewerInstance.camera.viewRectangle(extent);
-	
-	</script>
+  <script src="script.js"></script> 
 </body>
 </html>

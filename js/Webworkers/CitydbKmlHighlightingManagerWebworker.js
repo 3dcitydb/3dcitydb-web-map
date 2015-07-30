@@ -22,7 +22,7 @@
 			if (Object.keys(dataPool).length == 0) {
 				reply("refreshView", false);
 			}
-			for (objectId in dataPool) {
+			for (var objectId in dataPool) {
 				reply("checkMasterPool", objectId, dataPool[objectId]);
 				stack.push(objectId);
 			}

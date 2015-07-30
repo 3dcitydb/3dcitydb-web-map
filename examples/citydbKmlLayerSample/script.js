@@ -19,7 +19,7 @@
 	}; 
   	var citydbKmlLayer1 = new CitydbKmlLayer(options);
   	
-	var options2 = {
+/*	var options2 = {
 		url : 'https://dl.dropboxusercontent.com/u/24313387/KML/KML%20aus%203DCityDB/StatenIsland.kml',
 		name : 'Newyork_building_Lod1',
 		activeHighlighting: true,
@@ -34,12 +34,13 @@
 		id : 'London_building_Lod2'
 	};
 	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
-		
+*/
+  	
 	// Loading layers one by one...
 	var layers = [
 		citydbKmlLayer1 
-		,citydbKmlLayer2 
-		,citydbKmlLayer3
+	//	,citydbKmlLayer2 
+	//	,citydbKmlLayer3
 	];
 
 	var k = 0;
@@ -248,7 +249,7 @@
             	cesiumCamera.lookAt(_center, new Cesium.HeadingPitchRange(_heading, _pitch, _range));
             	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY);
   				// adding layer to Cesium Map          	          	
-            	webMap.addLayer(citydbKmlLayer1);    
+            	webMap.addLayer(layers[0]);    
             }
         })
     } 
@@ -257,7 +258,7 @@
     	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
     	cesiumCamera.viewRectangle(extent);
     	// adding layer to Cesium Map          	          	
-    	webMap.addLayer(citydbKmlLayer1);     
+    	webMap.addLayer(layers[0]);     
     }
     
     //---------------------------------  Button ClickEvent Handler  ----------------------------------------// 
@@ -295,8 +296,17 @@
   	// Clear Highlighting effect of all highlighted objects
   	var clearhighlight = function(){
   		citydbKmlLayer1.unHighlightAllObjects(); 
-  		citydbKmlLayer2.unHighlightAllObjects(); 
-  		citydbKmlLayer3.unHighlightAllObjects();
+  	//	citydbKmlLayer2.unHighlightAllObjects(); 
+  	//	citydbKmlLayer3.unHighlightAllObjects();
+  	};
+  	
+  	var hideSelectedObjects = function(){
+  		var objectIds = Object.keys(citydbKmlLayer1.highlightedObjects);
+  		citydbKmlLayer1.hideObjects(objectIds); 
+  	};
+  	
+  	var showHiddenObjects = function(){
+  		citydbKmlLayer1.showAllObjects();
   	};
   	
   	var layerMenuOptions = new Array();

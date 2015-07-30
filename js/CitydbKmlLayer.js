@@ -257,6 +257,66 @@
 	CitydbKmlLayer.prototype.activate = function(active){
 
 	}
+	
+	
+	/**
+	 * find and return the model object by Id (GMLID)
+	 * @param {String} Object Id
+	 * @return {Cesium.Model} Cesium Model instance having the corresponding GMLID
+	 */
+	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (var i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Model) {
+				if (primitive.ready) {
+					if (primitive._id._name === objectId) {
+						return primitive;
+					}
+				}									
+			}
+			else if (primitive instanceof Cesium.Primitive) {					
+ 				for (var j = 0; j < primitive._instanceIds.length; j++){	
+ 					var tmpId = primitive._instanceIds[j].name;
+ 					// LOD2
+					if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
+						var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
+						var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
+						return roofEntites.concat(wallEntites);
+					}
+					// LOD1
+					else if (tmpId === objectId) {
+						var targetEntity = primitive._instanceIds[j]
+						return targetEntity;
+					}
+				}
+			}
+		}
+		return null;		
+	};
+	
+	CitydbKmlLayer.prototype.getEntitiesById = function(objectId){		
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (var i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Primitive) {					
+ 				for (var j = 0; j < primitive._instanceIds.length; j++){	
+					if (primitive._instanceIds[j].name === objectId){						
+						var targetEntity = primitive._instanceIds[j];
+						try{
+							var parentEntity = targetEntity._parent;	
+							var childrenEntities = parentEntity._children;
+							return childrenEntities;
+						}
+						catch(e){
+							return null;
+						} 
+					}
+				}
+			}
+		}
+		return null;		
+	};
 
 	/**
 	 * highlights one or more object with a given color;
@@ -307,11 +367,11 @@
 	 * @param {Array<String>} A list of Object Ids. The default material will be restored
 	 */
 	CitydbKmlLayer.prototype.unHighlight = function(toUnHighlight){
-		for (k = 0; k < toUnHighlight.length; k++){	
+		for (var k = 0; k < toUnHighlight.length; k++){	
 			var id = toUnHighlight[k];			
 			delete this.highlightedObjects[id];		
 		}
-		for (k = 0; k < toUnHighlight.length; k++){	
+		for (var k = 0; k < toUnHighlight.length; k++){	
 			var id = toUnHighlight[k];			
 			this.unHighlightObject(this.getObjectById(id));
 		}
@@ -353,68 +413,7 @@
 		}
 		this._citydbKmlHighlightingManager.triggerWorker();
 	};
-	
-	/**
-	 * find and return the model object by Id (GMLID)
-	 * @param {String} Object Id
-	 * @return {Cesium.Model} Cesium Model instance having the corresponding GMLID
-	 */
-	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
-		var primitives = this._cesiumViewer.scene.primitives;
-		for (i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Model) {
-				if (primitive.ready) {
-					if (primitive._id._name === objectId) {
-						return primitive;
-					}
-				}									
-			}
-			else if (primitive instanceof Cesium.Primitive) {					
- 				for (j = 0; j < primitive._instanceIds.length; j++){	
- 					var tmpId = primitive._instanceIds[j].name;
- 					// LOD2
-					if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
-						var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
-						var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
-						return roofEntites.concat(wallEntites);
-					}
-					// LOD1
-					else if (tmpId === objectId) {
-						var targetEntity = primitive._instanceIds[j]
-						return targetEntity;
-					}
-				}
-			}
-		}
-		return null;		
-	};
-	
-	CitydbKmlLayer.prototype.getEntitiesById = function(objectId){		
-		var primitives = this._cesiumViewer.scene.primitives;
-		for (i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Primitive) {					
- 				for (j = 0; j < primitive._instanceIds.length; j++){	
-					if (primitive._instanceIds[j].name === objectId){						
-						var targetEntity = primitive._instanceIds[j];
-						try{
-							var parentEntity = targetEntity._parent;	
-							var childrenEntities = parentEntity._children;
-							return childrenEntities;
-						}
-						catch(e){
-							return null;
-						} 
-					}
-				}
-			}
-		}
-		return null;		
-	};
-	
-	
-	
+
 	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
 		var object = this.getObjectById(id);
 		return this.isHighlightedObject(object);
@@ -458,8 +457,30 @@
 	 * hideObjects
 	 * @param {Array<String>} A list of Object Ids which will be hidden
 	 */
-	CitydbKmlLayer.prototype.hideObjects = function(toHide){
-		// TODO
+	CitydbKmlLayer.prototype.hideObjects = function(toHide){		
+		for (var i = 0; i < toHide.length; i++){
+			var objectId = toHide[i];
+			if (!this.isInHiddenList(objectId)) {
+				this._hiddenObjects.push(objectId);
+			}				
+			this.hideObject(this.getObjectById(objectId));
+		}
+	};
+	
+	CitydbKmlLayer.prototype.hideObject = function(object){			
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var nodes = object._runtime.nodesByName;
+				for (var nodeId in nodes){
+					var node = nodes[nodeId];
+					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
+					publicNode.show = false;
+				}				
+			}
+		}
+	//	console.log(object.show);
 	};
 
 
@@ -468,7 +489,56 @@
 	 * @param {Array<String>} A list of Object Ids which will be unhidden. 
 	 */
 	CitydbKmlLayer.prototype.showObjects = function(toUnhide){
-		// TODO
+		for (var k = 0; k < toUnhide.length; k++){	
+			var objectId = toUnhide[k];			
+			this._hiddenObjects.splice(objectId, 1);	
+		}
+		for (var k = 0; k < toUnhide.length; k++){	
+			var objectId = toUnhide[k];			
+			this.showObject(this.getObjectById(objectId));
+		}
+	};
+	
+	CitydbKmlLayer.prototype.showObject = function(object){
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var nodes = object._runtime.nodesByName;
+				for (var nodeId in nodes){
+					var node = nodes[nodeId];
+					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
+					publicNode.show = true;
+				}				
+			}
+		}
+	};
+	
+	CitydbKmlLayer.prototype.isHiddenObject = function(object){	
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var nodes = object._runtime.nodesByName;
+				for (var nodeId in nodes){
+					var node = nodes[nodeId];
+					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
+					return !publicNode.show;									
+				}				
+			}
+		}
+		return true;
+	};
+	
+	CitydbKmlLayer.prototype.showAllObjects = function(){
+		for (var k = 0; k < this._hiddenObjects.length; k++){	
+			var objectId = this._hiddenObjects[k];			
+			this.showObject(this.getObjectById(objectId));
+		}
+		this._hiddenObjects = [];
+		this._citydbKmlHighlightingManager.triggerWorker();
+	};
+	
+	CitydbKmlLayer.prototype.isInHiddenList = function(objectId){	
+		return this._hiddenObjects.indexOf(objectId) > -1? true: false;
 	};
 
 	/**
