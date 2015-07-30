@@ -1,6 +1,8 @@
     document.getElementById('loadingIndicator').style.display = 'none';
 	// initiate 3Dcitydb-web-map instance
-	var cesiumViewer = new Cesium.Viewer('cesiumContainer');
+	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
+		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
+	});
 //	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
