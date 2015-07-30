@@ -450,7 +450,7 @@
 	};
 
 	CitydbKmlLayer.prototype.hasHighlightedObjects = function(){	
-		return Object.keys(this.highlightedObjects).length > 0? true : false;
+		return Object.keys(this._highlightedObjects).length > 0? true : false;
 	};
 
 	/**
@@ -539,6 +539,10 @@
 	
 	CitydbKmlLayer.prototype.isInHiddenList = function(objectId){	
 		return this._hiddenObjects.indexOf(objectId) > -1? true: false;
+	};
+	
+	CitydbKmlLayer.prototype.hasHiddenObjects = function(){	
+		return this._hiddenObjects.length > 0? true : false;
 	};
 
 	/**

@@ -35,7 +35,8 @@
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {	
-			if (isStillUpdating || scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming() || scope.shouldRun) {	
+		//	if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming() || scope.shouldRun) {	
+			if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
 				console.log("Highlighting manager repeat updating again...");
 		    	scope.rebuildDataPool();    		    	
 			}
