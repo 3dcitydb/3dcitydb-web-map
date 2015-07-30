@@ -27,31 +27,6 @@
 </head>
 <body>
 	<div id="cesiumContainer"></div>
-	<script>	
-		var terrainProvider = new Cesium.CesiumTerrainProvider({
-			url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/vorarlberg_DGM'
-		});
-
-		var viewer = new Cesium.Viewer('cesiumContainer', {
-			baseLayerPicker : false,
-			terrainProvider : terrainProvider
-		});
-		var extent = new Cesium.Rectangle.fromDegrees(9.706108, 47.220648, 9.796108, 47.320648);
-		viewer.camera.viewRectangle(extent);
-
-		viewer.extend(Cesium.viewerCesiumInspectorMixin);
-		viewer.scene.globe.maximumScreenSpaceError = 2;
-
-		var provider = new Cesium.WebMapServiceImageryProvider({
-			url: 'http://vogis.cnv.at/mapserver/mapserv',
-			layers : 'ef2012_12cm',
-			parameters: {
-				map: 'i_luftbilder_r_wms.map'
-			},
-			proxy: new Cesium.DefaultProxy('/proxy/')
-		});
-
-		viewer.imageryLayers.addImageryProvider(provider);
-	</script>
+    <script src="script.js"></script> 
 </body>
 </html>
