@@ -15,14 +15,6 @@
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {	
-			// update Highlighting
-			if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {
-				var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
-				if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
-					scope.citydbKmlLayerInstance.highlightObject(obj);
-					scope.oTask.triggerEvent('updateDataPool');
-				}					
-			}
 			// update Hidden/Show
 			if (scope.citydbKmlLayerInstance.isInHiddenList(objectId)) {
 				var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
@@ -31,6 +23,15 @@
 					scope.oTask.triggerEvent('updateDataPool');
 				}
 			}
+			// update Highlighting
+			if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {
+				var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
+				if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
+					scope.citydbKmlLayerInstance.highlightObject(obj);
+					scope.oTask.triggerEvent('updateDataPool');
+				}					
+			}
+
 			scope.oTask.triggerEvent('updateTaskStack');
 		});
 

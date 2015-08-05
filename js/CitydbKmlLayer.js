@@ -317,6 +317,40 @@
 		}
 		return null;		
 	};
+	
+	CitydbKmlLayer.prototype.setEntityColorByPrimitive = function(entity, color){
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (var i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Primitive) {					
+ 				for (var j = 0; j < primitive._instanceIds.length; j++){	
+ 					var tmpId = primitive._instanceIds[j].name;
+ 					if (tmpId == entity.name) {
+ 						var attributes = primitive.getGeometryInstanceAttributes(entity);
+						attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color); 
+						return;
+ 					}
+				}
+			}
+		}
+	};
+	
+	CitydbKmlLayer.prototype.test = function(entity){
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (var i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Primitive) {					
+ 				for (var j = 0; j < primitive._instanceIds.length; j++){	
+ 					var tmpId = primitive._instanceIds[j].name;
+ 					if (tmpId == entity.name) {
+ 						var attributes = primitive.getGeometryInstanceAttributes(entity);
+ 						attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
+						return;
+ 					}
+				}
+			}
+		}
+	};
 
 	/**
 	 * highlights one or more object with a given color;
@@ -334,7 +368,7 @@
 			return;
 		if (object instanceof Cesium.Model) {
 			if (object.ready) {
-				var highlightColor = this.highlightedObjects[object._id._name];
+				var highlightColor = this._highlightedObjects[object._id._name];
 				if (highlightColor) {
 					var materials = object._runtime.materialsByName;				
 					for (var materialId in materials){
@@ -348,7 +382,7 @@
 				object.addProperty("originalMaterial");
 			}	
 			object.originalMaterial = object.polygon.material;
-			object.polygon.material = this.highlightedObjects[object.name];
+			object.polygon.material = this._highlightedObjects[object.name].clone();
 		}	
 		else if (object instanceof Array) {
 			for (var i = 0; i < object.length; i++){	
@@ -357,7 +391,7 @@
 					childEntity.addProperty("originalMaterial");
 				}	
 				childEntity.originalMaterial = childEntity.polygon.material;
-				childEntity.polygon.material = this.highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')];
+				childEntity.polygon.material = this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')];
 			}		
 		}	
 	};
@@ -369,7 +403,7 @@
 	CitydbKmlLayer.prototype.unHighlight = function(toUnHighlight){
 		for (var k = 0; k < toUnHighlight.length; k++){	
 			var id = toUnHighlight[k];			
-			delete this.highlightedObjects[id];		
+			delete this._highlightedObjects[id];		
 		}
 		for (var k = 0; k < toUnHighlight.length; k++){	
 			var id = toUnHighlight[k];			
@@ -389,10 +423,16 @@
 				}
 			}	
 		}
-		else if (object instanceof Cesium.Entity) {
+		else if (object instanceof Cesium.Entity) {			
 			var originalMaterial = object.originalMaterial;
 			if (Cesium.defined(originalMaterial)) {
-				object.polygon.material = originalMaterial;
+				if (!this.isHiddenObject(object)) {
+					this.setEntityColorByPrimitive(object, originalMaterial.color._value.clone());	
+					var scope = this;
+					setTimeout(function(){
+						object.polygon.material = originalMaterial;	
+					}, 100)
+				}			
 			}			
 		}	
 		else if (object instanceof Array) {
@@ -407,11 +447,21 @@
 	};
 	
 	CitydbKmlLayer.prototype.unHighlightAllObjects = function(){
-		for (var id in this.highlightedObjects){
-			delete this.highlightedObjects[id];	
+		var tmpHighlightedObjects = {};
+		for (var id in this._highlightedObjects){
+			tmpHighlightedObjects[id] = this._highlightedObjects[id];
+		}
+		this._highlightedObjects = {};
+		for (var id in tmpHighlightedObjects){
 			this.unHighlightObject(this.getObjectById(id));
 		}
 		this._citydbKmlHighlightingManager.triggerWorker();
+		
+/*		for (var id in this._highlightedObjects){
+			delete this._highlightedObjects[id];	
+			this.unHighlightObject(this.getObjectById(id));
+		}
+		this._citydbKmlHighlightingManager.triggerWorker();*/
 	};
 
 	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
@@ -421,7 +471,7 @@
 	
 	CitydbKmlLayer.prototype.isHighlightedObject = function(object){	
 		if (object instanceof Cesium.Model) {
-			var highlightColor = this.highlightedObjects[object._id._name];
+			var highlightColor = this._highlightedObjects[object._id._name];
 			var materials = object._runtime.materialsByName;
 			for (var materialId in materials){
 				if (!materials[materialId].getValue('emission').equals(Cesium.Cartesian4.fromColor(highlightColor))) {
@@ -430,14 +480,14 @@
 			}
 		}	
 		else if (object instanceof Cesium.Entity) {			
-			if (!object.polygon.material.color._value.equals(this.highlightedObjects[object.name])) {
+			if (!object.polygon.material.color._value.equals(this._highlightedObjects[object.name])) {
 				return false;
 			}
 		}	
 		else if (object instanceof Array) {
 			for (var i = 0; i < object.length; i++){	
 				var childEntity = object[i];	
-				if (!childEntity.polygon.material.color._value.equals(this.highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')])) {
+				if (!childEntity.polygon.material.color._value.equals(this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')])) {
 					return false;
 				}
 			}		
@@ -446,7 +496,7 @@
 	};
 	
 	CitydbKmlLayer.prototype.isInHighlightedList = function(objectId){	
-		return this.highlightedObjects.hasOwnProperty(objectId);
+		return this._highlightedObjects.hasOwnProperty(objectId);
 	};
 
 	CitydbKmlLayer.prototype.hasHighlightedObjects = function(){	
@@ -480,6 +530,9 @@
 				}				
 			}
 		}
+		else if (object instanceof Cesium.Entity) {
+			object.show = false;
+		}
 	//	console.log(object.show);
 	};
 
@@ -488,7 +541,7 @@
 	 * showObjects, to undo hideObjects
 	 * @param {Array<String>} A list of Object Ids which will be unhidden. 
 	 */
-	CitydbKmlLayer.prototype.showObjects = function(toUnhide){
+	CitydbKmlLayer.prototype.showObjects = function(toUnhide){		
 		for (var k = 0; k < toUnhide.length; k++){	
 			var objectId = toUnhide[k];			
 			this._hiddenObjects.splice(objectId, 1);	
@@ -512,6 +565,20 @@
 				}				
 			}
 		}
+		else if (object instanceof Cesium.Entity) {
+			object.show = true;				
+			if (!this.isInHighlightedList(object.name)) {
+				var originalMaterial = object.originalMaterial;
+				if (Cesium.defined(originalMaterial)) {
+					this.setEntityColorByPrimitive(object, originalMaterial.color._value.clone());	
+					var scope = this;
+					setTimeout(function(){
+						object.polygon.material = originalMaterial;	
+						console.log(123);
+					}, 100)
+				}
+			}
+		}
 	};
 	
 	CitydbKmlLayer.prototype.isHiddenObject = function(object){	
@@ -524,6 +591,9 @@
 					return !publicNode.show;									
 				}				
 			}
+		}
+		else if (object instanceof Cesium.Entity) {
+			return !object.show;
 		}
 		return true;
 	};
