@@ -188,7 +188,7 @@
 	 * @param {CesiumViewer} cesiumViewer
 	 */
 	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
-		this._startLoadingEvent.raiseEvent();
+		this._startLoadingEvent.raiseEvent(this);
 		this._cesiumViewer = cesiumViewer;
 		var that = this;
 		if (this._url.indexOf(".json") >= 0) {	    		
@@ -200,10 +200,19 @@
 		        success: function(json, status){		        	
 		        	that._citydbKmlDataSource._name = json.layername;	
 		        	that._citydbKmlDataSource._proxy = json;
-		    		console.log(that._citydbKmlDataSource);
+
+		            that._cameraPosition = {
+		        		lat: (json.bbox.ymax + json.bbox.ymin) / 2,	
+		        		lon: (json.bbox.xmax + json.bbox.xmin) / 2,
+		    			range: 800,
+		    			tilt: 49,
+		    			heading: 6,
+		    			altitude: 40
+		        	}
+		            
 		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
 		            that._citydbKmlTilingManager.doStart();
-		            that._finishLoadingEvent.raiseEvent(that);
+		            that._finishLoadingEvent.raiseEvent(that);		            
 		        },
 		        error: function(XHR, textStatus, errorThrown){
 		        	console.log('can not find the json file for ' + kmlUrl);
@@ -278,17 +287,19 @@
 			else if (primitive instanceof Cesium.Primitive) {					
  				for (var j = 0; j < primitive._instanceIds.length; j++){	
  					var tmpId = primitive._instanceIds[j].name;
+ 					if (Cesium.defined(tmpId)) {
  					// LOD2
-					if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
-						var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
-						var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
-						return roofEntites.concat(wallEntites);
-					}
-					// LOD1
-					else if (tmpId === objectId) {
-						var targetEntity = primitive._instanceIds[j]
-						return targetEntity;
-					}
+ 						if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
+ 							var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
+ 							var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
+ 							return roofEntites.concat(wallEntites);
+ 						}
+ 						// LOD1
+ 						else if (tmpId === objectId) {
+ 							var targetEntity = primitive._instanceIds[j]
+ 							return targetEntity;
+ 						}
+ 					}						
 				}
 			}
 		}
@@ -436,32 +447,26 @@
 			}			
 		}	
 		else if (object instanceof Array) {
-			for (var i = 0; i < object.length; i++){	
-				var childEntity = object[i];	
-				var originalMaterial = childEntity.originalMaterial;
-				if (Cesium.defined(originalMaterial)) {
-					childEntity.polygon.material = originalMaterial;
-				}
-			}		
+			if (!this.isHiddenObject(object)) {
+				for (var i = 0; i < object.length; i++){	
+					var childEntity = object[i];	
+					var originalMaterial = childEntity.originalMaterial;
+					if (Cesium.defined(originalMaterial)) {
+						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
+						var scope = this;
+						childEntity.polygon.material = originalMaterial;						
+					}
+				}	
+			}				
 		}
 	};
 	
 	CitydbKmlLayer.prototype.unHighlightAllObjects = function(){
-		var tmpHighlightedObjects = {};
 		for (var id in this._highlightedObjects){
-			tmpHighlightedObjects[id] = this._highlightedObjects[id];
-		}
-		this._highlightedObjects = {};
-		for (var id in tmpHighlightedObjects){
-			this.unHighlightObject(this.getObjectById(id));
-		}
-		this._citydbKmlHighlightingManager.triggerWorker();
-		
-/*		for (var id in this._highlightedObjects){
 			delete this._highlightedObjects[id];	
 			this.unHighlightObject(this.getObjectById(id));
 		}
-		this._citydbKmlHighlightingManager.triggerWorker();*/
+		this._citydbKmlHighlightingManager.triggerWorker();
 	};
 
 	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
@@ -533,6 +538,12 @@
 		else if (object instanceof Cesium.Entity) {
 			object.show = false;
 		}
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				childEntity.show = false;
+			}		
+		}
 	//	console.log(object.show);
 	};
 
@@ -574,11 +585,25 @@
 					var scope = this;
 					setTimeout(function(){
 						object.polygon.material = originalMaterial;	
-						console.log(123);
 					}, 100)
 				}
 			}
 		}
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){					
+				var childEntity = object[i];	
+				childEntity.show = true;	
+				var globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');				
+				if (!this.isInHighlightedList(globeId)) {
+					var originalMaterial = childEntity.originalMaterial;
+					if (Cesium.defined(originalMaterial)) {
+						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
+						var scope = this;
+						childEntity.polygon.material = originalMaterial;	
+					}
+				}
+			}		
+		}	
 	};
 	
 	CitydbKmlLayer.prototype.isHiddenObject = function(object){	
@@ -594,6 +619,12 @@
 		}
 		else if (object instanceof Cesium.Entity) {
 			return !object.show;
+		}
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				return !childEntity.show;
+			}		
 		}
 		return true;
 	};

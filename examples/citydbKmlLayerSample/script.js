@@ -14,7 +14,8 @@
 
     // creating some layers which were exported from 3DCityDB using KML/Collada/Gltf Exporter
 	var options = {
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
+	//	url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md.kml',
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md_MasterJSON.json',
 		name : 'Berlin_Building_Texture',
 		activeHighlighting: true,
 		id : "kmlLayer"
@@ -29,20 +30,20 @@
 	};
 	var citydbKmlLayer2 = new CitydbKmlLayer(options2);
 	
-/*	var options3 = {
+	var options3 = {
 		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
 		name : 'London_building_Lod2',
 		activeHighlighting: true,
 		id : 'London_building_Lod2'
 	};
-	var citydbKmlLayer3 = new CitydbKmlLayer(options3);*/
+	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
 
   	
 	// Loading layers one by one...
 	var layers = [
 		citydbKmlLayer1, 
 		citydbKmlLayer2 
-	//	,citydbKmlLayer3
+		,citydbKmlLayer3
 	];
 
 	var k = 0;
@@ -52,7 +53,8 @@
 			document.getElementById('loadingIndicator').style.display = 'block';
 		});
 		_layer.registerEventHandler("FINISHLOADING", function(thisLayer) {
-			addEventListeners(thisLayer);
+			console.log(thisLayer);
+			addEventListeners(thisLayer);			
 			document.getElementById('loadingIndicator').style.display = 'none';
 			addLayerToMenu({
 			    text : thisLayer.name,
@@ -297,7 +299,7 @@
   	var clearhighlight = function(){
   		citydbKmlLayer1.unHighlightAllObjects(); 
   		citydbKmlLayer2.unHighlightAllObjects(); 
-  	//	citydbKmlLayer3.unHighlightAllObjects();
+  		citydbKmlLayer3.unHighlightAllObjects();
   	};
   	
   	var hideSelectedObjects = function(){
@@ -306,11 +308,15 @@
   		
   		var objectIds = Object.keys(citydbKmlLayer2.highlightedObjects);
   		citydbKmlLayer2.hideObjects(objectIds); 
+  		
+  		var objectIds = Object.keys(citydbKmlLayer3.highlightedObjects);
+  		citydbKmlLayer3.hideObjects(objectIds); 
   	};
   	
   	var showHiddenObjects = function(){
   		citydbKmlLayer1.showAllObjects();
   		citydbKmlLayer2.showAllObjects();
+  		citydbKmlLayer3.showAllObjects();
   	};
   	
   	var layerMenuOptions = new Array();

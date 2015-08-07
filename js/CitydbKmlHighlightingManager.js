@@ -68,7 +68,9 @@
 			else if (primitive instanceof Cesium.Primitive) {				
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
- 					dataPool[targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')] = false;	
+ 					if (Cesium.defined(targetEntity.name)) {
+ 						dataPool[targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')] = false;	
+ 					}					
 				}							
 			}
 		}
