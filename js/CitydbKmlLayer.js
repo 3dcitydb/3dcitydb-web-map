@@ -24,7 +24,8 @@
 		this._highlightedObjects = {};
 		this._active = true;
 		this._hiddenObjects = [];
-		this._cameraPosition = {};	
+		this._cameraPosition = {};
+		this._pickSurface = options.pickSurface;
 		this._cesiumViewer = null;
 		this._jsonLayerInfo = null;
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
@@ -141,6 +142,12 @@
 	    region : {
 	        get : function(){
 	        	return this._region;
+	        }
+	    },
+	    
+	    pickSurface : {
+	        get : function(){
+	        	return this._pickSurface;
 	        }
 	    },
 	    
@@ -288,7 +295,7 @@
  				for (var j = 0; j < primitive._instanceIds.length; j++){	
  					var tmpId = primitive._instanceIds[j].name;
  					if (Cesium.defined(tmpId)) {
- 					// LOD2
+ 						// LOD2
  						if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
  							var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
  							var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
@@ -296,8 +303,13 @@
  						}
  						// LOD1
  						else if (tmpId === objectId) {
- 							var targetEntity = primitive._instanceIds[j]
- 							return targetEntity;
+ 							if (this._pickSurface != true) {
+ 								var targetEntity = primitive._instanceIds[j]
+ 	 							return targetEntity;
+ 							}
+ 							else {
+ 								return this.getEntitiesById(objectId);
+ 							}							
  						}
  					}						
 				}
@@ -402,7 +414,12 @@
 					childEntity.addProperty("originalMaterial");
 				}	
 				childEntity.originalMaterial = childEntity.polygon.material;
-				childEntity.polygon.material = this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')];
+				if (this._pickSurface != true) {
+					childEntity.polygon.material = this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')];
+				}
+				else {
+					childEntity.polygon.material = this._highlightedObjects[childEntity.name];
+				}				
 			}		
 		}	
 	};
@@ -491,8 +508,15 @@
 		}	
 		else if (object instanceof Array) {
 			for (var i = 0; i < object.length; i++){	
-				var childEntity = object[i];	
-				if (!childEntity.polygon.material.color._value.equals(this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')])) {
+				var childEntity = object[i];					
+				var globeId;
+				if (this._pickSurface != true) {
+					globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+				}
+				else {
+					globeId = childEntity.name;
+				}
+				if (!childEntity.polygon.material.color._value.equals(this._highlightedObjects[globeId])) {
 					return false;
 				}
 			}		
@@ -593,7 +617,13 @@
 			for (var i = 0; i < object.length; i++){					
 				var childEntity = object[i];	
 				childEntity.show = true;	
-				var globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');				
+				var globeId;
+				if (this._pickSurface != true) {
+					globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+				}
+				else {
+					globeId = childEntity.name;
+				}			
 				if (!this.isInHighlightedList(globeId)) {
 					var originalMaterial = childEntity.originalMaterial;
 					if (Cesium.defined(originalMaterial)) {

@@ -23,18 +23,28 @@
   	var citydbKmlLayer1 = new CitydbKmlLayer(options);
   	
 	var options2 = {
-		url : 'https://dl.dropboxusercontent.com/u/24313387/KML/KML%20aus%203DCityDB/StatenIsland.kml',
+	//	url : 'https://dl.dropboxusercontent.com/u/24313387/KML/KML%20aus%203DCityDB/StatenIsland.kml',
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/NYK_All_Geometry/NYK_All_Geometry/NYK_All_Geometry_MasterJSON.json',
 		name : 'Newyork_building_Lod1',
 		activeHighlighting: true,
 		id : 'Newyork_building_Lod1'
 	};
 	var citydbKmlLayer2 = new CitydbKmlLayer(options2);
 	
-	var options3 = {
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
+/*	var options3 = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_MasterJSON.json',
 		name : 'London_building_Lod2',
 		activeHighlighting: true,
 		id : 'London_building_Lod2'
+	};
+	var citydbKmlLayer3 = new CitydbKmlLayer(options3);*/
+	
+	var options3 = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_MasterJSON.json',
+		name : 'Berlin_building_LOD2_Geometry',
+		activeHighlighting: true,
+		pickSurface: true,
+		id : 'Berlin_building_LOD2_Geometry'
 	};
 	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
 
@@ -83,7 +93,15 @@
 		citydbKmlLayer.registerEventHandler("CLICK", function(object) {
 			var targetEntity = object.id;
 	 		var primitive = object.primitive;
-	 		var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+	 		
+	 		var globeId; 
+	 		if (citydbKmlLayer.pickSurface != true) {
+	 			globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+	 		}
+	 		else {
+	 			globeId = targetEntity.name;
+	 		}
+	 		
 	 		if (citydbKmlLayer.isInHighlightedList(globeId))
 				return; 
 	 	    // clear all other Highlighting status and just highlight the clicked object...
@@ -99,7 +117,14 @@
 			var targetEntity = object.id;
 	 		var primitive = object.primitive;
 
-	 		var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+	 		var globeId; 
+	 		if (citydbKmlLayer.pickSurface != true) {
+	 			globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+	 		}
+	 		else {
+	 			globeId = targetEntity.name;
+	 		}
+	 		
 			if (citydbKmlLayer.isInHighlightedList(globeId)) {
 				citydbKmlLayer.unHighlight([globeId]);
 			}else {
@@ -123,7 +148,7 @@
 				} 
 			}
 			else if (primitive instanceof Cesium.Primitive) {	
-				if (targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1 ) {
+				if ((targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1) && citydbKmlLayer.pickSurface != true) {
 					var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
 					var roofEntities = citydbKmlLayer.getEntitiesById(globeId + '_RoofSurface');
 					var wallEntities = citydbKmlLayer.getEntitiesById(globeId + '_WallSurface');
@@ -175,7 +200,7 @@
 				} 
 			}
 			else if (primitive instanceof Cesium.Primitive) {				
-				if (targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1 ) {
+				if ((targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1)  && citydbKmlLayer.pickSurface != true) {
 					var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
 					var roofEntities = citydbKmlLayer.getEntitiesById(globeId + '_RoofSurface');
 					var wallEntities = citydbKmlLayer.getEntitiesById(globeId + '_WallSurface');
