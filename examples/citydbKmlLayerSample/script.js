@@ -3,7 +3,9 @@
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
 	});
+	
 //	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
+	
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
 	
@@ -18,7 +20,7 @@
 		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md_MasterJSON.json',
 		name : 'Berlin_Building_Texture',
 		activeHighlighting: true,
-		id : "kmlLayer"
+		id : "Berlin_Building_Texture"
 	}; 
   	var citydbKmlLayer1 = new CitydbKmlLayer(options);
   	
@@ -31,22 +33,22 @@
 	};
 	var citydbKmlLayer2 = new CitydbKmlLayer(options2);
 	
-/*	var options3 = {
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_MasterJSON.json',
+	var options3 = {
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
 		name : 'London_building_Lod2',
 		activeHighlighting: true,
 		id : 'London_building_Lod2'
 	};
-	var citydbKmlLayer3 = new CitydbKmlLayer(options3);*/
+	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
 	
-	var options3 = {
+	var options4 = {
 		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_MasterJSON.json',
 		name : 'Berlin_building_LOD2_Geometry',
 		activeHighlighting: true,
 		pickSurface: true,
 		id : 'Berlin_building_LOD2_Geometry'
 	};
-	var citydbKmlLayer3 = new CitydbKmlLayer(options3);
+	var citydbKmlLayer4 = new CitydbKmlLayer(options4);
 
   	
 	// Loading layers one by one...
@@ -54,6 +56,7 @@
 		citydbKmlLayer1, 
 		citydbKmlLayer2 
 		,citydbKmlLayer3
+		,citydbKmlLayer4
 	];
 
 	var k = 0;
@@ -66,13 +69,7 @@
 			console.log(thisLayer);
 			addEventListeners(thisLayer);			
 			document.getElementById('loadingIndicator').style.display = 'none';
-			addLayerToMenu({
-			    text : thisLayer.name,
-			    onselect : function() {
-			    	console.log(thisLayer);
-			        thisLayer.zoomToLayer();
-			    }
-			});	 
+			addLayerToList(_layer);
 			k++;
 			if (k < layers.length) {
 				currentLayer = layers[k];
@@ -325,6 +322,7 @@
   		citydbKmlLayer1.unHighlightAllObjects(); 
   		citydbKmlLayer2.unHighlightAllObjects(); 
   		citydbKmlLayer3.unHighlightAllObjects();
+  		citydbKmlLayer4.unHighlightAllObjects();
   	};
   	
   	var hideSelectedObjects = function(){
@@ -336,29 +334,61 @@
   		
   		var objectIds = Object.keys(citydbKmlLayer3.highlightedObjects);
   		citydbKmlLayer3.hideObjects(objectIds); 
+  		
+  		var objectIds = Object.keys(citydbKmlLayer4.highlightedObjects);
+  		citydbKmlLayer4.hideObjects(objectIds); 
   	};
   	
   	var showHiddenObjects = function(){
   		citydbKmlLayer1.showAllObjects();
   		citydbKmlLayer2.showAllObjects();
   		citydbKmlLayer3.showAllObjects();
+  		citydbKmlLayer4.showAllObjects();
   	};
   	
-  	var layerMenuOptions = new Array();
-    var layerMenu = document.getElementById('layerSelection');
-    layerMenu.onchange = function() {
-        var item = layerMenuOptions[layerMenu.selectedIndex];
-        if (item && typeof item.onselect === 'function') {
-            item.onselect();
-        }
-    };
-  	function addLayerToMenu(layerOption) {
-  		layerMenuOptions.push(layerOption);
-		var menuOption = document.createElement('option');
-		menuOption.textContent = layerOption.text;
-		layerMenu.appendChild(menuOption);	
-		return menuOption;
-	}
-  	function removeMenuOption(menuOption){
-  		layerMenu.removeChild(menuOption);
+  	function addLayerToList(layer) {
+  		var checkbox = document.createElement('input');
+	    checkbox.type = "checkbox";
+	    checkbox.id = "id";
+	    checkbox.checked = true;
+	    checkbox.onchange = function(event) {	    	
+	        var checkbox = event.target;
+	        var layerId = checkbox.parentNode.id;
+	        var citydbLayer = webMap.getLayerbyId(layerId);
+	        if (checkbox.checked) {
+	            console.log("Layer " + citydbLayer.name + " is visible now!");
+	            citydbLayer.activate(true);
+	        } else {
+	        	console.log("Layer " + citydbLayer.name + " is not visible now!");
+	        	citydbLayer.activate(false);
+	        }
+	    };
+	    
+	    var label = document.createElement('label')
+	    label.appendChild(document.createTextNode(layer.name));
+	    
+	    var layerOption = document.createElement('div');
+	    layerOption.id = layer.id;
+	    layerOption.appendChild(checkbox);
+	    layerOption.appendChild(label);
+	    
+	    label.ondblclick = function(event) {
+	    	event.preventDefault();
+	    	var layerId = event.target.parentNode.id;
+	    	var citydbLayer = webMap.getLayerbyId(layerId);
+	    	citydbLayer.zoomToLayer();
+	    }
+
+	    checkboxes.appendChild(layerOption);
   	}
+
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	

@@ -29,9 +29,11 @@
 		this._cesiumViewer = null;
 		this._jsonLayerInfo = null;
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
-		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		if (options.activeHighlighting == true)
 			this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);	
+		else
+			this._citydbKmlHighlightingManager = null;
+		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		
 		/**
 		 * handles ClickEvents
@@ -271,7 +273,14 @@
 	 * @param {Boolean} value
 	 */
 	CitydbKmlLayer.prototype.activate = function(active){
-
+		if (active == false) {
+			this._citydbKmlTilingManager.doTerminate();
+			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
+		}
+		else {
+			this._citydbKmlTilingManager.doStart();
+			this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);			
+		}
 	}
 	
 	
@@ -351,23 +360,6 @@
  					if (tmpId == entity.name) {
  						var attributes = primitive.getGeometryInstanceAttributes(entity);
 						attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color); 
-						return;
- 					}
-				}
-			}
-		}
-	};
-	
-	CitydbKmlLayer.prototype.test = function(entity){
-		var primitives = this._cesiumViewer.scene.primitives;
-		for (var i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Primitive) {					
- 				for (var j = 0; j < primitive._instanceIds.length; j++){	
- 					var tmpId = primitive._instanceIds[j].name;
- 					if (tmpId == entity.name) {
- 						var attributes = primitive.getGeometryInstanceAttributes(entity);
- 						attributes.show = Cesium.ShowGeometryInstanceAttribute.toValue(true);
 						return;
  					}
 				}
@@ -483,7 +475,8 @@
 			delete this._highlightedObjects[id];	
 			this.unHighlightObject(this.getObjectById(id));
 		}
-		this._citydbKmlHighlightingManager.triggerWorker();
+		if (this._citydbKmlHighlightingManager != null)
+			this._citydbKmlHighlightingManager.triggerWorker();		
 	};
 
 	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
@@ -665,7 +658,8 @@
 			this.showObject(this.getObjectById(objectId));
 		}
 		this._hiddenObjects = [];
-		this._citydbKmlHighlightingManager.triggerWorker();
+		if (this._citydbKmlHighlightingManager != null)
+			this._citydbKmlHighlightingManager.triggerWorker();		
 	};
 	
 	CitydbKmlLayer.prototype.isInHiddenList = function(objectId){	

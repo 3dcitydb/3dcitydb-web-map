@@ -20,50 +20,64 @@
   <script src="../../js/CitydbKmlDataSource.js"></script>  
   <script src="../../js/CitydbKmlLayer.js"></script> 
   <style>
-      @import url(../../ThirdParty/Cesium-1-11/Widgets/widgets.css);
-      html, body, #cesiumContainer {
-          top: 0px;
-          left: 0px;
-          position: absolute;
-          width: 100%; 
-          height: 100%; 
-          margin: 0; 
-          padding: 0; 
-          overflow: hidden;
-          z-index: -1;
-      }
-      #uiMenu {
-          border-radius:5px;
-          padding: 5px;
-          position:absolute;
-          left: 20px;
-          font-family: "Arial";
-          z-index: 99999;
-      }
-      .loadingIndicator {
-	    display: block;
-	    position: absolute;
-	    top: 50%;
-	    left: 50%;
-	    margin-top: -33px;
-	    margin-left: -33px;
-	    width: 66px;
-	    height: 66px;
-	    background-position: center;
-	    background-repeat: no-repeat;
-	    background-image: url(../../theme/img/ajax-loader.gif);
+	@import url(../../ThirdParty/Cesium-1-11/Widgets/widgets.css);
+	
+	html, body, #cesiumContainer {
+		top: 0px;
+		left: 0px;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+		z-index: -1;
 	}
-  </style>
+	
+	#uiMenu {
+		border-radius: 5px;
+		padding: 5px;
+		position: absolute;
+		left: 20px;
+		font-family: "Arial";
+		z-index: 99999;
+	}
+	
+	.loadingIndicator {
+		display: block;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		margin-top: -33px;
+		margin-left: -33px;
+		width: 66px;
+		height: 66px;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-image: url(../../theme/img/ajax-loader.gif);
+	}
+	
+	#checkboxes {
+		background: rgba(42, 42, 42, 0.8);
+		text-align: left;
+	}
+
+	#checkboxes label:hover {
+		background-color: #1e90ff;
+	}
+</style>
 </head>
 <body>
   <div id="cesiumContainer"></div>
   <div id="loadingIndicator" class="loadingIndicator"></div>
+  
   <div id="uiMenu">	  
-	  <select id ='layerSelection' class="cesium-button"></select>
+  	  <button id="checkboxes" class="cesium-button"></button>
 	  <button type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
 	  <button type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>
 	  <button type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>
       <button type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button> 
+      
   </div>
   <script src="script.js"></script> 
 </body>

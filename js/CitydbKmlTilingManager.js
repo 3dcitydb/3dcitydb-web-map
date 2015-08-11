@@ -3,14 +3,15 @@
  * **/
 (function() {
 	function CitydbKmlTilingManager(citydbKmlLayerInstance){	
-		scope = this;
-		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlTilingManager") + "Webworkers/CitydbKmlTilingManagerWebworker.js");
+		this.oTask = null;
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
-		this.handler = null;
+		this.dataPoolKml = new Object();
+		this.boundingboxEntity = null;
 	}
 	
 	CitydbKmlTilingManager.prototype.doStart = function() {		
 		var scope = this;
+		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlTilingManager") + "Webworkers/CitydbKmlTilingManagerWebworker.js");
 		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
     	var dataSourceCollection = cesiumViewer._dataSourceCollection;
     	var scene = cesiumViewer.scene;
@@ -22,7 +23,7 @@
     	}
     	
     	// displayed layers
-    	var dataPoolKml = new Object();
+    	var dataPoolKml = this.dataPoolKml;
     	
     	// Caching
     	var networklinkCache = new Object();
@@ -280,7 +281,8 @@
     CitydbKmlTilingManager.prototype.createBboxGeometry = function(bbox) {
     	var rectangle = Cesium.Rectangle.fromDegrees(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax);
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
-        cesiumViewer.entities.add({
+    	this.boundingboxEntity = {
+        	id: Cesium.createGuid(),
             rectangle : {
                 coordinates : rectangle,
                 fill : false,
@@ -288,7 +290,8 @@
                 outlineWidth : 20,
                 outlineColor : Cesium.Color.BLUE
             }
-        });
+        }
+        cesiumViewer.entities.add(this.boundingboxEntity);
     },
     
     /**
@@ -370,11 +373,23 @@
     	if (this.oTask != null) {       		
     		this.oTask.terminate();
     		this.oTask = null;
-
-    		this.handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_UP);
-    		this.handler.removeInputAction(Cesium.ScreenSpaceEventType.WHEEL);
-    		this.handler.removeInputAction(Cesium.ScreenSpaceEventType.MIDDLE_UP);
-    		this.handler = null;
+    		
+    		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
+        	var dataSourceCollection = cesiumViewer._dataSourceCollection;
+    		for (var objUrl in this.dataPoolKml){
+            	var networklinkItem = this.dataPoolKml[objUrl];			                	
+        		var kmlDatasource = networklinkItem.kmlDatasource;
+        		dataSourceCollection.remove(kmlDatasource);
+            }
+    		
+    		if (this.boundingboxEntity != null) {
+    			cesiumViewer.entities.remove(this.boundingboxEntity);
+    		}
+    		
+    		// terminate Hihgighting Manager
+        	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
+        		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doTerminate();
+        	}
     	}	
     };
     

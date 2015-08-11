@@ -4,14 +4,14 @@
 (function() {
 	
 	function CitydbKmlHighlightingManager(citydbKmlLayerInstance) {		
-		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlHighlightingManager") + "Webworkers/CitydbKmlHighlightingManagerWebworker.js");
+		this.oTask = null;
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
-		this.monitor = null;
-		this.shouldRun = true;
 	}
 	
 	CitydbKmlHighlightingManager.prototype.doStart = function() {
     	var scope = this;
+    	
+    	this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlHighlightingManager") + "Webworkers/CitydbKmlHighlightingManagerWebworker.js");
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {	
@@ -36,7 +36,6 @@
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {	
-		//	if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming() || scope.shouldRun) {	
 			if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
 				console.log("Highlighting manager repeat updating again...");
 		    	scope.rebuildDataPool();    		    	
@@ -61,9 +60,6 @@
 				if (primitive.ready) {
 					dataPool[primitive._id._name] = false;	
 				}	
-				else {
-					this.shouldRun = true;
-				}
 			}
 			else if (primitive instanceof Cesium.Primitive) {				
  				for (j = 0; j < primitive._instanceIds.length; j++){	
@@ -79,7 +75,6 @@
 	
 	CitydbKmlHighlightingManager.prototype.doTerminate = function() {
     	if (this.oTask != null) {       		
-    		clearInterval(this.monitor);
     		this.oTask.terminate();
     		this.oTask = null;
     	}	
@@ -116,7 +111,6 @@
     
     CitydbKmlHighlightingManager.prototype.rebuildDataPool = function() {
     	if (this.oTask != null) {
-    		this.shouldRun = false;
 			var dataPool = this.generateDataPool();
 			this.oTask.triggerEvent('rebuildDataPool', dataPool);
 		}
