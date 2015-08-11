@@ -31,6 +31,20 @@ WebMap3DCityDB.prototype.addLayer = function(layer){
 	return;
 }
 
+/**
+ * get a 3DCityDBLayer with the specified id
+ * @param {String} layerId
+ * @returns {3DCityDBLayer} The 3DCityDBLayer with the provided id or null if the id did not exist.
+ */
+WebMap3DCityDB.prototype.getLayerbyId = function(layerId){
+	for (var i = 0; i < this._layers.length; i++){
+		if (layerId == this._layers[i].id){
+			return this._layers[i];
+		}
+	}
+	return null;
+}
+
 
 /**
  * removes a 3DCityDBLayer from the cesiumViewer
