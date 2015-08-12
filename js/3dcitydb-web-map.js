@@ -13,7 +13,32 @@ function WebMap3DCityDB(cesiumViewer){
 	this._mouseClickEvents = false;
 	this._eventHandler = new Cesium.ScreenSpaceEventHandler(cesiumViewer.scene.canvas);
 	this._cameraEventAggregator = new Cesium.CameraEventAggregator(cesiumViewer.scene.canvas);
+	this._activeLayer = undefined;
+	Cesium.knockout.track(this, ['_activeLayer']);
 }
+
+Object.defineProperties(WebMap3DCityDB.prototype, {
+    /**
+     * Gets or sets the active layer 
+     * @memberof WebMap3DCityDB.prototype
+     * @type {3DCityDBLayer}
+     */
+	activeLayer : {
+        get : function(){
+        	return this._activeLayer;
+        },
+		set : function(value) {
+			if (Cesium.defined(this._activeLayer)) {
+				if (this._activeLayer.id != value.id) {
+					this._activeLayer = value;
+				}		
+			}
+			else {
+				this._activeLayer = value;
+			}				
+		}
+    }
+});
 
 
 /**
