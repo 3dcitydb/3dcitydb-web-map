@@ -57,28 +57,49 @@
 		background-image: url(../../theme/img/ajax-loader.gif);
 	}
 	
-	#checkboxes {
+	#layerlistbox {
+		width: 400px;
 		background: rgba(42, 42, 42, 0.8);
 		text-align: left;
 	}
 
-	#checkboxes label:hover {
+	#layerlistbox label:hover {
 		background-color: #1e90ff;
 	}
+	
+	#highlightinglist {
+		width: 400px;
+	}
+	
+	#hiddenlist {
+		width: 400px;
+	}	
 </style>
 </head>
 <body>
-  <div id="cesiumContainer"></div>
-  <div id="loadingIndicator" class="loadingIndicator"></div>
-  
-  <div id="uiMenu">	  
-  	  <button id="checkboxes" class="cesium-button"></button>
-	  <button type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
-	  <button type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>
-	  <button type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>
-      <button type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button> 
-      
-  </div>
-  <script src="script.js"></script> 
+	<div id="cesiumContainer"></div>
+	<div id="loadingIndicator" class="loadingIndicator"></div>
+
+	<div id="uiMenu">
+		<button id="layerlistbox" class="cesium-button"></button>
+		<button type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
+		<button type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>	
+		<button type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>	
+		<button type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>
+		<div>
+			<select id = "highlightinglist" class="cesium-button">
+				<option selected="selected" disabled="disabled">Choose highlighted Object</option>				
+			</select>			
+		</div>
+		<div>
+			<select id = "hiddenlist"class="cesium-button">
+				<option selected="selected" disabled="disabled">Choose hidden Object</option>
+				<option value="saab">uuid_42e2497b-199c-4b6a-8fc2-74873fdc331e</option>
+				<option value="mercedes">uuid_42e2497b-199c-4b6a-8fc2-74873fdc331e</option>
+				<option value="audi">uuid_42e2497b-199c-4b6a-8fc2-74873fdc331</option>					
+			</select>			
+		</div>
+	</div>
+	<script src="script.js"></script>
 </body>
 </html>

@@ -34,6 +34,8 @@
 		else
 			this._citydbKmlHighlightingManager = null;
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
+
+		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
 		
 		/**
 		 * handles ClickEvents
@@ -81,7 +83,10 @@
 	    highlightedObjects : {
 	        get : function(){
 	        	return this._highlightedObjects;
-	        }
+	        },
+	        set : function(value){
+	        	this._highlightedObjects = value;
+	        }	    
 	    },
 	    /**
 	     * Gets the currently hidden Objects as an array
@@ -91,7 +96,10 @@
 	    hiddenObjects : {
 	        get : function(){
 	        	return this._hiddenObjects;
-	        }
+	        },
+	        set : function(value){
+	        	this._hiddenObjects = value;
+	        }	
 	    },
 	    /**
 	     * Gets/Sets the CameraPosition.
@@ -188,7 +196,6 @@
 	        	return this._citydbKmlHighlightingManager == null? false: true;
 	        }
 	    }
-	    
 	});
 
 
@@ -375,7 +382,8 @@
 		for (var id in toHighlight){
 			this._highlightedObjects[id] = toHighlight[id];
 			this.highlightObject(this.getObjectById(id));
-		}		
+		}	
+		this._highlightedObjects = this._highlightedObjects;
 	};
 	
 	CitydbKmlLayer.prototype.highlightObject = function(object){	
@@ -429,6 +437,7 @@
 			var id = toUnHighlight[k];			
 			this.unHighlightObject(this.getObjectById(id));
 		}
+		this._highlightedObjects = this._highlightedObjects;
 	};
 	
 	CitydbKmlLayer.prototype.unHighlightObject = function(object){	
@@ -475,6 +484,7 @@
 			delete this._highlightedObjects[id];	
 			this.unHighlightObject(this.getObjectById(id));
 		}
+		this._highlightedObjects = this._highlightedObjects;
 		if (this._citydbKmlHighlightingManager != null)
 			this._citydbKmlHighlightingManager.triggerWorker();		
 	};
@@ -537,6 +547,7 @@
 			}				
 			this.hideObject(this.getObjectById(objectId));
 		}
+		this._hiddenObjects = this._hiddenObjects;
 	};
 	
 	CitydbKmlLayer.prototype.hideObject = function(object){			
@@ -578,6 +589,7 @@
 			var objectId = toUnhide[k];			
 			this.showObject(this.getObjectById(objectId));
 		}
+		this._hiddenObjects = this._hiddenObjects;
 	};
 	
 	CitydbKmlLayer.prototype.showObject = function(object){
@@ -657,6 +669,8 @@
 			var objectId = this._hiddenObjects[k];			
 			this.showObject(this.getObjectById(objectId));
 		}
+		this._hiddenObjects = this._hiddenObjects;
+		
 		this._hiddenObjects = [];
 		if (this._citydbKmlHighlightingManager != null)
 			this._citydbKmlHighlightingManager.triggerWorker();		
