@@ -214,15 +214,14 @@
         return url;
     }
 
-    function getOrCreateEntity(node, entityCollection) {
-        var id = queryStringAttribute(node, 'id');
-        id = defined(id) ? id : createGuid();
+    function getOrCreateEntity(node, entityCollection, layerId) {
+        var id = createGuid();
         var entity = entityCollection.getOrCreateEntity(id);
         if (!defined(entity.kml)) {
             entity.addProperty('kml');
             entity.addProperty('layerId');
             entity.kml = new KmlFeatureData();
-            entity.layerId = globeScope._layerId;
+            entity.layerId = layerId;
         }
         return entity;
     }
@@ -1114,7 +1113,7 @@
             var childNode = childNodes.item(i);
             var geometryProcessor = geometryTypes[childNode.localName];
             if (defined(geometryProcessor)) {
-                var childEntity = getOrCreateEntity(childNode, dataSource._entityCollection);
+                var childEntity = getOrCreateEntity(childNode, dataSource._entityCollection, dataSource._layerId);
                 childEntity.parent = entity;
                 childEntity.name = entity.name;
                 childEntity.availability = entity.availability;
@@ -1254,7 +1253,7 @@
     }
 
     function processFeature(dataSource, parent, featureNode, entityCollection, styleCollection, sourceUri, uriResolver) {
-        var entity = getOrCreateEntity(featureNode, entityCollection);
+        var entity = getOrCreateEntity(featureNode, entityCollection, dataSource._layerId);
         var kmlData = entity.kml;
         var styleEntity = computeFinalStyle(entity, dataSource, featureNode, styleCollection, sourceUri, uriResolver);
 
@@ -1678,9 +1677,7 @@
      * var viewer = new Cesium.Viewer('cesiumContainer');
      * viewer.dataSources.add(Cesium.CitydbKmlDataSource.load('../../SampleData/facilities.kmz'));
      */
-    var globeScope;
     var CitydbKmlDataSource = function(layerId, proxy) {
-    	globeScope = this;
         this._changed = new Event();
         this._error = new Event();
         this._loading = new Event();
