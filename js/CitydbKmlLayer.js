@@ -37,6 +37,7 @@
 
 		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
 		
+		
 		/**
 		 * handles ClickEvents
 		 * @type {Cesium.Event} clickEvent
@@ -243,7 +244,15 @@
 				that._citydbKmlTilingManager.doStart();
 				that._finishLoadingEvent.raiseEvent(that);
 		    });
-		}		
+		}	
+		
+		Cesium.knockout.getObservable(that, '_highlightedObjects').subscribe(function() {					
+			that._citydbKmlTilingManager.clearCaching();	
+	    });
+		
+		Cesium.knockout.getObservable(that, '_hiddenObjects').subscribe(function() {					
+			that._citydbKmlTilingManager.clearCaching();	
+	    });
 	}
 	
 	CitydbKmlLayer.prototype.zoomToLayer = function(){
@@ -302,7 +311,7 @@
 			var primitive = primitives.get(i);
 			if (primitive instanceof Cesium.Model) {
 				if (primitive.ready) {
-					if (primitive._id._name === objectId) {
+					if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
 						return primitive;
 					}
 				}									
@@ -310,7 +319,7 @@
 			else if (primitive instanceof Cesium.Primitive) {					
  				for (var j = 0; j < primitive._instanceIds.length; j++){	
  					var tmpId = primitive._instanceIds[j].name;
- 					if (Cesium.defined(tmpId)) {
+ 					if (Cesium.defined(tmpId) && primitive._instanceIds[j].layerId === this._id) {
  						// LOD2
  						if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
  							var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
@@ -319,13 +328,7 @@
  						}
  						// LOD1
  						else if (tmpId === objectId) {
- 							if (this._pickSurface != true) {
- 								var targetEntity = primitive._instanceIds[j]
- 	 							return targetEntity;
- 							}
- 							else {
- 								return this.getEntitiesById(objectId);
- 							}							
+ 							return this.getEntitiesById(objectId);						
  						}
  					}						
 				}
@@ -340,7 +343,7 @@
 			var primitive = primitives.get(i);
 			if (primitive instanceof Cesium.Primitive) {					
  				for (var j = 0; j < primitive._instanceIds.length; j++){	
-					if (primitive._instanceIds[j].name === objectId){						
+					if (primitive._instanceIds[j].name === objectId && primitive._instanceIds[j].layerId == this._id){						
 						var targetEntity = primitive._instanceIds[j];
 						try{
 							var parentEntity = targetEntity._parent;	
@@ -364,10 +367,12 @@
 			if (primitive instanceof Cesium.Primitive) {					
  				for (var j = 0; j < primitive._instanceIds.length; j++){	
  					var tmpId = primitive._instanceIds[j].name;
- 					if (tmpId == entity.name) {
+ 					if (tmpId == entity.name && entity.layerId === this._id) {
  						var attributes = primitive.getGeometryInstanceAttributes(entity);
-						attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color); 
-						return;
+ 						if (Cesium.defined(attributes)) {
+ 							attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color); 
+ 							return;
+ 						}						
  					}
 				}
 			}
@@ -472,7 +477,7 @@
 					if (Cesium.defined(originalMaterial)) {
 						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
 						var scope = this;
-						childEntity.polygon.material = originalMaterial;						
+						childEntity.polygon.material = originalMaterial;
 					}
 				}	
 			}				

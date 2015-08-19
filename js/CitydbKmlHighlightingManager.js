@@ -15,21 +15,36 @@
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {	
-			// update Hidden/Show
-			if (scope.citydbKmlLayerInstance.isInHiddenList(objectId)) {
-				var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
-				if (!scope.citydbKmlLayerInstance.isHiddenObject(obj)) {
-					scope.citydbKmlLayerInstance.hideObject(obj);
-					scope.oTask.triggerEvent('updateDataPool');
+			var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
+			
+			if (obj != null) {
+				// update Hidden/Show
+				if (scope.citydbKmlLayerInstance.isInHiddenList(objectId)) {
+					if (!scope.citydbKmlLayerInstance.isHiddenObject(obj)) {
+						scope.citydbKmlLayerInstance.hideObject(obj);
+						scope.oTask.triggerEvent('updateDataPool');
+					}
 				}
-			}
-			// update Highlighting
-			if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {
-				var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
-				if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
-					scope.citydbKmlLayerInstance.highlightObject(obj);
-					scope.oTask.triggerEvent('updateDataPool');
-				}					
+				else {
+					if (scope.citydbKmlLayerInstance.isHiddenObject(obj)) {
+						scope.citydbKmlLayerInstance.showObject(obj);
+						scope.oTask.triggerEvent('updateDataPool');
+					}
+				}
+				
+				// update Highlighting
+				if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {				
+					if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
+						scope.citydbKmlLayerInstance.highlightObject(obj);
+						scope.oTask.triggerEvent('updateDataPool');
+					}					
+				}
+				else {
+					if (scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
+						scope.citydbKmlLayerInstance.unHighlightObject(obj);
+						scope.oTask.triggerEvent('updateDataPool');
+					}
+				}
 			}
 
 			scope.oTask.triggerEvent('updateTaskStack');
@@ -58,13 +73,15 @@
 			var primitive = primitives.get(i);
 			if (primitive instanceof Cesium.Model) {
 				if (primitive.ready) {
-					dataPool[primitive._id._name] = false;	
+					if (primitive._id.layerId === this.citydbKmlLayerInstance._id) {
+						dataPool[primitive._id._name] = false;
+					}						
 				}	
 			}
 			else if (primitive instanceof Cesium.Primitive) {				
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
- 					if (Cesium.defined(targetEntity.name)) {
+ 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
  						dataPool[targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')] = false;	
  					}					
 				}							

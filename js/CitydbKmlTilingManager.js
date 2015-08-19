@@ -17,6 +17,9 @@
     	var scene = cesiumViewer.scene;
     	var canvas = scene.canvas; 
     	
+    	var minLodPixels = undefined;
+    	var maxLodPixels = undefined;
+    	
     	// start Hihgighting Manager
     	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
     		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doStart();
@@ -41,7 +44,9 @@
 			displayForm = jsonLayerInfo.displayform;
 			fileextension = jsonLayerInfo.fileextension;
 			var colnum = jsonLayerInfo.colnum;
-			var rownum = jsonLayerInfo.rownum;    			
+			var rownum = jsonLayerInfo.rownum;  
+			minLodPixels = jsonLayerInfo.minLodPixels == -1? Number.MIN_VALUE: jsonLayerInfo.minLodPixels;
+			maxLodPixels = jsonLayerInfo.maxLodPixels == -1? Number.MAX_VALUE: jsonLayerInfo.maxLodPixels;
 			var bbox = jsonLayerInfo.bbox;
 			var rowDelta = (bbox.ymax - bbox.ymin) / (rownum + 1);
 			var colDelta = (bbox.xmax - bbox.xmin) / (colnum + 1);
@@ -66,6 +71,9 @@
 	        		scope.oTask.triggerEvent('addItemToRTree', item);
           		}
           	}
+			// TODO
+			minLodPixels = 140;
+			maxLodPixels = Number.MAX_VALUE;
     	}
 
 		//------------------------------below are the relevant listeners call from the worker--------------------------------//
@@ -90,7 +98,7 @@
     	        	var polygon2 = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
     	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
     	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
-    	        	if (pixelCoveringSize < 140) {
+    	        	if (pixelCoveringSize < minLodPixels || pixelCoveringSize > maxLodPixels) {
     	        		dataSourceCollection.remove(kmlDatasource);
     	        		delete dataPoolKml[objUrl];
     	        		scope.oTask.triggerEvent('updateDataPoolRecord');
@@ -146,7 +154,7 @@
 	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
 	        	
 	        	if (networklinkCache.hasOwnProperty(objUrl)) {
-	        		if (pixelCoveringSize >= 140) { 
+	        		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
 	        			if (!dataPoolKml.hasOwnProperty(objUrl)) {
 	        				var networklinkItem = networklinkCache[objUrl].networklinkItem;
     	        			var kmlDatasource = networklinkItem.kmlDatasource;
@@ -177,7 +185,7 @@
     				};
     				networklinkCache[objUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	        				
     				       				
-    				if (pixelCoveringSize >= 140) {
+    				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
     					console.log("loading layer...");
     					dataSourceCollection.add(newKmlDatasource).then(function() {    					
     						if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
@@ -210,7 +218,13 @@
 		 * [cached layers] should not be bigger than a threshold value...
 		 * 
 		 */
-		scope.oTask.addListener("cleanCaching", function () {
+		scope.oTask.addListener("cleanCaching", function (maxCacheSize) {
+			var _maxCacheSize = 50;
+			
+			if (Cesium.defined(maxCacheSize)) {
+				_maxCacheSize = maxCacheSize;
+			}
+
 			var cacheSize = 0;
 			var tempCache = new Object();
 			for (var cacheID in networklinkCache){	
@@ -220,9 +234,7 @@
     			} 
             }
 
-			var maxCacheSize = 50;
-
-			while (cacheSize > maxCacheSize) {
+			while (cacheSize > _maxCacheSize) {
 				var cacheRecordMinTime = Number.MAX_VALUE;
 				var cacheRocordID = null;
 				for (var cacheID in tempCache){
@@ -271,6 +283,10 @@
     
     CitydbKmlTilingManager.prototype.isDataStreaming = function() {
     	return !this.oTask.isSleep();   	 
+    },
+    
+    CitydbKmlTilingManager.prototype.clearCaching = function() {
+    	this.oTask.oListeners["cleanCaching"].call(this, 0); 	 
     },
     
     /**
