@@ -32,9 +32,20 @@
 		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Extruded/Berlin_Center_Extruded_MasterJSON.json',
 		name : 'Berlin_Center_Extruded',
 		activeHighlighting: true,
-		cacheTiles: false,
+		cacheTiles: true,
 		id : "Berlin_Center_Extruded"
 	}));
+	
+/*	layers.push(new CitydbKmlLayer({
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md_MasterJSON.json',
+		name : 'Berlin_CityCenter_Texture',
+		activeHighlighting: true,
+		pickSurface: true,
+		cacheTiles: true,
+		maxSizeOfCachedTiles: 30,
+		maxCountOfVisibleTiles: 100,
+		id : "Berlin_CityCenter_Texture"
+	}));*/
 		
 	layers.push(new CitydbKmlLayer({
 		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Geometry/Berlin_Center_Geometry_MasterJSON.json',
@@ -43,7 +54,7 @@
 		pickSurface: true,
 		cacheTiles: true,
 		maxSizeOfCachedTiles: 30,
-		maxCountOfVisibleTiles: 100,
+		maxCountOfVisibleTiles: 30,
 		id : "Berlin_Center_Geometry"
 	}));
 	
@@ -60,8 +71,9 @@
 		name : 'Berlin_CityCenter_Building_Texture',
 		activeHighlighting: true,
 		id : "Berlin_CityCenter_Building_Texture"
-	}));
-
+	}));*/
+  	
+  	/*
 	layers.push( new CitydbKmlLayer({
 		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
 		name : 'London_Building_LOD2_Geometry',

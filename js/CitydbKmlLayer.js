@@ -507,6 +507,9 @@
 	CitydbKmlLayer.prototype.isHighlightedObject = function(object){	
 		if (object instanceof Cesium.Model) {
 			var highlightColor = this._highlightedObjects[object._id._name];
+			if (!Cesium.defined(highlightColor)) {
+				return false;
+			}
 			var materials = object._runtime.materialsByName;
 			for (var materialId in materials){
 				if (!materials[materialId].getValue('emission').equals(Cesium.Cartesian4.fromColor(highlightColor))) {

@@ -66,12 +66,9 @@
 
 		updateTaskStack : function() {
 			stack.pop();
-			if (stack.length == 0) {
-				setTimeout(function(){   	
-					reply("refreshView", isStillUpdating, dataPool);
-					isStillUpdating = false;  		    	
-    		    }, 1000); 
-				
+			if (stack.length == 0) {	
+				reply("refreshView", isStillUpdating, dataPool);
+				isStillUpdating = false;  		    	
 			}
 		}
 	};

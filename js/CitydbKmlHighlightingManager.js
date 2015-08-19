@@ -53,7 +53,9 @@
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {	
 			if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
 				console.log("Highlighting manager repeat updating again...");
-		    	scope.rebuildDataPool();    		    	
+				setTimeout(function(){   	
+					scope.rebuildDataPool();   		    	
+    		    }, 1000); 		    	  		    	
 			}
 			else {		
 				console.log("Highlighting Manager is sleeping...")
@@ -82,7 +84,12 @@
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
  					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
- 						dataPool[targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')] = false;	
+ 						if (this.citydbKmlLayerInstance.pickSurface) {
+ 							dataPool[targetEntity.name] = false;
+ 						}
+ 						else {
+ 							dataPool[targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')] = false;
+ 						}
  					}					
 				}							
 			}
