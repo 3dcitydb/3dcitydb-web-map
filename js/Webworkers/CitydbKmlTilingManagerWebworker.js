@@ -14,10 +14,12 @@
 	var _colDelta;
 	var _rownum;
 	var _colnum;
+	var _maxCountOfVisibleTiles;
 	
 	var eventlisteners = {
-		initWorker : function(frame, mode) {
+		initWorker : function(frame, maxCountOfVisibleTiles, mode) {
 			shouldRun = true;
+			_maxCountOfVisibleTiles = maxCountOfVisibleTiles;
 			console.log([frame, mode]);
 			eventlisteners["checkDataPool"].apply(self, [ frame, mode ]);
 		},
@@ -35,7 +37,7 @@
 			}
 
 			console.log("Size of the generated datapool is: " + dataPool.length);
-			if (dataPool.length == 0 || dataPool.length > 200) {
+			if (dataPool.length == 0 || dataPool.length > _maxCountOfVisibleTiles) {
 				stack = [];
 				eventlisteners["updateTaskStack"].apply(self);
 				return;
@@ -92,8 +94,8 @@
 			var maxRow = Math.floor((frameMaxY - _bbox.ymin) / _rowDelta);
 			
 			/** i --> column (X); j --> row (Y) */	
-			if ((maxCol - minCol) * (maxRow - minRow) > 200) {
-				for (var k = 0; k <= 200; k++ ) {
+			if ((maxCol - minCol) * (maxRow - minRow) > _maxCountOfVisibleTiles) {
+				for (var k = 0; k <= _maxCountOfVisibleTiles; k++ ) {
 					dataPool.push("dummy");
 				}
 			}

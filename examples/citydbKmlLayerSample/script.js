@@ -19,33 +19,34 @@
     // creating some layers which were exported from 3DCityDB using KML/Collada/Gltf Exporter
 	var layers = new Array();
 	
-	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Sample_Cesium/Berlin_Sample_Footprint/Berlin_Sample_Footprint_MasterJSON.json',
-		name : 'Berlin_Sample_Footprint',
+/*	layers.push(new CitydbKmlLayer({
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json',
+		name : 'Berlin_Center_Footprint',
 		activeHighlighting: true,
-		id : "Berlin_Sample_Footprint"
+		cacheTiles: false,
+		id : "Berlin_Center_Footprint"
 	}));
+	*/
 	
 	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Sample_Cesium/Berlin_Sample_Extruded/Berlin_Sample_Extruded_MasterJSON.json',
-		name : 'Berlin_Sample_Extruded',
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Extruded/Berlin_Center_Extruded_MasterJSON.json',
+		name : 'Berlin_Center_Extruded',
 		activeHighlighting: true,
-		id : "Berlin_Sample_Extruded"
+		cacheTiles: false,
+		id : "Berlin_Center_Extruded"
 	}));
 		
 	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Sample_Cesium/Beriln_Sample_Geometry/Beriln_Sample_Geometry_MasterJSON.json',
-		name : 'Beriln_Sample_Geometry',
+		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Geometry/Berlin_Center_Geometry_MasterJSON.json',
+		name : 'Berlin_Center_Geometry',
 		activeHighlighting: true,
-		id : "Beriln_Sample_Geometry"
+		pickSurface: true,
+		cacheTiles: true,
+		maxSizeOfCachedTiles: 30,
+		maxCountOfVisibleTiles: 100,
+		id : "Berlin_Center_Geometry"
 	}));
 	
-/*	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Sample_Cesium/Beriln_Sample_Texture/Beriln_Sample_Texture_MasterJSON.json',
-		name : 'Beriln_Sample_Texture',
-		activeHighlighting: true,
-		id : "Beriln_Sample_Texture"
-	}));*/
 	
 /*	layers.push(new CitydbKmlLayer({
 		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/NYK_All_Geometry/NYK_All_Geometry/NYK_All_Geometry_MasterJSON.json',

@@ -28,6 +28,11 @@
 		this._pickSurface = options.pickSurface;
 		this._cesiumViewer = null;
 		this._jsonLayerInfo = null;
+		
+		this._cacheTiles = Cesium.defaultValue(options.cacheTiles, true);		
+		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);						
+		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);
+		
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
 		if (options.activeHighlighting == true)
 			this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);	
