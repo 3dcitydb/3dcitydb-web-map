@@ -73,7 +73,20 @@
 	
 	#hiddenlist {
 		width: 400px;
+	}
+	
+	#generateLink {
+		width: 195px;
 	}	
+	#hideSelectedObjects {
+		width: 195px;
+	}
+	#clearhighlight {
+		width: 195px;
+	}	
+	#showHiddenObjects {
+		width: 195px;
+	}			
 </style>
 </head>
 <body>
@@ -81,11 +94,7 @@
 	<div id="loadingIndicator" class="loadingIndicator"></div>
 
 	<div id="uiMenu">
-		<button id="layerlistbox" class="cesium-button"></button>
-		<button type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
-		<button type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>	
-		<button type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>	
-		<button type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>
+		<button id="layerlistbox" class="cesium-button"></button>		
 		<div>
 			<select id = "highlightinglist" class="cesium-button">
 				<option selected="selected" disabled="disabled">Choose highlighted Object</option>				
@@ -99,6 +108,15 @@
 				<option value="audi">uuid_42e2497b-199c-4b6a-8fc2-74873fdc331</option>					
 			</select>			
 		</div>
+		<div>
+			<button id="generateLink" type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
+			<button id="hideSelectedObjects" type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>					
+	
+		</div>
+		<div>
+			<button id="clearhighlight" type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>	
+			<button id="showHiddenObjects" type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>			
+		</div>				
 	</div>
 	<script src="script.js"></script>
 </body>
