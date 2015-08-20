@@ -86,7 +86,24 @@
 	}	
 	#showHiddenObjects {
 		width: 195px;
-	}			
+	}
+	
+	
+    .showToolbox {
+        position: relative;
+    }
+    .showToolbox {
+        width: 100%;
+        font-weight: bold;
+    }
+    .overSelect {
+        position: absolute;
+        left: 0; right: 0; top: 0; bottom: 0;
+    }	
+	#toolbox {
+        display: none;
+        border: 3px #505050 solid;
+    }    			
 </style>
 </head>
 <body>
@@ -94,30 +111,48 @@
 	<div id="loadingIndicator" class="loadingIndicator"></div>
 
 	<div id="uiMenu">
-		<button id="layerlistbox" class="cesium-button"></button>		
-		<div>
-			<select id = "highlightinglist" class="cesium-button">
-				<option selected="selected" disabled="disabled">Choose highlighted Object</option>				
-			</select>			
-		</div>
-		<div>
-			<select id = "hiddenlist"class="cesium-button">
-				<option selected="selected" disabled="disabled">Choose hidden Object</option>
-				<option value="saab">uuid_42e2497b-199c-4b6a-8fc2-74873fdc331e</option>
-				<option value="mercedes">uuid_42e2497b-199c-4b6a-8fc2-74873fdc331e</option>
-				<option value="audi">uuid_42e2497b-199c-4b6a-8fc2-74873fdc331</option>					
-			</select>			
-		</div>
-		<div>
-			<button id="generateLink" type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
-			<button id="hideSelectedObjects" type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>					
-	
-		</div>
-		<div>
-			<button id="clearhighlight" type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>	
-			<button id="showHiddenObjects" type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>			
-		</div>				
+       <div class="showToolbox" onclick="showToolbox()">
+            <select class="cesium-button">
+                <option>Show/Hide Toolbox</option>
+            </select>
+            <div class="overSelect"></div>
+        </div>	
+		<div id="toolbox">
+			<button id="layerlistbox" class="cesium-button"></button>		
+			<div>
+				<select id = "highlightinglist" class="cesium-button">
+					<option selected="selected" disabled="disabled">Choose highlighted Object</option>				
+				</select>			
+			</div>
+			<div>
+				<select id = "hiddenlist" class="cesium-button">
+					<option selected="selected" disabled="disabled">Choose hidden Object</option>				
+				</select>			
+			</div>
+			<div>
+				<button id="generateLink" type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
+				<button id="hideSelectedObjects" type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>					
+		
+			</div>
+			<div>
+				<button id="clearhighlight" type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>	
+				<button id="showHiddenObjects" type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>			
+			</div>	
+        </div>				
 	</div>
+	<script>
+		var expanded = false;
+	    function showToolbox() {
+	        var toolbox = document.getElementById("toolbox");
+	        if (!expanded) {
+	        	toolbox.style.display = "block";
+	            expanded = true;
+	        } else {
+	        	toolbox.style.display = "none";
+	            expanded = false;
+	        }
+	    }
+	</script>
 	<script src="script.js"></script>
 </body>
 </html>
