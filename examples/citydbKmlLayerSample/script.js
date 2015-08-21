@@ -89,10 +89,30 @@
 		picksurface: Cesium.knockout.observableArray([false]),
 		maxSizeOfCachedTiles : 50,
 		maxCountOfVisibleTiles : 200
-	};
-  	
+	};  	
   	Cesium.knockout.track(addLayerViewModel);
 	Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
+	
+  	var addWmsViewModel = {
+        name : 'Vorarlberg WMS Service',
+        iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
+        tooltip : 'Voralberg Luftbild',
+		url: 'http://vogis.cnv.at/mapserver/mapserv',
+		layers : 'ef2012_12cm',
+		map: 'i_luftbilder_r_wms.map'
+	};  	
+  	Cesium.knockout.track(addWmsViewModel);
+	Cesium.knockout.applyBindings(addWmsViewModel, document.getElementById('citydb_addwmspanel'));	
+	
+  	var addTerrainViewModel = {
+        name : 'Vorarlberg DEM',
+        iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
+        tooltip : 'Vorarlberg Digitales Geländemodell',
+    	url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/vorarlberg_DGM'
+	};
+  	
+  	Cesium.knockout.track(addTerrainViewModel);
+	Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('citydb_addterrainpanel'));
 	
 	// sync object list...
 	observeObjectList();
@@ -600,7 +620,58 @@
   	  		}
   		} 		
   	}
+  	
+	function addWebMapServiceProvider() {
+		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+		var wmsProviderViewModel = new Cesium.ProviderViewModel({
+	        name : addWmsViewModel.name,
+	        iconUrl : addWmsViewModel.iconUrl,
+	        tooltip : addWmsViewModel.tooltip,
+	        creationFunction : function() {
+	            return new Cesium.WebMapServiceImageryProvider({
+	    			url: addWmsViewModel.url,
+	    			layers : addWmsViewModel.layers,
+	    			parameters: {
+	    				map: addWmsViewModel.map
+	    			},
+	    			proxy: new Cesium.DefaultProxy('/proxy/')
+	    		});
+	        }
+	    });
+		baseLayerPickerViewModel.imageryProviderViewModels.push(wmsProviderViewModel);
+		baseLayerPickerViewModel.selectedImagery = wmsProviderViewModel;
+	}
+	
+	function removeImageryProvider() {
+		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+		var selectedImagery = baseLayerPickerViewModel.selectedImagery;
+		baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
+		baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
+	}	  	
 
+	function addTerrainProvider() {
+		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+		var demProviderViewModel = new Cesium.ProviderViewModel({
+	        name : addTerrainViewModel.name,
+	        iconUrl : addTerrainViewModel.iconUrl,
+	        tooltip : addTerrainViewModel.tooltip,
+	        creationFunction : function() {
+	            return new Cesium.CesiumTerrainProvider({
+	    			url : addTerrainViewModel.url
+	    		});
+	        }
+	    })
+		baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
+		baseLayerPickerViewModel.selectedTerrain = demProviderViewModel;
+	}
+	
+	function removeTerrainProvider() {
+		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+		var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
+		baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
+		baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+	}
+	
   	cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
 		var gmlId = cesiumViewer.geocoder.viewModel._searchText;	
 		var promise = zoomToObject(gmlId);
