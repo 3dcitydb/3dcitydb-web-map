@@ -32,7 +32,7 @@
 		padding: 0;
 		overflow: hidden;
 		z-index: -1;
-	}
+	}	
 	
 	#uiMenu {
 		border-radius: 5px;
@@ -41,7 +41,7 @@
 		left: 20px;
 		font-family: "Arial";
 		z-index: 99999;
-	}
+	}	
 	
 	.loadingIndicator {
 		display: block;
@@ -78,31 +78,95 @@
 	#generateLink {
 		width: 195px;
 	}	
+	
 	#hideSelectedObjects {
 		width: 195px;
 	}
+	
 	#clearhighlight {
 		width: 195px;
 	}	
+	
 	#showHiddenObjects {
 		width: 195px;
 	}
-	
-	
+
     .showToolbox {
         position: relative;
-    }
-    .showToolbox {
         width: 100%;
-        font-weight: bold;
+        font-weight: bold;        
     }
+    
+	#showhidebutton {
+		width: 195px;
+    }   
+        
     .overSelect {
         position: absolute;
         left: 0; right: 0; top: 0; bottom: 0;
     }	
+    
 	#toolbox {
         display: none;
+		background: rgba(42, 42, 42, 0.5);        
         border: 3px #505050 solid;
+    }    
+    
+    .addlayer {
+        position: relative;
+        width: 100%;
+        font-weight: bold;  
+        display: inline;      
+    } 
+      
+	#showaddlayerpanelbutton {
+		width: 195px;
+    }   
+    
+    #removelayerbutton {
+		width: 195px;
+    }  
+
+    #addlayerpanel {
+        display: none;
+	    padding: 2px 3px;
+	    position: absolute;        
+        border: 3px #505050 solid;    
+		background: rgba(42, 42, 42, 0.6);
+        border-radius: 4px;  
+        color: #fff;
+	    font-family: sans-serif;
+	    font-size: 9pt;      
+    }  
+    
+    #addlayerpanel input {
+        vertical-align: middle;
+        padding-top: 1px;
+        padding-bottom: 1px;       
+    }  
+    
+    #addlayertable {
+		width: 391px;
+	}
+	
+	#picksurface {
+	    width: 100%;
+	    padding: 3px;
+	    margin: 1px;
+	}
+	
+    th, td {
+    	padding: 5px;
+	} 
+	
+    .addlayerinput {
+	    width: 100%;
+	    padding: 0px;
+	    margin: 0px;       
+    } 	 
+    
+	#addlayerbutton {
+		width: 391px;
     }    			
 </style>
 </head>
@@ -111,9 +175,9 @@
 	<div id="loadingIndicator" class="loadingIndicator"></div>
 
 	<div id="uiMenu">
-       <div class="showToolbox" onclick="showToolbox()">
-            <select class="cesium-button">
-                <option>Show/Hide Toolbox</option>
+        <div class="showToolbox" onclick="showToolbox()">
+            <select id = "showhidebutton" class="cesium-button">
+                <option>Show / Hide Toolbox</option>
             </select>
             <div class="overSelect"></div>
         </div>	
@@ -138,7 +202,54 @@
 				<button id="clearhighlight" type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>	
 				<button id="showHiddenObjects" type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>			
 			</div>	
-        </div>				
+			
+			 <!-- add layer panel -->
+	        <div class="addlayer" onclick="showAddLayerPanel()">
+	            <select id="showaddlayerpanelbutton" class="cesium-button" >
+	                <option>Add 3DCityDB-Layer</option>
+	            </select>	            
+	            <div class="overSelect"></div>
+	        </div>	
+	        <button type="button" id = "removelayerbutton" class="cesium-button" onclick="removeSelectedLayer()">Remove selected layer</button>
+			<div id="addlayerpanel">		
+				<table id="addlayertable">
+				    <tbody>
+					    <tr>
+					        <td WIDTH="25%">URL(*)</td>
+					        <td WIDTH="75%">
+					            <input class="addlayerinput" type="text" data-bind="value: url">
+					        </td>
+					    </tr>
+					    <tr>
+					        <td>Name(*)</td>
+					        <td>
+					            <input class="addlayerinput" type="text" data-bind="value: name">
+					        </td>
+					    </tr>
+					    <tr>
+					        <td>PickSurface</td>
+					        <td>
+								<select id="picksurface" class="cesium-button" data-bind="options: [false, true], selectedOptions: picksurface"></select>	
+					        </td>
+					    </tr>
+					    <tr>
+					        <td>maxSizeOfCachedTiles</td>
+					        <td>
+					            <input class="addlayerinput" type="text" data-bind="value: maxSizeOfCachedTiles">
+					        </td>
+					    </tr>
+					    <tr>
+					        <td>maxCountOfVisibleTiles</td>
+					        <td>
+					            <input class="addlayerinput" type="text" data-bind="value: maxCountOfVisibleTiles">
+					        </td>
+					    </tr>				    
+					</tbody>
+				</table>
+				<button id="addlayerbutton" type="button" class="cesium-button" onclick="addNewLayer()">add layer</button>
+	        </div>				
+        </div>	
+                			
 	</div>
 	<script>
 		var expanded = false;
@@ -152,6 +263,18 @@
 	            expanded = false;
 	        }
 	    }
+	    
+		var expanded2 = false;
+	    function showAddLayerPanel() {
+	        var addlayerpanel = document.getElementById("addlayerpanel");
+	        if (!expanded2) {
+	        	addlayerpanel.style.display = "block";
+	            expanded2 = true;
+	        } else {
+	        	addlayerpanel.style.display = "none";
+	            expanded2 = false;
+	        }
+	    }	    	    
 	</script>
 	<script src="script.js"></script>
 </body>

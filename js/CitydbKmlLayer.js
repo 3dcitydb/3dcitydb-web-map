@@ -11,38 +11,34 @@
  * @param {String} [options.id] id of this layer 
  * @param {String} [options.name] name of this layer 
  * @param {String} [options.region] boundingbox  of this layer Cesium.Rectangle
- * @param {Number} [options.minLevel] minLevel 
- * @param {Number} [options.maxLevel] maxLevel  
  *
  */
 (function() {
 	function CitydbKmlLayer(options){	
 		this._url = options.url;
-		this._id = options.id;
 		this._name = options.name;
+		this._id = Cesium.defaultValue(options.id, Cesium.createGuid());		
 		this._region = options.region;
-		this._highlightedObjects = {};
 		this._active = true;
+		this._highlightedObjects = {};		
 		this._hiddenObjects = [];
 		this._cameraPosition = {};
-		this._pickSurface = options.pickSurface;
-		this._cesiumViewer = null;
-		this._jsonLayerInfo = null;
-		
-		this._cacheTiles = Cesium.defaultValue(options.cacheTiles, true);		
-		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);						
+		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
+		this._cesiumViewer = undefined;
+		this._jsonLayerInfo = undefined;
+	
+		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);	
+		this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
 		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);
 		
-		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);
-		if (options.activeHighlighting == true)
-			this._citydbKmlHighlightingManager = new CitydbKmlHighlightingManager(this);	
-		else
-			this._citydbKmlHighlightingManager = null;
+		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);	
+		
+		this._activeHighlighting = Cesium.defaultValue(options.activeHighlighting, true);	
+		this._citydbKmlHighlightingManager = this._activeHighlighting? new CitydbKmlHighlightingManager(this): null;		
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 
 		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
-		
-		
+				
 		/**
 		 * handles ClickEvents
 		 * @type {Cesium.Event} clickEvent
@@ -286,7 +282,7 @@
 	 * @param {CesiumViewer} cesiumViewer
 	 */
 	CitydbKmlLayer.prototype.removeFromCesium = function(cesiumViewer){
-		// TODO
+		this.activate(false);
 	}
 
 	/**
@@ -294,7 +290,7 @@
 	 * @param {Boolean} value
 	 */
 	CitydbKmlLayer.prototype.activate = function(active){
-		if (active == false) {
+		if (active == false) {			
 			this._citydbKmlTilingManager.doTerminate();
 			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
 		}
@@ -302,6 +298,7 @@
 			this._citydbKmlTilingManager.doStart();
 			this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);			
 		}
+		this._active = active;
 	}
 	
 	
