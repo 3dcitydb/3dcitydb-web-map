@@ -57,117 +57,78 @@
 		background-image: url(../../theme/img/ajax-loader.gif);
 	}
 	
-	#layerlistbox {
-		width: 400px;
-		background: rgba(42, 42, 42, 0.8);
-		text-align: left;
-	}
-
-	#layerlistbox label:hover {
-		background-color: #1e90ff;
-	}
-	
-	#highlightinglist {
-		width: 400px;
-	}
-	
-	#hiddenlist {
-		width: 400px;
-	}
-	
-	#generateLink {
-		width: 195px;
-	}	
-	
-	#hideSelectedObjects {
-		width: 195px;
-	}
-	
-	#clearhighlight {
-		width: 195px;
-	}	
-	
-	#showHiddenObjects {
-		width: 195px;
-	}
-
-    .showToolbox {
-        position: relative;
-        width: 100%;
-        font-weight: bold;        
-    }
-    
-	#showhidebutton {
-		width: 195px;
-    }   
-        
-    .overSelect {
+	.citydb_overSelect {
         position: absolute;
         left: 0; right: 0; top: 0; bottom: 0;
     }	
-    
-	#toolbox {
-        display: none;
-		background: rgba(42, 42, 42, 0.5);        
-        border: 3px #505050 solid;
-    }    
-    
-    .addlayer {
-        position: relative;
-        width: 100%;
-        font-weight: bold;  
-        display: inline;      
-    } 
-      
-	#showaddlayerpanelbutton {
-		width: 195px;
-    }   
-    
-    #removelayerbutton {
-		width: 195px;
-    }  
+	
+	.citydb_short_container {
+		display: inline-block; 
+		position: relative; 
+		width: 48.5%;
+	}	
+		
+	.citydb_long_container {		
+	    margin-left: 0px; 
+	    margin-right: 2%; 
+	}
 
-    #addlayerpanel {
+    .citydb_dynamic_box {
         display: none;
+        margin: 3px; 
 	    padding: 2px 3px;
-	    position: absolute;        
-        border: 3px #505050 solid;    
+	    position: relative;        
+        border: 2px #505050 solid;    
 		background: rgba(42, 42, 42, 0.6);
         border-radius: 4px;  
         color: #fff;
 	    font-family: sans-serif;
 	    font-size: 9pt;      
-    }  
-    
-    #addlayerpanel input {
+    } 
+
+    .citydb_dynamic_box input {
         vertical-align: middle;
         padding-top: 1px;
         padding-bottom: 1px;       
-    }  
+    }  	
     
-    #addlayertable {
-		width: 391px;
+	.citydb_inputtable {
+		width: 100%;
 	}
 	
-	#picksurface {
+    .citydb_inputtable th, td {
+    	padding: 5px;
+	}
+	
+    .citydb_inputtable select {
 	    width: 100%;
 	    padding: 3px;
 	    margin: 1px;
-	}
-	
-    th, td {
-    	padding: 5px;
-	} 
-	
-    .addlayerinput {
+	} 	
+	 	
+    .citydb_inputtable input {
 	    width: 100%;
 	    padding: 0px;
 	    margin: 0px;       
-    } 	 
-    
-	#addlayerbutton {
-		width: 391px;
-    }    			
+    } 	     
+    	
+	#citydb_layerlistpanel {
+		width: 100%;
+		background: rgba(42, 42, 42, 0.8);
+		text-align: left;
+	}
+
+	#citydb_layerlistpanel label:hover {
+		background-color: #1e90ff;
+	}
+	
+	#citydb_toolbox {
+		width: 400px;
+        display: none;
+		background: rgba(42, 42, 42, 0.5);        
+        border: 3px #505050 solid;
+    }    
+
 </style>
 </head>
 <body>
@@ -175,103 +136,117 @@
 	<div id="loadingIndicator" class="loadingIndicator"></div>
 
 	<div id="uiMenu">
-        <div class="showToolbox" onclick="showToolbox()">
-            <select id = "showhidebutton" class="cesium-button">
+        <div onclick="showToolbox()">
+            <select class="cesium-button">
                 <option>Show / Hide Toolbox</option>
             </select>
-            <div class="overSelect"></div>
+            <div class="citydb_overSelect"></div>
         </div>	
-		<div id="toolbox">
-			<button id="layerlistbox" class="cesium-button"></button>		
-			<div>
-				<select id = "highlightinglist" class="cesium-button">
+		<div id="citydb_toolbox">
+			<div class = "citydb_long_container">
+				<button id="citydb_layerlistpanel" class="cesium-button"></button>
+			</div>
+	        <div style="width: 100%;">
+				 <!-- add layer panel -->
+		        <div class="citydb_short_container" onclick="showAddLayerPanel()">
+		            <select style="width: 100%;" class="cesium-button" >
+		                <option>Add 3DCityDB-Layer</option>
+		            </select>	            
+		            <div class="citydb_overSelect"></div>
+		        </div>	
+		        <div class="citydb_short_container">
+		        	<button type="button" style="width: 100%;" class="cesium-button" onclick="removeSelectedLayer()">Remove selected layer</button>
+		        </div>		        
+				<div id="citydb_addlayerpanel" class="citydb_dynamic_box">		
+					<table class="citydb_inputtable">
+					    <tbody>
+						    <tr>
+						        <td WIDTH="25%">URL(*)</td>
+						        <td WIDTH="75%">
+						            <input type="text" data-bind="value: url">
+						        </td>
+						    </tr>
+						    <tr>
+						        <td>Name(*)</td>
+						        <td>
+						            <input type="text" data-bind="value: name">
+						        </td>
+						    </tr>
+						    <tr>
+						        <td>PickSurface</td>
+						        <td>
+									<select class="cesium-button" data-bind="options: [false, true], selectedOptions: picksurface"></select>	
+						        </td>
+						    </tr>
+						    <tr>
+						        <td>MaxSizeOfCachedTiles</td>
+						        <td>
+						            <input type="text" data-bind="value: maxSizeOfCachedTiles">
+						        </td>
+						    </tr>
+						    <tr>
+						        <td>MaxCountOfVisibleTiles</td>
+						        <td>
+						            <input type="text" data-bind="value: maxCountOfVisibleTiles">
+						        </td>
+						    </tr>				    
+						</tbody>
+					</table>
+			        <div class="citydb_long_container">
+						<button style="width: 100%;" type="button" class="cesium-button" onclick="addNewLayer()">Add layer</button>
+			        </div>											
+		        </div>
+	        </div>	        
+			<div class="citydb_long_container">
+				<select id = "citydb_highlightinglist" style="width: 100%;" class="cesium-button">
 					<option selected="selected" disabled="disabled">Choose highlighted Object</option>				
 				</select>			
 			</div>
-			<div>
-				<select id = "hiddenlist" class="cesium-button">
+			<div class="citydb_long_container">
+				<select id = "citydb_hiddenlist" style="width: 100%;" class="cesium-button">
 					<option selected="selected" disabled="disabled">Choose hidden Object</option>				
 				</select>			
 			</div>
 			<div>
-				<button id="generateLink" type="button" class="cesium-button" onclick="generateLink()">generate Scene Link</button>
-				<button id="hideSelectedObjects" type="button" class="cesium-button" onclick="hideSelectedObjects()">hide selected Objects</button>					
-		
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="generateLink()">Generate Scene Link</button>		
+				</div>			
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="hideSelectedObjects()">Hide selected Objects</button>		
+				</div>					
 			</div>
 			<div>
-				<button id="clearhighlight" type="button" class="cesium-button" onclick="clearhighlight()">clear Highlighting</button>	
-				<button id="showHiddenObjects" type="button" class="cesium-button" onclick="showHiddenObjects()">show Hidden Objects</button>			
-			</div>	
-			
-			 <!-- add layer panel -->
-	        <div class="addlayer" onclick="showAddLayerPanel()">
-	            <select id="showaddlayerpanelbutton" class="cesium-button" >
-	                <option>Add 3DCityDB-Layer</option>
-	            </select>	            
-	            <div class="overSelect"></div>
-	        </div>	
-	        <button type="button" id = "removelayerbutton" class="cesium-button" onclick="removeSelectedLayer()">Remove selected layer</button>
-			<div id="addlayerpanel">		
-				<table id="addlayertable">
-				    <tbody>
-					    <tr>
-					        <td WIDTH="25%">URL(*)</td>
-					        <td WIDTH="75%">
-					            <input class="addlayerinput" type="text" data-bind="value: url">
-					        </td>
-					    </tr>
-					    <tr>
-					        <td>Name(*)</td>
-					        <td>
-					            <input class="addlayerinput" type="text" data-bind="value: name">
-					        </td>
-					    </tr>
-					    <tr>
-					        <td>PickSurface</td>
-					        <td>
-								<select id="picksurface" class="cesium-button" data-bind="options: [false, true], selectedOptions: picksurface"></select>	
-					        </td>
-					    </tr>
-					    <tr>
-					        <td>maxSizeOfCachedTiles</td>
-					        <td>
-					            <input class="addlayerinput" type="text" data-bind="value: maxSizeOfCachedTiles">
-					        </td>
-					    </tr>
-					    <tr>
-					        <td>maxCountOfVisibleTiles</td>
-					        <td>
-					            <input class="addlayerinput" type="text" data-bind="value: maxCountOfVisibleTiles">
-					        </td>
-					    </tr>				    
-					</tbody>
-				</table>
-				<button id="addlayerbutton" type="button" class="cesium-button" onclick="addNewLayer()">add layer</button>
-	        </div>				
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="clearhighlight()">Clear Highlighting</button>		
+				</div>			
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="showHiddenObjects()">Show Hidden Objects</button>	
+				</div>						
+			</div>		        				
         </div>	
                 			
 	</div>
 	<script>
 		var expanded = false;
 	    function showToolbox() {
-	        var toolbox = document.getElementById("toolbox");
+	        var citydb_toolbox = document.getElementById("citydb_toolbox");
 	        if (!expanded) {
-	        	toolbox.style.display = "block";
+	        	citydb_toolbox.style.display = "block";
 	            expanded = true;
 	        } else {
-	        	toolbox.style.display = "none";
+	        	citydb_toolbox.style.display = "none";
 	            expanded = false;
 	        }
 	    }
 	    
 		var expanded2 = false;
 	    function showAddLayerPanel() {
-	        var addlayerpanel = document.getElementById("addlayerpanel");
+	        var citydb_addlayerpanel = document.getElementById("citydb_addlayerpanel");
 	        if (!expanded2) {
-	        	addlayerpanel.style.display = "block";
+	        	citydb_addlayerpanel.style.display = "block";
 	            expanded2 = true;
 	        } else {
-	        	addlayerpanel.style.display = "none";
+	        	citydb_addlayerpanel.style.display = "none";
 	            expanded2 = false;
 	        }
 	    }	    	    

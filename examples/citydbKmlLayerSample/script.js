@@ -83,6 +83,17 @@
 		id : 'Berlin_Building_LOD2_ThematicSurfaceGeometry'
 	}));*/
 
+  	var addLayerViewModel = {
+		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
+		name : "Berlin_Center_Footprint",
+		picksurface: Cesium.knockout.observableArray([false]),
+		maxSizeOfCachedTiles : 50,
+		maxCountOfVisibleTiles : 200
+	};
+  	
+  	Cesium.knockout.track(addLayerViewModel);
+	Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
+	
 	// sync object list...
 	observeObjectList();
 	
@@ -97,12 +108,12 @@
 		var highlightedObjectsSubscription = undefined;
 		var hiddenObjectsSubscription = undefined;
 		
-		var highlightingListElement = document.getElementById("highlightinglist");
+		var highlightingListElement = document.getElementById("citydb_highlightinglist");
 		highlightingListElement.onchange = function() {
             zoomToObject(this.value);
         };
         
-		var hiddenListElement = document.getElementById("hiddenlist");
+		var hiddenListElement = document.getElementById("citydb_hiddenlist");
 		hiddenListElement.onchange = function() {
             zoomToObject(this.value);
         };
@@ -230,8 +241,8 @@
 	    	citydbLayer.zoomToLayer();
 	    }
 
-	    var layerListBox = document.getElementById("layerlistbox")
-	    layerListBox.appendChild(layerOption);
+	    var layerlistpanel = document.getElementById("citydb_layerlistpanel")
+	    layerlistpanel.appendChild(layerOption);
   	}
 	
 	function addEventListeners(citydbKmlLayer) {
@@ -590,16 +601,6 @@
   		} 		
   	}
 
-  	var addLayerViewModel = {
-		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
-		name : "Berlin_Center_Footprint",
-		picksurface: Cesium.knockout.observableArray([false]),
-		maxSizeOfCachedTiles : 50,
-		maxCountOfVisibleTiles : 200
-	};
-  	Cesium.knockout.track(addLayerViewModel);
-	Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('addlayerpanel'));
-  	
   	cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
 		var gmlId = cesiumViewer.geocoder.viewModel._searchText;	
 		var promise = zoomToObject(gmlId);
