@@ -175,7 +175,7 @@
 						    <tr>
 						        <td>PickSurface</td>
 						        <td>
-									<select class="cesium-button" data-bind="options: [false, true], selectedOptions: picksurface"></select>	
+									<select class="cesium-button" data-bind="options: [false, true], selectedOptions: pickSurface"></select>	
 						        </td>
 						    </tr>
 						    <tr>
@@ -327,7 +327,15 @@
 				<div class="citydb_short_container">
 					<button type="button" style="width: 100%;" class="cesium-button" onclick="showHiddenObjects()">Show Hidden Objects</button>	
 				</div>						
-			</div>		        				
+			</div>		
+			<div>
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="createScreenshot()">Create Screenshot</button>		
+				</div>			
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="printCurrentview()">Print current view</button>	
+				</div>						
+			</div>				        				
         </div>	               			
 	</div>
 	<script>

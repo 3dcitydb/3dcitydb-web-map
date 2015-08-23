@@ -86,7 +86,7 @@
   	var addLayerViewModel = {
 		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
 		name : "Berlin_Center_Footprint",
-		picksurface: Cesium.knockout.observableArray([false]),
+		pickSurface: Cesium.knockout.observableArray([false]),
 		maxSizeOfCachedTiles : 50,
 		maxCountOfVisibleTiles : 200
 	};  	
@@ -507,7 +507,7 @@
   	};
   	
   	// Clear Highlighting effect of all highlighted objects
-  	function clearhighlight(){		
+  	function clearhighlight(){
   		var layers = webMap._layers;
   		for (var i = 0; i < layers.length; i++) {
   			if (layers[i].active) {
@@ -596,7 +596,7 @@
 		_layers.push(new CitydbKmlLayer({
 			url : addLayerViewModel.url,
 			name : addLayerViewModel.name,
-			picksurface: addLayerViewModel.picksurface[0],
+			pickSurface: addLayerViewModel.pickSurface[0],
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
 			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles
 		}));
@@ -670,6 +670,25 @@
 		var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
 		baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
 		baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+	}
+	
+	function createScreenshot() {
+  		cesiumViewer.render();
+  		var imageUri = cesiumViewer.canvas.toDataURL();
+  		var imageWin = window.open("");
+  		imageWin.document.write("<html><head>" +
+  				"<title>" + imageUri + "</title></head><body>" +
+  				'<img src="' + imageUri + '"height="97%" width="100%">' + 
+  				"</body></html>");
+  		return imageWin;
+	}
+	
+	function printCurrentview() {
+  		var imageWin = createScreenshot();
+  		imageWin.document.close();
+  		imageWin.focus();
+  		imageWin.print();
+  		imageWin.close();
 	}
 	
   	cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
