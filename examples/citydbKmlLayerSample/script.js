@@ -355,19 +355,7 @@
 					}
 					catch(e){return;} // not valid entities
 					_doMouseoverHighlighting(childrenEntities, primitive, mouseOverhighlightColor);
-				}
-
-				function _doMouseoverHighlighting(_childrenEntities, _primitive, _mouseOverhighlightColor) {
-					for (var i = 0; i < _childrenEntities.length; i++){	
-						var childEntity = _childrenEntities[i];							
-						var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
-						if (!Cesium.defined(childEntity.originalSurfaceColor)) {
-							childEntity.addProperty("originalSurfaceColor");
-						}						
-						childEntity.originalSurfaceColor = attributes.color;
-						attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(_mouseOverhighlightColor); 
-					}
-				}
+				}	
 			}
 		});
 		
@@ -403,23 +391,35 @@
 					catch(e){return;} // not valid entities
 					_dismissMouseoverHighlighting(childrenEntities, primitive);	
 				}
-							
-				function _dismissMouseoverHighlighting(_childrenEntities, _primitive) {
-					for (var i = 0; i < _childrenEntities.length; i++){	
-						var childEntity = _childrenEntities[i];	
-						var originalSurfaceColor = childEntity.originalSurfaceColor;
-						try{
-							var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
-							attributes.color = originalSurfaceColor; 
-						}
-						catch(e){
-							console.log(e);
-							/* escape the DeveloperError exception: "This object was destroyed..." */
-						}
-					}
-				}
 			}
 		});	 
+	 	
+		function _doMouseoverHighlighting(_childrenEntities, _primitive, _mouseOverhighlightColor) {
+			for (var i = 0; i < _childrenEntities.length; i++){	
+				var childEntity = _childrenEntities[i];							
+				var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
+				if (!Cesium.defined(childEntity.originalSurfaceColor)) {
+					childEntity.addProperty("originalSurfaceColor");
+				}						
+				childEntity.originalSurfaceColor = attributes.color;
+				attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(_mouseOverhighlightColor); 
+			}
+		}
+		
+		function _dismissMouseoverHighlighting(_childrenEntities, _primitive) {
+			for (var i = 0; i < _childrenEntities.length; i++){	
+				var childEntity = _childrenEntities[i];	
+				var originalSurfaceColor = childEntity.originalSurfaceColor;
+				try{
+					var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
+					attributes.color = originalSurfaceColor; 
+				}
+				catch(e){
+					console.log(e);
+					/* escape the DeveloperError exception: "This object was destroyed..." */
+				}
+			}
+		}
 	}
  	
 	function zoomToDefaultCameraPosition() {	
