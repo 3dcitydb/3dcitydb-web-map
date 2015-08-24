@@ -277,6 +277,7 @@
 			var primitive = object.primitive;
 			console.log(citydbKmlLayer);
 	 		console.log(primitive);
+	 	//	createInfoTable(targetEntity);
 	 		
 	 		var globeId; 
 	 		if (citydbKmlLayer.pickSurface != true) {
@@ -689,6 +690,60 @@
   		imageWin.focus();
   		imageWin.print();
   		imageWin.close();
+	}
+	
+	function createInfoTable(cesiumEntity) {
+		var gmlid = cesiumEntity.name;
+		var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/1E2zbJqNnuAei0YETu3EvR20T4KUAZ5H3LYujMm4EacI/edit#gid=827491744";		
+		cesiumEntity.description = "Loading feature information...";
+		
+		fetchDataFromGoogleSpreadsheet(gmlid, spreadsheetUrl).then(function(kvp){
+			console.log(kvp);
+			var html = '<table class="cesium-infoBox-defaultTable"><tbody>';
+	        for (var key in kvp) {
+	            html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
+	        }
+	        html += '</tbody></table>';
+
+			cesiumEntity.description = html;
+		}).otherwise(function(error) {
+			cesiumEntity.description = 'No feature information found';
+		});		
+	}
+	
+	function fetchDataFromGoogleSpreadsheet(gmlid, spreadsheetUrl) {
+		var kvp = {};
+		var deferred = Cesium.when.defer();
+		
+		var spreadsheetKey = spreadsheetUrl.split("/")[5];
+		var metaLink = 'https://spreadsheets.google.com/feeds/worksheets/' + spreadsheetKey + '/public/full?alt=json-in-script';
+		
+		Cesium.jsonp(metaLink).then(function(meta) {
+			console.log(meta);			
+			var feedCellUrl = meta.feed.entry[0].link[1].href;
+			feedCellUrl += '?alt=json-in-script&min-row=1&max-row=1';
+			Cesium.jsonp(feedCellUrl).then(function(cellData) {
+				var feedListUrl = meta.feed.entry[0].link[0].href;
+				feedListUrl += '?alt=json-in-script&sq=gmlid%3D';
+				feedListUrl += gmlid;
+				Cesium.jsonp(feedListUrl).then(function(listData) {
+					for (var i = 1; i < cellData.feed.entry.length; i++) {
+						var key = cellData.feed.entry[i].content.$t;
+						var value = listData.feed.entry[0]['gsx$' + key.toLowerCase().replace(/_/g,'')].$t;
+						kvp[key] = value;
+					}
+					deferred.resolve(kvp);
+				}).otherwise(function(error) {
+					deferred.reject(error);
+				});
+			}).otherwise(function(error) {
+				deferred.reject(error);
+			});
+		}).otherwise(function(error) {
+			deferred.reject(error);
+		});
+		
+		return deferred.promise;
 	}
 	
   	cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
