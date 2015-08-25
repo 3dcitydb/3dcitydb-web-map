@@ -335,7 +335,16 @@
 				<div class="citydb_short_container">
 					<button type="button" style="width: 100%;" class="cesium-button" onclick="printCurrentview()">Print current view</button>	
 				</div>						
-			</div>				        				
+			</div>	
+			<div class="citydb_long_container">	
+				<select id = "citydb_showinexternalmaps" style="width: 100%;" onchange="showInExternalMaps()" class="cesium-button">
+					<option selected="selected" disabled="disabled">Show the selected object in External Maps</option>	
+					<option value = "google">Google StreetView</option>	
+					<option value = "osm"> OpenStreetMap</option>	
+					<option value = "bing">BingMaps ObliqueView</option>	
+					<option value = "dual">DualMaps</option>				
+				</select>					
+			</div>						        				
         </div>	               			
 	</div>
 	<script>

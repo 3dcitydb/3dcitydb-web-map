@@ -488,7 +488,7 @@
   				layers[i].unHighlightAllObjects();
   			} 			
   		} 
-  	//	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
+  		cesiumViewer.selectedEntity = undefined;
   	};
   	
     // hide the selected objects
@@ -718,6 +718,44 @@
 		});
 		
 		return deferred.promise;
+	}
+	
+	function showInExternalMaps() {
+		var mapOptionList = document.getElementById('citydb_showinexternalmaps');
+		var selectedIndex = mapOptionList.selectedIndex; 
+		mapOptionList.selectedIndex = 0;
+		
+		var selectedEntity = cesiumViewer.selectedEntity;
+		if (!Cesium.defined(selectedEntity))
+			return;
+		
+		var selectedEntityPosition = selectedEntity.position;
+		if (!Cesium.defined(selectedEntityPosition))
+			return;
+
+		var mapLink = "";		
+		var wgs84OCoordinate  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityPosition._value);
+		var lat = Cesium.Math.toDegrees(wgs84OCoordinate.latitude);
+		var lon = Cesium.Math.toDegrees(wgs84OCoordinate.longitude);
+
+		switch (selectedIndex) {
+			case 1:
+				mapLink = 'https://maps.google.com/maps?cbp=1,479.7175735027765,,0,-3.50219513621329&cbll=' + lat + ',' + lon + '&panoid=dmZf3jLw1OS-1bR58b03FA&gl=&hl=en&output=svembedmfe&layer=c'; 
+				break;
+			case 2:
+				mapLink = 'http://www.openstreetmap.org/index.html?lat=' + lat + '&lon=' + lon + '&zoom=20'; 
+				break;
+			case 3:
+				mapLink = 'http://www.bing.com/maps/default.aspx?v=2&cp=' + lat + '~' + lon + '&lvl=19&style=o';
+				break;
+			case 4:
+				mapLink = 'http://data.dualmaps.com/dualmaps4/map.htm?x=' + lon + '&y=' + lat + '&z=16&gm=0&ve=4&gc=0&bz=0&bd=0&mw=1&sv=1&sva=1&svb=0&svp=0&svz=0&svm=2&svf=0&sve=1';
+				break;
+			default:
+				//	do nothing...
+		}
+		
+		window.open(mapLink);
 	}
 	
   	cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
