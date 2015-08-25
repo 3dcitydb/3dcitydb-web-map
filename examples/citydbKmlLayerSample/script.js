@@ -277,8 +277,10 @@
 		citydbKmlLayer.registerEventHandler("MOUSEIN", function(object) {
 			var targetEntity = object.id;
 	 		var primitive = object.primitive;
+	 		
 	 		if (citydbKmlLayer.isInHighlightedList(targetEntity.name))
 				return;
+	 		
 			if (primitive instanceof Cesium.Model) {				
 				var materials = object.mesh._materials;
 				for (var i = 0; i < materials.length; i++) {
@@ -668,12 +670,12 @@
 	
 	function createInfoTable(cesiumEntity) {
 		var gmlid = cesiumEntity.name;
-		var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/1E2zbJqNnuAei0YETu3EvR20T4KUAZ5H3LYujMm4EacI/edit#gid=827491744";		
+		var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/1foXFrXSX4XztW78SzpxREAvH5qeYWaeSF8xxJhhl1LY/edit#gid=1868995472";		
 		cesiumEntity.description = "Loading feature information...";
 		
 		fetchDataFromGoogleSpreadsheet(gmlid, spreadsheetUrl).then(function(kvp){
 			console.log(kvp);
-			var html = '<table class="cesium-infoBox-defaultTable"><tbody>';
+			var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
 	        for (var key in kvp) {
 	            html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
 	        }
