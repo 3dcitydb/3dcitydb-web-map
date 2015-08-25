@@ -181,6 +181,18 @@
 	        }
 	    },
 	    
+	    maxSizeOfCachedTiles : {
+	        get : function(){
+	        	return this._maxSizeOfCachedTiles;
+	        }
+	    },
+	    
+	    maxCountOfVisibleTiles : {
+	        get : function(){
+	        	return this._maxCountOfVisibleTiles;
+	        }
+	    },
+	    
 	    citydbKmlTilingManager : {
 	        get : function(){
 	        	return this._citydbKmlTilingManager;

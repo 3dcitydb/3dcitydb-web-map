@@ -6,7 +6,7 @@
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
 	});
 	
-	//	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
+//	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
 	
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
@@ -16,72 +16,7 @@
 	webMap.activateMouseMoveEvents(true);
 	webMap.activateViewChangedEvent(true);
 
-    // creating some layers which were exported from 3DCityDB using KML/Collada/Gltf Exporter
-	var layers = new Array();
-	
-/*	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json',
-		name : 'Berlin_Center_Footprint',
-		activeHighlighting: true,
-		cacheTiles: false,
-		id : "Berlin_Center_Footprint"
-	}));
-	*/
-	
-	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Extruded/Berlin_Center_Extruded_MasterJSON.json',
-		name : 'Berlin_Center_Extruded'
-	}));
-	
-/*	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md_MasterJSON.json',
-		name : 'Berlin_CityCenter_Texture',
-		activeHighlighting: true,
-		pickSurface: true,
-		cacheTiles: true,
-		maxSizeOfCachedTiles: 30,
-		maxCountOfVisibleTiles: 100,
-		id : "Berlin_CityCenter_Texture"
-	}));*/
-		
-	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Geometry/Berlin_Center_Geometry_MasterJSON.json',
-		name : 'Berlin_Center_Geometry',
-		pickSurface: true,
-		maxSizeOfCachedTiles: 30,
-		maxCountOfVisibleTiles: 30
-	}));
-	
-	
-/*	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/NYK_All_Geometry/NYK_All_Geometry/NYK_All_Geometry_MasterJSON.json',
-		name : 'NewYork_Building_LOD1_ExtrudedGeometry',
-		activeHighlighting: true,
-		id : 'NewYork_Building_LOD1_ExtrudedGeometry'
-	}));*/
-	
-/*  	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_Texture_Md/Berlin_Center_Texture_Md_MasterJSON.json',
-		name : 'Berlin_CityCenter_Building_Texture',
-		activeHighlighting: true,
-		id : "Berlin_CityCenter_Building_Texture"
-	}));*/
-  	
-  	/*
-	layers.push( new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/London_LOD2_NO_HIGHLIGHTING/London_Geometry_LOD2.kml',
-		name : 'London_Building_LOD2_Geometry',
-		activeHighlighting: true,
-		id : 'London_Building_LOD2_Geometry'
-	}));*/
-
-/*	layers.push(new CitydbKmlLayer({
-		url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_All_Geometry/Berlin_All_Geometry_MasterJSON.json',
-		name : 'Berlin_Building_LOD2_ThematicSurfaceGeometry',
-		activeHighlighting: true,
-		pickSurface: true,
-		id : 'Berlin_Building_LOD2_ThematicSurfaceGeometry'
-	}));*/
+	layers = getLayersFromUrl();
 
   	var addLayerViewModel = {
 		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
@@ -122,6 +57,25 @@
 		console.log(info);
 		loadLayerGroup(layers);
 	})
+	
+	function getLayersFromUrl() {
+		var index = 0;
+		var nLayers = new Array();
+		var layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
+		while (layerConfigString) {
+			var layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);			
+			nLayers.push(new CitydbKmlLayer({
+				url : layerConfig.url,
+				name : layerConfig.name,
+				pickSurface: Boolean(layerConfig.pickSurface),
+				maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
+				maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
+			}));			
+			index++;
+			layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
+		}
+		return nLayers;
+	}
 	
 	function observeObjectList() {
 		var observable = Cesium.knockout.getObservable(webMap, '_activeLayer');
@@ -277,7 +231,7 @@
 			var primitive = object.primitive;
 			console.log(citydbKmlLayer);
 	 		console.log(primitive);
-	 	//	createInfoTable(targetEntity);
+	 		createInfoTable(targetEntity);
 	 		
 	 		var globeId; 
 	 		if (citydbKmlLayer.pickSurface != true) {
@@ -502,10 +456,29 @@
 			'&range=' + cameraPostion.range +
 			'&tilt=' + cameraPostion.tilt +
 			'&heading=' + cameraPostion.heading +
-			'&altitude=' + cameraPostion.altitude;
+			'&altitude=' + cameraPostion.altitude + 
+			'&' + layersToQuery();
 			window.history.pushState("string", "Title", projectLink);
         }
   	};
+  	
+  	function layersToQuery() {
+  		var layerGroupObject = new Object();
+  		var layers = webMap._layers;
+  		for (var i = 0; i < layers.length; i++) {
+  			var layer = layers[i];
+  			var layerConfig = {
+				url : layer.url,
+				name : layer.name,
+				pickSurface: layer.pickSurface,
+				maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
+				maxCountOfVisibleTiles: layer.maxCountOfVisibleTiles,
+  			}
+  			layerGroupObject["layer_" + i] = Cesium.objectToQuery(layerConfig); 			
+  		} 
+  		
+  		return Cesium.objectToQuery(layerGroupObject)
+  	}
   	
   	// Clear Highlighting effect of all highlighted objects
   	function clearhighlight(){
@@ -514,7 +487,8 @@
   			if (layers[i].active) {
   				layers[i].unHighlightAllObjects();
   			} 			
-  		} 		
+  		} 
+  	//	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
   	};
   	
     // hide the selected objects
