@@ -730,15 +730,22 @@
 		var selectedEntity = cesiumViewer.selectedEntity;
 		if (!Cesium.defined(selectedEntity))
 			return;
-		
-		var selectedEntityPosition = selectedEntity.position;
-		if (!Cesium.defined(selectedEntityPosition))
-			return;
 
-		var mapLink = "";		
-		var wgs84OCoordinate  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityPosition._value);
+		var selectedEntityPosition = selectedEntity.position;
+		var wgs84OCoordinate;
+		
+		if (!Cesium.defined(selectedEntityPosition)) {
+			var boundingSphereScratch = new Cesium.BoundingSphere();
+			cesiumViewer._dataSourceDisplay.getBoundingSphere(selectedEntity, false, boundingSphereScratch);
+			wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(boundingSphereScratch.center);
+		}
+		else {		
+			wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityPosition._value);
+
+		}
 		var lat = Cesium.Math.toDegrees(wgs84OCoordinate.latitude);
 		var lon = Cesium.Math.toDegrees(wgs84OCoordinate.longitude);
+		var mapLink = "";		
 
 		switch (selectedIndex) {
 			case 1:
