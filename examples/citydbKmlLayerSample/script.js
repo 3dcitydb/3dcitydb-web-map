@@ -6,8 +6,13 @@
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
 	});
 	
-//	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
+	var cesiumInfoBoxElement = document.getElementsByClassName('cesium-infoBox')[0];
+	cesiumInfoBoxElement.style.top = '90px';
 	
+
+	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);	
+	cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
+
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
 	
