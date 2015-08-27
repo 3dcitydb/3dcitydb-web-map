@@ -11,7 +11,7 @@
 
 	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);	
 	cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
-
+	
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
 	
@@ -784,6 +784,12 @@
 		}
 		
 		window.open(mapLink);
+	}
+	
+	function showPopupInfoBox(title, message) { 		
+  		cesiumViewer.cesiumWidget.showErrorPanel(title, message, 'Click "OK" button to continue... ');
+  		var showErrorPaneElement = document.getElementsByClassName('cesium-widget-errorPanel-content')[0];
+  		showErrorPaneElement.style.width = '400px';  		
 	}
 	
   	cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
