@@ -549,7 +549,6 @@
   	
   	// Clear Highlighting effect of all highlighted objects
   	function clearhighlight(){
-  		fetchDataFromGoogleFusionTable();
   		var layers = webMap._layers;
   		for (var i = 0; i < layers.length; i++) {
   			if (layers[i].active) {
@@ -582,16 +581,15 @@
   	};
   	
   	function zoomToObject(gmlId) {
-  		var jsonpUrl = CitydbUtil.get_host_and_file_wo_suffix_from_URL(webMap.activeLayer.url).replace('_MasterJSON', '') + 'json';  
-		var promise = jsonp(jsonpUrl);
+  		var spreadsheetUrl = webMap.activeLayer.spreadsheetUrl;  
+		var promise = fetchDataFromGoogleFusionTable(gmlId, spreadsheetUrl);
 		var _deferred = Cesium.when.defer();
 		Cesium.when(promise, function(result) {
-			var obj = result[gmlId];
-	        if (obj) {	        	
-	            // the entered string is a known GMLID; let's fly
-	            // to the center point of the corresponding feature
-	            var lon = (obj.envelope[0] + obj.envelope[2]) / 2.0;
-	            var lat = (obj.envelope[1] + obj.envelope[3]) / 2.0;
+			var centroid = result["Centroid"];
+	        if (centroid) {	  
+	        	var res = centroid.split(",");
+	            var lon = parseFloat(res[0]);
+	            var lat = parseFloat(res[1]);
 	    		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
     	        var heading = Cesium.Math.toRadians(0);
     	        var pitch = Cesium.Math.toRadians(-50);
