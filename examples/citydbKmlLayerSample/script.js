@@ -549,7 +549,7 @@
   	
   	// Clear Highlighting effect of all highlighted objects
   	function clearhighlight(){
-  		saveLayerSettings();
+  		fetchDataFromGoogleFusionTable();
   		var layers = webMap._layers;
   		for (var i = 0; i < layers.length; i++) {
   			if (layers[i].active) {
@@ -739,11 +739,10 @@
 	
 	function createInfoTable(cesiumEntity, citydbLayer) {
 		var gmlid = cesiumEntity.name;
-		var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/1foXFrXSX4XztW78SzpxREAvH5qeYWaeSF8xxJhhl1LY/edit#gid=1868995472";	
 		var spreadsheetUrl = citydbLayer.spreadsheetUrl;
 		cesiumEntity.description = "Loading feature information...";
 		
-		fetchDataFromGoogleSpreadsheet(gmlid, spreadsheetUrl).then(function(kvp){
+		fetchDataFromGoogleFusionTable(gmlid, spreadsheetUrl).then(function(kvp){
 			console.log(kvp);
 			var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
 	        for (var key in kvp) {
@@ -791,6 +790,33 @@
 		
 		return deferred.promise;
 	}
+	
+	function fetchDataFromGoogleFusionTable(gmlid, spreadsheetUrl) {
+		var kvp = {};
+		var deferred = Cesium.when.defer();
+		
+		var tableID = CitydbUtil.parse_query_string('docid', spreadsheetUrl); 		
+		var sql = "sql=SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
+		var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";		
+		var queryLink = "https://www.googleapis.com/fusiontables/v2/query?" + sql + "&key=" + apiKey; 	
+
+		Cesium.loadJson(queryLink).then(function(data) {
+			console.log(data);
+			var columns = data.columns;
+			var rows = data.rows;
+			for (var i = 0; i < columns.length; i++) {
+				var key = columns[i];
+				var value = rows[0][i];
+				kvp[key] = value;
+			}
+			console.log(kvp);
+			deferred.resolve(kvp);
+		}).otherwise(function(error) {
+			deferred.reject(error);
+		});
+		return deferred.promise;
+	}
+	
 	
 	function showInExternalMaps() {
 		var mapOptionList = document.getElementById('citydb_showinexternalmaps');
