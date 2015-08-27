@@ -26,7 +26,8 @@
   	var addLayerViewModel = {
 		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
 		name : "Berlin_Center_Footprint",
-		pickSurface: Cesium.knockout.observableArray([false]),
+		spreadsheetUrl: "",
+		pickSurface: [false],
 		maxSizeOfCachedTiles : 50,
 		maxCountOfVisibleTiles : 200
 	};  	
@@ -85,11 +86,12 @@
 		var nLayers = new Array();
 		var layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
 		while (layerConfigString) {
-			var layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);			
+			var layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);
 			nLayers.push(new CitydbKmlLayer({
 				url : layerConfig.url,
 				name : layerConfig.name,
-				pickSurface: Boolean(layerConfig.pickSurface),
+				spreadsheetUrl: layerConfig.spreadsheetUrl,
+				pickSurface: (layerConfig.pickSurface == "true"),
 				maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
 				maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
 			}));			
@@ -150,7 +152,9 @@
 				  		hiddenListElement.add(option);	
 					}				  		
 			    });	      		
-	      		selectedLayer.hiddenObjects = selectedLayer.hiddenObjects;      		
+	      		selectedLayer.hiddenObjects = selectedLayer.hiddenObjects;  
+	      		
+	      		updateAddLayerViewModel(selectedLayer);
 	        } 
 	        else {
 	        	while (highlightingListElement.length > 1) {
@@ -160,7 +164,38 @@
 		  			hiddenListElement.remove(1);
 		  		}
 	        }
-	    });
+	    });		
+		
+		function updateAddLayerViewModel(selectedLayer) {
+			addLayerViewModel.url = selectedLayer.url;
+			addLayerViewModel.name = selectedLayer.name;
+			addLayerViewModel.spreadsheetUrl = selectedLayer.spreadsheetUrl;
+			addLayerViewModel.pickSurface = [selectedLayer.pickSurface];
+			addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
+			addLayerViewModel.maxCountOfVisibleTiles = selectedLayer.maxCountOfVisibleTiles;	    
+		}
+	}
+	
+	function saveLayerSettings() {
+		var activeLayer = webMap.activeLayer;		
+		applySaving('url', activeLayer);
+		applySaving('name', activeLayer);
+		applySaving('pickSurface', activeLayer);
+		applySaving('spreadsheetUrl', activeLayer);
+		applySaving('maxSizeOfCachedTiles', activeLayer);
+		applySaving('maxCountOfVisibleTiles', activeLayer);
+		console.log(activeLayer);
+		activeLayer.reActivate();
+		
+		function applySaving(propertyName, activeLayer) {			
+			var newValue = addLayerViewModel[propertyName];
+			if (Cesium.isArray(newValue)) {			           
+	            activeLayer[propertyName] = newValue[0];
+        	}
+        	else {
+        		activeLayer[propertyName] = newValue;
+        	}
+		}		
 	}
 
 	function loadLayerGroup(_layers) {
@@ -253,7 +288,7 @@
 			var primitive = object.primitive;
 			console.log(citydbKmlLayer);
 	 		console.log(primitive);
-	 		createInfoTable(targetEntity);
+	 		createInfoTable(targetEntity, citydbKmlLayer);
 	 		
 	 		var globeId; 
 	 		if (citydbKmlLayer.pickSurface != true) {
@@ -492,6 +527,7 @@
 				url : layer.url,
 				name : layer.name,
 				pickSurface: layer.pickSurface,
+				spreadsheetUrl: layer.spreadsheetUrl,
 				maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
 				maxCountOfVisibleTiles: layer.maxCountOfVisibleTiles,
   			}
@@ -503,6 +539,7 @@
   	
   	// Clear Highlighting effect of all highlighted objects
   	function clearhighlight(){
+  		saveLayerSettings();
   		var layers = webMap._layers;
   		for (var i = 0; i < layers.length; i++) {
   			if (layers[i].active) {
@@ -592,6 +629,7 @@
 		_layers.push(new CitydbKmlLayer({
 			url : addLayerViewModel.url,
 			name : addLayerViewModel.name,
+			spreadsheetUrl : addLayerViewModel.spreadsheetUrl,
 			pickSurface: addLayerViewModel.pickSurface[0],
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
 			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles
@@ -687,9 +725,10 @@
   		imageWin.close();
 	}
 	
-	function createInfoTable(cesiumEntity) {
+	function createInfoTable(cesiumEntity, citydbLayer) {
 		var gmlid = cesiumEntity.name;
-		var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/1foXFrXSX4XztW78SzpxREAvH5qeYWaeSF8xxJhhl1LY/edit#gid=1868995472";		
+		var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/1foXFrXSX4XztW78SzpxREAvH5qeYWaeSF8xxJhhl1LY/edit#gid=1868995472";	
+		var spreadsheetUrl = citydbLayer.spreadsheetUrl;
 		cesiumEntity.description = "Loading feature information...";
 		
 		fetchDataFromGoogleSpreadsheet(gmlid, spreadsheetUrl).then(function(kvp){

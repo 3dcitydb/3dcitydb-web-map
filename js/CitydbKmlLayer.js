@@ -26,6 +26,7 @@
 		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
 		this._cesiumViewer = undefined;
 		this._jsonLayerInfo = undefined;
+		this._spreadsheetUrl = Cesium.defaultValue(options.spreadsheetUrl, "");
 	
 		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);	
 		this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
@@ -124,6 +125,9 @@
 	    url : {
 	        get : function(){
 	        	return this._url;
+	        },
+	        set : function(value){
+	        	this._url = value;
 	        }
 	    },
 	    /**
@@ -134,6 +138,9 @@
 	    name : {
 	        get : function(){
 	        	return this._name;
+	        },
+	        set : function(value){
+	        	this._name = value;
 	        }
 	    },
 	    /**
@@ -160,6 +167,18 @@
 	    pickSurface : {
 	        get : function(){
 	        	return this._pickSurface;
+	        },
+	        set : function(value){
+	        	this._pickSurface = value;
+	        }
+	    },
+	    
+	    spreadsheetUrl : {
+	        get : function(){
+	        	return this._spreadsheetUrl;
+	        },
+	        set : function(value){
+	        	this._spreadsheetUrl = value;
 	        }
 	    },
 	    
@@ -180,16 +199,32 @@
 	        	return this._citydbKmlDataSource;
 	        }
 	    },
+	    	    
+	    cacheTiles : {
+	        get : function(){
+	        	return this._cacheTiles;
+	        },
+	        set : function(value){
+	        	this._cacheTiles = value;
+	        }
+	    },
 	    
 	    maxSizeOfCachedTiles : {
 	        get : function(){
 	        	return this._maxSizeOfCachedTiles;
+	        },
+	        set : function(value){
+	        	this._maxSizeOfCachedTiles = value;
+	        	this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
 	        }
 	    },
 	    
 	    maxCountOfVisibleTiles : {
 	        get : function(){
 	        	return this._maxCountOfVisibleTiles;
+	        },
+	        set : function(value){
+	        	this._maxCountOfVisibleTiles = value;
 	        }
 	    },
 	    
@@ -311,6 +346,20 @@
 			this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);			
 		}
 		this._active = active;
+	}
+	
+	CitydbKmlLayer.prototype.reActivate = function(){
+		if (!this._active) {
+			this.activate(true);
+		}
+		else {
+			this.activate(false);
+			var that = this;
+			// here we simply activate layer one seconds layer...
+			setTimeout(function(){
+				that.activate(true);
+        	}, 1000)  			
+		}
 	}
 	
 	

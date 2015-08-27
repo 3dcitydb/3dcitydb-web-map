@@ -7,10 +7,6 @@
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
 		this.dataPoolKml = new Object();
 		this.boundingboxEntity = null;
-		
-		this._cacheTiles = citydbKmlLayerInstance._cacheTiles;
-		this._maxSizeOfCachedTiles = citydbKmlLayerInstance._maxSizeOfCachedTiles;					
-		this._maxCountOfVisibleTiles = citydbKmlLayerInstance._maxCountOfVisibleTiles;
 	}
 	
 	CitydbKmlTilingManager.prototype.doStart = function() {		
@@ -157,7 +153,7 @@
 	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
 	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
 	        	
-	        	if (scope._cacheTiles) { // with cache
+	        	if (scope.citydbKmlLayerInstance.cacheTiles) { // with cache
 	        		if (networklinkCache.hasOwnProperty(objUrl)) {
 		        		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
 		        			if (!dataPoolKml.hasOwnProperty(objUrl)) {
@@ -260,7 +256,7 @@
 		 */
 		scope.oTask.addListener("cleanCaching", function (maxCacheSize) {
 			// default value
-			var _maxCacheSize = scope._maxSizeOfCachedTiles;
+			var _maxCacheSize = scope.citydbKmlLayerInstance.maxSizeOfCachedTiles;
 			
 			if (Cesium.defined(maxCacheSize)) {
 				_maxCacheSize = maxCacheSize;
@@ -313,20 +309,24 @@
 	    // event Listeners are so far, we start the Networklink Manager worker...
 
 		if (masterUrl.indexOf(".json") >= 0) {
-			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope._maxCountOfVisibleTiles, 'matrix');  			
+			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope.citydbKmlLayerInstance.maxCountOfVisibleTiles, 'matrix');  			
     	}
 		else {
-			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope._maxCountOfVisibleTiles, 'rtree');
+			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope.citydbKmlLayerInstance.maxCountOfVisibleTiles, 'rtree');
 		}
 				
 		this.runMonitoring();
     },
     
     CitydbKmlTilingManager.prototype.isDataStreaming = function() {
+    	if (this.oTask == null)
+    		return false;
     	return !this.oTask.isSleep();   	 
     },
     
     CitydbKmlTilingManager.prototype.clearCaching = function() {
+    	if (this.oTask == null)
+    		return false;
     	this.oTask.oListeners["cleanCaching"].call(this, 0); 	 
     },
     

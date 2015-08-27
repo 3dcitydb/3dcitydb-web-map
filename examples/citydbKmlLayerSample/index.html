@@ -150,7 +150,7 @@
 				 <!-- add layer panel -->
 		        <div class="citydb_short_container" onclick="showAddLayerPanel()">
 		            <select style="width: 100%;" class="cesium-button" >
-		                <option>Add 3DCityDB-Layer</option>
+		                <option>Add / Configure Layer</option>
 		            </select>	            
 		            <div class="citydb_overSelect"></div>
 		        </div>	
@@ -173,6 +173,12 @@
 						        </td>
 						    </tr>
 						    <tr>
+						        <td>SpreadsheetUrl</td>
+						        <td>
+						            <input type="text" data-bind="value: spreadsheetUrl">
+						        </td>
+						    </tr>						    
+						    <tr>
 						        <td>PickSurface</td>
 						        <td>
 									<select class="cesium-button" data-bind="options: [false, true], selectedOptions: pickSurface"></select>	
@@ -192,9 +198,12 @@
 						    </tr>				    
 						</tbody>
 					</table>
-			        <div class="citydb_long_container">
+			        <div class="citydb_short_container">
 						<button style="width: 100%;" type="button" class="cesium-button" onclick="addNewLayer()">Add layer</button>
-			        </div>											
+			        </div>	
+			        <div class="citydb_short_container">
+						<button style="width: 100%;" type="button" class="cesium-button" onclick="saveLayerSettings()">Save layer settings</button>
+			        </div>				        										
 		        </div>
 	        </div>	
 	        
