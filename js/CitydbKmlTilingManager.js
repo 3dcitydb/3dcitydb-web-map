@@ -17,8 +17,8 @@
     	var scene = cesiumViewer.scene;
     	var canvas = scene.canvas; 
     	
-    	var minLodPixels = undefined;
-    	var maxLodPixels = undefined;
+    	var minLodPixels = this.citydbKmlLayerInstance.minLodPixels;
+    	var maxLodPixels = this.citydbKmlLayerInstance.maxLodPixels;
     	
     	// start Hihgighting Manager
     	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
@@ -45,8 +45,6 @@
 			fileextension = jsonLayerInfo.fileextension;
 			var colnum = jsonLayerInfo.colnum;
 			var rownum = jsonLayerInfo.rownum;  
-			minLodPixels = jsonLayerInfo.minLodPixels == -1? Number.MIN_VALUE: jsonLayerInfo.minLodPixels;
-			maxLodPixels = jsonLayerInfo.maxLodPixels == -1? Number.MAX_VALUE: jsonLayerInfo.maxLodPixels;
 			var bbox = jsonLayerInfo.bbox;
 			var rowDelta = (bbox.ymax - bbox.ymin) / (rownum + 1);
 			var colDelta = (bbox.xmax - bbox.xmin) / (colnum + 1);
@@ -71,9 +69,6 @@
 	        		scope.oTask.triggerEvent('addItemToRTree', item);
           		}
           	}
-			// TODO
-			minLodPixels = 140;
-			maxLodPixels = Number.MAX_VALUE;
     	}
 
 		//------------------------------below are the relevant listeners call from the worker--------------------------------//

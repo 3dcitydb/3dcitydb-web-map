@@ -32,6 +32,9 @@
 		this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
 		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);
 		
+    	this._minLodPixels = Cesium.defaultValue(options.minLodPixels, undefined);
+    	this._maxLodPixels = Cesium.defaultValue(options.maxLodPixels,  undefined);
+		
 		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);	
 		
 		this._activeHighlighting = Cesium.defaultValue(options.activeHighlighting, true);	
@@ -209,6 +212,24 @@
 	        }
 	    },
 	    
+	    minLodPixels : {
+	        get : function(){
+	        	return this._minLodPixels;
+	        },
+	        set : function(value){
+	        	this._minLodPixels = value;
+	        }
+	    },
+	    
+	    maxLodPixels : {
+	        get : function(){
+	        	return this._maxLodPixels;
+	        },
+	        set : function(value){
+	        	this._maxLodPixels = value;
+	        }
+	    },
+	    
 	    maxSizeOfCachedTiles : {
 	        get : function(){
 	        	return this._maxSizeOfCachedTiles;
@@ -275,6 +296,11 @@
 		    			altitude: 40
 		        	}
 		            
+		            if (!Cesium.defined(that._minLodPixels))
+		            	that._minLodPixels = json.minLodPixels == -1? Number.MIN_VALUE: json.minLodPixels;
+		            if (!Cesium.defined(that._maxLodPixels))
+		            	that._maxLodPixels = json.maxLodPixels == -1? Number.MAX_VALUE: json.maxLodPixels;
+		            
 		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
 		            that._citydbKmlTilingManager.doStart();
 		            that._finishLoadingEvent.raiseEvent(that);		            
@@ -287,7 +313,12 @@
     	}
 		else {
 			this._citydbKmlDataSource.load(this._url).then(function() {
-				that._cameraPosition = that._citydbKmlDataSource._lookAt;				
+				that._cameraPosition = that._citydbKmlDataSource._lookAt;
+				
+				// TODO
+				that._minLodPixels = 140
+				that._maxLodPixels = Number.MAX_VALUE;
+				
 				cesiumViewer.dataSources.add(that._citydbKmlDataSource);
 				that._citydbKmlTilingManager.doStart();
 				that._finishLoadingEvent.raiseEvent(that);

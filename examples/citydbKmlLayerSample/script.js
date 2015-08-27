@@ -28,6 +28,8 @@
 		name : "Berlin_Center_Footprint",
 		spreadsheetUrl: "",
 		pickSurface: [false],
+		minLodPixels : 140,
+		maxLodPixels : Number.MAX_VALUE,
 		maxSizeOfCachedTiles : 50,
 		maxCountOfVisibleTiles : 200
 	};  	
@@ -90,8 +92,10 @@
 			nLayers.push(new CitydbKmlLayer({
 				url : layerConfig.url,
 				name : layerConfig.name,
-				spreadsheetUrl: layerConfig.spreadsheetUrl,
+				spreadsheetUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
 				pickSurface: (layerConfig.pickSurface == "true"),
+				minLodPixels : Cesium.defaultValue(layerConfig.minLodPixels, 140),
+				maxLodPixels : Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
 				maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
 				maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
 			}));			
@@ -171,6 +175,8 @@
 			addLayerViewModel.name = selectedLayer.name;
 			addLayerViewModel.spreadsheetUrl = selectedLayer.spreadsheetUrl;
 			addLayerViewModel.pickSurface = [selectedLayer.pickSurface];
+			addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
+			addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
 			addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
 			addLayerViewModel.maxCountOfVisibleTiles = selectedLayer.maxCountOfVisibleTiles;	    
 		}
@@ -182,6 +188,8 @@
 		applySaving('name', activeLayer);
 		applySaving('pickSurface', activeLayer);
 		applySaving('spreadsheetUrl', activeLayer);
+		applySaving('minLodPixels', activeLayer);
+		applySaving('maxLodPixels', activeLayer);
 		applySaving('maxSizeOfCachedTiles', activeLayer);
 		applySaving('maxCountOfVisibleTiles', activeLayer);
 		console.log(activeLayer);
@@ -528,6 +536,8 @@
 				name : layer.name,
 				pickSurface: layer.pickSurface,
 				spreadsheetUrl: layer.spreadsheetUrl,
+				minLodPixels: layer.minLodPixels,
+				maxLodPixels: layer.maxLodPixels,
 				maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
 				maxCountOfVisibleTiles: layer.maxCountOfVisibleTiles,
   			}
@@ -631,6 +641,8 @@
 			name : addLayerViewModel.name,
 			spreadsheetUrl : addLayerViewModel.spreadsheetUrl,
 			pickSurface: addLayerViewModel.pickSurface[0],
+			minLodPixels: addLayerViewModel.minLodPixels,
+			maxLodPixels : addLayerViewModel.maxLodPixels,
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
 			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles
 		}));
