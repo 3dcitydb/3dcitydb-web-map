@@ -8,7 +8,6 @@
 	
 	var cesiumInfoBoxElement = document.getElementsByClassName('cesium-infoBox')[0];
 	cesiumInfoBoxElement.style.top = '90px';
-	
 
 	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);	
 	cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
@@ -20,9 +19,10 @@
 	webMap.activateMouseClickEvents(true);
 	webMap.activateMouseMoveEvents(true);
 	webMap.activateViewChangedEvent(true);
-
+	
 	layers = getLayersFromUrl();
 
+	// set default input parameter value and bind the view and model
   	var addLayerViewModel = {
 		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
 		name : "Berlin_Center_Footprint",
@@ -49,10 +49,12 @@
         iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
         tooltip : 'Vorarlberg Digitales Geländemodell',
     	url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/vorarlberg_DGM'
-	};
-  	
+	};  	
   	Cesium.knockout.track(addTerrainViewModel);
 	Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('citydb_addterrainpanel'));
+	
+	//	track number of loaded tiles	
+	trackLoadedTiles();
 	
 	// sync object list...
 	observeObjectList();
@@ -62,6 +64,21 @@
 		console.log(info);
 		loadLayerGroup(layers);
 	})
+	
+	    
+    /**---------------------------------  methods and functions  ----------------------------------------**/ 
+		
+	function trackLoadedTiles() {
+		var helper = new Cesium.EventHelper();
+		var datasourceCollection = cesiumViewer._dataSourceCollection;
+		helper.add(datasourceCollection.dataSourceAdded, _listener);
+		helper.add(datasourceCollection.dataSourceRemoved, _listener);
+		
+		function _listener() {
+			var tileInspector = document.getElementById('citydb_tileInspector');
+			tileInspector.innerHTML = 'Number of Loaded Tiles: ' + (cesiumViewer._dataSourceCollection.length - webMap._layers.length);
+		}
+	}
 	
 	function getLayersFromUrl() {
 		var index = 0;
@@ -435,9 +452,6 @@
 	    return deferred.promise;
 	}
 
-    
-    /**---------------------------------  Button ClickEvent Handler  ----------------------------------------**/ 
-    
     // Creation of a weblink for sharing with other people..
  	function generateLink(){
   		var cameraPostion = null;	    		    	   	
