@@ -301,7 +301,7 @@
 			var primitive = object.primitive;
 			console.log(citydbKmlLayer);
 	 		console.log(primitive);
-	 		createInfoTable(targetEntity, citydbKmlLayer);
+	 		
 	 		
 	 		var globeId; 
 	 		if (citydbKmlLayer.pickSurface != true) {
@@ -310,6 +310,8 @@
 	 		else {
 	 			globeId = targetEntity.name;
 	 		}
+	 		
+	 		createInfoTable(globeId, targetEntity, citydbKmlLayer);
 	 		
 	 		if (citydbKmlLayer.isInHighlightedList(globeId))
 				return; 
@@ -553,7 +555,7 @@
   	}
   	
   	// Clear Highlighting effect of all highlighted objects
-  	function clearhighlight(){
+  	function clearhighlight(){  		
   		var layers = webMap._layers;
   		for (var i = 0; i < layers.length; i++) {
   			if (layers[i].active) {
@@ -592,7 +594,7 @@
 		Cesium.when(promise, function(result) {
 			var centroid = result["CENTROID"];
 	        if (centroid) {	  
-	        	var res = centroid.split(",");
+	        	var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
 	            var lon = parseFloat(res[0]);
 	            var lat = parseFloat(res[1]);
 	    		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
@@ -723,10 +725,12 @@
   		imageWin.close();
 	}
 	
-	function createInfoTable(cesiumEntity, citydbLayer) {
-		var gmlid = cesiumEntity.name;
+	function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
 		var spreadsheetUrl = citydbLayer.spreadsheetUrl;
-		cesiumEntity.description = "Loading feature information...";
+		var clonedEntity = Cesium.clone(cesiumEntity);
+		cesiumViewer.selectedEntity = clonedEntity;
+		clonedEntity.name = gmlid;
+		clonedEntity.description = "Loading feature information...";
 		
 		fetchDataFromGoogleFusionTable(gmlid, spreadsheetUrl).then(function(kvp){
 			console.log(kvp);
@@ -735,10 +739,10 @@
 	            html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
 	        }
 	        html += '</tbody></table>';
-
-			cesiumEntity.description = html;
+	        
+	        clonedEntity.description = html;
 		}).otherwise(function(error) {
-			cesiumEntity.description = 'No feature information found';
+			clonedEntity.description = 'No feature information found';
 		});		
 	}
 	
