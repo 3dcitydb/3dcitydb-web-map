@@ -193,7 +193,12 @@
 		applySaving('maxSizeOfCachedTiles', activeLayer);
 		applySaving('maxCountOfVisibleTiles', activeLayer);
 		console.log(activeLayer);
-		activeLayer.reActivate();
+		
+		document.getElementById('loadingIndicator').style.display = 'block';	
+		var promise = activeLayer.reActivate();
+		Cesium.when(promise, function(result){
+			document.getElementById('loadingIndicator').style.display = 'none';
+		})
 		
 		function applySaving(propertyName, activeLayer) {			
 			var newValue = addLayerViewModel[propertyName];
@@ -585,7 +590,7 @@
 		var promise = fetchDataFromGoogleFusionTable(gmlId, spreadsheetUrl);
 		var _deferred = Cesium.when.defer();
 		Cesium.when(promise, function(result) {
-			var centroid = result["Centroid"];
+			var centroid = result["CENTROID"];
 	        if (centroid) {	  
 	        	var res = centroid.split(",");
 	            var lon = parseFloat(res[0]);
@@ -610,24 +615,7 @@
 		}, function() {
 			throw new Cesium.DeveloperError(arguments);
 		});		        
-  		
-  		function jsonp(jsonpUrl) {
-  			var deferred = Cesium.when.defer();
-  			jQuery.noConflict().ajax({		    	
-		        url: jsonpUrl + '?jsoncallback=?',   
-		        dataType: "jsonp",
-		        jsonpCallback: "handle_3DCityDB_data", 
-		        timeout: 30000, 
-		        success: function(json){		        	
-		        	 deferred.resolve(json);
-		        },
-		        error: function(){
-		        	deferred.reject(arguments);
-		        }
-		    }); 
-  			return deferred.promise;
-  		}
-  		
+	
   		return _deferred;
   	}
   	

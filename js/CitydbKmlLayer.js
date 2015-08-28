@@ -380,8 +380,11 @@
 	}
 	
 	CitydbKmlLayer.prototype.reActivate = function(){
+		var deferred = Cesium.when.defer();
+		
 		if (!this._active) {
 			this.activate(true);
+			deferred.resolve(this._active);
 		}
 		else {
 			this.activate(false);
@@ -389,8 +392,10 @@
 			// here we simply activate layer one seconds layer...
 			setTimeout(function(){
 				that.activate(true);
+				deferred.resolve(this._active);
         	}, 1000)  			
 		}
+		return deferred.promise;
 	}
 	
 	
