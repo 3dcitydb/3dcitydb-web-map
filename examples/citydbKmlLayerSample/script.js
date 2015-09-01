@@ -536,7 +536,8 @@
 			'&heading=' + cameraPostion.heading +
 			'&altitude=' + cameraPostion.altitude + 
 			'&' + layersToQuery();
-			window.history.pushState("string", "Title", projectLink);
+		//	window.history.pushState("string", "Title", projectLink);
+			showPopupInfoBox("Scene Link", '<a href="' + projectLink + '" style="color:#c0c0c0" target="_blank">' + projectLink + '</a>');
         }
   	};
   	
@@ -562,7 +563,7 @@
   	}
   	
   	// Clear Highlighting effect of all highlighted objects
-  	function clearhighlight(){  		
+  	function clearhighlight(){   		
   		var layers = webMap._layers;
   		for (var i = 0; i < layers.length; i++) {
   			if (layers[i].active) {
@@ -860,7 +861,7 @@
 	function showPopupInfoBox(title, message) { 		
   		cesiumViewer.cesiumWidget.showErrorPanel(title, message, 'Click "OK" button to continue... ');
   		var showErrorPaneElement = document.getElementsByClassName('cesium-widget-errorPanel-content')[0];
-  		showErrorPaneElement.style.width = '400px';  		
+  		showErrorPaneElement.style.width = '400px'; 
 	}
 	
   	cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
