@@ -191,12 +191,18 @@
 		        			dataPoolKml[objUrl] = newNetworklinkItem;
 		        			newKmlDatasource.load(objUrl).then(function() {    					
 		        				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
+	        				}).otherwise(function(error) {
+	        					console.log(error);
+	        					scope.oTask.triggerEvent('updateTaskStack');
 	        				});
 	    				}	
 	    				else {
 	    					newKmlDatasource.load(objUrl).then(function() {
 	        					console.log("cache loaded...");	        					
 		        				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
+	        				}).otherwise(function(error) {
+	        					console.log(error);
+	        					scope.oTask.triggerEvent('updateTaskStack');
 	        				});
 	    				}       				
 	    			}
@@ -224,7 +230,10 @@
 									setTimeout(function(){		        					
 				    					scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
 				                	}, 5);
-								});							
+								}).otherwise(function(error) {
+		        					console.log(error);
+		        					scope.oTask.triggerEvent('updateTaskStack');
+		        				});							
 		    				});        				
 						}
 						else {
