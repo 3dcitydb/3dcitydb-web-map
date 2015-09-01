@@ -9,8 +9,8 @@
 	var cesiumInfoBoxElement = document.getElementsByClassName('cesium-infoBox')[0];
 	cesiumInfoBoxElement.style.top = '90px';
 
-	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);	
-	cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
+/*	cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);	
+	cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;*/
 	
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
@@ -727,10 +727,7 @@
 	
 	function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
 		var spreadsheetUrl = citydbLayer.spreadsheetUrl;
-		var clonedEntity = Cesium.clone(cesiumEntity);
-		cesiumViewer.selectedEntity = clonedEntity;
-		clonedEntity.name = gmlid;
-		clonedEntity.description = "Loading feature information...";
+		cesiumEntity.description = "Loading feature information...";
 		
 		fetchDataFromGoogleFusionTable(gmlid, spreadsheetUrl).then(function(kvp){
 			console.log(kvp);
@@ -740,9 +737,9 @@
 	        }
 	        html += '</tbody></table>';
 	        
-	        clonedEntity.description = html;
+	        cesiumEntity.description = html;
 		}).otherwise(function(error) {
-			clonedEntity.description = 'No feature information found';
+			cesiumEntity.description = 'No feature information found';
 		});		
 	}
 	
@@ -852,6 +849,50 @@
 		
 		window.open(mapLink);
 	}
+	
+/*	function showInExternalMaps() {
+		var selectedEntity = cesiumViewer.selectedEntity;
+		var gmlId = selectedEntity.name;
+		var spreadsheetUrl = webMap.activeLayer.spreadsheetUrl;
+		var promise = fetchDataFromGoogleFusionTable(gmlId, spreadsheetUrl);
+		Cesium.when(promise, function(result) {
+			var centroid = result["CENTROID"];
+	        if (centroid) {	  
+	        	var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
+	            var lon = parseFloat(res[0]);
+	            var lat = parseFloat(res[1]);
+	            
+	            var mapLink = "";		
+	            var mapOptionList = document.getElementById('citydb_showinexternalmaps');
+	    		var selectedIndex = mapOptionList.selectedIndex; 
+	    		mapOptionList.selectedIndex = 0;
+	    		
+	    		switch (selectedIndex) {
+	    			case 1:
+	    				mapLink = 'https://maps.google.com/maps?cbp=1,479.7175735027765,,0,-3.50219513621329&cbll=' + lat + ',' + lon + '&panoid=dmZf3jLw1OS-1bR58b03FA&gl=&hl=en&output=svembedmfe&layer=c'; 
+	    				break;
+	    			case 2:
+	    				mapLink = 'http://www.openstreetmap.org/index.html?lat=' + lat + '&lon=' + lon + '&zoom=20'; 
+	    				break;
+	    			case 3:
+	    				mapLink = 'http://www.bing.com/maps/default.aspx?v=2&cp=' + lat + '~' + lon + '&lvl=19&style=o';
+	    				break;
+	    			case 4:
+	    				mapLink = 'http://data.dualmaps.com/dualmaps4/map.htm?x=' + lon + '&y=' + lat + '&z=16&gm=0&ve=4&gc=0&bz=0&bd=0&mw=1&sv=1&sva=1&svb=0&svp=0&svz=0&svm=2&svf=0&sve=1';
+	    				break;
+	    			default:
+	    				//	do nothing...
+	    		}
+	    		
+	    		window.open(mapLink);
+	        }
+		}, function() {
+			throw new Cesium.DeveloperError(arguments);
+		});	
+	}*/
+	
+	
+	
 	
 	function showPopupInfoBox(title, message) { 		
   		cesiumViewer.cesiumWidget.showErrorPanel(title, message, 'Click "OK" button to continue... ');
