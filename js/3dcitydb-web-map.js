@@ -151,7 +151,7 @@ function passClickEventToLayer(webMap3DCityDB, modifier, object){
 				}
 			}
 		}else{
-			if(object.id.layerId){
+			if(object.id && object.id.layerId){
 				var layerid = object.id.layerId;
 				for(var i = 0; i < webMap3DCityDB._layers.length; i++){
 					if(webMap3DCityDB._layers[i].id == layerid){
