@@ -6,6 +6,8 @@
 	function CitydbKmlHighlightingManager(citydbKmlLayerInstance) {		
 		this.oTask = null;
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
+		this.dataPool = {};
+		this.cachedObjects = {};
 	}
 	
 	CitydbKmlHighlightingManager.prototype.doStart = function() {
@@ -15,7 +17,8 @@
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {	
-			var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
+		//	var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
+			var obj = scope.cachedObjects[objectId];
 			
 			if (obj != null) {
 				// update Hidden/Show
@@ -46,8 +49,9 @@
 					}
 				}
 			}
-
-			scope.oTask.triggerEvent('updateTaskStack');
+			setTimeout(function(){   	
+				scope.oTask.triggerEvent('updateTaskStack'); 		    	
+		    }, 50); 			
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {	
@@ -55,7 +59,7 @@
 				console.log("Highlighting manager repeat updating again...");
 				setTimeout(function(){   	
 					scope.rebuildDataPool();   		    	
-    		    }, 1000); 		    	  		    	
+    		    }, 3000); 		    	  		    	
 			}
 			else {		
 				console.log("Highlighting Manager is sleeping...")
@@ -63,20 +67,21 @@
 			}					
 		});			
 
-		var dataPool = this.generateDataPool();
+		this.dataPool = this.generateDataPool();
 
-		scope.oTask.triggerEvent('initWorker', dataPool);		
+		scope.oTask.triggerEvent('initWorker', this.dataPool);		
     }
 	
 	CitydbKmlHighlightingManager.prototype.generateDataPool = function() {
-		var dataPool = {};
+		var _dataPool = {};
 		var primitives = this.citydbKmlLayerInstance._cesiumViewer.scene.primitives;
 		for (i = 0; i < primitives.length; i++) {
 			var primitive = primitives.get(i);
 			if (primitive instanceof Cesium.Model) {
 				if (primitive.ready) {
 					if (primitive._id.layerId === this.citydbKmlLayerInstance._id) {
-						dataPool[primitive._id._name] = false;
+						var objectId = primitive._id._name;
+						_dataPool[objectId] = false;
 					}						
 				}	
 			}
@@ -84,17 +89,54 @@
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
  					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+ 						var objectId;
  						if (this.citydbKmlLayerInstance.pickSurface) {
- 							dataPool[targetEntity.name] = false;
+ 							objectId = targetEntity.name;
  						}
  						else {
- 							dataPool[targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')] = false;
+ 							objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+ 							
  						}
+ 						_dataPool[objectId] = false;
  					}					
 				}							
 			}
 		}
-		return dataPool;
+		return _dataPool;
+	}
+	
+	CitydbKmlHighlightingManager.prototype.updateCachedObjects = function() {
+		this.cachedObjects = {}
+		var primitives = this.citydbKmlLayerInstance._cesiumViewer.scene.primitives;
+		for (i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Model) {
+				if (primitive.ready) {
+					if (primitive._id.layerId === this.citydbKmlLayerInstance._id) {
+						var objectId = primitive._id._name;
+						var tmpObject = this.citydbKmlLayerInstance.getObjectById(objectId);
+						this.cachedObjects[objectId] = tmpObject;
+					}						
+				}	
+			}
+			else if (primitive instanceof Cesium.Primitive) {				
+ 				for (j = 0; j < primitive._instanceIds.length; j++){	
+ 					var targetEntity = primitive._instanceIds[j];
+ 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+ 						var objectId;
+ 						if (this.citydbKmlLayerInstance.pickSurface) {
+ 							objectId = targetEntity.name;
+ 						}
+ 						else {
+ 							objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+ 							
+ 						}
+						var tmpObject = this.citydbKmlLayerInstance.getObjectById(objectId);
+						this.cachedObjects[objectId] = tmpObject;
+ 					}					
+				}							
+			}
+		}
 	}
 	
 	CitydbKmlHighlightingManager.prototype.doTerminate = function() {
@@ -106,12 +148,15 @@
 	
 	CitydbKmlHighlightingManager.prototype.triggerWorker = function() {
     	var scope = this;
-    	if (scope.oTask != null) {       		
+    	if (scope.oTask != null) {   
+    		if (!scope.citydbKmlLayerInstance.hasHighlightedObjects() && !scope.citydbKmlLayerInstance.hasHiddenObjects())
+    			return;
     		if (scope.oTask.isSleep()) {
          		scope.oTask.wake();	
          		console.log("trigger starting...");
          		scope.rebuildDataPool();  
  			}
+    		scope.updateCachedObjects();
     	}            	
     },
     
@@ -135,8 +180,9 @@
     
     CitydbKmlHighlightingManager.prototype.rebuildDataPool = function() {
     	if (this.oTask != null) {
-			var dataPool = this.generateDataPool();
-			this.oTask.triggerEvent('rebuildDataPool', dataPool);
+			console.log("Tiling manager is sleeping and update the data pool now " + this.citydbKmlLayerInstance.name);
+			this.dataPool = this.generateDataPool();	
+			this.oTask.triggerEvent('rebuildDataPool', this.dataPool);
 		}
     }
     

@@ -6,9 +6,6 @@
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
 	});
 	
-	var cesiumInfoBoxElement = document.getElementsByClassName('cesium-infoBox')[0];
-	cesiumInfoBoxElement.style.top = '90px';
-	
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
 	
@@ -61,6 +58,8 @@
 	if (debugStr == "true") {
 		cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);	
 		cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
+		var cesiumInfoBoxElement = document.getElementsByClassName('cesium-infoBox')[0];
+		cesiumInfoBoxElement.style.top = '90px';
 	}	
 	
 	//	track number of loaded tiles	
@@ -86,7 +85,7 @@
 		
 		function _listener() {
 			var tileInspector = document.getElementById('citydb_tileInspector');
-			tileInspector.innerHTML = 'Number of Loaded Tiles: ' + (cesiumViewer._dataSourceCollection.length - webMap._layers.length);
+			tileInspector.innerHTML = 'Number of showed Tiles: ' + (cesiumViewer._dataSourceCollection.length - webMap._layers.length);
 		}
 	}
 	
