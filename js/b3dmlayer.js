@@ -207,6 +207,90 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 	});
 }
 
+function getBatchIdsByParentId(batchTable, batchSize, pid, result){
+	var propertyValues = batchTable["topId"];
+    if(propertyValues){    	
+    	var hasNoChildren = false;
+        for(var i = 0; i < propertyValues.length; i++){
+            if(pid == propertyValues[i]){                            	           
+            	var check = getBatchIdsByParentId(batchTable, getPropertyByBatchId(batchTable, "subId", i), result);
+            	if(check == null){
+            		result.push(i);
+            	}
+            	hasNoChildren = true;
+            }
+        }
+        if(!hasNoChildren){
+        	return null;	
+        }        
+    }
+    return result;
+}
+function getIdsByBatchIds(batchTable, batchIds){
+	
+	
+}
+
+function getObjectForBatchId(batchTable, batchId){
+	var jsonObject = {}	
+	jsonObject.id = getPropertyByBatchId(batchTable, "subId", batchId);
+	jsonObject.type = getPropertyByBatchId(batchTable, "classId", batchId);
+	jsonObject.batchId = batchId;
+	jsonObject.attributes = {};
+	for (var key in batchTable){
+		if(batchTable[key] && batchTable[key][batchId] && key != "subId" && key != "topId" && key != "classId"){
+			jsonObject.attributes[key] = batchTable[key][batchId];
+		}
+	}
+	jsonObject.children = [];
+	var childrenBatchIds = getBatchIdsByProperty(batchTable, "topId", jsonObject.id);
+	for(var i = 0; i < childrenBatchIds.length; i++){
+		var childBatchId = childrenBatchIds[i];
+		jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));		
+	}
+	return jsonObject;
+}
+function getObjectForId(batchTable, id){
+	var batchId = getFirstBatchIdByProperty(batchTable, "subId", id);
+	return getObjectForBatchId(batchTable, batchId);	
+}
+function getBatchIdsByProperty(batchTable, property, value){
+	var batchIds = [];
+	var propertyValues = batchTable[property];
+	if(propertyValues){
+        for(var i = 0; i < propertyValues.length; i++){
+            if(value == propertyValues[i]){
+                batchIds.push(i);
+            }
+        }
+    }
+    return batchIds;
+}
+
+function getFirstBatchIdByProperty(batchTable, property, value){
+	var propertyValues = batchTable[property];
+    if(propertyValues){
+        for(var i = 0; i < propertyValues.length; i++){
+            if(value == propertyValues[i]){
+                return i;
+            }
+        }
+    }
+    return null;
+}
+function getPropertyByBatchId(batchTable, property, batchId){
+	return batchTable[property][batchId];
+}
+function getRootId(batchTable, id){
+	var pid = id;
+	while(pid != null){
+		id = pid;
+		var batchId = getFirstBatchIdByProperty(batchTable, "subId", id);		
+		pid = getPropertyByBatchId(batchTable,"topId", batchId);
+	}
+	return id;
+}
+
 /**
  * adds this layer to the given cesium viewer
  * @param {CesiumViewer} cesiumViewer
@@ -350,9 +434,64 @@ B3DMLayer.prototype.registerEventHandler = function(event, callback){
  * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
  * @param {*} arguments, any number of arguments
  */
-B3DMLayer.prototype.triggerEvent = function(event, object){
-	var objectId = object.getProperty(this.propertyName);
+B3DMLayer.prototype.triggerEvent = function(event, object){	
+	//console.log("-----------------");
+	//console.log("BATCHID " + object._batchId);
+	//console.log("BATCHSIZE " + object._content._batchSize);
+	//var batchId = object._batchId;
+	//var batchSize = object._content._batchSize;
+	//if(!this.maxSize){
+		//this.maxSize = 1;
+	//}
+	//if(!this.minSize){
+		//this.minSize = 11111111111;
+	//}
+	//if(batchId == 0){
+		//if(batchSize < this.minSize){
+			//this.minSize = batchSize;
+		//}
+	//}else{
+		//if(batchSize > this.maxSize){
+			//this.maxSize = batchSize;
+		//}
+	//}
+	//console.log("MIN :" + this.minSize + " -- MAX :" + this.maxSize );
+	
+	var batchSize =  object._content._batchSize;
+	var t0 = performance.now();	
+	for(var i = 0; i < 100; i++){
+	
+	var objectId = object.getProperty("subId");
+	
+	var batchTable = object._content.getBatchTable();
+	var rootId = getRootId(batchTable, objectId);
+	var result = []
+	getBatchIdsByParentId( batchTable, batchSize, rootId, result);
+	
+	
+	// returns an JSON Object with 
+	/*{
+		item:{
+			id:rootID
+			type:26
+			children:[
+			 
+			]
+			attributes:{
+				name:test,
+			}
+		}
+		
+	}*/
+	var JSONobject = getObjectForId(batchTable, rootId);
+	}
+	var t1 = performance.now();
+	console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
+	console.log("ObjectID: " + objectId);
+	console.log("RootID: " + rootId);	
 	console.log(event + " == " + objectId);
+	console.log(result);
+	console.log(JSONobject);
 	if(event == "CLICK"){
 		this._clickEvent.raiseEvent(objectId);
 	}else if(event == "MOUSEIN"){
