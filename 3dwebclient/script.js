@@ -880,7 +880,7 @@
 
 		switch (selectedIndex) {
 			case 1:
-				mapLink = 'https://maps.google.com/maps?cbp=1,479.7175735027765,,0,-3.50219513621329&cbll=' + lat + ',' + lon + '&panoid=dmZf3jLw1OS-1bR58b03FA&gl=&hl=en&output=svembedmfe&layer=c'; 
+				mapLink = 'http://data.mapchannels.com/dualmaps5/map.htm?lat=' + lat + '&lng=' + lon + '&z=18&slat=' + lat + '&slng=' + lon + '&sh=-150.75&sp=-0.897&sz=1&gm=0&bm=2&panel=s&mi=1&md=0';
 				break;
 			case 2:
 				mapLink = 'http://www.openstreetmap.org/index.html?lat=' + lat + '&lon=' + lon + '&zoom=20'; 
