@@ -58,7 +58,7 @@
 			if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
 				console.log("Highlighting manager repeat updating again...");
 				setTimeout(function(){   	
-					scope.rebuildDataPool();   		    	
+					scope.rebuildDataPool();   					
     		    }, 3000); 		    	  		    	
 			}
 			else {		
@@ -108,33 +108,64 @@
 	CitydbKmlHighlightingManager.prototype.updateCachedObjects = function() {
 		this.cachedObjects = {}
 		var primitives = this.citydbKmlLayerInstance._cesiumViewer.scene.primitives;
-		for (i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Model) {
-				if (primitive.ready) {
-					if (primitive._id.layerId === this.citydbKmlLayerInstance._id) {
-						var objectId = primitive._id._name;
-						var tmpObject = this.citydbKmlLayerInstance.getObjectById(objectId);
-						this.cachedObjects[objectId] = tmpObject;
-					}						
-				}	
+		if (this.citydbKmlLayerInstance._layerType == "collada") {
+			for (var i = 0; i < primitives.length; i++) {
+				var primitive = primitives.get(i);
+				if (primitive instanceof Cesium.Model) {
+					if (primitive.ready) {
+						if (primitive._id.layerId === this.citydbKmlLayerInstance._id) {
+							this.cachedObjects[primitive._id._name] = primitive;
+						}						
+					}									
+				}
 			}
-			else if (primitive instanceof Cesium.Primitive) {				
- 				for (j = 0; j < primitive._instanceIds.length; j++){	
+		}
+		else if (this.citydbKmlLayerInstance._layerType == "geometry") {
+			if (this.pickSurface) {
+				for (var i = 0; i < primitives.length; i++) {
+					var primitive = primitives.get(i);
+					for (j = 0; j < primitive._instanceIds.length; j++){	
+	 					var targetEntity = primitive._instanceIds[j];
+	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+	 						try{
+	 							this.cachedObjects[targetEntity.name] = targetEntity._parent._children;
+							}
+							catch(e){}	 						
+	 					}					
+					}	
+				}
+			}
+			else {
+				for (var i = 0; i < primitives.length; i++) {
+					var primitive = primitives.get(i);
+					for (j = 0; j < primitive._instanceIds.length; j++){	
+	 					var targetEntity = primitive._instanceIds[j];
+	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+							var objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+							if (!this.cachedObjects.hasOwnProperty(objectId)) {
+								var roofEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_RoofSurface');
+								var wallEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_WallSurface');
+								if (roofEntites != null && wallEntites != null) {
+									this.cachedObjects[objectId] = roofEntites.concat(wallEntites);
+								}
+							}	 						
+	 					}					
+					}	
+				}
+			}
+		}
+		else if (this.citydbKmlLayerInstance._layerType == "extruded" || this.citydbKmlLayerInstance._layerType == "footprint") {
+			for (var i = 0; i < primitives.length; i++) {
+				var primitive = primitives.get(i);
+				for (var j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
  					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
- 						var objectId;
- 						if (this.citydbKmlLayerInstance.pickSurface) {
- 							objectId = targetEntity.name;
- 						}
- 						else {
- 							objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
- 							
- 						}
-						var tmpObject = this.citydbKmlLayerInstance.getObjectById(objectId);
-						this.cachedObjects[objectId] = tmpObject;
+ 						try{
+ 							this.cachedObjects[targetEntity.name] = targetEntity._parent._children;
+						}
+						catch(e){}
  					}					
-				}							
+				}	
 			}
 		}
 	}
@@ -145,7 +176,7 @@
     		this.oTask = null;
     	}	
     }
-	
+
 	CitydbKmlHighlightingManager.prototype.triggerWorker = function() {
     	var scope = this;
     	if (scope.oTask != null) {   
@@ -156,9 +187,8 @@
          		console.log("trigger starting...");
          		scope.rebuildDataPool();  
  			}
-    		scope.updateCachedObjects();
     	}            	
-    },
+    }
     
     CitydbKmlHighlightingManager.prototype.addData = function(objectId) {
     	if (this.oTask != null) {
@@ -181,6 +211,7 @@
     CitydbKmlHighlightingManager.prototype.rebuildDataPool = function() {
     	if (this.oTask != null) {
 			console.log("Tiling manager is sleeping and update the data pool now " + this.citydbKmlLayerInstance.name);
+			this.updateCachedObjects();
 			this.dataPool = this.generateDataPool();	
 			this.oTask.triggerEvent('rebuildDataPool', this.dataPool);
 		}

@@ -406,69 +406,40 @@
 	 * @param {String} Object Id
 	 * @return {Cesium.Model} Cesium Model instance having the corresponding GMLID
 	 */
-/*	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
-		var primitives = this._cesiumViewer.scene.primitives;
-		for (var i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Model) {
-				if (primitive.ready) {
-					if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
-						return primitive;
-					}
-				}									
-			}
-			else if (primitive instanceof Cesium.Primitive) {				
- 				for (var j = 0; j < primitive._instanceIds.length; j++){
- 					var tmpprimitiveInstance = primitive._instanceIds[j];
- 					var tmpId = tmpprimitiveInstance.name;
- 					if (Cesium.defined(tmpId) && tmpprimitiveInstance.layerId === this._id) {
- 						// LOD2
- 						if (tmpId !== objectId && tmpId.indexOf(objectId) > -1){	
- 							var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
- 							var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
- 							return roofEntites.concat(wallEntites);
- 						}
- 						// LOD1
- 						else if (tmpId === objectId) {
- 							return this.getEntitiesById(objectId);						
- 						}
- 					}						
-				}
-			}
-		}
-		return null;		
-	};*/
 	
 	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
 		var primitives = this._cesiumViewer.scene.primitives;
-		for (var i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Model) {
-				if (primitive.ready) {
-					if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
-						return primitive;
-					}
-				}									
+		if (this._layerType == "collada") {
+			for (var i = 0; i < primitives.length; i++) {
+				var primitive = primitives.get(i);
+				if (primitive instanceof Cesium.Model) {
+					if (primitive.ready) {
+						if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
+							return primitive;
+						}
+					}									
+				}
 			}
 		}
-		
-		if (this.pickSurface) {
-			return this.getEntitiesById(objectId);
-		}
-		else {
-			if (this._layerType == "geometry") {
-				var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
-				if (roofEntites == null)
-					return null;
-				var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
-				return roofEntites.concat(wallEntites);
-			}
-			else {
+		else if (this._layerType == "geometry") {
+			if (this.pickSurface) {
 				return this.getEntitiesById(objectId);
 			}
+			else {
+				var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
+				var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
+				if (roofEntites != null && wallEntites != null) {
+					return roofEntites.concat(wallEntites);
+				}
+				else {
+					return null;
+				}
+			}
 		}
-					
-		return null;		
+		else if (this._layerType == "extruded" || this._layerType == "footprint") {
+			return this.getEntitiesById(objectId);
+		}
+		return null;	
 	};
 	
 	CitydbKmlLayer.prototype.getEntitiesById = function(objectId){		

@@ -221,8 +221,7 @@
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
 		        			
 		        			dataPoolKml[objUrl] = newNetworklinkItem;	        			
-		        			dataSourceCollection.add(newKmlDatasource).then(function() { 
-								
+		        			dataSourceCollection.add(newKmlDatasource).then(function() { 								
 							});  
 		        			newKmlDatasource.load(objUrl).then(function() {	
 		        				setTimeout(function(){		        					
