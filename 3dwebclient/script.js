@@ -569,7 +569,8 @@
 				altitude: 0
 	    	};  
 			var	projectLink = location.protocol + '//' + location.host + location.pathname + '?' +
-			'lat=' + cameraPostion.lat +
+			'&title=' + document.title +
+			'&lat=' + cameraPostion.lat +
 			'&lon=' + cameraPostion.lon +
 			'&range=' + cameraPostion.range +
 			'&tilt=' + cameraPostion.tilt +
