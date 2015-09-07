@@ -1,4 +1,13 @@
 
+	/**
+	 * @name 3DCityDB-Web-Map-Client
+	 * @description CesiumJS and 3DCityDB based web client for interactive 3D visualization and exploration of large semantic 3D city models 
+	 * @author Zhihang Yao <zhihang.yao@tum.de>, Thomas H.Kolbe <thomas.kolbe@tum.de>
+	 * @version 07.09.2015, TU München
+	 * @Copyright (c)2015 TU München, Chair of Geoinformatics <http://www.gis.bgu.tum.de/> 
+	 * @licence GNU Lesser General Public License Version 3.0
+	 */
+	
 	/*---------------------------------  set globe variables  ----------------------------------------*/
 
 	// create 3Dcitydb-web-map instance
