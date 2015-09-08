@@ -14,7 +14,7 @@
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
 	});
-	
+		
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
 
@@ -706,6 +706,15 @@
   	
 	function addWebMapServiceProvider() {
 		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+		var proxyUrl;
+		if (location.host.indexOf('8000') > -1) {
+			proxyUrl = '/proxy/'
+		}
+		else {
+			proxyUrl = location.protocol + '//' + location.host + '/proxy/'
+		}
+		
+		console.log(proxyUrl);
 		var wmsProviderViewModel = new Cesium.ProviderViewModel({
 	        name : addWmsViewModel.name,
 	        iconUrl : addWmsViewModel.iconUrl,
@@ -717,7 +726,7 @@
 	    			parameters: {
 	    				map: addWmsViewModel.map
 	    			},
-	    			proxy: new Cesium.DefaultProxy('/proxy/')
+	    			proxy: new Cesium.DefaultProxy(proxyUrl)
 	    		});
 	        }
 	    });

@@ -54,8 +54,26 @@
 		    }, 50); 			
 		});
 
-		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {	
-			if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
+		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {				
+			setTimeout(function(){   
+				if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
+					console.log("Highlighting Manager is sleeping...")
+					scope.oTask.sleep();
+				}
+				else {
+					if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
+						console.log("Highlighting manager repeat updating again...");
+						scope.rebuildDataPool(); 		    	  		    	
+					}
+					else {		
+						console.log("Highlighting Manager is sleeping...")
+						scope.oTask.sleep();
+					} 
+				}
+				 					
+		    }, 3000); 	
+			
+/*			if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
 				console.log("Highlighting manager repeat updating again...");
 				setTimeout(function(){   	
 					scope.rebuildDataPool();   					
@@ -64,7 +82,7 @@
 			else {		
 				console.log("Highlighting Manager is sleeping...")
 				scope.oTask.sleep();
-			}					
+			}*/					
 		});			
 
 		this.dataPool = this.generateDataPool();
@@ -127,10 +145,10 @@
 					for (j = 0; j < primitive._instanceIds.length; j++){	
 	 					var targetEntity = primitive._instanceIds[j];
 	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
-	 						try{
-	 							this.cachedObjects[targetEntity.name] = targetEntity._parent._children;
-							}
-							catch(e){}	 						
+							var parentEntity = targetEntity._parent
+							if (Cesium.defined(parentEntity)) {
+								this.cachedObjects[targetEntity.name] = parentEntity._children;
+							}	
 	 					}					
 					}	
 				}
@@ -160,10 +178,10 @@
 				for (var j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
  					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
- 						try{
- 							this.cachedObjects[targetEntity.name] = targetEntity._parent._children;
+ 						var parentEntity = targetEntity._parent
+						if (Cesium.defined(parentEntity)) {
+							this.cachedObjects[targetEntity.name] = parentEntity._children;
 						}
-						catch(e){}
  					}					
 				}	
 			}

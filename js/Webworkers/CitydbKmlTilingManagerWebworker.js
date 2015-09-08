@@ -152,26 +152,28 @@
 		},
 
 		updateTaskStack : function() {
-			if (stack == null) {
-				return;
-			}				
-	
-			var matrixItem = stack.pop();
-			if (typeof matrixItem == 'undefined') {
-				if (isStillUpdating) {
-					isStillUpdating = false;
-					reply("removeDatasources");
-					console.log("Tiling Manager repeat searching again...");
-				} else {
-					if (shouldRun == true) {
-						shouldRun = false;
-						console.log("Tiling Manager is sleeping...");
-						reply("refreshView");
+			setTimeout(function(){		
+				if (stack == null) {
+					return;
+				}				
+		
+				var matrixItem = stack.pop();
+				if (typeof matrixItem == 'undefined') {
+					if (isStillUpdating) {
+						isStillUpdating = false;
+						reply("removeDatasources");
+						console.log("Tiling Manager repeat searching again...");
+					} else {
+						if (shouldRun == true) {
+							shouldRun = false;
+							console.log("Tiling Manager is sleeping...");
+							reply("refreshView");
+						}
 					}
-				}
-			} else {
-				reply("checkMasterPool", matrixItem);
-			}
+				} else {
+					reply("checkMasterPool", matrixItem);
+				}      										        							        			
+        	}, 10);
 		}
 	};
 	

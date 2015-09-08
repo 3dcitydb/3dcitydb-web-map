@@ -151,19 +151,27 @@
 	        	if (scope.citydbKmlLayerInstance.cacheTiles) { // with cache
 	        		if (networklinkCache.hasOwnProperty(objUrl)) {
 		        		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
-		        			if (!dataPoolKml.hasOwnProperty(objUrl)) {
+		        			if (!dataPoolKml.hasOwnProperty(objUrl)) {		        				
 		        				var networklinkItem = networklinkCache[objUrl].networklinkItem;
 	    	        			var kmlDatasource = networklinkItem.kmlDatasource;
-	    	        			dataSourceCollection.add(kmlDatasource);
-	    	        			console.log("loading layer...");	
-	    	        			// status was changed...
-			        			scope.oTask.triggerEvent('updateDataPoolRecord');
-	    	        			dataPoolKml[objUrl] = networklinkItem;
-		        			}   	        			
+	    	        			dataPoolKml[objUrl] = networklinkItem;    
+    	        				dataSourceCollection.add(kmlDatasource).then(function() { 	        					
+    	        					scope.oTask.triggerEvent('updateTaskStack');
+	    		        			console.log("loading layer...");	
+		    	        			// status was changed...
+				        			scope.oTask.triggerEvent('updateDataPoolRecord');		    	        			    										        							        			
+		        				}).otherwise(function(error) {
+		        					console.log(error);
+		        					scope.oTask.triggerEvent('updateTaskStack');
+		        				});	  	    	        			  	        			
+		        			} 
+		        			else {
+		        				scope.oTask.triggerEvent('updateTaskStack');
+		        			}
 		        		}
-		        		setTimeout(function(){		        					
-	    					scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-	                	}, 5);
+		        		else {
+		        			scope.oTask.triggerEvent('updateTaskStack');
+		        		}		        				        		
 	        		}
 	    			else {
 	    				var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
@@ -181,9 +189,7 @@
     	        			console.log("loading layer...");	
     	        			// status was changed...
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');
-	    					dataSourceCollection.add(newKmlDatasource).then(function() { 
-		        			//	scope.oTask.triggerEvent('updateTaskStack');
-	        				});       						 
+	    					dataSourceCollection.add(newKmlDatasource);    						 
 		        			dataPoolKml[objUrl] = newNetworklinkItem;
 		        			newKmlDatasource.load(objUrl).then(function() { 
 		        				scope.oTask.triggerEvent('updateTaskStack');
@@ -192,9 +198,9 @@
 	        					scope.oTask.triggerEvent('updateTaskStack');
 	        				});
 	    				}	
-	    				else {	 
-	    					scope.oTask.triggerEvent('updateTaskStack');
-	    					newKmlDatasource.load(objUrl).then(function() {	    						
+	    				else {	 	    					
+	    					newKmlDatasource.load(objUrl).then(function() {	
+	    						scope.oTask.triggerEvent('updateTaskStack');
 	        					console.log("cache loaded...");	        							        					        										        							        			
 	        				}).otherwise(function(error) {
 	        					console.log(error);
@@ -223,10 +229,8 @@
 		        			dataPoolKml[objUrl] = newNetworklinkItem;	        			
 		        			dataSourceCollection.add(newKmlDatasource).then(function() { 								
 							});  
-		        			newKmlDatasource.load(objUrl).then(function() {	
-		        				setTimeout(function(){		        					
-			    					scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-			                	}, 5);
+		        			newKmlDatasource.load(objUrl).then(function() {		        					
+			    				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
 		        			}).otherwise(function(error) {
 	        					console.log(error);
 	        					scope.oTask.triggerEvent('updateTaskStack');
@@ -241,10 +245,8 @@
 		        	}
 	        	}				
     		}
-    		else {        					        					
-    			setTimeout(function(){		        					
-					scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-            	}, 5);  	        										        							        			               	
+    		else {        					        						        					
+				scope.oTask.triggerEvent('updateTaskStack');	        										        							        				        										        							        			               	
     		}  				
 		});
 

@@ -451,14 +451,10 @@
  					var tmpprimitiveInstance = primitive._instanceIds[j];
 					if (tmpprimitiveInstance.name === objectId && tmpprimitiveInstance.layerId == this._id){						
 						var targetEntity = tmpprimitiveInstance;
-						try{
-							var parentEntity = targetEntity._parent;	
-							var childrenEntities = parentEntity._children;
-							return childrenEntities;
-						}
-						catch(e){
-							return null;
-						} 
+						var parentEntity = targetEntity._parent
+						if (Cesium.defined(parentEntity)) {
+							return parentEntity._children;
+						}						
 					}
 				}
 			}
