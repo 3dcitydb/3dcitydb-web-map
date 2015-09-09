@@ -17,6 +17,9 @@
     	var scene = cesiumViewer.scene;
     	var canvas = scene.canvas; 
     	
+    	var minLodPixels = this.citydbKmlLayerInstance.minLodPixels;
+    	var maxLodPixels = this.citydbKmlLayerInstance.maxLodPixels;
+    	
     	// start Hihgighting Manager
     	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
     		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doStart();
@@ -41,7 +44,7 @@
 			displayForm = jsonLayerInfo.displayform;
 			fileextension = jsonLayerInfo.fileextension;
 			var colnum = jsonLayerInfo.colnum;
-			var rownum = jsonLayerInfo.rownum;    			
+			var rownum = jsonLayerInfo.rownum;  
 			var bbox = jsonLayerInfo.bbox;
 			var rowDelta = (bbox.ymax - bbox.ymin) / (rownum + 1);
 			var colDelta = (bbox.xmax - bbox.xmin) / (colnum + 1);
@@ -90,7 +93,7 @@
     	        	var polygon2 = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
     	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
     	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
-    	        	if (pixelCoveringSize < 140) {
+    	        	if (pixelCoveringSize < minLodPixels || pixelCoveringSize > maxLodPixels) {
     	        		dataSourceCollection.remove(kmlDatasource);
     	        		delete dataPoolKml[objUrl];
     	        		scope.oTask.triggerEvent('updateDataPoolRecord');
@@ -145,62 +148,105 @@
 	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
 	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
 	        	
-	        	if (networklinkCache.hasOwnProperty(objUrl)) {
-	        		if (pixelCoveringSize >= 140) { 
-	        			if (!dataPoolKml.hasOwnProperty(objUrl)) {
-	        				var networklinkItem = networklinkCache[objUrl].networklinkItem;
-    	        			var kmlDatasource = networklinkItem.kmlDatasource;
-    	        			dataSourceCollection.add(kmlDatasource).then(function() {    					
-    	        				if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
-    	        	    			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
-    	        	    		} 	        										        							        			
-            				});
+	        	if (scope.citydbKmlLayerInstance.cacheTiles) { // with cache
+	        		if (networklinkCache.hasOwnProperty(objUrl)) {
+		        		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
+		        			if (!dataPoolKml.hasOwnProperty(objUrl)) {		        				
+		        				var networklinkItem = networklinkCache[objUrl].networklinkItem;
+	    	        			var kmlDatasource = networklinkItem.kmlDatasource;
+	    	        			dataPoolKml[objUrl] = networklinkItem;    
+    	        				dataSourceCollection.add(kmlDatasource).then(function() { 	        					
+    	        					scope.oTask.triggerEvent('updateTaskStack');
+	    		        			console.log("loading layer...");	
+		    	        			// status was changed...
+				        			scope.oTask.triggerEvent('updateDataPoolRecord');		    	        			    										        							        			
+		        				}).otherwise(function(error) {
+		        					console.log(error);
+		        					scope.oTask.triggerEvent('updateTaskStack');
+		        				});	  	    	        			  	        			
+		        			} 
+		        			else {
+		        				scope.oTask.triggerEvent('updateTaskStack');
+		        			}
+		        		}
+		        		else {
+		        			scope.oTask.triggerEvent('updateTaskStack');
+		        		}		        				        		
+	        		}
+	    			else {
+	    				var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
+	    				var newNetworklinkItem = {
+	    					url: objUrl,
+	    					kmlDatasource: newKmlDatasource,
+	    					lowerRightCorner: lowerRightCorner,
+	    					upperRightCorner: upperRightCorner,
+	    					upperLeftCorner: upperLeftCorner,
+	    					lowerLeftCorner: lowerLeftCorner        					
+	    				};
+	    				networklinkCache[objUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	        				
+	    				       				
+	    				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
     	        			console.log("loading layer...");	
-    	        			dataPoolKml[objUrl] = networklinkItem;
     	        			// status was changed...
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');
-	        			}   	        			
-	        		}
-	        		setTimeout(function(){		        					
-    					scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-                	}, 5);
-        		}
-    			else {
-    				var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
-    				var newNetworklinkItem = {
-    					url: objUrl,
-    					kmlDatasource: newKmlDatasource,
-    					lowerRightCorner: lowerRightCorner,
-    					upperRightCorner: upperRightCorner,
-    					upperLeftCorner: upperLeftCorner,
-    					lowerLeftCorner: lowerLeftCorner        					
-    				};
-    				networklinkCache[objUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	        				
-    				       				
-    				if (pixelCoveringSize >= 140) {
-    					console.log("loading layer...");
-    					dataSourceCollection.add(newKmlDatasource).then(function() {    					
-    						if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
-    			    			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
-    			    		} 	        										        							        			
-        				});       						 
-	        			dataPoolKml[objUrl] = newNetworklinkItem;
-	        			newKmlDatasource.load(objUrl).then(function() {    					
-	        				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-        				});
-    				}	
-    				else {
-    					newKmlDatasource.load(objUrl).then(function() {
-        					console.log("cache loaded...");	        					
-	        				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-        				});
-    				}       				
-    			}	        	
+	    					dataSourceCollection.add(newKmlDatasource);    						 
+		        			dataPoolKml[objUrl] = newNetworklinkItem;
+		        			newKmlDatasource.load(objUrl).then(function() { 
+		        				scope.oTask.triggerEvent('updateTaskStack');
+	        				}).otherwise(function(error) {
+	        					console.log(error);
+	        					scope.oTask.triggerEvent('updateTaskStack');
+	        				});
+	    				}	
+	    				else {	 	    					
+	    					newKmlDatasource.load(objUrl).then(function() {	
+	    						scope.oTask.triggerEvent('updateTaskStack');
+	        					console.log("cache loaded...");	        							        					        										        							        			
+	        				}).otherwise(function(error) {
+	        					console.log(error);
+	        					scope.oTask.triggerEvent('updateTaskStack');
+	        				});
+	    				}       				
+	    			}
+	        	}
+	        	else { // no cache
+	        		if (!dataPoolKml.hasOwnProperty(objUrl)) {
+		        		var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
+						var newNetworklinkItem = {
+							url: objUrl,
+							kmlDatasource: newKmlDatasource,
+							lowerRightCorner: lowerRightCorner,
+							upperRightCorner: upperRightCorner,
+							upperLeftCorner: upperLeftCorner,
+							lowerLeftCorner: lowerLeftCorner        					
+						};       				
+						       				
+						if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
+    	        			console.log("loading layer...");	
+    	        			// status was changed...
+		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
+		        			
+		        			dataPoolKml[objUrl] = newNetworklinkItem;	        			
+		        			dataSourceCollection.add(newKmlDatasource).then(function() { 								
+							});  
+		        			newKmlDatasource.load(objUrl).then(function() {		        					
+			    				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
+		        			}).otherwise(function(error) {
+	        					console.log(error);
+	        					scope.oTask.triggerEvent('updateTaskStack');
+	        				});	
+						}
+						else {
+							scope.oTask.triggerEvent('updateTaskStack');
+						}
+		        	}
+		        	else {
+		        		scope.oTask.triggerEvent('updateTaskStack');
+		        	}
+	        	}				
     		}
-    		else {        					        					
-    			setTimeout(function(){		        					
-					scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-            	}, 5);  	        										        							        			               	
+    		else {        					        						        					
+				scope.oTask.triggerEvent('updateTaskStack');	        										        							        				        										        							        			               	
     		}  				
 		});
 
@@ -210,7 +256,14 @@
 		 * [cached layers] should not be bigger than a threshold value...
 		 * 
 		 */
-		scope.oTask.addListener("cleanCaching", function () {
+		scope.oTask.addListener("cleanCaching", function (maxCacheSize) {
+			// default value
+			var _maxCacheSize = scope.citydbKmlLayerInstance.maxSizeOfCachedTiles;
+			
+			if (Cesium.defined(maxCacheSize)) {
+				_maxCacheSize = maxCacheSize;
+			}
+
 			var cacheSize = 0;
 			var tempCache = new Object();
 			for (var cacheID in networklinkCache){	
@@ -220,9 +273,7 @@
     			} 
             }
 
-			var maxCacheSize = 50;
-
-			while (cacheSize > maxCacheSize) {
+			while (cacheSize > _maxCacheSize) {
 				var cacheRecordMinTime = Number.MAX_VALUE;
 				var cacheRocordID = null;
 				for (var cacheID in tempCache){
@@ -260,17 +311,25 @@
 	    // event Listeners are so far, we start the Networklink Manager worker...
 
 		if (masterUrl.indexOf(".json") >= 0) {
-			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), 'matrix');  			
+			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope.citydbKmlLayerInstance.maxCountOfVisibleTiles, 'matrix');  			
     	}
 		else {
-			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), 'rtree');
+			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope.citydbKmlLayerInstance.maxCountOfVisibleTiles, 'rtree');
 		}
 				
 		this.runMonitoring();
     },
     
     CitydbKmlTilingManager.prototype.isDataStreaming = function() {
-    	return !this.oTask.isSleep();   	 
+    	if (this.oTask == null)
+    		return false;
+    	return this.oTask.isSleep()? false: true;   	 
+    },
+    
+    CitydbKmlTilingManager.prototype.clearCaching = function() {
+    	if (this.oTask == null)
+    		return false;
+    	this.oTask.oListeners["cleanCaching"].call(this, 0); 	 
     },
     
     /**
@@ -319,7 +378,7 @@
     		originHeight = originHeight + frameHeight*factor*0.1;
     		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
     	}
-    	originHeight = originHeight + (frameHeight - originHeight) / 2;
+   // 	originHeight = originHeight + (frameHeight - originHeight) / 2;
     	    	
 		var cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
     	var cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));
@@ -338,7 +397,7 @@
     		var frameMaxY = Math.max(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
 
     		// buffer for caching, 300 meter
-    		var offzet = 300;
+    		var offzet = 10;
     		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
     		var yOffzet = offzet / 111000;
 
@@ -417,11 +476,7 @@
  			}
     		else {
     			scope.oTask.triggerEvent('abortAndnotifyWake');  
-    		}
-    		// trigger Highlighting Manager...
-    		if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
-    			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
-    		}    		
+    		}	
     	}            	
     },
     

@@ -11,22 +11,38 @@
   <link rel="icon" type="image/png" href="../../theme/img/favicon.png" sizes="16x16">
   <script src="../../ThirdParty/Cesium-1-11/Cesium.js"></script> 
   <style>
-      @import url(../../ThirdParty/Cesium-1-11/Widgets/widgets.css);
-      html, body, #cesiumContainer {
-          top: 0px;
-          left: 0px;
-          position: absolute;
-          width: 100%; 
-          height: 100%; 
-          margin: 0; 
-          padding: 0; 
-          overflow: hidden;
-          z-index: -1;
-      }
-  </style>
+@import url(../../ThirdParty/Cesium-1-11/Widgets/widgets.css);
+
+	html, body, #cesiumContainer {
+		top: 0px;
+		left: 0px;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+		z-index: -1;
+	}
+	
+	#citydb_toolbar {
+		border-radius: 5px;
+		padding: 5px;
+		position: absolute;
+		left: 20px;
+		font-family: "Arial";
+		z-index: 99999;
+	}
+</style>
 </head>
 <body>
 	<div id="cesiumContainer"></div>
-    <script src="script.js"></script> 
+	<div id="citydb_toolbar">
+		<button class="cesium-button" onclick="addWebMapServiceProvider()">Add new WMSProvider</button>
+		<button class="cesium-button" onclick="removeImageryProvider()">remove current ImageryProvider</button>		
+		<button class="cesium-button" onclick="addTerrainProvider()">Add new TerrainProvider</button>
+		<button class="cesium-button" onclick="removeTerrainProvider()">remove current TerrainProvider</button>	
+	</div>
+    <script src="script.js"></script> 	   
 </body>
 </html>
