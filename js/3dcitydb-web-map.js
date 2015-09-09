@@ -70,6 +70,12 @@ WebMap3DCityDB.prototype.getLayerbyId = function(layerId){
 	return null;
 }
 
+/**
+ * @returns {Array.<3DCityDBLayer>} An array with 3dcitydb layer
+ */
+WebMap3DCityDB.prototype.getLayers = function(){
+	return this._layers;
+}
 
 /**
  * removes a 3DCityDBLayer from the cesiumViewer
