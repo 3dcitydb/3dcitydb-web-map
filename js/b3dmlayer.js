@@ -30,6 +30,8 @@ function B3DMLayer(options){
 	this._hiddenObjects = {};
 	this._hiddenObjectsModels = {};
 	this._cameraPosition = {};	
+	
+	this._debugging = options["debugging"] ? options["debugging"] : false;
 	/**
 	 * handles ClickEvents
 	 * @type {Cesium.Event} clickEvent
@@ -48,8 +50,10 @@ function B3DMLayer(options){
 	 */
 	this._mouseOutEvent = new Cesium.Event();
 	
-	this.propertyName = "subId";
+	/** pickmode can be Feature or ID */
+	this.pickMode = "feature";
 }
+
 
 Object.defineProperties(B3DMLayer.prototype, {
     /**
@@ -138,9 +142,12 @@ Object.defineProperties(B3DMLayer.prototype, {
     
 });
 
-B3DMLayer.prototype.setPropertyName = function(property){
-	
-	this.propertyName = property;
+B3DMLayer.prototype.setPickMode = function(pickMode){	
+	if(pickMode == "feature" || pickMode == "id"){
+		if(pickMode != this.pickMode){
+			this.pickMode = pickMode;
+		}
+	}
 }
 
 
@@ -152,39 +159,63 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 	this._cesium3DTileset = new Cesium.Cesium3DTileset({
     	url:this._url, //"http://PC205/temp/b3dm/tms",
     	maximumScreenSpaceError : 16,
-    	debugShowStatistics : false,
+    	debugShowStatistics : this._debugging,
     	debugFreezeFrame : false,
-    	debugShowBox : true,
-    	debugShowcontentBox : true,
-    	debugShowBoundingVolume : true,
-    	debugShowContentsBoundingVolume : true
+    	debugShowBox : this._debugging,
+    	debugShowcontentBox : this._debugging,
+    	debugShowBoundingVolume : this._debugging,
+    	debugShowContentsBoundingVolume : this._debugging
     });	
 	cesiumViewer.scene.primitives.add(this._cesium3DTileset);
 	var that = this;
 	this._cesium3DTileset.tileVisible.addEventListener(function(tile){
 		if(!tile.b3dmlayer_LastUpdated || tile.b3dmlayer_LastUpdated < that._highlightedObjectsLastUpdated){
 			if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
-				for( var key in that._highlightedObjects){
-					var batchIds = tile.content.getBatchIdsByProperty(that.propertyName, key);
-					for(var i = 0; i < batchIds.length; i++){
-						//var color = new Cesium.Color(1,1,1,1);		
-						var model = tile.content.getModel(batchIds[i]);
-						that._highlightedObjectsOriginalModels[key][batchIds[i]] = model; 
-						var color = model.color;						
-						if(!color.equals(that._highlightedObjects[key])){
-							that._highlightedObjectsOriginalColor[key] = color.clone();
-							model.color = that._highlightedObjects[key];
+				var batchTable = tile.content.getBatchTable();
+				var batchSize = tile.content._batchSize;
+				var batchId = 0;
+				
+				for(var i = 0; i < batchTable["subId"].length; i++){
+					var id = batchTable["subId"][i];
+					if(that._highlightedObjects[id]){
+						// highlight						
+						var batchId = i;
+						var batchIds =[];
+						if(batchId >= batchSize){
+							//var rootId = getRootId(batchTable, id);
+							getBatchIdsByParentId(batchTable, batchSize, id, batchIds);
+						} else{
+							batchIds.push(batchId);
 						}
-						
+											
+						for(var j = 0; j < batchIds.length; j++){
+							//var color = new Cesium.Color(1,1,1,1);		
+							var model = tile.content.getModel(batchIds[j]);							
+							that._highlightedObjectsOriginalModels[id][batchIds[j]] = model;
+							var color = model.color;
+							if(!that._highlightedObjectsOriginalColor[id]){
+								that._highlightedObjectsOriginalColor[id] = color.clone();
+							}
+							model.color = that._highlightedObjects[id];
+						}
 					}
 				}
 				for(var key in that._hiddenObjects){
-					var batchIds = tile.content.getBatchIdsByProperty(that.propertyName, key);
-					for(var i = 0; i < batchIds.length; i++){
-						//var color = new Cesium.Color(1,1,1,1);		
-						var model = tile.content.getModel(batchIds[i]);
-						that._hiddenObjectsModels[key][batchIds[i]] = model; 
-						model.show = false;
+					var batchId = getFirstBatchIdByProperty(batchTable, "subId", key);
+					if(batchId != null){
+						var batchIds =[];
+						if(batchId >= batchSize){
+							var rootId = getRootId(batchTable, key);
+							getBatchIdsByParentId(batchTable, batchSize, rootId, batchIds);
+						} else{
+							batchIds.push(batchId);
+						}					
+						for(var i = 0; i < batchIds.length; i++){
+							//var color = new Cesium.Color(1,1,1,1);		
+							var model = tile.content.getModel(batchIds[i]);
+							that._hiddenObjectsModels[key][batchIds[i]] = model; 
+							model.show = false;
+						}
 					}
 				}
 				
@@ -211,15 +242,23 @@ function getBatchIdsByParentId(batchTable, batchSize, pid, result){
 	var propertyValues = batchTable["topId"];
     if(propertyValues){    	
     	var hasNoChildren = false;
-        for(var i = 0; i < propertyValues.length; i++){
-            if(pid == propertyValues[i]){                            	           
-            	var check = getBatchIdsByParentId(batchTable, getPropertyByBatchId(batchTable, "subId", i), result);
-            	if(check == null){
-            		result.push(i);
-            	}
-            	hasNoChildren = true;
-            }
-        }
+    	var index = propertyValues.indexOf(pid);
+    	if(index >= 0){
+	        for(var i = index; i < propertyValues.length; i++){
+	            if(pid == propertyValues[i]){            
+	            	if(i >= batchSize){
+	            		var check = getBatchIdsByParentId(batchTable, batchSize, getPropertyByBatchId(batchTable, "subId", i), result);
+	            		if(check == null){
+	                		result.push(i);
+	                	}
+	            	}else{
+	            		result.push(i);
+	            	}
+	            	
+	            	hasNoChildren = true;
+	            }
+	        }
+    	}
         if(!hasNoChildren){
         	return null;	
         }        
@@ -268,15 +307,18 @@ function getBatchIdsByProperty(batchTable, property, value){
 }
 
 function getFirstBatchIdByProperty(batchTable, property, value){
-	var propertyValues = batchTable[property];
-    if(propertyValues){
-        for(var i = 0; i < propertyValues.length; i++){
-            if(value == propertyValues[i]){
-                return i;
-            }
-        }
+	var i = batchTable[property].indexOf(value);
+	if(i < 0){
+		return null
+	}else{
+		return i;
+	}
+    /*for(var i = 0; i < batchTable[property].length; i++){
+       if(value == batchTable[property][i]){
+    	   return i;
+       }
     }
-    return null;
+    return null;*/
 }
 function getPropertyByBatchId(batchTable, property, batchId){
 	return batchTable[property][batchId];
@@ -354,6 +396,17 @@ B3DMLayer.prototype.unHighlight = function(toUnHighlight){
 	}
 	//this._highlightedObjectsLastUpdated = Date.now();
 };
+/**
+ * clear all current Highlighted Objects 
+ */
+B3DMLayer.prototype.clearHighlight = function(){	
+	var toUnHighlight = [];
+	for(var key in this._highlightedObjects){
+		toUnHighlight.push(key);
+	}
+	this.unHighlight(toUnHighlight);	
+};
+
 
 /**
  * hideObjects
@@ -434,70 +487,27 @@ B3DMLayer.prototype.registerEventHandler = function(event, callback){
  * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
  * @param {*} arguments, any number of arguments
  */
-B3DMLayer.prototype.triggerEvent = function(event, object){	
-	//console.log("-----------------");
-	//console.log("BATCHID " + object._batchId);
-	//console.log("BATCHSIZE " + object._content._batchSize);
-	//var batchId = object._batchId;
-	//var batchSize = object._content._batchSize;
-	//if(!this.maxSize){
-		//this.maxSize = 1;
-	//}
-	//if(!this.minSize){
-		//this.minSize = 11111111111;
-	//}
-	//if(batchId == 0){
-		//if(batchSize < this.minSize){
-			//this.minSize = batchSize;
-		//}
-	//}else{
-		//if(batchSize > this.maxSize){
-			//this.maxSize = batchSize;
-		//}
-	//}
-	//console.log("MIN :" + this.minSize + " -- MAX :" + this.maxSize );
-	
-	var batchSize =  object._content._batchSize;
-	var t0 = performance.now();	
-	for(var i = 0; i < 100; i++){
-	
+B3DMLayer.prototype.triggerEvent = function(event, object){		
 	var objectId = object.getProperty("subId");
-	
 	var batchTable = object._content.getBatchTable();
-	var rootId = getRootId(batchTable, objectId);
-	var result = []
-	getBatchIdsByParentId( batchTable, batchSize, rootId, result);
-	
-	
-	// returns an JSON Object with 
-	/*{
-		item:{
-			id:rootID
-			type:26
-			children:[
-			 
-			]
-			attributes:{
-				name:test,
-			}
-		}
-		
-	}*/
-	var JSONobject = getObjectForId(batchTable, rootId);
-	}
-	var t1 = performance.now();
-	console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
-	console.log("ObjectID: " + objectId);
-	console.log("RootID: " + rootId);	
-	console.log(event + " == " + objectId);
-	console.log(result);
-	console.log(JSONobject);
+	var batchSize =  object._content._batchSize;		
+	if(this.pickMode == "id"){
+	}else if(this.pickMode == "feature"){
+		objectId = getRootId(batchTable, objectId);
+	}	
 	if(event == "CLICK"){
-		this._clickEvent.raiseEvent(objectId);
+		var JSONobject = getObjectForId(batchTable, objectId);	
+		this._clickEvent.raiseEvent(objectId, JSONobject);
 	}else if(event == "MOUSEIN"){
-		this._mouseInEvent.raiseEvent(objectId);
+		if(this.mouseMoveId != objectId){
+			this.mouseMoveId = objectId;
+			this._mouseInEvent.raiseEvent(objectId);
+		}
 	}else if(event == "MOUSEOUT"){
-		this._mouseOutEvent.raiseEvent(objectId);
+		if(this.mouseMoveId == objectId){
+			this.mouseMoveId = null;
+			this._mouseOutEvent.raiseEvent(objectId);
+		}
 	}
 }
 
