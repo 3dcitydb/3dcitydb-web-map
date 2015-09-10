@@ -435,11 +435,13 @@
     		
     		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
         	var dataSourceCollection = cesiumViewer._dataSourceCollection;
+        	        	
     		for (var objUrl in this.dataPoolKml){
             	var networklinkItem = this.dataPoolKml[objUrl];			                	
         		var kmlDatasource = networklinkItem.kmlDatasource;
         		dataSourceCollection.remove(kmlDatasource);
             }
+    		this.dataPoolKml = {};
     		
     		if (this.boundingboxEntity != null) {
     			cesiumViewer.entities.remove(this.boundingboxEntity);
