@@ -100,8 +100,8 @@
 			});	
 	  	});
 		
-		//	track number of loaded tiles	
-		trackLoadedTiles();
+		//	inspect the status of the showed and cached tiles	
+		inspectTileStatus();
 		
 		// bind view and model of the highlighted and hidden Objects...
 		observeObjectList();
@@ -116,16 +116,32 @@
 	    
     /*---------------------------------  methods and functions  ----------------------------------------*/ 
 		
-	function trackLoadedTiles() {
-		var helper = new Cesium.EventHelper();
-		var datasourceCollection = cesiumViewer._dataSourceCollection;
-		helper.add(datasourceCollection.dataSourceAdded, _listener);
-		helper.add(datasourceCollection.dataSourceRemoved, _listener);
-		
-		function _listener() {
-			var tileInspector = document.getElementById('citydb_tileInspector');
-			tileInspector.innerHTML = 'Number of showed Tiles: ' + (cesiumViewer._dataSourceCollection.length - webMap._layers.length);
-		}
+	function inspectTileStatus() {
+		setInterval(function() {
+			var cachedTilesInspector = document.getElementById('citydb_cachedTilesInspector');
+			var showedTilesInspector = document.getElementById('citydb_showedTilesInspector');
+			var layers = webMap._layers;
+			var numberOfshowedTiles = 0;
+			var numberOfCachedTiles = 0;
+			var isLoadingTiles = false;
+	  		for (var i = 0; i < layers.length; i++) {
+	  			if (layers[i].active) {	  				
+	  				numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
+	  				numberOfCachedTiles = numberOfCachedTiles +  Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
+	  				if (layers[i].citydbKmlTilingManager.isDataStreaming()) {
+	  					isLoadingTiles = true;
+	  				}
+	  			} 	
+	  		}
+	  		showedTilesInspector.innerHTML = 'Number of showed Tiles: ' + numberOfshowedTiles;
+			cachedTilesInspector.innerHTML = 'Number of cached Tiles: ' + (numberOfCachedTiles - numberOfshowedTiles);
+			
+			var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
+			if (isLoadingTiles)
+				loadingTilesInspector.style.display = 'block';
+			else
+				loadingTilesInspector.style.display = 'none';
+		}, 1000);		
 	}
 	
 	function getLayersFromUrl() {
