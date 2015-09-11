@@ -70,6 +70,12 @@ WebMap3DCityDB.prototype.getLayerbyId = function(layerId){
 	return null;
 }
 
+/**
+ * @returns {Array.<3DCityDBLayer>} An array with 3dcitydb layer
+ */
+WebMap3DCityDB.prototype.getLayers = function(){
+	return this._layers;
+}
 
 /**
  * removes a 3DCityDBLayer from the cesiumViewer
@@ -139,6 +145,31 @@ WebMap3DCityDB.prototype.activateViewChangedEvent = function(active){
 	    cesiumWidget.clock.onTick.addEventListener(listenerFunc);	
 	}	
 }
+
+function passClickEventToLayer(webMap3DCityDB, modifier, object){
+	if(object){
+		if(Cesium.BatchedModel && object instanceof Cesium.BatchedModel){
+			var url = object.primitive.url;
+			for(var i = 0; i < webMap3DCityDB._layers.length; i++){
+				if(webMap3DCityDB._layers[i].url == url){
+					webMap3DCityDB._layers[i].triggerEvent(modifier, object);
+					return true;
+				}
+			}
+		}else{
+			if(object.id && object.id.layerId){
+				var layerid = object.id.layerId;
+				for(var i = 0; i < webMap3DCityDB._layers.length; i++){
+					if(webMap3DCityDB._layers[i].id == layerid){
+						webMap3DCityDB._layers[i].triggerEvent(modifier, object);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
 /** 
  * activates mouseClick Events over objects 
  * @param {Boolean} active
@@ -148,30 +179,11 @@ WebMap3DCityDB.prototype.activateMouseClickEvents = function(active){
 		var that = this;
 		this._eventHandler.setInputAction(function(event){
 			var object = that._cesiumViewerInstance.scene.pick(event.position);
-			if(object){
-				if(object.id.layerId){
-					var layerid = object.id.layerId;
-					for(var i = 0; i < that._layers.length; i++){
-						if(that._layers[i].id == layerid){
-							that._layers[i].triggerEvent("CLICK", object);
-						}
-					}
-				}
-			}
-		}, Cesium.ScreenSpaceEventType.LEFT_CLICK);	
-		
+			passClickEventToLayer(that, "CLICK", object);
+		}, Cesium.ScreenSpaceEventType.LEFT_CLICK);			
 		this._eventHandler.setInputAction(function(event){
 			var object = that._cesiumViewerInstance.scene.pick(event.position);
-			if(object){
-				if(object.id.layerId){
-					var layerid = object.id.layerId;
-					for(var i = 0; i < that._layers.length; i++){
-						if(that._layers[i].id == layerid){
-							that._layers[i].triggerEvent("CTRLCLICK", object);
-						}
-					}
-				}
-			}
+			passClickEventToLayer(that, "CTRLCLICK", object);			
 		}, Cesium.ScreenSpaceEventType.LEFT_CLICK, Cesium.KeyboardEventModifier.CTRL);		
 	}else{
 		this._eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -202,43 +214,23 @@ WebMap3DCityDB.prototype.activateMouseMoveEvents = function(active){
 			pickingInProgress = true;
 			var object = that._cesiumViewerInstance.scene.pick(event.endPosition);
 			if(currentObject && currentObject != object){
-				if(currentObject.id.layerId){
-					var layerid = currentObject.id.layerId;
-					for(var i = 0; i < that._layers.length; i++){
-						if(that._layers[i].id == layerid){
-							that._layers[i].triggerEvent("MOUSEOUT", currentObject);
-						}
-					}
+				if(passClickEventToLayer(that, "MOUSEOUT", currentObject)){
 					currentObject = null;
-				}				
+				}
 			}
 			if(object && currentObject != object){			
-				if(object.id.layerId){
-					var layerid = object.id.layerId;
-					for(var i = 0; i < that._layers.length; i++){
-						if(that._layers[i].id == layerid){
-							that._layers[i].triggerEvent("MOUSEIN", object);
-						}
-					}
-					currentObject = object;
-					pickingInProgress =false;
-					return;
+				if(!passClickEventToLayer(that, "MOUSEIN", object)){
+					currentObject = null;	
 				}else{
-					currentObject = null;
+					currentObject = object;
 				}
 			}
 			pickingInProgress =false;
 		}, Cesium.ScreenSpaceEventType.MOUSE_MOVE);		
 	}else{
 		if(currentObject != null){
-			if(currentObject.id.layerId){
-				var layerid = currentObject.id.layerId;
-				for(var i = 0; i < that._layers.length; i++){
-					if(that._layers[i].id == layerid){
-						that._layers[i].triggerEvent("MOUSEOUT", object);
-					}
-				}
-			}
+			passClickEventToLayer(that, "MOUSEOUT", currentObject);
+			currentObject = null;
 		}
 		this._eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 	}
