@@ -51,8 +51,6 @@
 				var matrixItem = stack.pop();
 				reply("checkMasterPool", matrixItem);
 			}
-	
-			reply("cleanCaching");
 		},
 	
 		updateDataPoolRecord : function() {
@@ -144,11 +142,7 @@
 				return as - bs;
 			});
 	
-			if (pool.length > 60) {
-				return pool.slice(0, 60);
-			} else {
-				return pool;
-			}
+			return pool;
 		},
 
 		updateTaskStack : function() {

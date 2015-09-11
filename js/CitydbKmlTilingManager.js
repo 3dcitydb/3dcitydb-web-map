@@ -6,6 +6,7 @@
 		this.oTask = null;
 		this.citydbKmlLayerInstance = citydbKmlLayerInstance;
 		this.dataPoolKml = new Object();
+		this.networklinkCache = new Object();
 		this.boundingboxEntity = null;
 	}
 	
@@ -29,7 +30,7 @@
     	var dataPoolKml = this.dataPoolKml;
     	
     	// Caching
-    	var networklinkCache = new Object();
+    	var networklinkCache = this.networklinkCache;
     	
     	// url of the data layer
     	var masterUrl = this.citydbKmlLayerInstance.url;
@@ -100,6 +101,7 @@
     	        	} 
         		}
             }
+
 			if (masterUrl.indexOf(".json") >= 0) {
 				scope.oTask.triggerEvent('checkDataPool', scope.createFrameBbox(), 'matrix');   			
         	}
@@ -288,8 +290,7 @@
 				delete networklinkCache[cacheRocordID];
     			cacheSize--;
     		}
-			
-			console.log("Current Cache size is: " + Object.keys(networklinkCache).length);		        										        							        			           
+			console.log("Current Cache size is: " + Object.keys(scope.networklinkCache).length);		        										        							        			           
 		});
 		
 		
@@ -298,7 +299,8 @@
 		 * update the statusbar and Highlighting status of the KML objects		
 		 *  
 		 */
-		scope.oTask.addListener("refreshView", function () {			
+		scope.oTask.addListener("refreshView", function () {
+			scope.oTask.oListeners["cleanCaching"].call(this); 
 			scope.oTask.sleep();	
 			// trigger Highlighting Manager again...
     		if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
@@ -400,7 +402,12 @@
     		var offzet = 10;
     		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
     		var yOffzet = offzet / 111000;
-
+/*    		this.createBboxGeometry({
+    			xmin: frameMinX - xOffzet,
+    			ymin: frameMinY - yOffzet, 
+    			xmax: frameMaxX + xOffzet, 
+    			ymax: frameMaxY + yOffzet
+    		}); */
         	return [frameMinX - xOffzet, frameMinY - yOffzet, frameMaxX + xOffzet, frameMaxY + yOffzet];
     	}
     	else {
@@ -442,6 +449,7 @@
         		dataSourceCollection.remove(kmlDatasource);
             }
     		this.dataPoolKml = {};
+    		this.networklinkCache = {};
     		
     		if (this.boundingboxEntity != null) {
     			cesiumViewer.entities.remove(this.boundingboxEntity);
