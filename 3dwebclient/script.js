@@ -45,10 +45,10 @@
 	Cesium.knockout.applyBindings(addWmsViewModel, document.getElementById('citydb_addwmspanel'));	
 	
   	var addTerrainViewModel = {
-        name : 'New DEM',
-        iconUrl : '',
-        tooltip : '',
-    	url : ''
+        name : 'NYC_Terrain',
+        iconUrl : 'http://icons.iconarchive.com/icons/iconscity/flags/256/usa-icon.png',
+        tooltip : 'Terrain of New York City created by TUM',
+    	url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/Kachel_NYC_m/'
 	};  	
   	Cesium.knockout.track(addTerrainViewModel);
 	Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('citydb_addterrainpanel'));
