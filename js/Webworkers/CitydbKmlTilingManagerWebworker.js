@@ -86,17 +86,38 @@
 			_colnum = colnum;
 		},
 		
-		calculatePixels: function(polygon1, polygon2, funcId) {
-			var intersectPolygon = intersectionPolygons(polygon1, polygon2);
-        	var area = 0;         
+		calculatePixels: function(tilePolygon, framePolygon, funcId) {
+			var intersectPolygon = intersectionPolygons(tilePolygon, framePolygon);
+        	var area = 0;  
 			var j = intersectPolygon.length - 1;  
 			for (var i=0; i<intersectPolygon.length; i++){
 				area = area +  (intersectPolygon[j].x + intersectPolygon[i].x) * (intersectPolygon[j].y - intersectPolygon[i].y); 
 		        j = i;  
 		    }		
-			setTimeout(function(){
-				reply(funcId, Math.sqrt(area/2));
-			},1);			
+			if (area == 0) {
+				setTimeout(function(){
+					reply(funcId, 0);
+				},1);
+			}				
+			else {
+				var x1 = tilePolygon[0].x;
+	        	var y1 = tilePolygon[0].y;
+				var x2 = tilePolygon[1].x;
+	        	var y2 = tilePolygon[1].y;
+	        	var x3 = tilePolygon[2].x;
+	        	var y3 = tilePolygon[2].y;
+	        	var x4 = tilePolygon[3].x;
+	        	var y4 = tilePolygon[3].y;
+
+	        	var lengthOfDiagonal1 =  Math.sqrt((x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3));
+	        	var lengthOfDiagonal2 =  Math.sqrt((x2 - x4)*(x2 - x4) + (y2 - y4)*(y2 - y4));
+	        	var lengthOfDiagonal = (lengthOfDiagonal1 + lengthOfDiagonal2) / 2;
+	        	
+	        	setTimeout(function(){
+	        		console.log(lengthOfDiagonal);
+					reply(funcId, lengthOfDiagonal);
+				},1);	
+			}	
 		},
 		
 		queryByMatrix : function(frame) {
