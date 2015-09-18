@@ -350,9 +350,9 @@
     	
     	while (!Cesium.defined(cartesian3Indicator)) {
     		factor++
-    		if (factor > 10)
+    		if (factor > 5)
     			break;
-    		originHeight = originHeight + frameHeight*factor*0.1;
+    		originHeight = originHeight + frameHeight*factor*0.2;
     		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
     	}
     	    	
