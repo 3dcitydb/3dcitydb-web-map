@@ -31,7 +31,6 @@
 		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);	
 		this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
 		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);
-		this._maxNumberOfConcurrentXhrs = Cesium.defaultValue(options.maxNumberOfConcurrentXhrs, 5);
 		
     	this._minLodPixels = Cesium.defaultValue(options.minLodPixels, undefined);
     	this._maxLodPixels = Cesium.defaultValue(options.maxLodPixels,  undefined);
@@ -248,15 +247,6 @@
 	        },
 	        set : function(value){
 	        	this._maxCountOfVisibleTiles = value;
-	        }
-	    },
-	    
-	    maxNumberOfConcurrentXhrs : {
-	        get : function(){
-	        	return this._maxNumberOfConcurrentXhrs;
-	        },
-	        set : function(value){
-	        	this._maxNumberOfConcurrentXhrs = value;
 	        }
 	    },
 	    

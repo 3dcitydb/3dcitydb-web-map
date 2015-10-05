@@ -25,10 +25,9 @@
 		spreadsheetUrl: "",
 		pickSurface: [false],
 		minLodPixels : 140,
-		maxLodPixels : Number.MAX_VALUE,		
-		maxSizeOfCachedTiles : 50,		
-		maxCountOfVisibleTiles : 200,
-		maxNumberOfConcurrentXhrs: 5,
+		maxLodPixels : Number.MAX_VALUE,
+		maxSizeOfCachedTiles : 50,
+		maxCountOfVisibleTiles : 200
 	};  	
   	Cesium.knockout.track(addLayerViewModel);
 	Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
@@ -127,8 +126,8 @@
 			var isLoadingTiles = false;
 	  		for (var i = 0; i < layers.length; i++) {
 	  			if (layers[i].active) {	  				
-	  				numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.showedTiles).length;
-	  				numberOfCachedTiles = numberOfCachedTiles +  Object.keys(layers[i].citydbKmlTilingManager.cachedTiles).length;
+	  				numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
+	  				numberOfCachedTiles = numberOfCachedTiles +  Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
 	  				if (layers[i].citydbKmlTilingManager.isDataStreaming()) {
 	  					isLoadingTiles = true;
 	  				}
@@ -159,8 +158,7 @@
 				minLodPixels : Cesium.defaultValue(layerConfig.minLodPixels, 140),
 				maxLodPixels : Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
 				maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
-				maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles,
-				maxNumberOfConcurrentXhrs: layerConfig.maxNumberOfConcurrentXhrs
+				maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
 			}));			
 			index++;
 			layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
@@ -243,8 +241,7 @@
 			addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
 			addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
 			addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
-			addLayerViewModel.maxCountOfVisibleTiles = selectedLayer.maxCountOfVisibleTiles;	
-			addLayerViewModel.maxNumberOfConcurrentXhrs = selectedLayer.maxNumberOfConcurrentXhrs;				
+			addLayerViewModel.maxCountOfVisibleTiles = selectedLayer.maxCountOfVisibleTiles;	    
 		}
 	}
 	
@@ -258,7 +255,6 @@
 		applySaving('maxLodPixels', activeLayer);
 		applySaving('maxSizeOfCachedTiles', activeLayer);
 		applySaving('maxCountOfVisibleTiles', activeLayer);
-		applySaving('maxNumberOfConcurrentXhrs', activeLayer);		
 		console.log(activeLayer);
 		
 		document.getElementById('loadingIndicator').style.display = 'block';	
@@ -616,7 +612,6 @@
 				maxLodPixels: layer.maxLodPixels,
 				maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
 				maxCountOfVisibleTiles: layer.maxCountOfVisibleTiles,
-				maxNumberOfConcurrentXhrs: layer.maxNumberOfConcurrentXhrs				
   			}
   			layerGroupObject["layer_" + i] = Cesium.objectToQuery(layerConfig); 			
   		} 
@@ -702,8 +697,7 @@
 			minLodPixels: addLayerViewModel.minLodPixels,
 			maxLodPixels : addLayerViewModel.maxLodPixels,
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
-			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles,
-			maxNumberOfConcurrentXhrs : addLayerViewModel.maxNumberOfConcurrentXhrs			
+			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles
 		}));
 		
 		loadLayerGroup(_layers);	

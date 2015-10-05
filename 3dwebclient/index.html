@@ -11,6 +11,7 @@
   <link rel="icon" type="image/png" href="../theme/img/favicon.png" sizes="16x16">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>	
   <script src="../ThirdParty/Cesium-1-11/Cesium.js"></script> 
+  <script src="../ThirdParty/Intersection/IntersectionAPI.js"></script>
   <script src="../js/3dcitydb-web-map.js"></script>  
   <script src="../js/CitydbUtil.js"></script>  
   <script src="../js/CitydbWebworker.js"></script>
@@ -174,13 +175,13 @@
 						        </td>
 						    </tr>
 						    <tr>
-						        <td>spreadsheetUrl</td>
+						        <td>SpreadsheetUrl</td>
 						        <td>
 						            <input type="text" data-bind="value: spreadsheetUrl">
 						        </td>
 						    </tr>						    
 						    <tr>
-						        <td>pickSurface</td>
+						        <td>PickSurface</td>
 						        <td>
 									<select class="cesium-button" data-bind="options: [false, true], selectedOptions: pickSurface"></select>	
 						        </td>
@@ -198,23 +199,17 @@
 						        </td>
 						    </tr>							    
 						    <tr>
-						        <td>maxSizeOfCachedTiles</td>
+						        <td>MaxSizeOfCachedTiles</td>
 						        <td>
 						            <input type="text" data-bind="value: maxSizeOfCachedTiles">
 						        </td>
 						    </tr>
 						    <tr>
-						        <td>maxCountOfVisibleTiles</td>
+						        <td>MaxCountOfVisibleTiles</td>
 						        <td>
 						            <input type="text" data-bind="value: maxCountOfVisibleTiles">
 						        </td>
-						    </tr>
-						    <tr>
-						        <td>maxNumberOfConcurrentXhrs</td>
-						        <td>
-						            <input type="text" data-bind="value: maxNumberOfConcurrentXhrs">
-						        </td>
-						    </tr>							    				    
+						    </tr>				    
 						</tbody>
 					</table>
 			        <div class="citydb_short_container">
