@@ -10,6 +10,26 @@
 		this.boundingboxEntity = null;
 	}
 	
+	function calculatePixels(tilePolygon, framePolygon) {
+    	var intersectedPolygon = intersectionPolygons(tilePolygon, framePolygon);
+    	var intersectedPixels = CitydbUtil.polygonArea(intersectedPolygon);
+    	if (intersectedPixels > 0) {
+    		var x1 = tilePolygon[0].x;
+    		var y1 = tilePolygon[0].y;
+    		var x2 = tilePolygon[1].x;
+    		var y2 = tilePolygon[1].y;
+    		var x3 = tilePolygon[2].x;
+    		var y3 = tilePolygon[2].y;
+    		var x4 = tilePolygon[3].x;
+    		var y4 = tilePolygon[3].y;	        		
+    		var lengthOfDiagonal1 =  Math.sqrt((x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3));
+    		var lengthOfDiagonal2 =  Math.sqrt((x2 - x4)*(x2 - x4) + (y2 - y4)*(y2 - y4));
+    		var lengthOfDiagonal = (lengthOfDiagonal1 + lengthOfDiagonal2) / 2;
+    		return lengthOfDiagonal;
+    	}
+    	return Math.sqrt(intersectedPixels);
+	}
+	
 	CitydbKmlTilingManager.prototype.doStart = function() {		
 		var scope = this;
 		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlTilingManager") + "Webworkers/CitydbKmlTilingManagerWebworker.js");
@@ -90,10 +110,9 @@
         		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {
         			var clientWidth = canvas.clientWidth;
             		var clientHeight = canvas.clientHeight;					        							        		
-            		var polygon1 = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
-    	        	var polygon2 = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
-    	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
-    	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
+            		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
+    	        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
+    	        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);   	        	
     	        	if (pixelCoveringSize < minLodPixels || pixelCoveringSize > maxLodPixels) {
     	        		dataSourceCollection.remove(kmlDatasource);
     	        		delete dataPoolKml[objUrl];
@@ -145,10 +164,9 @@
     		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {
     			var clientWidth = canvas.clientWidth;
         		var clientHeight = canvas.clientHeight;					        							        		
-        		var polygon1 = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
-	        	var polygon2 = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
-	        	var intersectPolygon = intersectionPolygons(polygon1, polygon2);
-	        	var pixelCoveringSize = Math.sqrt(CitydbUtil.polygonArea(intersectPolygon));
+        		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
+	        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
+	        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);	        	
 	        	
 	        	if (scope.citydbKmlLayerInstance.cacheTiles) { // with cache
 	        		if (networklinkCache.hasOwnProperty(objUrl)) {
@@ -380,8 +398,7 @@
     		originHeight = originHeight + frameHeight*factor*0.1;
     		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
     	}
-   // 	originHeight = originHeight + (frameHeight - originHeight) / 2;
-    	    	
+
 		var cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
     	var cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));
     	var cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
