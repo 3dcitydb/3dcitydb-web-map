@@ -9,7 +9,9 @@
 	 */
 	
 	/*---------------------------------  set globe variables  ----------------------------------------*/
-
+	// updated Bing Key
+	Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';
+	
 	// create 3Dcitydb-web-map instance
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
@@ -86,7 +88,10 @@
 		var titleStr = CitydbUtil.parse_query_string('title', window.location.href);
 		if (titleStr) {
 			document.title = titleStr;
-		}	
+			if (titleStr == 'Vorarlberg_Demo') {
+				loadWmsAndTerrainForVorarlberg();
+			}
+		}			
 		
 		// extended search command for searching object by gmlid
 		cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
@@ -112,6 +117,28 @@
 			var layers = getLayersFromUrl();
 			loadLayerGroup(layers);
 		})			
+	}
+	
+	/*---------------------------------  	Vorarlberg Demo      ----------------------------------------*/ 
+	
+	function loadWmsAndTerrainForVorarlberg() {
+		addWmsViewModel = {
+	        name : 'Vorarlberg WMS Service',
+	        iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
+	        tooltip : 'Voralberg Orthoimagery',
+			url: 'http://vogis.cnv.at/mapserver/mapserv',
+			layers : 'ef2012_12cm',
+			map: 'i_luftbilder_r_wms.map'
+		};
+		addWebMapServiceProvider();
+		
+		addTerrainViewModel = {
+	        name : 'Vorarlberg Terrain Model',
+	        iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
+	        tooltip : 'Vorarlberg Terrain Model',
+	    	url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/vorarlberg_DGM'
+		}; 
+		addTerrainProvider();
 	}
 	    
     /*---------------------------------  methods and functions  ----------------------------------------*/ 
