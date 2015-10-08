@@ -9,7 +9,9 @@
 	 */
 	
 	/*---------------------------------  set globe variables  ----------------------------------------*/
-
+	// updated Bing Key
+	Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';
+	
 	// create 3Dcitydb-web-map instance
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
