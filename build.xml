@@ -1,0 +1,44 @@
+<project name="3DCityDB-Web-Map" default="all" basedir=".">
+    <!-- Setup -->
+    <property name="SRC_JS_DIR" value="js" description="JavaScript source folder" />
+	<property name="SRC_THIRDPARTY_DIR" value="thirdparty" description="Thirdparty source folder" />
+	<property name="SRC_THIRDPARTY_INTERSECTION" value="thirdparty/Intersection" description="Thirdparty Intersection API" />
+    <property name="DIST_DIR" value="build" description="Output folder for build targets" />
+    <property name="DIST_JS_DIR" value="${DIST_DIR}/unminified" description="Output folder for JavaScript files" />
+	
+	 <!-- File name for distribution -->
+	<property name="JS" value="${DIST_JS_DIR}/3dcitydb-web-map-api.js" />
+
+	<!-- delete the ${DIST_DIR} directory tree -->
+    <target name="clean">
+        <delete dir="${DIST_DIR}" />
+    </target>        	
+   
+    <!-- Targets -->
+    <target name="js" depends="clean" description="Concatenate JavaScript source files and copy the additional required sources">
+        <echo message="Building ${JS}" />
+        <concat destfile="${JS}">
+            <fileset dir="${SRC_JS_DIR}" includes="3dcitydb-web-map.js" />
+        	<fileset dir="${SRC_THIRDPARTY_INTERSECTION}" includes="IntersectionAPI.js" />
+            <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlDataSource.js" />
+            <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlHighlightingManager.js" />
+        	<fileset dir="${SRC_JS_DIR}" includes="CitydbKmlLayer.js" />
+            <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlTilingManager.js" />
+        	<fileset dir="${SRC_JS_DIR}" includes="CitydbUtil.js" />
+            <fileset dir="${SRC_JS_DIR}" includes="CitydbWebworker.js" />    
+        </concat>
+    	
+    	<copy todir="${DIST_JS_DIR}/Webworkers">
+			<fileset dir="${SRC_JS_DIR}/Webworkers" />
+		</copy>
+    	
+    	<copy todir="${DIST_JS_DIR}/Cesium">
+			<fileset dir="${SRC_THIRDPARTY_DIR}/Cesium-1-11" />
+		</copy>
+        <echo message="${JS} built." />
+    </target>
+ 
+    <target name="all" depends="js">
+        <echo message="Build complete." />
+    </target>
+</project>
