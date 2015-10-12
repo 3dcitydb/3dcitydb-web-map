@@ -32,11 +32,14 @@
 	
 	CitydbKmlTilingManager.prototype.doStart = function() {		
 		var scope = this;
-		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlTilingManager") + "Webworkers/CitydbKmlTilingManagerWebworker.js");
-		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
-    	var dataSourceCollection = cesiumViewer._dataSourceCollection;
-    	var scene = cesiumViewer.scene;
-    	var canvas = scene.canvas; 
+		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlTilingManager") + "Webworkers/CitydbKmlTilingManagerWebworker.js");    	 	
+    	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
+    	var dataSourceCollection = cesiumViewer._dataSourceCollection;  
+    	var cesiumWidget = cesiumViewer.cesiumWidget; 
+    	var scene = cesiumWidget.scene;
+    	var camera = scene.camera;
+    	var canvas = scene.canvas;
+    	var globe = scene.globe;
     	
     	var minLodPixels = this.citydbKmlLayerInstance.minLodPixels;
     	var maxLodPixels = this.citydbKmlLayerInstance.maxLodPixels;
@@ -151,19 +154,23 @@
 			else {
 				objUrl = matrixItem[4].key;
 			}
+    		
+    		var clientWidth = canvas.clientWidth;
+    		var clientHeight = canvas.clientHeight;	
+    		
+    		var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene)).height;	
 
-			var lowerRightCorner = Cesium.Cartesian3.fromDegrees(maxX, minY);
-			var upperRightCorner = Cesium.Cartesian3.fromDegrees(maxX, maxY);
-			var upperLeftCorner = Cesium.Cartesian3.fromDegrees(minX, maxY);
-			var lowerLeftCorner = Cesium.Cartesian3.fromDegrees(minX, minY);	
+			var lowerRightCorner = Cesium.Cartesian3.fromDegrees(maxX, minY, terrainHeight);
+			var upperRightCorner = Cesium.Cartesian3.fromDegrees(maxX, maxY, terrainHeight);
+			var upperLeftCorner = Cesium.Cartesian3.fromDegrees(minX, maxY, terrainHeight);
+			var lowerLeftCorner = Cesium.Cartesian3.fromDegrees(minX, minY, terrainHeight);	
 			var v1Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerRightCorner);
     		var v2Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperRightCorner);
     		var v3Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperLeftCorner);
     		var v4Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerLeftCorner);
 
     		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {
-    			var clientWidth = canvas.clientWidth;
-        		var clientHeight = canvas.clientHeight;					        							        		
+    							        							        		
         		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
 	        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
 	        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);	        	
@@ -381,8 +388,10 @@
     CitydbKmlTilingManager.prototype.createFrameBbox = function() {
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var cesiumWidget = cesiumViewer.cesiumWidget; 
-    	var camera = cesiumWidget.scene.camera;
-    	var canvas = cesiumWidget.scene.canvas;
+    	var scene = cesiumWidget.scene;
+    	var camera = scene.camera;
+    	var canvas = scene.canvas;
+    	var globe = scene.globe;
 
     	var frameWidth = canvas.clientWidth;
     	var frameHeight = canvas.clientHeight;
@@ -399,17 +408,17 @@
     		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
     	}
 
-		var cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
-    	var cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));
-    	var cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
-    	var cartesian3OfFrameCorner4 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth, originHeight));    	
+    	var cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
+    	var cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
+    	var cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
+    	var cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
     	
     	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
     		var wgs84OfFrameCorner1  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
     		var wgs84OfFrameCorner2 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner2);			
     		var wgs84OfFrameCorner3 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner3);			
     		var wgs84OfFrameCorner4 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner4);
-    		
+
     		var frameMinX = Math.min(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
     		var frameMaxX = Math.max(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
     		var frameMinY = Math.min(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
