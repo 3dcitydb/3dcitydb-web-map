@@ -158,7 +158,13 @@
     		var clientWidth = canvas.clientWidth;
     		var clientHeight = canvas.clientHeight;	
     		
-    		var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene)).height;	
+    		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
+    		if (typeof intersectedPoint == 'undefined') {
+    			scope.oTask.triggerEvent('updateTaskStack');
+    			scope.oTask.triggerEvent('updateDataPoolRecord');	
+    			return;
+    		}
+    		var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;	
 
 			var lowerRightCorner = Cesium.Cartesian3.fromDegrees(maxX, minY, terrainHeight);
 			var upperRightCorner = Cesium.Cartesian3.fromDegrees(maxX, maxY, terrainHeight);
@@ -180,6 +186,11 @@
 		        		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
 		        			if (!dataPoolKml.hasOwnProperty(objUrl)) {		        				
 		        				var networklinkItem = networklinkCache[objUrl].networklinkItem;
+		        				networklinkItem.lowerRightCorner = lowerRightCorner;
+		        				networklinkItem.upperRightCorner = upperRightCorner;
+		        				networklinkItem.upperLeftCorner = upperLeftCorner;
+		        				networklinkItem.lowerLeftCorner = lowerLeftCorner;
+		        				
 	    	        			var kmlDatasource = networklinkItem.kmlDatasource;
 	    	        			dataPoolKml[objUrl] = networklinkItem;    
     	        				dataSourceCollection.add(kmlDatasource).then(function() { 	        					
