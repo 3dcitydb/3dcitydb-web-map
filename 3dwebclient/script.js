@@ -595,11 +595,9 @@
     // Creation of a weblink for sharing with other people..
  	function generateLink(){
   		var cameraPostion = null;	    		    	   	
-    	var ray = cesiumCamera.getPickRay(new Cesium.Cartesian2(
-            Math.round(cesiumViewer.scene.canvas.clientWidth / 2),
-            Math.round(cesiumViewer.scene.canvas.clientHeight / 2)
-        ));
-        var position = cesiumViewer.scene.globe.pick(ray, cesiumViewer.scene);
+  		var camera = cesiumViewer.scene.camera;
+  		var canvas = cesiumViewer.scene.canvas
+        var position = camera.pickEllipsoid(new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2));
         if (Cesium.defined(position)) {
             var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
             var range = Cesium.Cartesian3.distance(position, cesiumCamera.position);
