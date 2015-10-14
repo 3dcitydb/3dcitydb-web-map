@@ -419,10 +419,23 @@
     		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
     	}
 
-    	var cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
-    	var cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
-    	var cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
-    	var cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+    	var cartesian3OfFrameCorner1;
+    	var cartesian3OfFrameCorner2;
+    	var cartesian3OfFrameCorner3;
+    	var cartesian3OfFrameCorner4;
+    	
+    	if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+    		cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
+    		cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));
+    		cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
+    		cartesian3OfFrameCorner4 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth, originHeight)); 
+    	}
+    	else {
+    		cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
+        	cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
+        	cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
+        	cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+    	}
     	
     	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
     		var wgs84OfFrameCorner1  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
