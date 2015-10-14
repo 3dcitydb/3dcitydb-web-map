@@ -1303,7 +1303,8 @@
 		var locationNode = queryFirstNode(modelNode, 'Location', namespaces.kml);
 		var longitude = queryNumericValue(locationNode, 'longitude', namespaces.kml);
 		var latitude = queryNumericValue(locationNode, 'latitude', namespaces.kml);
-        var position = Cesium.Cartesian3.fromDegrees(longitude, latitude, 0);
+		var height = queryNumericValue(locationNode, 'altitude', namespaces.kml);
+        var position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
 		var heading = Cesium.Math.toRadians(180);
 		var pitch = Cesium.Math.toRadians(180);
 		var roll = 0;
