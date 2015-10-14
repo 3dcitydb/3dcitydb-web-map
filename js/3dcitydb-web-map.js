@@ -101,7 +101,7 @@
 	 */
 	WebMap3DCityDB.prototype.activateViewChangedEvent = function(active){
 		var that = this;
-		var cesiumWidget = cesiumViewer.cesiumWidget;
+		var cesiumWidget = this._cesiumViewerInstance.cesiumWidget;
 	    var camera = cesiumWidget.scene.camera;
 	    var posX = camera.position.x;
 	    var posY = camera.position.y;
