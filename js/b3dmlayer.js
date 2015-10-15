@@ -171,8 +171,8 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 	this._cesium3DTileset.tileVisible.addEventListener(function(tile){
 		if(!tile.b3dmlayer_LastUpdated || tile.b3dmlayer_LastUpdated < that._highlightedObjectsLastUpdated){
 			if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
-				var batchTable = tile.content.getBatchTable();
-				var batchSize = tile.content._batchSize;
+				var batchTable = tile.content.batchTable;
+				var batchSize = tile.content.batchSize;
 				var batchId = 0;
 				
 				for(var i = 0; i < batchTable["subId"].length; i++){
@@ -219,18 +219,6 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 					}
 				}
 				
-				/*
-				for (var i = 0; i < that._highlightedObjectsToRemove.length; i++){
-					var key = that._highlightedObjectsToRemove[i];
-					var batchIds = tile.content.getBatchIdsByProperty("topId", key);
-					for(var j = 0; j < batchIds.length; j++){
-						tile.content.setColor(batchIds[j], that._highlightedObjectsOriginalColor[key]);												
-					}
-					if(batchIds.length > 0){
-						that._highlightedObjectsToRemove.splice(i,1);
-					}
-				}
-				*/
 				tile["b3dmlayer_LastUpdated"] = Date.now();
 			}						 
 		}
@@ -264,10 +252,6 @@ function getBatchIdsByParentId(batchTable, batchSize, pid, result){
         }        
     }
     return result;
-}
-function getIdsByBatchIds(batchTable, batchIds){
-	
-	
 }
 
 function getObjectForBatchId(batchTable, batchId){
@@ -313,12 +297,7 @@ function getFirstBatchIdByProperty(batchTable, property, value){
 	}else{
 		return i;
 	}
-    /*for(var i = 0; i < batchTable[property].length; i++){
-       if(value == batchTable[property][i]){
-    	   return i;
-       }
-    }
-    return null;*/
+
 }
 function getPropertyByBatchId(batchTable, property, batchId){
 	return batchTable[property][batchId];
@@ -489,8 +468,8 @@ B3DMLayer.prototype.registerEventHandler = function(event, callback){
  */
 B3DMLayer.prototype.triggerEvent = function(event, object){		
 	var objectId = object.getProperty("subId");
-	var batchTable = object._content.getBatchTable();
-	var batchSize =  object._content._batchSize;		
+	var batchTable = object._content.batchTable;
+	var batchSize =  object._content.batchSize;		
 	if(this.pickMode == "id"){
 	}else if(this.pickMode == "feature"){
 		objectId = getRootId(batchTable, objectId);
