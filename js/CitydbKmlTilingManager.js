@@ -159,28 +159,42 @@
 				objUrl = matrixItem[4].key;
 			}
     		
-    		var clientWidth = canvas.clientWidth;
-    		var clientHeight = canvas.clientHeight;	
     		
-    		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
-    		if (typeof intersectedPoint == 'undefined') {
-    			scope.oTask.triggerEvent('updateTaskStack');
-    			scope.oTask.triggerEvent('updateDataPoolRecord');	
-    			return;
-    		}
-    		var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;	
+    		var lowerRightCorner;
+			var upperRightCorner;
+			var upperLeftCorner;
+			var lowerLeftCorner;	
+			
+			var clientWidth = canvas.clientWidth;
+    		var clientHeight = canvas.clientHeight;	   
+    		
+    		if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+    			lowerRightCorner = Cesium.Cartesian3.fromDegrees(maxX, minY);
+    			upperRightCorner = Cesium.Cartesian3.fromDegrees(maxX, maxY);
+    			upperLeftCorner = Cesium.Cartesian3.fromDegrees(minX, maxY);
+    			lowerLeftCorner = Cesium.Cartesian3.fromDegrees(minX, minY);
+    			
+        	}
+        	else {        		     		
+        		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
+        		if (typeof intersectedPoint == 'undefined') {
+        			scope.oTask.triggerEvent('updateTaskStack');
+        			scope.oTask.triggerEvent('updateDataPoolRecord');	
+        			return;
+        		}
+        		var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;	
+    			lowerRightCorner = Cesium.Cartesian3.fromDegrees(maxX, minY, terrainHeight);
+    			upperRightCorner = Cesium.Cartesian3.fromDegrees(maxX, maxY, terrainHeight);
+    			upperLeftCorner = Cesium.Cartesian3.fromDegrees(minX, maxY, terrainHeight);
+    			lowerLeftCorner = Cesium.Cartesian3.fromDegrees(minX, minY, terrainHeight);	
+        	}
 
-			var lowerRightCorner = Cesium.Cartesian3.fromDegrees(maxX, minY, terrainHeight);
-			var upperRightCorner = Cesium.Cartesian3.fromDegrees(maxX, maxY, terrainHeight);
-			var upperLeftCorner = Cesium.Cartesian3.fromDegrees(minX, maxY, terrainHeight);
-			var lowerLeftCorner = Cesium.Cartesian3.fromDegrees(minX, minY, terrainHeight);	
 			var v1Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerRightCorner);
     		var v2Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperRightCorner);
     		var v3Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperLeftCorner);
     		var v4Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerLeftCorner);
 
-    		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {
-    							        							        		
+    		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {		        							        		
         		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
 	        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
 	        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);	        	
