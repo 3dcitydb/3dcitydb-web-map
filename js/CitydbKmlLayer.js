@@ -564,7 +564,6 @@
 			if (Cesium.defined(originalMaterial)) {
 				if (!this.isHiddenObject(object)) {
 					this.setEntityColorByPrimitive(object, originalMaterial.color._value.clone());	
-					var scope = this;
 					setTimeout(function(){
 						object.polygon.material = originalMaterial;	
 					}, 100)
@@ -578,7 +577,6 @@
 					var originalMaterial = childEntity.originalMaterial;
 					if (Cesium.defined(originalMaterial)) {
 						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
-						var scope = this;
 						childEntity.polygon.material = originalMaterial;
 					}
 				}	
@@ -721,7 +719,6 @@
 				var originalMaterial = object.originalMaterial;
 				if (Cesium.defined(originalMaterial)) {
 					this.setEntityColorByPrimitive(object, originalMaterial.color._value.clone());	
-					var scope = this;
 					setTimeout(function(){
 						object.polygon.material = originalMaterial;	
 					}, 100)
@@ -742,9 +739,10 @@
 				if (!this.isInHighlightedList(globeId)) {
 					var originalMaterial = childEntity.originalMaterial;
 					if (Cesium.defined(originalMaterial)) {
-						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
-						var scope = this;
-						childEntity.polygon.material = originalMaterial;	
+						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value);	
+						setTimeout(function(){
+							childEntity.polygon.material = originalMaterial;	
+						}, 100)	
 					}
 				}
 			}		
@@ -782,8 +780,8 @@
 		this._hiddenObjects = this._hiddenObjects;
 		
 		this._hiddenObjects = [];
-		if (this._citydbKmlHighlightingManager != null)
-			this._citydbKmlHighlightingManager.triggerWorker();		
+/*		if (this._citydbKmlHighlightingManager != null)
+			this._citydbKmlHighlightingManager.triggerWorker();		*/
 	};
 	
 	CitydbKmlLayer.prototype.isInHiddenList = function(objectId){	
