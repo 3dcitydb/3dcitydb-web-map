@@ -32,7 +32,11 @@
 	
 	CitydbKmlTilingManager.prototype.doStart = function() {		
 		var scope = this;
-		this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlTilingManager") + "Webworkers/CitydbKmlTilingManagerWebworker.js");    	 	
+		var workerPath = CitydbUtil.retrieveURL("CitydbKmlTilingManager");
+		if (typeof workerPath == 'undefined') {
+			workerPath = CitydbUtil.retrieveURL("3dcitydb-web-map-api");
+		}
+		this.oTask = new CitydbWebworker(workerPath + "Webworkers/CitydbKmlTilingManagerWebworker.js");    	 	
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var dataSourceCollection = cesiumViewer._dataSourceCollection;  
     	var cesiumWidget = cesiumViewer.cesiumWidget; 

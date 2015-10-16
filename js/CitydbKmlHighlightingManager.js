@@ -13,7 +13,11 @@
 	CitydbKmlHighlightingManager.prototype.doStart = function() {
     	var scope = this;
     	
-    	this.oTask = new CitydbWebworker(CitydbUtil.retrieveURL("CitydbKmlHighlightingManager") + "Webworkers/CitydbKmlHighlightingManagerWebworker.js");
+    	var workerPath = CitydbUtil.retrieveURL("CitydbKmlHighlightingManager");
+    	if (typeof workerPath == 'undefined') {
+			workerPath = CitydbUtil.retrieveURL("3dcitydb-web-map-api");
+		}   	
+    	this.oTask = new CitydbWebworker(workerPath + "Webworkers/CitydbKmlHighlightingManagerWebworker.js");
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {	
@@ -69,20 +73,8 @@
 						console.log("Highlighting Manager is sleeping...")
 						scope.oTask.sleep();
 					} 
-				}
-				 					
-		    }, 3000); 	
-			
-/*			if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
-				console.log("Highlighting manager repeat updating again...");
-				setTimeout(function(){   	
-					scope.rebuildDataPool();   					
-    		    }, 3000); 		    	  		    	
-			}
-			else {		
-				console.log("Highlighting Manager is sleeping...")
-				scope.oTask.sleep();
-			}*/					
+				}				 					
+		    }, 3000); 				
 		});			
 
 		this.dataPool = this.generateDataPool();
