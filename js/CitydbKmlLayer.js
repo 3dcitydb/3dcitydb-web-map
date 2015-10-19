@@ -25,8 +25,9 @@
 		this._cameraPosition = {};
 		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
 		this._cesiumViewer = undefined;
-		this._jsonLayerInfo = undefined;
 		this._spreadsheetUrl = Cesium.defaultValue(options.spreadsheetUrl, "");
+		this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
+		this._cityobjectsJsonData = {};
 	
 		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);	
 		this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
@@ -186,15 +187,27 @@
 	        }
 	    },
 	    
-	    cesiumViewer : {
+	    cityobjectsJsonUrl : {
 	        get : function(){
-	        	return this._cesiumViewer;
+	        	return this._cityobjectsJsonUrl;
+	        },
+	        set : function(value){
+	        	this._cityobjectsJsonUrl = value;
 	        }
 	    },
 	    
-	    jsonLayerInfo : {
+	    cityobjectsJsonData : {
 	        get : function(){
-	        	return this._jsonLayerInfo;
+	        	return this._cityobjectsJsonData;
+	        },
+	        set : function(value){
+	        	this._cityobjectsJsonData = value;
+	        }
+	    },
+	    
+	    cesiumViewer : {
+	        get : function(){
+	        	return this._cesiumViewer;
 	        }
 	    },
 	    
@@ -305,7 +318,21 @@
 		            
 		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
 		            that._citydbKmlTilingManager.doStart();
-		            that._finishLoadingEvent.raiseEvent(that);		            
+		            
+		            var jsonUrl = that._cityobjectsJsonUrl;
+		            if (Cesium.defined(jsonUrl)) {
+		            	Cesium.loadJson(jsonUrl).then(function(data) {
+							console.log(data);
+							that._cityobjectsJsonData = data;
+							that._finishLoadingEvent.raiseEvent(that);
+						}).otherwise(function(error) {
+							console.log(error);
+							that._finishLoadingEvent.raiseEvent(that);
+						});	
+		            }
+		            else {
+		            	that._finishLoadingEvent.raiseEvent(that);
+		            }		            		            
 		        },
 		        error: function(XHR, textStatus, errorThrown){
 		        	console.log('can not find the json file for ' + kmlUrl);
