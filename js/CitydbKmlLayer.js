@@ -25,7 +25,7 @@
 		this._cameraPosition = {};
 		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
 		this._cesiumViewer = undefined;
-		this._spreadsheetUrl = Cesium.defaultValue(options.spreadsheetUrl, "");
+		this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
 		this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
 		this._cityobjectsJsonData = {};
 	
@@ -43,6 +43,18 @@
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		this._layerType = undefined;
 
+		this._configParameters = {
+			"id": this.id,
+			"url" : this.url,
+			"name" : this.name,
+			"thematicDataUrl" : this.thematicDataUrl,
+			"pickSurface": this.pickSurface,
+			"minLodPixels": this.minLodPixels,
+			"maxLodPixels" : this.maxLodPixels,
+			"maxSizeOfCachedTiles": this.maxSizeOfCachedTiles,
+			"maxCountOfVisibleTiles" : this.maxCountOfVisibleTiles
+		}
+		
 		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
 				
 		/**
@@ -178,12 +190,12 @@
 	        }
 	    },
 	    
-	    spreadsheetUrl : {
+	    thematicDataUrl : {
 	        get : function(){
-	        	return this._spreadsheetUrl;
+	        	return this._thematicDataUrl;
 	        },
 	        set : function(value){
-	        	this._spreadsheetUrl = value;
+	        	this._thematicDataUrl = value;
 	        }
 	    },
 	    
@@ -279,6 +291,12 @@
 	        get : function(){
 	        	return this._citydbKmlHighlightingManager == null? false: true;
 	        }
+	    },
+	    
+	    configParameters : {
+	        get : function(){
+	        	return this._configParameters;
+	        }
 	    }
 	});
 
@@ -371,7 +389,7 @@
         var heading = Cesium.Math.toRadians(this._cameraPosition.heading);
         var pitch = Cesium.Math.toRadians(this._cameraPosition.tilt - 90);
         var range = this._cameraPosition.range;
-        
+        var cesiumCamera = this._cesiumViewer.scene.camera;
         cesiumCamera.flyTo({
             destination : Cesium.Cartesian3.fromDegrees(lon, lat, range),
             complete: function() {

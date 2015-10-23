@@ -24,7 +24,7 @@
   	var addLayerViewModel = {
 		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
 		name : "Berlin_Center_Footprint",
-		spreadsheetUrl: "",
+		thematicDataUrl: "",
 		pickSurface: [false],
 		minLodPixels : 140,
 		maxLodPixels : Number.MAX_VALUE,
@@ -180,7 +180,7 @@
 			nLayers.push(new CitydbKmlLayer({
 				url : layerConfig.url,
 				name : layerConfig.name,
-				spreadsheetUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
+				thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
 				pickSurface: (layerConfig.pickSurface == "true"),
 				minLodPixels : Cesium.defaultValue(layerConfig.minLodPixels, 140),
 				maxLodPixels : Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
@@ -263,7 +263,7 @@
 		function updateAddLayerViewModel(selectedLayer) {
 			addLayerViewModel.url = selectedLayer.url;
 			addLayerViewModel.name = selectedLayer.name;
-			addLayerViewModel.spreadsheetUrl = selectedLayer.spreadsheetUrl;
+			addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
 			addLayerViewModel.pickSurface = [selectedLayer.pickSurface];
 			addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
 			addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
@@ -277,7 +277,7 @@
 		applySaving('url', activeLayer);
 		applySaving('name', activeLayer);
 		applySaving('pickSurface', activeLayer);
-		applySaving('spreadsheetUrl', activeLayer);
+		applySaving('thematicDataUrl', activeLayer);
 		applySaving('minLodPixels', activeLayer);
 		applySaving('maxLodPixels', activeLayer);
 		applySaving('maxSizeOfCachedTiles', activeLayer);
@@ -632,7 +632,7 @@
 				url : layer.url,
 				name : layer.name,
 				pickSurface: layer.pickSurface,
-				spreadsheetUrl: layer.spreadsheetUrl,
+				spreadsheetUrl: layer.thematicDataUrl,
 				minLodPixels: layer.minLodPixels,
 				maxLodPixels: layer.maxLodPixels,
 				maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
@@ -678,8 +678,8 @@
   	};
   	
   	function zoomToObject(gmlId) {
-  		var spreadsheetUrl = webMap.activeLayer.spreadsheetUrl;  
-		var promise = fetchDataFromGoogleFusionTable(gmlId, spreadsheetUrl);
+  		var thematicDataUrl = webMap.activeLayer.thematicDataUrl;  
+		var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
 		var _deferred = Cesium.when.defer();
 		Cesium.when(promise, function(result) {
 			var centroid = result["CENTROID"];
@@ -717,7 +717,7 @@
 		_layers.push(new CitydbKmlLayer({
 			url : addLayerViewModel.url,
 			name : addLayerViewModel.name,
-			spreadsheetUrl : addLayerViewModel.spreadsheetUrl,
+			thematicDataUrl : addLayerViewModel.thematicDataUrl,
 			pickSurface: addLayerViewModel.pickSurface[0],
 			minLodPixels: addLayerViewModel.minLodPixels,
 			maxLodPixels : addLayerViewModel.maxLodPixels,
@@ -825,10 +825,10 @@
 	}
 	
 	function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
-		var spreadsheetUrl = citydbLayer.spreadsheetUrl;
+		var thematicDataUrl = citydbLayer.thematicDataUrl;
 		cesiumEntity.description = "Loading feature information...";
 		
-		fetchDataFromGoogleFusionTable(gmlid, spreadsheetUrl).then(function(kvp){
+		fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl).then(function(kvp){
 			console.log(kvp);
 			var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
 	        for (var key in kvp) {
@@ -842,11 +842,11 @@
 		});		
 	}
 	
-	function fetchDataFromGoogleSpreadsheet(gmlid, spreadsheetUrl) {
+	function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
 		var kvp = {};
 		var deferred = Cesium.when.defer();
 		
-		var spreadsheetKey = spreadsheetUrl.split("/")[5];
+		var spreadsheetKey = thematicDataUrl.split("/")[5];
 		var metaLink = 'https://spreadsheets.google.com/feeds/worksheets/' + spreadsheetKey + '/public/full?alt=json-in-script';
 		
 		Cesium.jsonp(metaLink).then(function(meta) {
@@ -877,11 +877,11 @@
 		return deferred.promise;
 	}
 	
-	function fetchDataFromGoogleFusionTable(gmlid, spreadsheetUrl) {
+	function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
 		var kvp = {};
 		var deferred = Cesium.when.defer();
 		
-		var tableID = CitydbUtil.parse_query_string('docid', spreadsheetUrl); 		
+		var tableID = CitydbUtil.parse_query_string('docid', thematicDataUrl); 		
 		var sql = "sql=SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
 		var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";		
 		var queryLink = "https://www.googleapis.com/fusiontables/v2/query?" + sql + "&key=" + apiKey; 	
