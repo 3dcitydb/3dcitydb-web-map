@@ -38,24 +38,29 @@
 						scope.oTask.triggerEvent('updateDataPool');
 					}
 				}
-				
-				// update Highlighting
-				if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {				
-					if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
-						scope.citydbKmlLayerInstance.highlightObject(obj);
-						scope.oTask.triggerEvent('updateDataPool');
-					}					
-				}
-				else {
-					if (scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
-						scope.citydbKmlLayerInstance.unHighlightObject(obj);
-						scope.oTask.triggerEvent('updateDataPool');
+								
+				setTimeout(function(){   	
+					// update Highlighting
+					if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {				
+						if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
+							scope.citydbKmlLayerInstance.highlightObject(obj);
+							scope.oTask.triggerEvent('updateDataPool');
+						}					
 					}
-				}
+					else {
+						if (scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
+							scope.citydbKmlLayerInstance.unHighlightObject(obj);
+							scope.oTask.triggerEvent('updateDataPool');
+						}
+					}
+					scope.oTask.triggerEvent('updateTaskStack'); 
+			    }, 50);
 			}
-			setTimeout(function(){   	
-				scope.oTask.triggerEvent('updateTaskStack'); 		    	
-		    }, 50); 			
+			else {
+				setTimeout(function(){   	
+					scope.oTask.triggerEvent('updateTaskStack'); 		    	
+			    }, 50); 
+			}						
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {				
