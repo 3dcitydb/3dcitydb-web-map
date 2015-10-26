@@ -48,6 +48,7 @@
 			"url" : this.url,
 			"name" : this.name,
 			"thematicDataUrl" : this.thematicDataUrl,
+			"cityobjectsJsonUrl" : this.cityobjectsJsonUrl,
 			"pickSurface": this.pickSurface,
 			"minLodPixels": this.minLodPixels,
 			"maxLodPixels" : this.maxLodPixels,
