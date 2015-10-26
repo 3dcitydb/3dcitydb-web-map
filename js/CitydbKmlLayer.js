@@ -310,54 +310,47 @@
 		this._startLoadingEvent.raiseEvent(this);
 		this._cesiumViewer = cesiumViewer;
 		var that = this;
-		if (this._url.indexOf(".json") >= 0) {	    		
-			jQuery.noConflict().ajax({		    	
-		        url: that._url +'?jsoncallback=?',   
-		        dataType: "jsonp",
-		        jsonpCallback: "handle_3DCityDB_data", // the function name was defined by 3DCityDB KML/collada Exporter
-		        timeout: 30000, // timeout in order to trigger the JQuery ajax error callback function
-		        success: function(json, status){		        	
-		        	that._citydbKmlDataSource._name = json.layername;	
-		        	that._citydbKmlDataSource._proxy = json;
-		        	that._layerType = json.displayform;
-
-		            that._cameraPosition = {
-		        		lat: (json.bbox.ymax + json.bbox.ymin) / 2,	
-		        		lon: (json.bbox.xmax + json.bbox.xmin) / 2,
-		    			range: 800,
-		    			tilt: 49,
-		    			heading: 6,
-		    			altitude: 40
-		        	}
-		            
-		            if (!Cesium.defined(that._minLodPixels))
-		            	that._minLodPixels = json.minLodPixels == -1? Number.MIN_VALUE: json.minLodPixels;
-		            if (!Cesium.defined(that._maxLodPixels))
-		            	that._maxLodPixels = json.maxLodPixels == -1? Number.MAX_VALUE: json.maxLodPixels;
-		            
-		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-		            that._citydbKmlTilingManager.doStart();
-		            
-		            var jsonUrl = that._cityobjectsJsonUrl;
-		            if (Cesium.defined(jsonUrl)) {
-		            	Cesium.loadJson(jsonUrl).then(function(data) {
-							console.log(data);
-							that._cityobjectsJsonData = data;
-							that._finishLoadingEvent.raiseEvent(that);
-						}).otherwise(function(error) {
-							console.log(error);
-							that._finishLoadingEvent.raiseEvent(that);
-						});	
-		            }
-		            else {
-		            	that._finishLoadingEvent.raiseEvent(that);
-		            }		            		            
-		        },
-		        error: function(XHR, textStatus, errorThrown){
-		        	console.log('can not find the json file for ' + kmlUrl);
-		        	that._finishLoadingEvent.raiseEvent(that);
-		        }
-		    });	
+		if (this._url.indexOf(".json") >= 0) {	 
+			Cesium.loadJson(this._url).then(function(json) {        	
+	        	that._citydbKmlDataSource._name = json.layername;	
+	        	that._citydbKmlDataSource._proxy = json;
+	        	that._layerType = json.displayform;
+	            that._cameraPosition = {
+	        		lat: (json.bbox.ymax + json.bbox.ymin) / 2,	
+	        		lon: (json.bbox.xmax + json.bbox.xmin) / 2,
+	    			range: 800,
+	    			tilt: 49,
+	    			heading: 6,
+	    			altitude: 40
+	        	}
+	            
+	            if (!Cesium.defined(that._minLodPixels))
+	            	that._minLodPixels = json.minLodPixels == -1? Number.MIN_VALUE: json.minLodPixels;
+	            if (!Cesium.defined(that._maxLodPixels))
+	            	that._maxLodPixels = json.maxLodPixels == -1? Number.MAX_VALUE: json.maxLodPixels;
+	            
+	    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
+	            that._citydbKmlTilingManager.doStart();
+	            
+	            var jsonUrl = that._cityobjectsJsonUrl;
+	            if (Cesium.defined(jsonUrl)) {
+	            	Cesium.loadJson(jsonUrl).then(function(data) {
+						console.log(data);
+						that._cityobjectsJsonData = data;
+						that._finishLoadingEvent.raiseEvent(that);
+					}).otherwise(function(error) {
+						console.log(error);
+						that._finishLoadingEvent.raiseEvent(that);
+					});	
+	            }
+	            else {
+	            	that._finishLoadingEvent.raiseEvent(that);
+	            }		            		            
+	        
+			}).otherwise(function(error) {
+				console.log('can not find the json file for ' + kmlUrl);
+	        	that._finishLoadingEvent.raiseEvent(that);
+			});
     	}
 		else {
 			this._citydbKmlDataSource.load(this._url).then(function() {
