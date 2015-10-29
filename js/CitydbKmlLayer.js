@@ -485,7 +485,7 @@
 		var primitives = this._cesiumViewer.scene.primitives;
 		for (var i = 0; i < primitives.length; i++) {
 			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Primitive) {					
+			if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {					
  				for (var j = 0; j < primitive._instanceIds.length; j++){
  					var tmpprimitiveInstance = primitive._instanceIds[j];
 					if (tmpprimitiveInstance.name === objectId && tmpprimitiveInstance.layerId == this._id){						
@@ -505,7 +505,7 @@
 		var primitives = this._cesiumViewer.scene.primitives;
 		for (var i = 0; i < primitives.length; i++) {
 			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Primitive) {					
+			if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {					
  				for (var j = 0; j < primitive._instanceIds.length; j++){	
  					var tmpId = primitive._instanceIds[j].name;
  					if (tmpId == entity.name && entity.layerId === this._id) {

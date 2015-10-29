@@ -100,7 +100,7 @@
 					}						
 				}	
 			}
-			else if (primitive instanceof Cesium.Primitive) {				
+			else if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {				
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
  					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
@@ -139,48 +139,54 @@
 			if (this.pickSurface) {
 				for (var i = 0; i < primitives.length; i++) {
 					var primitive = primitives.get(i);
-					for (j = 0; j < primitive._instanceIds.length; j++){	
-	 					var targetEntity = primitive._instanceIds[j];
-	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
-							var parentEntity = targetEntity._parent
-							if (Cesium.defined(parentEntity)) {
-								this.cachedObjects[targetEntity.name] = parentEntity._children;
-							}	
-	 					}					
-					}	
+					if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
+						for (j = 0; j < primitive._instanceIds.length; j++){	
+		 					var targetEntity = primitive._instanceIds[j];
+		 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+								var parentEntity = targetEntity._parent
+								if (Cesium.defined(parentEntity)) {
+									this.cachedObjects[targetEntity.name] = parentEntity._children;
+								}	
+		 					}					
+						}	
+					}					
 				}
 			}
 			else {
 				for (var i = 0; i < primitives.length; i++) {
 					var primitive = primitives.get(i);
-					for (j = 0; j < primitive._instanceIds.length; j++){	
-	 					var targetEntity = primitive._instanceIds[j];
-	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
-							var objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-							if (!this.cachedObjects.hasOwnProperty(objectId)) {
-								var roofEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_RoofSurface');
-								var wallEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_WallSurface');
-								if (roofEntites != null && wallEntites != null) {
-									this.cachedObjects[objectId] = roofEntites.concat(wallEntites);
-								}
-							}	 						
-	 					}					
-					}	
+					if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
+						for (j = 0; j < primitive._instanceIds.length; j++){	
+		 					var targetEntity = primitive._instanceIds[j];
+		 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+								var objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
+								if (!this.cachedObjects.hasOwnProperty(objectId)) {
+									var roofEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_RoofSurface');
+									var wallEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_WallSurface');
+									if (roofEntites != null && wallEntites != null) {
+										this.cachedObjects[objectId] = roofEntites.concat(wallEntites);
+									}
+								}	 						
+		 					}					
+						}	
+					}					
 				}
 			}
 		}
 		else if (this.citydbKmlLayerInstance._layerType == "extruded" || this.citydbKmlLayerInstance._layerType == "footprint") {
 			for (var i = 0; i < primitives.length; i++) {
 				var primitive = primitives.get(i);
-				for (var j = 0; j < primitive._instanceIds.length; j++){	
- 					var targetEntity = primitive._instanceIds[j];
- 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
- 						var parentEntity = targetEntity._parent
-						if (Cesium.defined(parentEntity)) {
-							this.cachedObjects[targetEntity.name] = parentEntity._children;
-						}
- 					}					
-				}	
+				if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
+					for (var j = 0; j < primitive._instanceIds.length; j++){	
+	 					var targetEntity = primitive._instanceIds[j];
+	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+	 						var parentEntity = targetEntity._parent
+							if (Cesium.defined(parentEntity)) {
+								this.cachedObjects[targetEntity.name] = parentEntity._children;
+							}
+	 					}					
+					}	
+				}				
 			}
 		}
 	}

@@ -32,7 +32,7 @@
 			<fileset dir="${SRC_JS_DIR}/Webworkers" />
 		</copy>
     	
-    	<copy todir="${DIST_JS_DIR}/Cesium">
+    	<copy todir="${DIST_JS_DIR}/Cesium-1.11">
 			<fileset dir="${SRC_THIRDPARTY_DIR}/Cesium-1-11" />
 		</copy>
         <echo message="${JS} built." />
