@@ -19,7 +19,7 @@
 		this._name = options.name;
 		this._id = Cesium.defaultValue(options.id, Cesium.createGuid());		
 		this._region = options.region;
-		this._active = true;
+		this._active = Cesium.defaultValue(options.active, true);
 		this._highlightedObjects = {};		
 		this._hiddenObjects = [];
 		this._cameraPosition = {};
@@ -329,8 +329,10 @@
 	            if (!Cesium.defined(that._maxLodPixels))
 	            	that._maxLodPixels = json.maxLodPixels == -1? Number.MAX_VALUE: json.maxLodPixels;
 	            
-	    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-	            that._citydbKmlTilingManager.doStart();
+	            if (that._active) {
+	            	that._citydbKmlTilingManager.doStart();
+	            	that._cesiumViewer.dataSources.add(that._citydbKmlDataSource);
+	            }
 	            
 	            var jsonUrl = that._cityobjectsJsonUrl;
 	            if (Cesium.defined(jsonUrl)) {
@@ -420,22 +422,63 @@
 		this._active = active;
 	}
 	
-	CitydbKmlLayer.prototype.reActivate = function(){
+	CitydbKmlLayer.prototype.reActivate = function(){		
 		var deferred = Cesium.when.defer();
+		this._highlightedObjects = {};	
+		this._hiddenObjects = [];
+		this._cityobjectsJsonData = {};			
+		if (this._active) {
+			this._citydbKmlTilingManager.doTerminate();
+			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);	
+		}		
+		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);	
+		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		
-		if (!this._active) {
-			this.activate(true);
-			deferred.resolve(this._active);
-		}
+		var that = this;
+		if (this._url.indexOf(".json") >= 0) {	 
+			Cesium.loadJson(this._url).then(function(json) {        	
+	        	that._citydbKmlDataSource._name = json.layername;	
+	        	that._citydbKmlDataSource._proxy = json;
+	        	that._layerType = json.displayform;
+	            that._cameraPosition = {
+	        		lat: (json.bbox.ymax + json.bbox.ymin) / 2,	
+	        		lon: (json.bbox.xmax + json.bbox.xmin) / 2,
+	    			range: 800,
+	    			tilt: 49,
+	    			heading: 6,
+	    			altitude: 40
+	        	}
+	            
+	            if (that._active) {
+	            	that._citydbKmlTilingManager.doStart();
+	            	that._cesiumViewer.dataSources.add(that._citydbKmlDataSource);
+	            }
+
+	            var jsonUrl = that._cityobjectsJsonUrl;
+	            if (Cesium.defined(jsonUrl) && jsonUrl.length > 0) {
+	            	Cesium.loadJson(jsonUrl).then(function(data) {
+						that._cityobjectsJsonData = data;
+						deferred.resolve();
+					}).otherwise(function(error) {
+						deferred.resolve();
+					});	
+	            }
+	            else {
+	            	deferred.resolve();
+	            }		            		            	        
+			}).otherwise(function(error) {
+				console.log('can not find the json file for ' + kmlUrl);
+				deferred.resolve();
+			});
+    	}
 		else {
-			this.activate(false);
-			var that = this;
-			// here we simply activate layer one seconds layer...
-			setTimeout(function(){
-				that.activate(true);
-				deferred.resolve(this._active);
-        	}, 1000)  			
-		}
+			this._citydbKmlDataSource.load(this._url).then(function() {
+				that._cameraPosition = that._citydbKmlDataSource._lookAt;				
+				cesiumViewer.dataSources.add(that._citydbKmlDataSource);
+				that._citydbKmlTilingManager.doStart();
+				deferred.resolve();
+		    });
+		}	
 		return deferred.promise;
 	}
 	
