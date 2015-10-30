@@ -50,8 +50,8 @@ function B3DMLayer(options){
 	 */
 	this._mouseOutEvent = new Cesium.Event();
 
-	/** pickmode can be Feature or ID */
-	this.pickMode = "feature";
+	/** pickmode can be toplevelfeature or clickedfeature */
+	this.pickMode = "toplevelfeature";
 }
 
 
@@ -142,8 +142,12 @@ Object.defineProperties(B3DMLayer.prototype, {
 
 });
 
+/**
+ * Whether to return the clicked feature itself or its (parent) top-level feature
+ * @param {string} pickMode "toplevelfeature" | "clickedfeature"
+ */
 B3DMLayer.prototype.setPickMode = function(pickMode){
-	if(pickMode == "feature" || pickMode == "id"){
+	if(pickMode == "toplevelfeature" || pickMode == "clickedfeature"){
 		if(pickMode != this.pickMode){
 			this.pickMode = pickMode;
 		}
@@ -471,8 +475,7 @@ B3DMLayer.prototype.triggerEvent = function(event, object){
 	var objectId = object.getProperty("subId");
 	var batchTable = object._content.batchTable;
 	var batchSize =  object._content.batchSize;
-	if(this.pickMode == "id"){
-	}else if(this.pickMode == "feature"){
+	if(this.pickMode == "toplevelfeature"){
 		objectId = getRootId(batchTable, objectId);
 	}
 	if(event == "CLICK"){
