@@ -41,6 +41,36 @@
 	    }
 	});
 
+	/**
+	 * pass the object and modifier to the layer
+	 * @param {string} modifier
+	 * @param {Object} object
+	 */
+	WebMap3DCityDB.prototype.passEventToLayer = function(modifier, object){
+		if(object){
+			var i = 0;
+			if(Cesium.BatchedModel && object instanceof Cesium.BatchedModel){
+				var url = object.primitive.url;
+				for(i = 0; i < this._layers.length; i++){
+					if(this._layers[i].url == url){
+						this._layers[i].triggerEvent(modifier, object);
+						return true;
+					}
+				}
+			}else{
+				if(object.id && object.id.layerId){
+					var layerid = object.id.layerId;
+					for(i = 0; i < this._layers.length; i++){
+						if(this._layers[i].id == layerid){
+							this._layers[i].triggerEvent(modifier, object);
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	};
 
 	/**
 	 * adds a 3DCityDBLayer to the cesiumViewer
@@ -148,39 +178,8 @@
 	};
 
 	/**
-	 * pass the object and modifier to the layer
-	 * @param {string} modifier
-	 * @param {Object} object
-	 */
-	WebMap3DCityDB.prototype.passEventToLayer = function(modifier, object){
-		if(object){
-			var i = 0;
-			if(Cesium.BatchedModel && object instanceof Cesium.BatchedModel){
-				var url = object.primitive.url;
-				for(i = 0; i < this._layers.length; i++){
-					if(this._layers[i].url == url){
-						this._layers[i].triggerEvent(modifier, object);
-						return true;
-					}
-				}
-			}else{
-				if(object.id && object.id.layerId){
-					var layerid = object.id.layerId;
-					for(i = 0; i < this._layers.length; i++){
-						if(this._layers[i].id == layerid){
-							this._layers[i].triggerEvent(modifier, object);
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	};
-
-	/**
 	 * activates mouseClick Events over objects
-	 * @param {Boolean} active
+	 * @param {boolean} active
 	 */
 	WebMap3DCityDB.prototype.activateMouseClickEvents = function(active){
 		if(active){
