@@ -32,11 +32,18 @@ function B3DMLayer(options){
 	this._cameraPosition = {};
 
 	this._debugging = options["debugging"] ? options["debugging"] : false;
+
 	/**
 	 * handles ClickEvents
 	 * @type {Cesium.Event} clickEvent
 	 */
 	this._clickEvent = new Cesium.Event();
+
+	/**
+	 * handles ClickEvents
+	 * @type {Cesium.Event} clickEvent
+	 */
+	this._ctrlclickEvent = new Cesium.Event();
 
 	/**
 	 * handles ClickEvents
@@ -51,7 +58,11 @@ function B3DMLayer(options){
 	this._mouseOutEvent = new Cesium.Event();
 
 	/** pickmode can be toplevelfeature or clickedfeature */
-	this.pickMode = "toplevelfeature";
+	this.clickPickMode = "toplevelfeature";
+
+	/** pickmode can be toplevelfeature or clickedfeature */
+	this.ctrlclickPickMode = "toplevelfeature";
+
 }
 
 
@@ -146,10 +157,10 @@ Object.defineProperties(B3DMLayer.prototype, {
  * Whether to return the clicked feature itself or its (parent) top-level feature
  * @param {string} pickMode "toplevelfeature" | "clickedfeature"
  */
-B3DMLayer.prototype.setPickMode = function(pickMode){
+B3DMLayer.prototype.setClickPickMode = function(pickMode){
 	if(pickMode == "toplevelfeature" || pickMode == "clickedfeature"){
-		if(pickMode != this.pickMode){
-			this.pickMode = pickMode;
+		if(pickMode != this.clickPickMode){
+			this.clickPickMode = pickMode;
 		}
 	}
 };
@@ -443,6 +454,8 @@ B3DMLayer.prototype.showObjects = function(toUnhide){
 B3DMLayer.prototype.removeEventHandler = function(event, callback){
 	if(event == "CLICK"){
 		this._clickEvent.removeEventListener(callback, this);
+	}else if(event == "CTRLCLICK"){
+		this._ctrlclickEvent.removeEventListener(callback, this);
 	}else if(event == "MOUSEIN"){
 		this._mouseInEvent.removeEventListener(callback, this);
 	}else if(event == "MOUSEOUT"){
@@ -459,6 +472,8 @@ B3DMLayer.prototype.removeEventHandler = function(event, callback){
 B3DMLayer.prototype.registerEventHandler = function(event, callback){
 	if(event == "CLICK"){
 		this._clickEvent.addEventListener(callback, this);
+	}else if(event == "CTRLCLICK"){
+		this._ctrlclickEvent.addEventListener(callback, this);
 	}else if(event == "MOUSEIN"){
 		this._mouseInEvent.addEventListener(callback, this);
 	}else if(event == "MOUSEOUT"){
@@ -475,12 +490,19 @@ B3DMLayer.prototype.triggerEvent = function(event, object){
 	var objectId = object.getProperty("subId");
 	var batchTable = object._content.batchTable;
 	var batchSize =  object._content.batchSize;
-	if(this.pickMode == "toplevelfeature"){
+	if(this.clickPickMode === "toplevelfeature"){
 		objectId = getRootId(batchTable, objectId);
 	}
+	var JSONObject;
 	if(event == "CLICK"){
-		var JSONobject = getObjectForId(batchTable, objectId);
+		JSONobject = getObjectForId(batchTable, objectId);
 		this._clickEvent.raiseEvent(objectId, JSONobject);
+	}else if(event == "CTRLCLICK"){
+		if (this.clickPickMode !== "toplevelfeature" && this.ctrlclickPickMode == "toplevelfeature"){
+			 objectId = getRootId(batchTable, objectId);
+		}
+		JSONobject = getObjectForId(batchTable, objectId);
+		this._ctrlclickEvent.raiseEvent(objectId, JSONobject);
 	}else if(event == "MOUSEIN"){
 		if(this.mouseMoveId != objectId){
 			this.mouseMoveId = objectId;
