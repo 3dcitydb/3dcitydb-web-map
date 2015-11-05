@@ -543,6 +543,34 @@
  	
 	function zoomToDefaultCameraPosition() {	
 		var deferred = Cesium.when.defer();
+		var latitudeStr = CitydbUtil.parse_query_string('latitude', window.location.href);
+	    var longitudeStr = CitydbUtil.parse_query_string('longitude', window.location.href);
+	    var heightStr = CitydbUtil.parse_query_string('height', window.location.href);
+	    var headingStr = CitydbUtil.parse_query_string('heading', window.location.href);
+	    var pitchStr = CitydbUtil.parse_query_string('pitch', window.location.href);
+	    var rollStr = CitydbUtil.parse_query_string('roll', window.location.href);
+	    
+	    if (latitudeStr && longitudeStr && heightStr && headingStr && pitchStr && rollStr) {
+	    	var cameraPostion = {
+    			latitude: parseFloat(latitudeStr),
+            	longitude: parseFloat(longitudeStr),
+            	height: parseFloat(heightStr),
+            	heading: parseFloat(headingStr),
+            	pitch: parseFloat(pitchStr),
+            	roll: parseFloat(rollStr)	
+	    	}
+	    	return flyToCameraPosition(cameraPostion);
+	    }
+	    else {
+	    	return zoomToDefaultCameraPosition_expired();
+	    }
+
+	    return deferred;
+	}
+	
+	function zoomToDefaultCameraPosition_expired() {	
+		var deferred = Cesium.when.defer();
+		var cesiumCamera = cesiumViewer.scene.camera;
 		var latstr = CitydbUtil.parse_query_string('lat', window.location.href);
 	    var lonstr = CitydbUtil.parse_query_string('lon', window.location.href);
 	    
@@ -589,39 +617,63 @@
 	    	cesiumCamera.viewRectangle(extent);
 	    	deferred.resolve("fly to the default camera position");;
 	    }
-	    return deferred.promise;
+	    return deferred;
 	}
 
-    // Creation of a weblink for sharing with other people..
+	function flyToCameraPosition(cameraPosition) {
+		var deferred = Cesium.when.defer();
+		var cesiumCamera = cesiumViewer.scene.camera;    
+		var longitude = cameraPosition.longitude;
+		var latitude = cameraPosition.latitude;
+		var height = cameraPosition.height;
+        cesiumCamera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
+            complete: function() {
+            	cesiumCamera.setView({
+        		    positionCartographic : new Cesium.Cartographic(Cesium.Math.toRadians(longitude), Cesium.Math.toRadians(latitude), height),
+        		    heading : Cesium.Math.toRadians(cameraPosition.heading),
+        		    pitch : Cesium.Math.toRadians(cameraPosition.pitch),
+        		    roll : Cesium.Math.toRadians(cameraPosition.roll)
+        		});
+            	deferred.resolve("fly to the desired camera position");
+            }
+        });	
+        return deferred;
+	}
+	
+    // Creation of a scene link for sharing with other people..
  	function generateLink(){
-  		var cameraPostion = null;	    		    	   	
-  		var camera = cesiumViewer.scene.camera;
-  		var canvas = cesiumViewer.scene.canvas
-        var position = camera.pickEllipsoid(new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2));
-        if (Cesium.defined(position)) {
-            var cartographic = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
-            var range = Cesium.Cartesian3.distance(position, cesiumCamera.position);
-            cameraPostion = {
-	    		lat: Cesium.Math.toDegrees(cartographic.latitude),	
-	    		lon: Cesium.Math.toDegrees(cartographic.longitude),
-				range: range,
-				tilt: Cesium.Math.toDegrees(cesiumCamera.pitch)+ 90,
-				heading:  Cesium.Math.toDegrees(cesiumCamera.heading),
-				altitude: 0
-	    	};  
-			var	projectLink = location.protocol + '//' + location.host + location.pathname + '?' +
-			'&title=' + document.title +
-			'&lat=' + cameraPostion.lat +
-			'&lon=' + cameraPostion.lon +
-			'&range=' + cameraPostion.range +
-			'&tilt=' + cameraPostion.tilt +
-			'&heading=' + cameraPostion.heading +
-			'&altitude=' + cameraPostion.altitude + 
-			'&' + layersToQuery();
-		//	window.history.pushState("string", "Title", projectLink);
-			showPopupInfoBox("Scene Link", '<a href="' + projectLink + '" style="color:#c0c0c0" target="_blank">' + projectLink + '</a>');
-        }
+		var cameraPosition = getCurrentCameraPostion();
+		var	projectLink = location.protocol + '//' + location.host + location.pathname + '?' +
+         	'&title=' + document.title +
+			'&latitude=' + cameraPosition.latitude +
+			'&longitude=' + cameraPosition.longitude +
+			'&height=' + cameraPosition.height +
+			'&heading=' + cameraPosition.heading +
+			'&pitch=' + cameraPosition.pitch +
+			'&roll=' + cameraPosition.roll + 
+			'&' + layersToQuery();; 	
+		showPopupInfoBox("Scene Link", '<a href="' + projectLink + '" style="color:#c0c0c0" target="_blank">' + projectLink + '</a>');
   	};
+  	
+  	function getCurrentCameraPostion(){
+  		var cesiumCamera = cesiumViewer.scene.camera;
+        var position = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cesiumCamera.position);
+        var latitude = Cesium.Math.toDegrees(position.latitude);
+        var longitude = Cesium.Math.toDegrees(position.longitude);
+        var height = position.height;
+        var heading = Cesium.Math.toDegrees(cesiumCamera.heading);
+        var pitch = Cesium.Math.toDegrees(cesiumCamera.pitch);
+        var roll = Cesium.Math.toDegrees(cesiumCamera.roll);
+        return {
+        	latitude: latitude,
+        	longitude: longitude,
+        	height: height,
+        	heading: heading,
+        	pitch: pitch,
+        	roll: roll
+        }
+  	}
   	
   	function layersToQuery() {
   		var layerGroupObject = new Object();
