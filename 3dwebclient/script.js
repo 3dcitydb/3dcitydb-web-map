@@ -36,7 +36,7 @@
 	
   	var addWmsViewModel = {
         name : 'NYC Orthoimagery WMS Service',
-        iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
+        iconUrl : 'http://icons.iconarchive.com/icons/iconscity/flags/256/usa-icon.png',
         tooltip : 'NYC Orthoimagery',
 		url: 'http://www.orthos.dhses.ny.gov/ArcGIS/services/Latest/MapServer/WMSServer',
 		layers : '0',
@@ -88,9 +88,6 @@
 		var titleStr = CitydbUtil.parse_query_string('title', window.location.href);
 		if (titleStr) {
 			document.title = titleStr;
-			if (titleStr == 'Vorarlberg_Demo') {
-				loadWmsAndTerrainForVorarlberg();
-			}
 		}			
 		
 		// extended search command for searching object by gmlid
@@ -116,6 +113,24 @@
 			console.log(info);
 			var layers = getLayersFromUrl();
 			loadLayerGroup(layers);
+			
+			var basemapConfigString = CitydbUtil.parse_query_string('basemap', window.location.href);
+			if (basemapConfigString) {
+				var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(basemapConfigString))[0]);
+				for (key in viewMoModel) {
+					addWmsViewModel[key] = viewMoModel[key];
+				}
+				addWebMapServiceProvider();
+			}
+			
+			var terrainConfigString = CitydbUtil.parse_query_string('terrain', window.location.href);
+			if (terrainConfigString) {
+				var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(terrainConfigString))[0]);
+				for (key in viewMoModel) {
+					addTerrainViewModel[key] = viewMoModel[key];
+				}
+				addTerrainProvider();
+			}
 		})			
 	}
 	
@@ -652,7 +667,16 @@
 			'&heading=' + cameraPosition.heading +
 			'&pitch=' + cameraPosition.pitch +
 			'&roll=' + cameraPosition.roll + 
-			'&' + layersToQuery();; 	
+			'&' + layersToQuery(); 	
+		var basemap = basemapToQuery();
+		if (basemap != null) {
+			projectLink = projectLink + '&' + basemap;
+		}
+		
+		var terrain = terrainToQuery();
+		if (terrain != null) {
+			projectLink = projectLink + '&' + terrain;
+		}
 		showPopupInfoBox("Scene Link", '<a href="' + projectLink + '" style="color:#c0c0c0" target="_blank">' + projectLink + '</a>');
   	};
   	
@@ -694,6 +718,32 @@
   		} 
   		
   		return Cesium.objectToQuery(layerGroupObject)
+  	}
+  	
+  	function basemapToQuery() {  		
+  		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+  		var baseLayerProviderFunc = baseLayerPickerViewModel.selectedImagery.creationCommand();
+  		if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider) {
+  			return Cesium.objectToQuery({
+  				basemap: Cesium.objectToQuery(addWmsViewModel)
+  			});
+  		}
+  		else {
+  			return null;
+  		}
+  	}
+  	
+  	function terrainToQuery() {
+  		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+  		var baseLayerProviderFunc = baseLayerPickerViewModel.selectedTerrain.creationCommand();
+  		if (baseLayerProviderFunc instanceof Cesium.CesiumTerrainProvider) {
+  			return Cesium.objectToQuery({
+  				terrain: Cesium.objectToQuery(addTerrainViewModel)
+  			});
+  		}
+  		else {
+  			return null;
+  		}
   	}
   	
   	// Clear Highlighting effect of all highlighted objects
