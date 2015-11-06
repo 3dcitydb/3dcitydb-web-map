@@ -24,6 +24,14 @@
 		this._hiddenObjects = [];
 		this._cameraPosition = {};
 		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
+		if (typeof(this._pickSurface) == "string"){
+			if (this._pickSurface.toLowerCase() == "true") {
+				this._pickSurface = true;
+			}
+			else {
+				this._pickSurface = false;
+			}
+		}
 		this._cesiumViewer = undefined;
 		this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
 		this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
@@ -187,7 +195,17 @@
 	        	return this._pickSurface;
 	        },
 	        set : function(value){
-	        	this._pickSurface = value;
+	        	if (value instanceof String) {
+	    			if (value.toLowerCase() == "true") {
+	    				this._pickSurface = true;
+	    			}
+	    			else {
+	    				this._pickSurface = false;
+	    			}
+	    		}
+	        	else {
+	        		this._pickSurface = value;
+	        	}	
 	        }
 	    },
 	    

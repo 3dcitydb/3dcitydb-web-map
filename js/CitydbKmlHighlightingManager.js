@@ -136,7 +136,7 @@
 			}
 		}
 		else if (this.citydbKmlLayerInstance._layerType == "geometry") {
-			if (this.pickSurface) {
+			if (this.citydbKmlLayerInstance.pickSurface) {
 				for (var i = 0; i < primitives.length; i++) {
 					var primitive = primitives.get(i);
 					if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
