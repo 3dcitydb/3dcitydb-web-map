@@ -196,6 +196,7 @@
 				url : layerConfig.url,
 				name : layerConfig.name,
 				thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
+				active: (layerConfig.active == "true"),
 				pickSurface: (layerConfig.pickSurface == "true"),
 				minLodPixels : Cesium.defaultValue(layerConfig.minLodPixels, 140),
 				maxLodPixels : Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
@@ -360,7 +361,7 @@
   		var checkbox = document.createElement('input');
 	    checkbox.type = "checkbox";
 	    checkbox.id = "id";
-	    checkbox.checked = true;
+	    checkbox.checked = layer.active;
 	    checkbox.onchange = function(event) {	    	
 	        var checkbox = event.target;
 	        var layerId = checkbox.parentNode.id;
@@ -707,6 +708,7 @@
   			var layerConfig = {
 				url : layer.url,
 				name : layer.name,
+				active: layer.active,
 				pickSurface: layer.pickSurface,
 				spreadsheetUrl: layer.thematicDataUrl,
 				minLodPixels: layer.minLodPixels,
