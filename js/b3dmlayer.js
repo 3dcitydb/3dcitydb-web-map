@@ -31,6 +31,8 @@ function B3DMLayer(options){
 	this._hiddenObjectsModels = {};
 	this._cameraPosition = {};
 
+	this._style	= null;
+	this._styleDirty = false;
 	this._debugging = options["debugging"] ? options["debugging"] : false;
 
 	/**
@@ -164,8 +166,10 @@ B3DMLayer.prototype.setClickPickMode = function(pickMode){
 		}
 	}
 };
-
-
+function isFunction(functionToCheck) {
+ var getType = {};
+ return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
 /**
  * adds this layer to the given cesium viewer
  * @param {CesiumViewer} cesiumViewer
@@ -184,6 +188,30 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 	cesiumViewer.scene.primitives.add(this._cesium3DTileset);
 	var that = this;
 	this._cesium3DTileset.tileVisible.addEventListener(function(tile){
+
+		if(!tile.style_lastUpdated || tile.style_lastUpdated < that._styleLastUpdated){
+
+			if(that._style instanceof Cesium.Color){
+				if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
+					tile.content.setAllColor(that._style);
+				}
+			}else if(isFunction(that._style)){
+				var batchSize = tile.content.batchSize;
+				for(var j = 0; j < batchSize; j++){
+					model = tile.content.getModel(j);
+					var color = that._style.call(null, model);
+					if(color === false){
+						model.show = false;
+					}else{
+						//model.show = true;
+					}
+					if (color){
+						model.color = color;
+					}
+				}
+			}
+			tile["style_lastUpdated"] = Date.now();
+		}
 		if(!tile.b3dmlayer_LastUpdated || tile.b3dmlayer_LastUpdated < that._highlightedObjectsLastUpdated){
 			if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
 				var batchTable = tile.content.batchTable;
@@ -514,4 +542,13 @@ B3DMLayer.prototype.triggerEvent = function(event, object){
 			this._mouseOutEvent.raiseEvent(objectId);
 		}
 	}
+};
+
+/**
+ * sets the Style for the whole layer
+ * @param {Cesium.Color | Function} a cesium color, or a function which returns a cesium color
+ */
+B3DMLayer.prototype.setStyle = function(color){
+	this._style = color;
+	this._styleLastUpdated = Date.now();
 };
