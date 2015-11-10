@@ -183,14 +183,15 @@
 	 */
 	WebMap3DCityDB.prototype.activateMouseClickEvents = function(active){
 		if(active){
-			this._eventHandler.setInputAction(goog.bind(function(event){
-				var object = this._cesiumViewerInstance.scene.pick(event.position);
-				this.passEventToLayer("CLICK", object);
-			}, this), Cesium.ScreenSpaceEventType.LEFT_CLICK);
-			this._eventHandler.setInputAction(goog.bind(function(event){
-				var object = this._cesiumViewerInstance.scene.pick(event.position);
-				this.passEventToLayer("CTRLCLICK", object);
-			}, this), Cesium.ScreenSpaceEventType.LEFT_CLICK, Cesium.KeyboardEventModifier.CTRL);
+			var that = this;
+			this._eventHandler.setInputAction(function(event){
+				var object = that._cesiumViewerInstance.scene.pick(event.position);
+				that.passEventToLayer("CLICK", object);
+			}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+			this._eventHandler.setInputAction(function(event){
+				var object = that._cesiumViewerInstance.scene.pick(event.position);
+				that.passEventToLayer("CTRLCLICK", object);
+			}, Cesium.ScreenSpaceEventType.LEFT_CLICK, Cesium.KeyboardEventModifier.CTRL);
 		}else{
 			this._eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
 			this._eventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK, Cesium.KeyboardEventModifier.CTRL);
