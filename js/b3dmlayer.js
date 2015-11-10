@@ -31,8 +31,7 @@ function B3DMLayer(options){
 	this._hiddenObjectsModels = {};
 	this._cameraPosition = {};
 
-	this._style	= null;
-	this._styleDirty = false;
+	this._style	= options.style;
 	this._debugging = options["debugging"] ? options["debugging"] : false;
 
 	/**
@@ -151,7 +150,17 @@ Object.defineProperties(B3DMLayer.prototype, {
         get : function(){
         	return this._region;
         }
-    }
+    },
+		/**
+     * Gets the style of this layer can be a function or a Cesium.Color
+     * @memberof DataSource.prototype
+     * @type  {Cesium.Color | Function}
+     */
+		style : {
+			get : function(){
+				return this._style;
+			}
+		}
 
 });
 
@@ -188,18 +197,21 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 	cesiumViewer.scene.primitives.add(this._cesium3DTileset);
 	var that = this;
 	this._cesium3DTileset.tileVisible.addEventListener(function(tile){
+		var batchSize;
+		var color;
 
 		if(!tile.style_lastUpdated || tile.style_lastUpdated < that._styleLastUpdated){
+
 
 			if(that._style instanceof Cesium.Color){
 				if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
 					tile.content.setAllColor(that._style);
 				}
 			}else if(isFunction(that._style)){
-				var batchSize = tile.content.batchSize;
+				batchSize = tile.content.batchSize;
 				for(var j = 0; j < batchSize; j++){
 					model = tile.content.getModel(j);
-					var color = that._style.call(null, model);
+					color = that._style.call(null, model);
 					if(color === false){
 						model.show = false;
 					}else{
@@ -215,7 +227,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 		if(!tile.b3dmlayer_LastUpdated || tile.b3dmlayer_LastUpdated < that._highlightedObjectsLastUpdated){
 			if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
 				var batchTable = tile.content.batchTable;
-				var batchSize = tile.content.batchSize;
+				batchSize = tile.content.batchSize;
 				var batchId = 0;
 				var batchIds =[];
 				var model = null;
@@ -232,11 +244,11 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 							batchIds.push(batchId);
 						}
 
-						for(var j = 0; j < batchIds.length; j++){
+						for(var k = 0; k < batchIds.length; k++){
 							//var color = new Cesium.Color(1,1,1,1);
-							model = tile.content.getModel(batchIds[j]);
-							that._highlightedObjectsOriginalModels[id][batchIds[j]] = model;
-							var color = model.color;
+							model = tile.content.getModel(batchIds[k]);
+							that._highlightedObjectsOriginalModels[id][batchIds[k]] = model;
+							color = model.color;
 							if(!that._highlightedObjectsOriginalColor[id]){
 								that._highlightedObjectsOriginalColor[id] = color.clone();
 							}
@@ -254,10 +266,10 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 						} else{
 							batchIds.push(batchId);
 						}
-						for(var k = 0; k < batchIds.length; k++){
+						for(var l = 0; l < batchIds.length; l++){
 							//var color = new Cesium.Color(1,1,1,1);
-							model = tile.content.getModel(batchIds[k]);
-							that._hiddenObjectsModels[key][batchIds[k]] = model;
+							model = tile.content.getModel(batchIds[l]);
+							that._hiddenObjectsModels[key][batchIds[l]] = model;
 							model.show = false;
 						}
 					}
