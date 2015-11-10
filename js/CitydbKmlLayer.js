@@ -34,6 +34,7 @@
 		}
 		this._cesiumViewer = undefined;
 		this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
+		this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
 		this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
 		this._cityobjectsJsonData = {};
 	
@@ -56,6 +57,7 @@
 			"url" : this.url,
 			"name" : this.name,
 			"thematicDataUrl" : this.thematicDataUrl,
+			"thematicDataProvider" : this._thematicDataProvider,
 			"cityobjectsJsonUrl" : this.cityobjectsJsonUrl,
 			"pickSurface": this.pickSurface,
 			"minLodPixels": this.minLodPixels,
@@ -215,6 +217,15 @@
 	        },
 	        set : function(value){
 	        	this._thematicDataUrl = value;
+	        }
+	    },
+	    
+	    thematicDataProvider : {
+	        get : function(){
+	        	return this._thematicDataProvider;
+	        },
+	        set : function(value){
+	        	this._thematicDataProvider = value;
 	        }
 	    },
 	    
