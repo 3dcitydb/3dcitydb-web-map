@@ -40,7 +40,7 @@
         tooltip : 'NYC Orthoimagery',
 		url: 'http://www.orthos.dhses.ny.gov/ArcGIS/services/Latest/MapServer/WMSServer',
 		layers : '0',
-		map: ''
+		additionalParameters: ''
 	};  	
   	Cesium.knockout.track(addWmsViewModel);
 	Cesium.knockout.applyBindings(addWmsViewModel, document.getElementById('citydb_addwmspanel'));	
@@ -143,7 +143,7 @@
 	        tooltip : 'Voralberg Orthoimagery',
 			url: 'http://vogis.cnv.at/mapserver/mapserv',
 			layers : 'ef2012_12cm',
-			map: 'i_luftbilder_r_wms.map'
+			additionalParameters: 'map=i_luftbilder_r_wms.map'
 		};
 		addWebMapServiceProvider();
 		
@@ -868,9 +868,7 @@
 	            return new Cesium.WebMapServiceImageryProvider({
 	    			url: addWmsViewModel.url,
 	    			layers : addWmsViewModel.layers,
-	    			parameters: {
-	    				map: addWmsViewModel.map
-	    			},
+	    			parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters),
 	    			proxy: new Cesium.DefaultProxy(proxyUrl)
 	    		});
 	        }
