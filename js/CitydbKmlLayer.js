@@ -565,7 +565,10 @@
 						var parentEntity = targetEntity._parent
 						if (Cesium.defined(parentEntity)) {
 							return parentEntity._children;
-						}						
+						}	
+						else {
+							return [targetEntity]
+						}
 					}
 				}
 			}
@@ -631,13 +634,13 @@
 				if (!Cesium.defined(childEntity.originalMaterial)) {
 					childEntity.addProperty("originalMaterial");
 				}	
-				childEntity.originalMaterial = childEntity.polygon.material;
+				childEntity.originalMaterial = this.getObjectMaterial(childEntity);
 				if (this._pickSurface != true) {
-					childEntity.polygon.material = this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')];
+					this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')]);
 				}
 				else {
-					childEntity.polygon.material = this._highlightedObjects[childEntity.name];
-				}				
+					this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name]);
+				}					
 			}		
 		}	
 	};
@@ -688,7 +691,7 @@
 					var originalMaterial = childEntity.originalMaterial;
 					if (Cesium.defined(originalMaterial)) {
 						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
-						childEntity.polygon.material = originalMaterial;
+						this.setObjectMaterial(childEntity, originalMaterial);
 					}
 				}	
 			}				
@@ -738,7 +741,8 @@
 				else {
 					globeId = childEntity.name;
 				}
-				if (!childEntity.polygon.material.color._value.equals(this._highlightedObjects[globeId])) {
+				var material = this.getObjectMaterial(childEntity);
+				if (!material.color._value.equals(this._highlightedObjects[globeId])) {
 					return false;
 				}
 			}		
@@ -851,8 +855,8 @@
 					var originalMaterial = childEntity.originalMaterial;
 					if (Cesium.defined(originalMaterial)) {
 						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value);	
-						setTimeout(function(){
-							childEntity.polygon.material = originalMaterial;	
+						setTimeout(function(){	
+							this.setObjectMaterial(childEntity, originalMaterial);
 						}, 100)	
 					}
 				}
@@ -901,6 +905,32 @@
 	
 	CitydbKmlLayer.prototype.hasHiddenObjects = function(){	
 		return this._hiddenObjects.length > 0? true : false;
+	};
+	
+	CitydbKmlLayer.prototype.setObjectMaterial = function(object, material){	
+		if (Cesium.defined(object.polygon)) {
+			object.polygon.material = material;
+		}
+		else if (Cesium.defined(object.polyline)) {
+			object.polyline.material = material;
+		}
+		else if (Cesium.defined(object.point)) {
+			object.point.material = material;
+		}
+	};
+	
+	CitydbKmlLayer.prototype.getObjectMaterial = function(object){	
+		var geometryGraphic;
+		if (Cesium.defined(object.polygon)) {
+			geometryGraphic = object.polygon;
+		}
+		else if (Cesium.defined(object.polyline)) {
+			geometryGraphic = object.polyline;
+		}
+		else if (Cesium.defined(object.point)) {
+			geometryGraphic = object.point;
+		}
+		return geometryGraphic.material
 	};
 
 	/**

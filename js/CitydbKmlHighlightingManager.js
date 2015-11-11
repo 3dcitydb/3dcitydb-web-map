@@ -146,7 +146,12 @@
 								var parentEntity = targetEntity._parent
 								if (Cesium.defined(parentEntity)) {
 									this.cachedObjects[targetEntity.name] = parentEntity._children;
-								}	
+								}
+								else {
+									if (targetEntity.name != "Tile border") {
+										this.cachedObjects[targetEntity.name] = [targetEntity];
+									}
+								}
 		 					}					
 						}	
 					}					
@@ -183,6 +188,11 @@
 	 						var parentEntity = targetEntity._parent
 							if (Cesium.defined(parentEntity)) {
 								this.cachedObjects[targetEntity.name] = parentEntity._children;
+							}
+							else {
+								if (targetEntity.name != "Tile border") {
+									this.cachedObjects[targetEntity.name] = [targetEntity];
+								}
 							}
 	 					}					
 					}	
