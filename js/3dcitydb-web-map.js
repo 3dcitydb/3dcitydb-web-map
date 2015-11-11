@@ -207,32 +207,33 @@
 		var pickingInProgress = false;
 		var currentObject = null;
 		if(active){
-			this._eventHandler.setInputAction(goog.bind(function(event){
+			var that = this;
+			this._eventHandler.setInputAction(function(event){
 				// When camera is moved do not trigger any other events
-				if (this._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.LEFT_DRAG) ||
-						this._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.MIDDLE_DRAG) ||
-						this._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.PINCH ) ||
-						this._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.RIGHT_DRAG ) ||
-						this._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.WHEEL)){
+				if (that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.LEFT_DRAG) ||
+						that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.MIDDLE_DRAG) ||
+						that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.PINCH ) ||
+						that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.RIGHT_DRAG ) ||
+						that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.WHEEL)){
 					return;
 				}
 				if(pickingInProgress) return;
 				pickingInProgress = true;
-				var object = this._cesiumViewerInstance.scene.pick(event.endPosition);
+				var object = that._cesiumViewerInstance.scene.pick(event.endPosition);
 				if(currentObject && currentObject != object){
-					if(this.passEventToLayer("MOUSEOUT", currentObject)){
+					if(that.passEventToLayer("MOUSEOUT", currentObject)){
 						currentObject = null;
 					}
 				}
 				if(object && currentObject != object){
-					if(!this.passEventToLayer("MOUSEIN", object)){
+					if(!that.passEventToLayer("MOUSEIN", object)){
 						currentObject = null;
 					}else{
 						currentObject = object;
 					}
 				}
 				pickingInProgress =false;
-			}, this), Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+			}, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 		}else{
 			if(currentObject !== null){
 				this.passEventToLayer("MOUSEOUT", currentObject);
