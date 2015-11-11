@@ -22,7 +22,7 @@ function B3DMLayer(options){
 	this._name = options.name;
 	this._region = options.region;
 	this._highlightedObjects = {};
-	this._highlightedObjectsLastUpdated = Date.now();
+	this._lastUpdated = Date.now();
 	this._highlightedObjectsOriginalColor = {};
 	this._highlightedObjectsOriginalModels = {};
 	//this._highlightedObjectsToRemove = [];
@@ -200,7 +200,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 		var batchSize;
 		var color;
 
-		if(!tile.style_lastUpdated || tile.style_lastUpdated < that._styleLastUpdated){
+		if(!tile._lastUpdated || tile._lastUpdated < that._lastUpdated){
 
 
 			if(that._style instanceof Cesium.Color){
@@ -222,9 +222,6 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 					}
 				}
 			}
-			tile["style_lastUpdated"] = Date.now();
-		}
-		if(!tile.b3dmlayer_LastUpdated || tile.b3dmlayer_LastUpdated < that._highlightedObjectsLastUpdated){
 			if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
 				var batchTable = tile.content.batchTable;
 				batchSize = tile.content.batchSize;
@@ -275,7 +272,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 					}
 				}
 
-				tile["b3dmlayer_LastUpdated"] = Date.now();
+				tile["_LastUpdated"] = Date.now();
 			}
 		}
 		//console.log(tile);
@@ -404,7 +401,7 @@ B3DMLayer.prototype.highlight = function(toHighlight){
 		delete toHighlight[id];
 	}
 	if(dirty){
-		this._highlightedObjectsLastUpdated = Date.now();
+		this._lastUpdated = Date.now();
 	}
 };
 
@@ -429,7 +426,7 @@ B3DMLayer.prototype.unHighlight = function(toUnHighlight){
 			delete this._highlightedObjectsOriginalColor[id];
 		}
 	}
-	//this._highlightedObjectsLastUpdated = Date.now();
+	//this._lastUpdated = Date.now();
 };
 /**
  * clear all current Highlighted Objects
@@ -459,7 +456,7 @@ B3DMLayer.prototype.hideObjects = function(toHide){
 		//delete toHide[toHide[i]];
 	}
 	if(dirty){
-		this._highlightedObjectsLastUpdated = Date.now();
+		this._lastUpdated = Date.now();
 	}
 };
 
@@ -562,5 +559,5 @@ B3DMLayer.prototype.triggerEvent = function(event, object){
  */
 B3DMLayer.prototype.setStyle = function(color){
 	this._style = color;
-	this._styleLastUpdated = Date.now();
+	this._lastUpdated = Date.now();
 };
