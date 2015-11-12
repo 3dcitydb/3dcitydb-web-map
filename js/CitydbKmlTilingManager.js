@@ -360,6 +360,11 @@
     		if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
     			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
     		} 
+    		
+    		// if terrain data is still loading, we trigger the tiling manger again...
+    		if (cesiumViewer.scene.globe._surface._tileLoadQueue.length > 0) {   			
+    			scope.triggerWorker();
+    		}
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
