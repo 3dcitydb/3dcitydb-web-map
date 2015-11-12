@@ -362,9 +362,12 @@
     		} 
     		
     		// if terrain data is still loading, we trigger the tiling manger again...
-    		if (cesiumViewer.scene.globe._surface._tileLoadQueue.length > 0) {   			
-    			scope.triggerWorker();
-    		}
+    		setTimeout(function(){
+    			console.log(cesiumViewer.scene.globe._surface._tileLoadQueue.length);
+    			if (cesiumViewer.scene.globe._surface._tileLoadQueue.length > 0) { 
+    				scope.triggerWorker();
+        		}				
+			}, 1000)   
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
