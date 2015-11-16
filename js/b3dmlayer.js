@@ -196,6 +196,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
     });
 	cesiumViewer.scene.primitives.add(this._cesium3DTileset);
 	var that = this;
+
 	this._cesium3DTileset.tileVisible.addEventListener(function(tile){
 		var batchSize;
 		var color;
@@ -205,10 +206,10 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 
 			if(that._style instanceof Cesium.Color){
 				if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
-					tile.content.setAllColor(that._style);
+					tile.content.batchTableResources.setAllColor(that._style);
 				}
 			}else if(isFunction(that._style)){
-				batchSize = tile.content.batchSize;
+				batchSize = tile.content.batchLength;
 				for(var j = 0; j < batchSize; j++){
 					model = tile.content.getModel(j);
 					color = that._style.call(null, model);
@@ -223,13 +224,13 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				}
 			}
 			if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
-				var batchTable = tile.content.batchTable;
-				batchSize = tile.content.batchSize;
+				var batchTable = tile.content.batchTableResources.batchTable;
+				batchSize = tile.content.batchTableResources.batchLength;
 				var batchId = 0;
 				var batchIds =[];
 				var model = null;
-				for(var i = 0; i < batchTable["subId"].length; i++){
-					var id = batchTable["subId"][i];
+				for(var i = 0; i < batchTable["id"].length; i++){
+					var id = batchTable["id"][i];
 					if(that._highlightedObjects[id]){
 						// highlight
 						batchId = i;
@@ -254,7 +255,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 					}
 				}
 				for(var key in that._hiddenObjects){
-					batchId = getFirstBatchIdByProperty(batchTable, "subId", key);
+					batchId = getFirstBatchIdByProperty(batchTable, "id", key);
 					if(batchId !== null){
 						batchIds =[];
 						if(batchId >= batchSize){
@@ -280,7 +281,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 };
 
 function getBatchIdsByParentId(batchTable, batchSize, pid, result){
-	var propertyValues = batchTable["topId"];
+	var propertyValues = batchTable["parentId"];
     if(propertyValues){
     	var hasNoChildren = false;
     	var index = propertyValues.indexOf(pid);
@@ -288,7 +289,7 @@ function getBatchIdsByParentId(batchTable, batchSize, pid, result){
 	        for(var i = index; i < propertyValues.length; i++){
 	            if(pid == propertyValues[i]){
 	            	if(i >= batchSize){
-	            		var check = getBatchIdsByParentId(batchTable, batchSize, getPropertyByBatchId(batchTable, "subId", i), result);
+	            		var check = getBatchIdsByParentId(batchTable, batchSize, getPropertyByBatchId(batchTable, "id", i), result);
 	            		if(check === null){
 	                		result.push(i);
 	                	}
@@ -309,17 +310,17 @@ function getBatchIdsByParentId(batchTable, batchSize, pid, result){
 
 function getObjectForBatchId(batchTable, batchId){
 	var jsonObject = {};
-	jsonObject.id = getPropertyByBatchId(batchTable, "subId", batchId);
+	jsonObject.id = getPropertyByBatchId(batchTable, "id", batchId);
 	jsonObject.type = getPropertyByBatchId(batchTable, "classId", batchId);
 	jsonObject.batchId = batchId;
 	jsonObject.attributes = {};
 	for (var key in batchTable){
-		if(batchTable[key] && batchTable[key][batchId] && key != "subId" && key != "topId" && key != "classId"){
+		if(batchTable[key] && batchTable[key][batchId] && key != "id" && key != "id" && key != "classId"){
 			jsonObject.attributes[key] = batchTable[key][batchId];
 		}
 	}
 	jsonObject.children = [];
-	var childrenBatchIds = getBatchIdsByProperty(batchTable, "topId", jsonObject.id);
+	var childrenBatchIds = getBatchIdsByProperty(batchTable, "parentId", jsonObject.id);
 	for(var i = 0; i < childrenBatchIds.length; i++){
 		var childBatchId = childrenBatchIds[i];
 		jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));
@@ -327,7 +328,7 @@ function getObjectForBatchId(batchTable, batchId){
 	return jsonObject;
 }
 function getObjectForId(batchTable, id){
-	var batchId = getFirstBatchIdByProperty(batchTable, "subId", id);
+	var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
 	return getObjectForBatchId(batchTable, batchId);
 }
 function getBatchIdsByProperty(batchTable, property, value){
@@ -359,8 +360,8 @@ function getRootId(batchTable, id){
 	var pid = id;
 	while(pid !== null){
 		id = pid;
-		var batchId = getFirstBatchIdByProperty(batchTable, "subId", id);
-		pid = getPropertyByBatchId(batchTable,"topId", batchId);
+		var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
+		pid = getPropertyByBatchId(batchTable,"parentId", batchId);
 	}
 	return id;
 }
@@ -524,9 +525,9 @@ B3DMLayer.prototype.registerEventHandler = function(event, callback){
  * @param {*} arguments, any number of arguments
  */
 B3DMLayer.prototype.triggerEvent = function(event, object){
-	var objectId = object.getProperty("subId");
-	var batchTable = object._content.batchTable;
-	var batchSize =  object._content.batchSize;
+	var objectId = object.getProperty("id");
+	var batchTable = object._batchTableResources.batchTable;
+	var batchSize =  object._batchTableResources.batchLength;
 	if(this.clickPickMode === "toplevelfeature"){
 		objectId = getRootId(batchTable, objectId);
 	}
