@@ -361,13 +361,12 @@
     			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
     		} 
     		
-    		// if terrain data is still loading, we trigger the tiling manger again...
+    		// if terrain data is used, tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
     		setTimeout(function(){
-    			console.log(cesiumViewer.scene.globe._surface._tileLoadQueue.length);
-    			if (cesiumViewer.scene.globe._surface._tileLoadQueue.length > 0) { 
+    			if (!(cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
     				scope.triggerWorker();
-        		}				
-			}, 1000)   
+    			}			
+			}, 3000)     
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
@@ -577,7 +576,9 @@
     	var scene = cesiumViewer.scene;
     	
     	scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function() {
-    		scope.triggerWorker();
+    		if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+				scope.triggerWorker();
+			}
 		});
     };
 		

@@ -64,22 +64,29 @@
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {				
-			setTimeout(function(){   
-				if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
-					console.log("Highlighting Manager is sleeping...")
-					scope.oTask.sleep();
-				}
-				else {
-					if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
-						console.log("Highlighting manager repeat updating again...");
-						scope.rebuildDataPool(); 		    	  		    	
-					}
-					else {		
+			var cesiumViewer = scope.citydbKmlLayerInstance._cesiumViewer;
+			if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+				setTimeout(function(){   
+					if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
 						console.log("Highlighting Manager is sleeping...")
 						scope.oTask.sleep();
-					} 
-				}				 					
-		    }, 3000); 				
+					}
+					else {
+						if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
+							console.log("Highlighting manager repeat updating again...");
+							scope.rebuildDataPool(); 		    	  		    	
+						}
+						else {		
+							console.log("Highlighting Manager is sleeping...")
+							scope.oTask.sleep();
+						} 
+					}				 					
+			    }, 3000); 	
+			}	
+			else {
+				console.log("Highlighting Manager is sleeping...")
+				scope.oTask.sleep();
+			}				
 		});			
 
 		this.dataPool = this.generateDataPool();
