@@ -419,7 +419,7 @@ B3DMLayer.prototype.unHighlight = function(toUnHighlight){
 
 			var models = this._highlightedObjectsOriginalModels[id];
 			for (var batchId in models) { //j = 0; j < models.length; j++){
-				if(this._highlightedObjectsOriginalColor[id]){
+				if(this._highlightedObjectsOriginalColor[id] && !models[batchId]._batchTableResources.isDestroyed()){
 					models[batchId].color = this._highlightedObjectsOriginalColor[id];
 				}
 			}
