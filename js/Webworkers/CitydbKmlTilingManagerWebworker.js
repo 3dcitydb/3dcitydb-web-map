@@ -167,7 +167,7 @@
 				} else {
 					reply("checkMasterPool", matrixItem);
 				}      										        							        			
-        	}, 10);
+        	}, 20);
 		}
 	};
 	
