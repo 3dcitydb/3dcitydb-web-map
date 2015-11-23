@@ -319,6 +319,10 @@ function getObjectForBatchId(batchTable, batchId){
 	for (var key in batchTable){
 		if(batchTable[key] && batchTable[key][batchId] && key != "id" && key != "id" && key != "classId"){
 			jsonObject.attributes[key] = batchTable[key][batchId];
+			//TODO quick hack to deal with b3dm layers which have json style attributes in batchtable
+			if (jsonObject.attributes.attributes){
+				jsonObject.attributes = jsonObject.attributes.attributes;
+			}
 		}
 	}
 	jsonObject.children = [];
