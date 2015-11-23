@@ -201,14 +201,12 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 		var batchSize;
 		var color;
 
-		if(!tile._lastUpdated || tile._lastUpdated < that._lastUpdated){
+		if((!tile._lastUpdated || tile._lastUpdated < that._lastUpdated) && tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
 
 			//TODO styling stuff and highlighting/hide stuff is now always performed on each update, could perhaps not be so performant
 			// Styling stuff
 			if(that._style instanceof Cesium.Color){
-				if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
-					tile.content.batchTableResources.setAllColor(that._style);
-				}
+				tile.content.batchTableResources.setAllColor(that._style);
 			}else if(isFunction(that._style)){
 				batchSize = tile.content.batchLength;
 				for(var j = 0; j < batchSize; j++){
@@ -225,7 +223,6 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				}
 			}
 			// Highlighting and Hide stuff
-			if(tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
 				var batchTable = tile.content.batchTableResources.batchTable;
 				batchSize = tile.content.batchTableResources.batchLength;
 				var batchId = 0;
@@ -276,7 +273,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				}
 
 				tile["_LastUpdated"] = Date.now();
-			}
+
 		}
 		//console.log(tile);
 	});
