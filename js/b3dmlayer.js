@@ -212,7 +212,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				for(var j = 0; j < batchSize; j++){
 					model = tile.content.getModel(j);
 					var jsonObject = this.getObjectForBatchId(tile.content.batchTableResources.batchTable, j, true);
-					color = that._style.call(null, jsonObject);
+					color = that._style.call(null, jsonObject, this.bindBatchTableToFunction(this.getAttributesFromParent, tile.content.batchTableResources.batchTable));
 					if(color === false){
 						model.show = false;
 					}else{
@@ -306,6 +306,21 @@ function getBatchIdsByParentId(batchTable, batchSize, pid, result){
         }
     }
     return result;
+}
+
+function bindBatchTableToFunction(func, batchTable){
+	return function(jsonObject){
+		return func.call(this, batchTable,jsonObject);
+	};
+}
+
+function getAttributesFromParent(batchTable, jsonObject){
+	var parentId = jsonObject.attributes.parentBatchId || null;
+	if (parentId !== null){
+			return getObjectForBatchId(batchTable, parentId, false);
+	} else {
+		return null;
+	}
 }
 
 function getObjectForBatchId(batchTable, batchId, skipChildren){
