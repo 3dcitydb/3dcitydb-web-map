@@ -211,7 +211,8 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				batchSize = tile.content.batchLength;
 				for(var j = 0; j < batchSize; j++){
 					model = tile.content.getModel(j);
-					color = that._style.call(null, model);
+					var jsonObject = this.getObjectForBatchId(tile.content.batchTableResources.batchTable, j, true);
+					color = that._style.call(null, jsonObject);
 					if(color === false){
 						model.show = false;
 					}else{
@@ -307,7 +308,7 @@ function getBatchIdsByParentId(batchTable, batchSize, pid, result){
     return result;
 }
 
-function getObjectForBatchId(batchTable, batchId){
+function getObjectForBatchId(batchTable, batchId, skipChildren){
 	var jsonObject = {};
 	jsonObject.id = getPropertyByBatchId(batchTable, "id", batchId);
 	jsonObject.type = getPropertyByBatchId(batchTable, "classId", batchId);
@@ -322,18 +323,24 @@ function getObjectForBatchId(batchTable, batchId){
 			}
 		}
 	}
-	jsonObject.children = [];
-	var childrenBatchIds = getBatchIdsByProperty(batchTable, "parentId", jsonObject.id);
-	for(var i = 0; i < childrenBatchIds.length; i++){
-		var childBatchId = childrenBatchIds[i];
-		jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));
+	if (skipChildren){
+		return jsonObject;
+	} else{
+		jsonObject.children = [];
+		var childrenBatchIds = getBatchIdsByProperty(batchTable, "parentId", jsonObject.id);
+		for(var i = 0; i < childrenBatchIds.length; i++){
+			var childBatchId = childrenBatchIds[i];
+			jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));
+		}
+		return jsonObject;
 	}
-	return jsonObject;
 }
+
 function getObjectForId(batchTable, id){
 	var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
 	return getObjectForBatchId(batchTable, batchId);
 }
+
 function getBatchIdsByProperty(batchTable, property, value){
 	var batchIds = [];
 	var propertyValues = batchTable[property];
