@@ -211,8 +211,8 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				batchSize = tile.content.batchLength;
 				for(var j = 0; j < batchSize; j++){
 					model = tile.content.getModel(j);
-					var jsonObject = this.getObjectForBatchId(tile.content.batchTableResources.batchTable, j, true);
-					color = that._style.call(null, jsonObject, this.bindBatchTableToFunction(this.getAttributesFromParent, tile.content.batchTableResources.batchTable));
+					var jsonObject = getObjectForBatchId(tile.content.batchTableResources.batchTable, j, true);
+					color = that._style.call(null, jsonObject, bindBatchTableToFunction(getAttributesFromParent, tile.content.batchTableResources.batchTable));
 					if(color === false){
 						model.show = false;
 					}else{
@@ -234,10 +234,10 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 					if(that._highlightedObjects[id]){
 						// highlight
 						batchId = i;
-						batchIds =[];
+						batchIds = [];
 						if(batchId >= batchSize){
 							//var rootId = getRootId(batchTable, id);
-							getBatchIdsByParentId(batchTable, batchSize, id, batchIds);
+							batchIds = getBatchIdsOfChildrenByBatchId(batchTable, batchId);
 						} else{
 							batchIds.push(batchId);
 						}
@@ -260,7 +260,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 						batchIds =[];
 						if(batchId >= batchSize){
 							var rootId = getRootId(batchTable, key);
-							getBatchIdsByParentId(batchTable, batchSize, rootId, batchIds);
+							batchIds = getBatchIdsOfChildrenByBatchId(batchTable, batchId);
 						} else{
 							batchIds.push(batchId);
 						}
@@ -279,34 +279,6 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 		//console.log(tile);
 	});
 };
-
-function getBatchIdsByParentId(batchTable, batchSize, pid, result){
-	var propertyValues = batchTable["parentId"];
-    if(propertyValues){
-    	var hasNoChildren = false;
-    	var index = propertyValues.indexOf(pid);
-    	if(index >= 0){
-	        for(var i = index; i < propertyValues.length; i++){
-	            if(pid == propertyValues[i]){
-	            	if(i >= batchSize){
-	            		var check = getBatchIdsByParentId(batchTable, batchSize, getPropertyByBatchId(batchTable, "id", i), result);
-	            		if(check === null){
-	                		result.push(i);
-	                	}
-	            	}else{
-	            		result.push(i);
-	            	}
-
-	            	hasNoChildren = true;
-	            }
-	        }
-    	}
-        if(!hasNoChildren){
-        	return null;
-        }
-    }
-    return result;
-}
 
 function bindBatchTableToFunction(func, batchTable){
 	return function(jsonObject){
@@ -342,7 +314,7 @@ function getObjectForBatchId(batchTable, batchId, skipChildren){
 		return jsonObject;
 	} else{
 		jsonObject.children = [];
-		var childrenBatchIds = getBatchIdsByProperty(batchTable, "parentId", jsonObject.id);
+		var childrenBatchIds = getBatchIdsOfChildrenByBatchId(batchTable, jsonObject.batchId);
 		for(var i = 0; i < childrenBatchIds.length; i++){
 			var childBatchId = childrenBatchIds[i];
 			jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));
@@ -354,6 +326,20 @@ function getObjectForBatchId(batchTable, batchId, skipChildren){
 function getObjectForId(batchTable, id){
 	var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
 	return getObjectForBatchId(batchTable, batchId);
+}
+
+function getBatchIdsOfChildrenByBatchId(batchTable, batchId){
+	// TODO this only gets the batchids of one level higher.. not recursively yet!
+	var batchIds = [];
+	var parentBatchIds = batchTable["parentPosition"];
+	if(parentBatchIds){
+        for(var i = 0; i < parentBatchIds.length; i++){
+            if(parentBatchIds[i] === batchId){
+                batchIds.push(i);
+            }
+        }
+    }
+    return batchIds;
 }
 
 function getBatchIdsByProperty(batchTable, property, value){
@@ -382,13 +368,14 @@ function getPropertyByBatchId(batchTable, property, batchId){
 	return batchTable[property][batchId];
 }
 function getRootId(batchTable, id){
-	var pid = id;
-	while(pid !== null){
-		id = pid;
-		var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
-		pid = getPropertyByBatchId(batchTable,"parentId", batchId);
+	var parentBatchId;
+	var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
+	parentBatchId = batchTable.parentPosition[batchId];
+	while(parentBatchId !== null){
+		batchId = parentBatchId;
+		parentBatchId = batchTable.parentPosition[batchId];
 	}
-	return id;
+	return batchTable.id[batchId];
 }
 
 /**
