@@ -256,7 +256,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				}
 				for(var key in that._hiddenObjects){
 					batchId = getFirstBatchIdByProperty(batchTable, "id", key);
-					if(batchId !== null){
+					if(batchId !== -1){
 						batchIds =[];
 						if(batchId >= batchSize){
 							var rootId = getRootId(batchTable, key);
@@ -273,7 +273,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 					}
 				}
 
-				tile["_LastUpdated"] = Date.now();
+				tile["_lastUpdated"] = Date.now();
 
 		}
 		//console.log(tile);
@@ -287,9 +287,9 @@ function bindBatchTableToFunction(func, batchTable){
 }
 
 function getAttributesFromParent(batchTable, jsonObject){
-	var parentId = jsonObject.attributes.parentBatchId || null;
-	if (parentId !== null){
-			return getObjectForBatchId(batchTable, parentId, false);
+	var parentBatchId = batchTable["parentPosition"][jsonObject.batchId] || -1;
+	if (parentBatchId !== -1){
+			return getObjectForBatchId(batchTable, parentBatchId, true);
 	} else {
 		return null;
 	}
@@ -371,7 +371,7 @@ function getRootId(batchTable, id){
 	var parentBatchId;
 	var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
 	parentBatchId = batchTable.parentPosition[batchId];
-	while(parentBatchId !== null){
+	while(parentBatchId !== -1){
 		batchId = parentBatchId;
 		parentBatchId = batchTable.parentPosition[batchId];
 	}
