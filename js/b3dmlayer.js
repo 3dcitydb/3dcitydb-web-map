@@ -248,8 +248,9 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 							that._highlightedObjectsOriginalModels[id][batchIds[k]] = model;
 							color = model.color;
 							if(!that._highlightedObjectsOriginalColor[id]){
-								that._highlightedObjectsOriginalColor[id] = color.clone();
+								that._highlightedObjectsOriginalColor[id] = {};
 							}
+							that._highlightedObjectsOriginalColor[id][batchIds[k]] = color.clone();
 							model.color = that._highlightedObjects[id];
 						}
 					}
@@ -459,7 +460,7 @@ B3DMLayer.prototype.unHighlight = function(toUnHighlight){
 			var models = this._highlightedObjectsOriginalModels[id];
 			for (var batchId in models) { //j = 0; j < models.length; j++){
 				if(this._highlightedObjectsOriginalColor[id] && !models[batchId]._batchTableResources.isDestroyed()){
-					models[batchId].color = this._highlightedObjectsOriginalColor[id];
+					models[batchId].color = this._highlightedObjectsOriginalColor[id][batchId];
 				}
 			}
 			this._highlightedObjectsOriginalModels[id] = {};
