@@ -287,7 +287,7 @@ function bindBatchTableToFunction(func, batchTable){
 }
 
 function getAttributesFromParent(batchTable, jsonObject){
-	var parentBatchId = batchTable["parentPosition"][jsonObject.batchId] || -1;
+	var parentBatchId = jsonObject.parentPosition || -1;
 	if (parentBatchId !== -1){
 			return getObjectForBatchId(batchTable, parentBatchId, true);
 	} else {
@@ -301,19 +301,48 @@ function getObjectForBatchId(batchTable, batchId, skipChildren){
 	jsonObject.type = getPropertyByBatchId(batchTable, "classId", batchId);
 	jsonObject.batchId = batchId;
 	jsonObject.attributes = {};
-	for (var key in batchTable){
-		if(batchTable[key] && batchTable[key][batchId] && key != "id" && key != "id" && key != "classId"){
-			jsonObject.attributes[key] = batchTable[key][batchId];
-			//TODO quick hack to deal with b3dm layers which have json style attributes in batchtable
-			if (jsonObject.attributes.attributes){
-				jsonObject.attributes = jsonObject.attributes.attributes;
-			}
+	jsonObject.children = [];
+	if (batchTable.attributes && batchTable.attributes[batchId]){
+		if (batchTable.attributes.attributes){
+			// JSON style attributes in B3DM
+			jsonObject.attributes = batchTable.attributes.attributes[batchId];
+		} else{
+			// Flat hierarchy attributes in B3DM
+			jsonObject.attributes = batchTable.attributes[batchId];
 		}
 	}
+	if (batchTable.parentPosition && batchTable.parentPosition[batchId]){
+		jsonObject.parentPosition = batchTable.parentPosition[batchId];
+	}
+	if (jsonObject.attributes.Address){
+		var	address = jsonObject.attributes.Address;
+		var addressJsonObject = {
+			// this has to be replaced with the id in the future
+			id : "Address",
+			type : "_1",
+			batchId : null,
+		 	attributes : address,
+			children : []
+		};
+		jsonObject.children.push(addressJsonObject);
+	}
+	/*
+	if (jsonObject.attributes.vcs_Addresses){
+		var address;
+		var addressJsonObject;
+		for (var i = 0; i < jsonObject.attributes.vcs_Addresses[i].length; i++){
+			address = jsonObject.attributes.vcs_Addresses[i];
+			addressJsonObject.id = null;
+			addressJsonObject.type = "-1";
+			addressJsonObject.batchId = null;
+			addressJsonObject.attributes = address;
+			jsonObject.children.push(addressJsonObject);
+		}
+	}
+	*/
 	if (skipChildren){
 		return jsonObject;
 	} else{
-		jsonObject.children = [];
 		var childrenBatchIds = getBatchIdsOfChildrenByBatchId(batchTable, jsonObject.batchId);
 		for(var i = 0; i < childrenBatchIds.length; i++){
 			var childBatchId = childrenBatchIds[i];
