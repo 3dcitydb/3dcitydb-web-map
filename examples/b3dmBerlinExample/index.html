@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>Berlin demo</title>
+
+  <script src="../../ThirdParty/Cesium-1-14-3dtiles/Cesium.js"></script>
+
+  <script src="../../js/3dcitydb-web-map.js"></script>
+  <script src="../../js/b3dmlayer.js"></script>
+  <style>
+      @import url(../../ThirdParty/Cesium-1-14-3dtiles/Widgets/widgets.css);
+      html, body, #cesiumContainer {
+          top: 0px;
+          left: 0px;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          z-index: -1;
+      }
+      #uiMenu {
+          border-radius:5px;
+          padding: 10px;
+          position:absolute;
+          left: 20px;
+          font-family: "Arial";
+          z-index: 99999;
+      }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+   <div id="uiMenu">
+    <button type="button" onclick="addLayer()">add Building Layer</button>
+    <button type="button" onclick="removeLayer()">remove Building Layer</button>
+    <br />
+    <button type="button" onclick="activateClickListener(true)">activateClickListener</button>
+    <button type="button" onclick="activateClickListener(false)">deactivateClickListener</button>
+    <br />
+    <button type="button" onclick="setRed()">setColor(red)</button>
+    <button type="button" onclick="setGreen()">setColor(green)</button>
+    <button type="button" onclick="setFunctionColor()">setColor(function)</button>
+  </div>
+  <script>
+  var b3dmLayer;
+  
+  	var addLayer = function(){
+  		var buildingsextent = new Cesium.Rectangle.fromDegrees(24.81, 60.18, 24.85, 60.20);
+      var options = {url:'./buildings',
+        name:"buildingslayer",
+        region: buildingsextent,
+        id:"b3dmLayer"};
+
+      b3dmLayer = new B3DMLayer(options);
+      webMap.addLayer(b3dmLayer);
+  	};
+
+    var removeLayer = function(){
+        webMap.removeLayer("b3dmLayer");
+    };
+
+    var activateClickListener = function(activate){
+      if (activate) {
+        cesiumEventHandler.setInputAction(function(position) {
+          var ray = viewer.scene.camera.getPickRay(position.position);
+          var cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+          if (cartesian) {
+            alert("clicked: " + cartesian);
+          }
+        }, Cesium.ScreenSpaceEventType["LEFT_CLICK"]);
+      } else{
+        cesiumEventHandler.removeInputAction(Cesium.ScreenSpaceEventType["LEFT_CLICK"]);
+      }
+  	};
+    var setStyle = function(color){
+      if(b3dmLayer){
+        b3dmLayer.setStyle(color);
+      }
+    } 
+    var setRed = function(){
+      setStyle(Cesium.Color.CRIMSON);
+    } 
+    var setGreen = function(){
+      setStyle(new Cesium.Color(0.2,1,0.2, 0.2));
+    } 
+    var setFunctionColor = function(){
+      setStyle(function(model){
+        var property = model.getProperty("EIG_KL_PV");
+        if(property === "0") return new Cesium.Color(1,0.2,0.2);
+        if(property === "1") return new Cesium.Color(0.2,1,0.2);
+        if(property === "2") return new Cesium.Color(0.2,0.2,1);
+        return false;
+      });
+    } 
+    // Initialize Cesium
+    Cesium.BingMapsApi.defaultKey = 'AimQ0zJhUF5vsUh57SVej_VijMQ3SwPwBt9RAgityvvmMh7_Qx334j4JYjDXmrs9'
+
+    var terrainProvider = new Cesium.CesiumTerrainProvider({
+          "url" : "./terrain",
+          "requestVertexNormals": true
+      });
+
+    var viewer = new Cesium.Viewer('cesiumContainer', {baseLayerPicker : false,
+      terrainProvider : terrainProvider
+    });
+
+    var cesiumEventHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+    var extent = new Cesium.Rectangle.fromDegrees(13.39657249732205,52.49127999816725,13.42722986993895,52.50998943590507);
+    viewer.camera.viewRectangle(extent);
+
+    viewer.extend(Cesium.viewerCesiumInspectorMixin);
+
+    var webMap = new WebMap3DCityDB(viewer);
+
+  </script>
+</body>
+</html>
