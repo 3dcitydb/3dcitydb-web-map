@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <link rel="icon" type="image/png" href="../../theme/img/favicon.png" sizes="16x16">
+  <title>New York City demo</title>
+  
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="../../ThirdParty/Cesium-1-16/Cesium.js"></script> 
+  <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
+  <script src="../../js/3dcitydb-web-map.js"></script>  
+  <script src="../../js/CitydbUtil.js"></script>  
+  <script src="../../js/CitydbWebworker.js"></script>
+  <script src="../../js/CitydbSceneTransforms.js"></script> 
+  <script src="../../js/CitydbKmlHighlightingManager.js"></script>   
+  <script src="../../js/CitydbKmlTilingManager.js"></script>  
+  <script src="../../js/CitydbKmlDataSource.js"></script>    
+  <script src="../../js/CitydbKmlLayer.js"></script> 
+  
+  <style>
+     @import url(../../ThirdParty/Cesium-1-16/Widgets/widgets.css);
+      html, body, #cesiumContainer {
+          top: 0px;
+          left: 0px;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          z-index: -1;
+      }
+      #uiMenu {
+          border-radius:5px;
+          padding: 10px;
+          position:absolute;
+          left: 20px;
+          font-family: "Arial";
+          z-index: 99999;
+      }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+   <div id="uiMenu">
+    <button type="button" onclick="addLayers()">add KML/KMZ Data Layers</button>
+    <button type="button" onclick="removeLayers()">remove KML/KMZ Data Layer</button>
+  </div>
+  <script>
+	// Initialize Cesium Viewer
+	Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq'
+	
+	var viewer = new Cesium.Viewer('cesiumContainer', {
+		baseLayerPicker : false
+	});
+	
+	var extent = new Cesium.Rectangle.fromDegrees(-74.2554618991863, 40.4984065460536, -73.6992741782758, 40.9147033697977);
+	viewer.camera.setView({destination: extent})
+	
+	var webMap = new WebMap3DCityDB(viewer);
+	webMap.activateViewChangedEvent(true);
+	
+	var buildingLayer;
+	var lotLayer;
+	var streetLayer;
+	
+	var addLayers = function() {
+		buildingLayer = new CitydbKmlLayer({
+			url : './data/Buildings/NYC_Building_Extruded_MasterJSON.json'
+		});
+		
+		lotLayer = new CitydbKmlLayer({
+			url : './data/Lot/NYC_Lot_Footprint_MasterJSON.json'
+		});
+		
+		streetLayer = new CitydbKmlLayer({
+			url : './data/Street/NYC_Street_Footprint_MasterJSON.json'
+		});
+		
+		webMap.addLayer(buildingLayer);
+		webMap.addLayer(lotLayer);
+		webMap.addLayer(streetLayer);
+		buildingLayer.registerEventHandler("FINISHLOADING", function(loadedcitydbLayer) {
+			loadedcitydbLayer.zoomToStartPosition();
+		});		
+	};
+	
+	var removeLayers = function() {
+		webMap.removeLayer(buildingLayer.id);
+		webMap.removeLayer(lotLayer.id);
+		webMap.removeLayer(streetLayer.id);
+	};	
+</script>
+</body>
+</html>
