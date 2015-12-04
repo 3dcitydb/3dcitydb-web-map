@@ -24,6 +24,7 @@
             <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlHighlightingManager.js" />
         	<fileset dir="${SRC_JS_DIR}" includes="CitydbKmlLayer.js" />
             <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlTilingManager.js" />
+        	<fileset dir="${SRC_JS_DIR}" includes="CitydbSceneTransforms.js" />
         	<fileset dir="${SRC_JS_DIR}" includes="CitydbUtil.js" />
             <fileset dir="${SRC_JS_DIR}" includes="CitydbWebworker.js" />    
         </concat>
@@ -32,8 +33,8 @@
 			<fileset dir="${SRC_JS_DIR}/Webworkers" />
 		</copy>
     	
-    	<copy todir="${DIST_JS_DIR}/Cesium-1.11">
-			<fileset dir="${SRC_THIRDPARTY_DIR}/Cesium-1-11" />
+    	<copy todir="${DIST_JS_DIR}/Cesium-1.16">
+			<fileset dir="${SRC_THIRDPARTY_DIR}/Cesium-1-16" />
 		</copy>
         <echo message="${JS} built." />
     </target>
