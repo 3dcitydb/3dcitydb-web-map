@@ -501,4 +501,4 @@
     };
 		
 	window.CitydbKmlTilingManager = CitydbKmlTilingManager;
-})()
+})();
