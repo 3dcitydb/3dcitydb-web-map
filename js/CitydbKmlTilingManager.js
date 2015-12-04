@@ -110,10 +110,10 @@
 			for (var objUrl in dataPoolKml){
             	var networklinkItem = dataPoolKml[objUrl];			                	
         		var kmlDatasource = networklinkItem.kmlDatasource;
-        		var v1Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerRightCorner);
-        		var v2Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperRightCorner);
-        		var v3Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperLeftCorner);
-        		var v4Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerLeftCorner);
+        		var v1Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerRightCorner);
+        		var v2Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperRightCorner);
+        		var v3Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperLeftCorner);
+        		var v4Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerLeftCorner);
         		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {
         			var clientWidth = canvas.clientWidth;
             		var clientHeight = canvas.clientHeight;					        							        		
@@ -189,10 +189,10 @@
     			lowerLeftCorner = Cesium.Cartesian3.fromDegrees(minX, minY, terrainHeight);	
         	}
 
-			var v1Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerRightCorner);
-    		var v2Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperRightCorner);
-    		var v3Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperLeftCorner);
-    		var v4Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerLeftCorner);
+			var v1Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, lowerRightCorner);
+    		var v2Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, upperRightCorner);
+    		var v3Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, upperLeftCorner);
+    		var v4Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, lowerLeftCorner);
 
     		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {		        							        		
         		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
@@ -356,6 +356,7 @@
 		scope.oTask.addListener("refreshView", function () {
 			scope.oTask.oListeners["cleanCaching"].call(this); 
 			scope.oTask.sleep();	
+			
 			// trigger Highlighting Manager again...
     		if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
     			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
@@ -366,7 +367,7 @@
     			if (!(cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
     				scope.triggerWorker();
     			}			
-			}, 3000)     
+			}, 1000)     
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
@@ -434,14 +435,15 @@
 
     	var factor = 0;
     	var originHeight = 0;
-    	var cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, 0));
+    	
+    	var cartesian3Indicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , 0)), scene);
     	
     	while (!Cesium.defined(cartesian3Indicator)) {
     		factor++
     		if (factor > 10)
     			break;
-    		originHeight = originHeight + frameHeight*factor*0.1;
-    		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
+    		originHeight = originHeight + frameHeight*factor*0.1;   	
+    		cartesian3Indicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
     	}
 
     	var cartesian3OfFrameCorner1;
@@ -477,12 +479,7 @@
     		var offzet = 10;
     		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
     		var yOffzet = offzet / 111000;
-/*    		this.createBboxGeometry({
-    			xmin: frameMinX - xOffzet,
-    			ymin: frameMinY - yOffzet, 
-    			xmax: frameMaxX + xOffzet, 
-    			ymax: frameMaxY + yOffzet
-    		}); */
+
         	return [frameMinX - xOffzet, frameMinY - yOffzet, frameMaxX + xOffzet, frameMaxY + yOffzet];
     	}
     	else {
