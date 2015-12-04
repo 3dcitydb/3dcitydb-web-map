@@ -21,7 +21,7 @@
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {	
-		//	var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
+
 			var obj = scope.cachedObjects[objectId];
 			
 			if (obj != null) {
