@@ -7,7 +7,6 @@
 	var shouldRun = false;
 	var stack = [];
 	var isStillUpdating = true;
-
 	var _bbox;
 	var _rowDelta;
 	var _colDelta;

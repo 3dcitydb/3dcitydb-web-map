@@ -388,7 +388,7 @@
 	    	event.preventDefault();
 	    	var layerId = event.target.parentNode.id;
 	    	var citydbLayer = webMap.getLayerbyId(layerId);
-	    	citydbLayer.zoomToLayer();
+	    	citydbLayer.zoomToStartPosition();
 	    }
 
 	    var layerlistpanel = document.getElementById("citydb_layerlistpanel")

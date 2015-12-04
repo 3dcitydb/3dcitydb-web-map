@@ -1,6 +1,8 @@
 /**
- * test
- * **/
+ *
+ * Highlighting Manager for controlling Appearance of objects created by the dynamically loaded KML/KMZ data tiles
+ *
+ **/
 (function() {
 	
 	function CitydbKmlHighlightingManager(citydbKmlLayerInstance) {		

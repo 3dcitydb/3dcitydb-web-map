@@ -1,6 +1,8 @@
 /**
- * test
- * **/
+ *
+ * Tiling manager for controlling dynamic loading and unloading KML/KMZ Tiles data
+ *
+ **/
 (function() {
 	function CitydbKmlTilingManager(citydbKmlLayerInstance){	
 		this.oTask = null;
@@ -48,7 +50,7 @@
     	var minLodPixels = this.citydbKmlLayerInstance.minLodPixels;
     	var maxLodPixels = this.citydbKmlLayerInstance.maxLodPixels;
     	
-    	// start Hihgighting Manager
+    	// start Highlighting Manager
     	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
     		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doStart();
     	}
@@ -59,17 +61,15 @@
     	// Caching
     	var networklinkCache = this.networklinkCache;
     	
-    	// url of the data layer
+    	// Url of the data layer
     	var masterUrl = this.citydbKmlLayerInstance.url;
-    	
-		var hostAndPath = null, layername = null, displayForm = null, fileextension = null;
 
-		// parsing layer infos..
-		var jsonLayerInfo = this.citydbKmlLayerInstance._citydbKmlDataSource._proxy;			
-		hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
-		layername = jsonLayerInfo.layername;
-		displayForm = jsonLayerInfo.displayform;
-		fileextension = jsonLayerInfo.fileextension;
+		// parsing layer info..
+		var jsonLayerInfo = this.citydbKmlLayerInstance._jsonLayerInfo;			
+		var hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
+		var layername = jsonLayerInfo.layername;
+		var displayForm = jsonLayerInfo.displayform;
+		var fileextension = jsonLayerInfo.fileextension;
 		var colnum = jsonLayerInfo.colnum;
 		var rownum = jsonLayerInfo.rownum;  
 		var bbox = jsonLayerInfo.bbox;
@@ -174,10 +174,9 @@
         				
 	        			var kmlDatasource = networklinkItem.kmlDatasource;
 	        			dataPoolKml[tileUrl] = networklinkItem;    
-        				dataSourceCollection.add(kmlDatasource).then(function() { 	        					
-        					scope.oTask.triggerEvent('updateTaskStack');
+        				dataSourceCollection.add(kmlDatasource).then(function() { 	  
 		        			console.log("loading layer...");	
-    	        			// status was changed...
+        					scope.oTask.triggerEvent('updateTaskStack');
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');		    	        			    										        							        			
         				}).otherwise(function(error) {
         					scope.oTask.triggerEvent('updateTaskStack');
@@ -208,7 +207,6 @@
    				
 				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
         			console.log("loading layer...");	
-        			// status was changed...
         			scope.oTask.triggerEvent('updateDataPoolRecord');
 					dataSourceCollection.add(newKmlDatasource);    						 
         			dataPoolKml[tileUrl] = newNetworklinkItem;
@@ -237,7 +235,7 @@
 
 		/**
 		 * 
-		 * Cachingsize = [number of displayed layers] + [cached layers]
+		 * Cache Size = [number of displayed layers] + [cached layers]
 		 * [cached layers] should not be bigger than a threshold value...
 		 * 
 		 */
@@ -279,7 +277,7 @@
 		
 		/**
 		 * 
-		 * update the statusbar and Highlighting status of the KML objects		
+		 * update the status bar and Highlighting status of the KML objects		
 		 *  
 		 */
 		scope.oTask.addListener("refreshView", function () {
@@ -450,7 +448,7 @@
     			cesiumViewer.entities.remove(this.boundingboxEntity);
     		}
     		
-    		// terminate Hihgighting Manager
+    		// terminate Highlighting Manager
         	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
         		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doTerminate();
         	}
@@ -487,7 +485,7 @@
     
     /**
      * 
-	 * control and manager the networklink manager and the highiting events
+	 * Tiling manager and the highlighting events
 	 * 
 	 */       
     CitydbKmlTilingManager.prototype.runMonitoring = function() {

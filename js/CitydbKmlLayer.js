@@ -1,20 +1,18 @@
-
 /**
- * Defines the interface for a 3DCityDBLayer. This Object is an interface for
- * documentation purpose and is not intended to be instantiated directly.
- *
- * @alias CitydbKmlLayer
- * @constructor
- *
+ * 
+ * This JavaScript class implements the interface Layer3DCityDB defined in "3dcitydb-layer.js"  
+ * for processing KML/KMZ/glTF data exported by 3DCityDB-Importer-Exporter-Tool (version 3.1.0 or higher), 
+ * 
+ * @alias KmlDataSource
+ * 
  * @param {Object} [options] Object with the following properties:
- * @param {String} [options.url] url to the layer data
- * @param {String} [options.id] id of this layer 
- * @param {String} [options.name] name of this layer 
- * @param {String} [options.region] boundingbox  of this layer Cesium.Rectangle
- *
+ * @param {String} [options.url] Url to the layer data
+ * 
  */
 (function() {
 	function CitydbKmlLayer(options){	
+		
+		// variables defined in the 3dcitydb-layer-Interface
 		this._url = options.url;
 		this._name = options.name;
 		this._id = Cesium.defaultValue(options.id, Cesium.createGuid());		
@@ -23,6 +21,12 @@
 		this._highlightedObjects = new Object();		
 		this._hiddenObjects = new Array();
 		this._cameraPosition = new Object();
+		this._clickEvent = new Cesium.Event();		
+		this._ctrlClickEvent = new Cesium.Event();
+		this._mouseInEvent = new Cesium.Event();
+		this._mouseOutEvent = new Cesium.Event();
+		
+		// extended variables for CitydbKmlLayer
 		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
 		if (typeof(this._pickSurface) == "string"){
 			if (this._pickSurface.toLowerCase() == "true") {
@@ -31,26 +35,25 @@
 			else {
 				this._pickSurface = false;
 			}
-		}
+		}		
 		this._cesiumViewer = undefined;
 		this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
 		this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
 		this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
-		this._cityobjectsJsonData = new Object();
-	
+		this._cityobjectsJsonData = new Object();	
 		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);	
-		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);
-		
+		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);		
     	this._minLodPixels = Cesium.defaultValue(options.minLodPixels, undefined);
-    	this._maxLodPixels = Cesium.defaultValue(options.maxLodPixels,  undefined);
-		
-		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);	
-		
+    	this._maxLodPixels = Cesium.defaultValue(options.maxLodPixels,  undefined);		
+		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);			
 		this._activeHighlighting = Cesium.defaultValue(options.activeHighlighting, true);	
 		this._citydbKmlHighlightingManager = this._activeHighlighting? new CitydbKmlHighlightingManager(this): null;		
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		this._layerType = undefined;
-
+		this._jsonLayerInfo = undefined;
+		this._startLoadingEvent = new Cesium.Event();		
+		this._finishLoadingEvent = new Cesium.Event();		
+		this._viewChangedEvent = new Cesium.Event();
 		this._configParameters = {
 			"id": this.id,
 			"url" : this.url,
@@ -65,51 +68,17 @@
 			"maxCountOfVisibleTiles" : this.maxCountOfVisibleTiles
 		}
 		
-		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
-				
-		/**
-		 * handles ClickEvents
-		 * @type {Cesium.Event} clickEvent
-		 */
-		this._clickEvent = new Cesium.Event();
-		
-		this._ctrlClickEvent = new Cesium.Event();
-		
-		/**
-		 * handles ClickEvents
-		 * @type {Cesium.Event} clickEvent
-		 */
-		this._mouseInEvent = new Cesium.Event();
-		
-		/**
-		 * handles ClickEvents
-		 * @type {Cesium.Event} clickEvent
-		 */
-		this._mouseOutEvent = new Cesium.Event();
-		
-		this._startLoadingEvent = new Cesium.Event();
-		
-		this._finishLoadingEvent = new Cesium.Event();
-		
-		this._viewChangedEvent = new Cesium.Event();
+		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);				
 	}
 
 	Object.defineProperties(CitydbKmlLayer.prototype, {
-	    /**
-	     * Gets the active 
-	     * @memberof 3DCityDBLayer.prototype
-	     * @type {Boolean}
-	     */
+		
 	    active : {
 	        get : function(){
 	        	return this._active;
 	        }
 	    },
-	    /**
-	     * Gets the currently highlighted Objects as an array
-	     * @memberof 3DCityDBLayer.prototype
-	     * @type {Array}
-	     */
+
 	    highlightedObjects : {
 	        get : function(){
 	        	return this._highlightedObjects;
@@ -118,11 +87,7 @@
 	        	this._highlightedObjects = value;
 	        }	    
 	    },
-	    /**
-	     * Gets the currently hidden Objects as an array
-	     * @memberof 3DCityDBLayer.prototype
-	     * @type {Array}
-	     */
+
 	    hiddenObjects : {
 	        get : function(){
 	        	return this._hiddenObjects;
@@ -131,11 +96,7 @@
 	        	this._hiddenObjects = value;
 	        }	
 	    },
-	    /**
-	     * Gets/Sets the CameraPosition.
-	     * @memberof DataSource.prototype
-	     * @type {Object}
-	     */
+
 	    cameraPosition : {
 	        get : function(){
 	        	return this._cameraPosition;
@@ -144,11 +105,7 @@
 	        	this._cameraPosition = value;
 	        }
 	    },
-	    /**
-	     * Gets the url of the datasource
-	     * @memberof DataSource.prototype
-	     * @type {String}
-	     */
+
 	    url : {
 	        get : function(){
 	        	return this._url;
@@ -157,11 +114,7 @@
 	        	this._url = value;
 	        }
 	    },
-	    /**
-	     * Gets the name of this datasource.
-	     * @memberof DataSource.prototype
-	     * @type {String}
-	     */
+
 	    name : {
 	        get : function(){
 	        	return this._name;
@@ -170,21 +123,13 @@
 	        	this._name = value;
 	        }
 	    },
-	    /**
-	     * Gets the id of this datasource, the id should be unique.
-	     * @memberof DataSource.prototype
-	     * @type {String}
-	     */
+
 	    id : {
 	        get : function(){
 	        	return this._id;
 	        }
 	    },
-	    /**
-	     * Gets boundingbox of this layer as an Cesium Rectangle Object with longitude/latitude values in radians. 
-	     * @memberof DataSource.prototype
-	     * @type {Cesium.Rectangle}
-	     */
+
 	    region : {
 	        get : function(){
 	        	return this._region;
@@ -319,39 +264,18 @@
 	    }
 	});
 
-
-	/**
-	 * adds this layer to the given Cesium viewer
-	 * @param {CesiumViewer} cesiumViewer
-	 */
-	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
-		this._cesiumViewer = cesiumViewer;
-
-		var that = this;
-		loadMasterJSON(that, true);
-		
-		Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function() {					
-			that._citydbKmlTilingManager.clearCaching();	
-	    });
-		
-		Cesium.knockout.getObservable(this, '_hiddenObjects').subscribe(function() {					
-			that._citydbKmlTilingManager.clearCaching();	
-	    });
-	}
-	
 	function loadMasterJSON(that, isFirstLoad) {
 		var deferred = Cesium.when.defer();
 		var jsonUrl = that._url;
 		that._startLoadingEvent.raiseEvent(that);
 		Cesium.loadJson(jsonUrl).then(function(json) {        	
-        	that._citydbKmlDataSource._name = json.layername;	
-        	that._citydbKmlDataSource._proxy = json;
+        	that._jsonLayerInfo = json;	
         	that._layerType = json.displayform;
             that._cameraPosition = {
         		lat: (json.bbox.ymax + json.bbox.ymin) / 2,	
         		lon: (json.bbox.xmax + json.bbox.xmin) / 2,
     			range: 800,
-    			tilt: 49,
+    			pitch: -50,
     			heading: 6,
     			altitude: 40
         	}
@@ -392,13 +316,93 @@
 		});
 		return deferred.promise;
 	}
+	
+	/**
+	 * adds this layer to the given Cesium viewer
+	 * @param {CesiumViewer} cesiumViewer
+	 */
+	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
+		this._cesiumViewer = cesiumViewer;
 
+		var that = this;
+		loadMasterJSON(that, true);
+		
+		Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function() {					
+			that._citydbKmlTilingManager.clearCaching();	
+	    });
+		
+		Cesium.knockout.getObservable(this, '_hiddenObjects').subscribe(function() {					
+			that._citydbKmlTilingManager.clearCaching();	
+	    });
+	}
 
 	CitydbKmlLayer.prototype.removeFromCesium = function(cesiumViewer){
 		this.activate(false);
 	}
 
-
+	/**
+	 * highlights one or more object with a given color;
+	 * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
+	 */
+	CitydbKmlLayer.prototype.highlight = function(toHighlight){
+		for (var id in toHighlight){
+			this._highlightedObjects[id] = toHighlight[id];
+			this.highlightObject(this.getObjectById(id));
+		}	
+		this._highlightedObjects = this._highlightedObjects;
+	}
+	
+	/**
+	 * undo highlighting
+	 * @param {Array<String>} A list of Object Ids. The default material will be restored
+	 */
+	CitydbKmlLayer.prototype.unHighlight = function(toUnHighlight){
+		for (var k = 0; k < toUnHighlight.length; k++){	
+			var id = toUnHighlight[k];			
+			delete this._highlightedObjects[id];		
+		}
+		for (var k = 0; k < toUnHighlight.length; k++){	
+			var id = toUnHighlight[k];			
+			this.unHighlightObject(this.getObjectById(id));
+		}
+		this._highlightedObjects = this._highlightedObjects;
+	};
+	
+	/**
+	 * hideObjects
+	 * @param {Array<String>} A list of Object Ids which will be hidden
+	 */
+	CitydbKmlLayer.prototype.hideObjects = function(toHide){		
+		for (var i = 0; i < toHide.length; i++){
+			var objectId = toHide[i];
+			if (!this.isInHiddenList(objectId)) {
+				this._hiddenObjects.push(objectId);
+			}				
+			this.hideObject(this.getObjectById(objectId));
+		}
+		this._hiddenObjects = this._hiddenObjects;
+	};
+	
+	/**
+	 * showObjects, to undo hideObjects
+	 * @param {Array<String>} A list of Object Ids which will be unhidden. 
+	 */
+	CitydbKmlLayer.prototype.showObjects = function(toUnhide){		
+		for (var k = 0; k < toUnhide.length; k++){	
+			var objectId = toUnhide[k];			
+			this._hiddenObjects.splice(objectId, 1);	
+		}
+		for (var k = 0; k < toUnhide.length; k++){	
+			var objectId = toUnhide[k];			
+			this.showObject(this.getObjectById(objectId));
+		}
+		this._hiddenObjects = this._hiddenObjects;
+	};
+	
+	/**
+	 * activates or deactivates the layer
+	 * @param {Boolean} value
+	 */
 	CitydbKmlLayer.prototype.activate = function(active){
 		if (active == false) {			
 			this._citydbKmlTilingManager.doTerminate();
@@ -411,6 +415,100 @@
 		this._active = active;
 	}
 	
+	/**
+	 * zooms to the layer cameraPostion
+	 */	
+	CitydbKmlLayer.prototype.zoomToStartPosition = function(){
+		var that = this;
+		var lat = this._cameraPosition.lat;
+		var lon = this._cameraPosition.lon;
+		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
+        var heading = Cesium.Math.toRadians(this._cameraPosition.heading);
+        var pitch = Cesium.Math.toRadians(this._cameraPosition.pitch);
+        var range = this._cameraPosition.range;
+        var cesiumCamera = this._cesiumViewer.scene.camera;
+        cesiumCamera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(lon, lat, range),
+            complete: function() {
+            	cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+            	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
+            	setTimeout(function(){
+            		that._citydbKmlTilingManager.triggerWorker();
+            	}, 3000)            	
+            }
+        })
+	}
+	
+	/**
+	 * removes an Eventhandler
+	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
+	 * @param {function} callback function to be called
+	 */	
+	CitydbKmlLayer.prototype.removeEventHandler = function(event, callback){
+		if(event == "CLICK"){
+			this._clickEvent.removeEventListener(callback, this);
+		}else if(event == "CTRLCLICK"){
+			this._ctrlClickEvent.removeEventListener(callback, this);
+		}else if(event == "MOUSEIN"){
+			this._mouseInEvent.removeEventListener(callback, this);
+		}else if(event == "MOUSEOUT"){
+			this._mouseOutEvent.removeEventListener(callback, this);
+		}else if(event == "STARTLOADING"){
+			this._startLoadingEvent.removeEventListener(callback, this);
+		}else if(event == "FINISHLOADING"){
+			this._finishLoadingEvent.removeEventListener(callback, this);
+		}else if(event == "VIEWCHANGED"){
+			this._viewChangedEvent.removeEventListener(callback, this);
+		}
+	}
+
+	/**
+	 * adds an Eventhandler
+	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
+	 * @param {function} callback function to be called
+	 * @return {String} id of the event Handler, can be used to remove the event Handler
+	 */
+	CitydbKmlLayer.prototype.registerEventHandler = function(event, callback){
+		if(event == "CLICK"){
+			this._clickEvent.addEventListener(callback, this);
+		}else if(event == "CTRLCLICK"){
+			this._ctrlClickEvent.addEventListener(callback, this)
+		}else if(event == "MOUSEIN"){
+			this._mouseInEvent.addEventListener(callback, this);
+		}else if(event == "MOUSEOUT"){
+			this._mouseOutEvent.addEventListener(callback, this);
+		}else if(event == "STARTLOADING"){
+			this._startLoadingEvent.addEventListener(callback, this);
+		}else if(event == "FINISHLOADING"){
+			this._finishLoadingEvent.addEventListener(callback, this);
+		}else if(event == "VIEWCHANGED"){
+			this._viewChangedEvent.addEventListener(callback, this);
+		}
+	}
+
+	/**
+	 * triggers an Event
+	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
+	 * @param {*} arguments, any number of arguments
+	 */
+	CitydbKmlLayer.prototype.triggerEvent = function(event, object){
+		if(event == "CLICK"){
+			this._clickEvent.raiseEvent(object);
+		}else if(event == "CTRLCLICK"){
+			this._ctrlClickEvent.raiseEvent(object);
+		}else if(event == "MOUSEIN"){
+			this._mouseInEvent.raiseEvent(object);
+		}else if(event == "MOUSEOUT"){
+			this._mouseOutEvent.raiseEvent(object);
+		}else if(event == "VIEWCHANGED"){
+			this._viewChangedEvent.raiseEvent(object);
+		}
+	}
+	
+	//--------------------------------------------------------------------------------------------------------//
+	//---------------------- Extended Methods and Functions for CitydbKmlLayer--------------------------------//
+	//--------------------------------------------------------------------------------------------------------//
+		
 	CitydbKmlLayer.prototype.reActivate = function(){		
 		this._highlightedObjects = {};	
 		this._hiddenObjects = [];
@@ -425,27 +523,6 @@
 		return loadMasterJSON(this, false);
 	}
 	
-	CitydbKmlLayer.prototype.zoomToLayer = function(){
-		var that = this;
-		var lat = this._cameraPosition.lat;
-		var lon = this._cameraPosition.lon;
-		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
-        var heading = Cesium.Math.toRadians(this._cameraPosition.heading);
-        var pitch = Cesium.Math.toRadians(this._cameraPosition.tilt - 90);
-        var range = this._cameraPosition.range;
-        var cesiumCamera = this._cesiumViewer.scene.camera;
-        cesiumCamera.flyTo({
-            destination : Cesium.Cartesian3.fromDegrees(lon, lat, range),
-            complete: function() {
-            	cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
-            	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
-            	setTimeout(function(){
-            		that._citydbKmlTilingManager.triggerWorker();
-            	}, 3000)            	
-            }
-        })
-	}
-
 	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
 		var primitives = this._cesiumViewer.scene.primitives;
 		if (this._layerType == "collada") {
@@ -522,18 +599,6 @@
 			}
 		}
 	};
-
-	/**
-	 * highlights one or more object with a given color;
-	 * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
-	 */
-	CitydbKmlLayer.prototype.highlight = function(toHighlight){
-		for (var id in toHighlight){
-			this._highlightedObjects[id] = toHighlight[id];
-			this.highlightObject(this.getObjectById(id));
-		}	
-		this._highlightedObjects = this._highlightedObjects;
-	};
 	
 	CitydbKmlLayer.prototype.highlightObject = function(object){	
 		if (object == null)
@@ -564,22 +629,6 @@
 				}					
 			}		
 		}	
-	};
-
-	/**
-	 * undo highlighting
-	 * @param {Array<String>} A list of Object Ids. The default material will be restored
-	 */
-	CitydbKmlLayer.prototype.unHighlight = function(toUnHighlight){
-		for (var k = 0; k < toUnHighlight.length; k++){	
-			var id = toUnHighlight[k];			
-			delete this._highlightedObjects[id];		
-		}
-		for (var k = 0; k < toUnHighlight.length; k++){	
-			var id = toUnHighlight[k];			
-			this.unHighlightObject(this.getObjectById(id));
-		}
-		this._highlightedObjects = this._highlightedObjects;
 	};
 	
 	CitydbKmlLayer.prototype.unHighlightObject = function(object){	
@@ -663,21 +712,6 @@
 		return Object.keys(this._highlightedObjects).length > 0? true : false;
 	};
 
-	/**
-	 * hideObjects
-	 * @param {Array<String>} A list of Object Ids which will be hidden
-	 */
-	CitydbKmlLayer.prototype.hideObjects = function(toHide){		
-		for (var i = 0; i < toHide.length; i++){
-			var objectId = toHide[i];
-			if (!this.isInHiddenList(objectId)) {
-				this._hiddenObjects.push(objectId);
-			}				
-			this.hideObject(this.getObjectById(objectId));
-		}
-		this._hiddenObjects = this._hiddenObjects;
-	};
-	
 	CitydbKmlLayer.prototype.hideObject = function(object){			
 		if (object == null)
 			return;
@@ -697,24 +731,6 @@
 				childEntity.show = false;
 			}		
 		}
-	//	console.log(object.show);
-	};
-
-
-	/**
-	 * showObjects, to undo hideObjects
-	 * @param {Array<String>} A list of Object Ids which will be unhidden. 
-	 */
-	CitydbKmlLayer.prototype.showObjects = function(toUnhide){		
-		for (var k = 0; k < toUnhide.length; k++){	
-			var objectId = toUnhide[k];			
-			this._hiddenObjects.splice(objectId, 1);	
-		}
-		for (var k = 0; k < toUnhide.length; k++){	
-			var objectId = toUnhide[k];			
-			this.showObject(this.getObjectById(objectId));
-		}
-		this._hiddenObjects = this._hiddenObjects;
 	};
 	
 	CitydbKmlLayer.prototype.showObject = function(object){
@@ -817,71 +833,6 @@
 		return geometryGraphic.material
 	};
 
-	/**
-	 * removes an Eventhandler
-	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
-	 * @param {function} callback function to be called
-	 */	
-	CitydbKmlLayer.prototype.removeEventHandler = function(event, callback){
-		if(event == "CLICK"){
-			this._clickEvent.removeEventListener(callback, this);
-		}else if(event == "CTRLCLICK"){
-			this._ctrlClickEvent.removeEventListener(callback, this);
-		}else if(event == "MOUSEIN"){
-			this._mouseInEvent.removeEventListener(callback, this);
-		}else if(event == "MOUSEOUT"){
-			this._mouseOutEvent.removeEventListener(callback, this);
-		}else if(event == "STARTLOADING"){
-			this._startLoadingEvent.removeEventListener(callback, this);
-		}else if(event == "FINISHLOADING"){
-			this._finishLoadingEvent.removeEventListener(callback, this);
-		}else if(event == "VIEWCHANGED"){
-			this._viewChangedEvent.removeEventListener(callback, this);
-		}
-	}
-
-	/**
-	 * adds an Eventhandler
-	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
-	 * @param {function} callback function to be called
-	 * @return {String} id of the event Handler, can be used to remove the event Handler
-	 */
-	CitydbKmlLayer.prototype.registerEventHandler = function(event, callback){
-		if(event == "CLICK"){
-			this._clickEvent.addEventListener(callback, this);
-		}else if(event == "CTRLCLICK"){
-			this._ctrlClickEvent.addEventListener(callback, this)
-		}else if(event == "MOUSEIN"){
-			this._mouseInEvent.addEventListener(callback, this);
-		}else if(event == "MOUSEOUT"){
-			this._mouseOutEvent.addEventListener(callback, this);
-		}else if(event == "STARTLOADING"){
-			this._startLoadingEvent.addEventListener(callback, this);
-		}else if(event == "FINISHLOADING"){
-			this._finishLoadingEvent.addEventListener(callback, this);
-		}else if(event == "VIEWCHANGED"){
-			this._viewChangedEvent.addEventListener(callback, this);
-		}
-	}
-
-	/**
-	 * triggers an Event
-	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
-	 * @param {*} arguments, any number of arguments
-	 */
-	CitydbKmlLayer.prototype.triggerEvent = function(event, object){
-		if(event == "CLICK"){
-			this._clickEvent.raiseEvent(object);
-		}else if(event == "CTRLCLICK"){
-			this._ctrlClickEvent.raiseEvent(object);
-		}else if(event == "MOUSEIN"){
-			this._mouseInEvent.raiseEvent(object);
-		}else if(event == "MOUSEOUT"){
-			this._mouseOutEvent.raiseEvent(object);
-		}else if(event == "VIEWCHANGED"){
-			this._viewChangedEvent.raiseEvent(object);
-		}
-	}
 	window.CitydbKmlLayer = CitydbKmlLayer;
 })();
 
