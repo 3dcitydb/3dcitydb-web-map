@@ -359,14 +359,23 @@
     	
     	var cartesian3Indicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , 0)), scene);
     	
-    	while (!Cesium.defined(cartesian3Indicator)) {
+    	var flag = false;
+    	while (!flag) {
     		factor++
     		if (factor > 10)
     			break;
     		originHeight = originHeight + frameHeight*factor*0.1;   	
     		cartesian3Indicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
+    		if (Cesium.defined(cartesian3Indicator)) {
+    			flag = true;
+/*    			distanceLimit = Cesium.Cartesian3.distance(cartesian3Indicator, camera.position);
+    			console.log(distanceLimit);
+    			if (distanceLimit < 10000) {    				
+    				flag = false;
+    			}*/
+    		}
     	}
-
+    	
     	var cartesian3OfFrameCorner1;
     	var cartesian3OfFrameCorner2;
     	var cartesian3OfFrameCorner3;
