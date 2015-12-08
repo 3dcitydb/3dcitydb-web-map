@@ -323,14 +323,17 @@
 		
 		function registerLayerEventHandler(_layer) {
 			var tempMenuOption;
-			_layer.registerEventHandler("STARTLOADING", function(thisLayer) {
+			var startLoadingHandler = function(thisLayer) {
 				document.getElementById('loadingIndicator').style.display = 'block';				
-			});
-			_layer.registerEventHandler("FINISHLOADING", function(thisLayer) {
+			}
+			_layer.registerEventHandler("STARTLOADING", startLoadingHandler);
+			var finishLoadingHandler = function(thisLayer) {
 				console.log(thisLayer);
 				addEventListeners(thisLayer);			
 				document.getElementById('loadingIndicator').style.display = 'none';
-				addLayerToList(_layer);
+				addLayerToList(thisLayer);
+				thisLayer.removeEventHandler("STARTLOADING", startLoadingHandler);
+				thisLayer.removeEventHandler("FINISHLOADING", finishLoadingHandler);
 				k++;
 				if (k < _layers.length) {
 					var currentLayer = _layers[k];
@@ -340,7 +343,8 @@
 				else {
 					webMap.activeLayer = _layers[0];
 				}
-			});
+			}
+			_layer.registerEventHandler("FINISHLOADING", finishLoadingHandler);
 		}
 		
 		// adding layer to Cesium Map          	          	
