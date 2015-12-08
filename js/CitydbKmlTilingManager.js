@@ -289,11 +289,9 @@
     			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
     		} 
     		
-    		// if terrain data is used, tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
+    		// Tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
     		setTimeout(function(){
-    			if (!(cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
-    				scope.triggerWorker();
-    			}			
+    			scope.triggerWorker();		
 			}, 1000)     
 		});	
 		
@@ -368,11 +366,6 @@
     		cartesian3Indicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
     		if (Cesium.defined(cartesian3Indicator)) {
     			flag = true;
-/*    			distanceLimit = Cesium.Cartesian3.distance(cartesian3Indicator, camera.position);
-    			console.log(distanceLimit);
-    			if (distanceLimit < 10000) {    				
-    				flag = false;
-    			}*/
     		}
     	}
     	
@@ -502,10 +495,16 @@
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var scene = cesiumViewer.scene;
     	
+    	var timer = null;
     	scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function() {
-    		if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
-				scope.triggerWorker();
-			}
+    		if (timer != null) {
+    			clearTimeout(timer);
+    		}
+    		timer = setTimeout(function(){
+    			console.log("trigger Tiling manager by viewechanged event");
+    			scope.triggerWorker(); 
+    			timer = null;
+    		}, 100);    		
 		});
     };
 		
