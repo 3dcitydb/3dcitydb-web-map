@@ -201,15 +201,12 @@
 					lowerLeftCorner: lowerLeftCorner        					
 				};
 				
-				if (scope.citydbKmlLayerInstance._maxSizeOfCachedTiles >= 0) {
-					networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
-				}
-   				
 				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
         			console.log("loading layer...");	
         			scope.oTask.triggerEvent('updateDataPoolRecord');
 					dataSourceCollection.add(newKmlDatasource);    						 
         			dataPoolKml[tileUrl] = newNetworklinkItem;
+        			networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};
         			newKmlDatasource.load(tileUrl).then(function() { 
         				scope.oTask.triggerEvent('updateTaskStack');
     				}).otherwise(function(error) {
@@ -217,7 +214,8 @@
     				});
 				}	
 				else {	
-					if (scope.citydbKmlLayerInstance._maxSizeOfCachedTiles >= 0) {
+					if (scope.citydbKmlLayerInstance._maxSizeOfCachedTiles > 0 && !Cesium.FeatureDetection.isFirefox()) {
+						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
 						newKmlDatasource.load(tileUrl).then(function() {	
 							scope.oTask.triggerEvent('updateTaskStack');
 	    					console.log("cache loaded...");	        							        					        										        							        			
