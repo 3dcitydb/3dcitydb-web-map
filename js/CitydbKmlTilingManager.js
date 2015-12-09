@@ -106,7 +106,10 @@
 	        		scope.oTask.triggerEvent('updateDataPoolRecord');
 	        	}         		
             }
-			scope.oTask.triggerEvent('checkDataPool', scope.createFrameBbox());   						
+			var promise = scope.createFrameBbox();
+			Cesium.when(promise, function(frame){
+				scope.oTask.triggerEvent('checkDataPool', frame);   	
+			});								
 		});
 		
 		/**
@@ -116,6 +119,10 @@
 		 * 
 		 */
 		this.oTask.addListener("checkMasterPool", function (matrixItem) {
+			if (!Cesium.defined(matrixItem)) {
+				scope.oTask.triggerEvent('updateTaskStack');
+				return;
+			}
 			var minX = matrixItem[0];
     		var minY = matrixItem[1];
     		var maxX = matrixItem[2];
@@ -141,7 +148,7 @@
     			
         	}
         	else {        		     		
-        		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
+        		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight)), scene);
         		if (typeof intersectedPoint == 'undefined') {
         			scope.oTask.triggerEvent('updateTaskStack');
         			scope.oTask.triggerEvent('updateDataPoolRecord');	
@@ -207,26 +214,15 @@
 					dataSourceCollection.add(newKmlDatasource);    						 
         			dataPoolKml[tileUrl] = newNetworklinkItem;
         			networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};
-        			newKmlDatasource.load(tileUrl).then(function() { 
+
+        			newKmlDatasource.load(tileUrl).then(function(dataSource) { 
         				scope.oTask.triggerEvent('updateTaskStack');
     				}).otherwise(function(error) {
     					scope.oTask.triggerEvent('updateTaskStack');
     				});
 				}	
 				else {	
-					if (scope.citydbKmlLayerInstance._maxSizeOfCachedTiles > 0 && !Cesium.FeatureDetection.isFirefox()) {
-						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
-						newKmlDatasource.load(tileUrl).then(function() {	
-							scope.oTask.triggerEvent('updateTaskStack');
-	    					console.log("cache loaded...");	        							        					        										        							        			
-	    				}).otherwise(function(error) {
-	    					console.log(error);
-	    					scope.oTask.triggerEvent('updateTaskStack');
-	    				});
-					}
-					else {
-						scope.oTask.triggerEvent('updateTaskStack');
-					}					
+					scope.oTask.triggerEvent('updateTaskStack');
 				}       				
 			}
 		});
@@ -289,15 +285,18 @@
     		
     		// Tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
     		setTimeout(function(){
-    			scope.triggerWorker();		
+    			scope.triggerWorker(false);		
 			}, 1000)     
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
 		
-	    // event Listeners are so far, we start the Networklink Manager worker...
-		scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope.citydbKmlLayerInstance.maxCountOfVisibleTiles);  			
-	
+	    // event Listeners are so far, we start the Tiling Manager worker...
+		var promise = scope.createFrameBbox();
+		Cesium.when(promise, function(frame){
+			scope.oTask.triggerEvent('initWorker', frame, scope.citydbKmlLayerInstance.maxCountOfVisibleTiles);  	
+		});	
+
 		this.runMonitoring();
     },
     
@@ -343,71 +342,89 @@
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var cesiumWidget = cesiumViewer.cesiumWidget; 
     	var scene = cesiumWidget.scene;
-    	var camera = scene.camera;
     	var canvas = scene.canvas;
-    	var globe = scene.globe;
-
     	var frameWidth = canvas.clientWidth;
     	var frameHeight = canvas.clientHeight;
 
-    	var factor = 0;
     	var originHeight = 0;
+    	var stepSize = frameHeight / 20;
     	
-    	var cartesian3Indicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , 0)), scene);
-    	
-    	var flag = false;
-    	while (!flag) {
-    		factor++
-    		if (factor > 10)
-    			break;
-    		originHeight = originHeight + frameHeight*factor*0.1;   	
-    		cartesian3Indicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
-    		if (Cesium.defined(cartesian3Indicator)) {
-    			flag = true;
-    		}
-    	}
-    	
-    	var cartesian3OfFrameCorner1;
-    	var cartesian3OfFrameCorner2;
-    	var cartesian3OfFrameCorner3;
-    	var cartesian3OfFrameCorner4;
-    	
-    	if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
-    		cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
-    		cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));
-    		cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
-    		cartesian3OfFrameCorner4 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth, originHeight)); 
-    	}
-    	else {
-    		cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
-        	cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
-        	cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
-        	cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
-    	}
-    	
-    	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
-    		var wgs84OfFrameCorner1  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
-    		var wgs84OfFrameCorner2 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner2);			
-    		var wgs84OfFrameCorner3 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner3);			
-    		var wgs84OfFrameCorner4 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner4);
-
-    		var frameMinX = Math.min(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
-    		var frameMaxX = Math.max(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
-    		var frameMinY = Math.min(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
-    		var frameMaxY = Math.max(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
-
-    		// buffer for caching, 300 meter
-    		var offzet = 10;
-    		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
-    		var yOffzet = offzet / 111000;
-
-        	return [frameMinX - xOffzet, frameMinY - yOffzet, frameMaxX + xOffzet, frameMaxY + yOffzet];
-    	}
-    	else {
-    		// in the case when the camera are looking at air
-    		return [0,0,0,0];
-    	}		
+    	return this.calcaulateFrameBbox(originHeight, stepSize, null);		
     };
+    
+    CitydbKmlTilingManager.prototype.calcaulateFrameBbox = function(originHeight, stepSize, internalDeferred) {
+    	var scope = this;
+    	
+    	var deferred;
+    	if (internalDeferred == null) {
+    		deferred = Cesium.when.defer();
+    	}
+    	else {
+    		deferred = internalDeferred;
+    	}
+    	
+    	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
+    	var cesiumWidget = cesiumViewer.cesiumWidget; 
+    	var scene = cesiumWidget.scene;
+    	var camera = scene.camera;
+    	var canvas = scene.canvas;
+    	var globe = scene.globe;
+    	
+    	var frameWidth = canvas.clientWidth;
+    	var frameHeight = canvas.clientHeight;
+
+    	if (originHeight > frameHeight) {
+    		var frame = null;
+    		deferred.resolve(frame);
+    	}
+    	else {
+        	var cartesian3LeftIndicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
+        	var cartesian3RightIndicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+        	
+        	if (!Cesium.defined(cartesian3LeftIndicator) || !Cesium.defined(cartesian3RightIndicator)) {
+        		originHeight = originHeight + stepSize;            	
+    			scope.calcaulateFrameBbox(originHeight, stepSize, deferred);
+    		}
+        	else {        		
+        		var cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
+            	var cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
+            	var cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
+            	var cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+
+            	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
+            		var wgs84OfFrameCorner1 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
+            		var wgs84OfFrameCorner2 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner2);			
+            		var wgs84OfFrameCorner3 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner3);			
+            		var wgs84OfFrameCorner4 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner4);
+
+            		var frameMinX = Math.min(Cesium.Math.toDegrees(wgs84OfFrameCorner1.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.longitude));
+            		var frameMaxX = Math.max(Cesium.Math.toDegrees(wgs84OfFrameCorner1.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.longitude));
+            		var frameMinY = Math.min(Cesium.Math.toDegrees(wgs84OfFrameCorner1.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.latitude));
+            		var frameMaxY = Math.max(Cesium.Math.toDegrees(wgs84OfFrameCorner1.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.latitude));
+
+            		var frame = [frameMinX, frameMinY, frameMaxX, frameMaxY];
+            		var funcName = CitydbUtil.generateUUID();
+            		scope.oTask.triggerEvent('queryNumberOfTiles', funcName, frame);         		
+                	scope.oTask.addListener(funcName, function (isValidFrame) {
+                		if (isValidFrame) {    
+                			deferred.resolve(frame);
+                		}
+                		else {
+                			originHeight = originHeight + stepSize;
+                			scope.calcaulateFrameBbox(originHeight, stepSize, deferred);
+                		}
+                		scope.oTask.removeListener(funcName);
+                	});	
+            	}
+            	else {
+            		var frame = null;
+            		deferred.resolve(frame);
+            	}
+        	}
+    	}
+    		
+    	return deferred.promise;
+    }
 
     /**
      * 
@@ -466,10 +483,10 @@
     
     /**
      * 
-	 * public function to trigger Networklnk Manager
+	 * public function to trigger Tiling Manager
 	 * 
 	 */          
-    CitydbKmlTilingManager.prototype.triggerWorker = function() {
+    CitydbKmlTilingManager.prototype.triggerWorker = function(updateTaskQueue) {
     	var scope = this;
     	if (scope.oTask != null) {       		
     		if (scope.oTask.isSleep()) {
@@ -478,7 +495,9 @@
  				scope.oTask.triggerEvent('notifyWake');  
  			}
     		else {
-    			scope.oTask.triggerEvent('abortAndnotifyWake');  
+    			if (updateTaskQueue) {
+    				scope.oTask.triggerEvent('abortAndnotifyWake');  
+    			}    			
     		}	
     	}            	
     },
@@ -500,9 +519,9 @@
     		}
     		timer = setTimeout(function(){
     			console.log("trigger Tiling manager by viewechanged event");
-    			scope.triggerWorker(); 
+    			scope.triggerWorker(true); 
     			timer = null;
-    		}, 100);    		
+    		}, 100 + 100*Math.random());    		
 		});
     };
 		
