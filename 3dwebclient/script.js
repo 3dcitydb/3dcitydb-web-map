@@ -7,7 +7,7 @@
 	 * @Copyright (c)2015 TU München, Chair of Geoinformatics <http://www.gis.bgu.tum.de/> 
 	 * @licence GNU Lesser General Public License Version 3.0
 	 */
-	
+
 	/*---------------------------------  set globe variables  ----------------------------------------*/
 	// updated Bing Key
 	Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';

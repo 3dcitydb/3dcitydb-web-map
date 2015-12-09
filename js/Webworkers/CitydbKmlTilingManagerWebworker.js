@@ -40,11 +40,11 @@
 			}
 				
 			// Tiles within the view frame are sorted, so that the tiles in the middle of the viewport will be loaded firstly
-			stack = eventlisteners["sortDatapool"].apply(self, [ dataPool, frame ]).reverse();
+			stack = eventlisteners["sortDatapool"].apply(self, [ dataPool, frame ]);
 	
 			var batchSize = 5;	
 			for (var i = 0; i < batchSize; i++) {
-				var matrixItem = stack.pop();
+				var matrixItem = stack.shift();
 				reply("checkMasterPool", matrixItem);
 			}
 		},
@@ -96,7 +96,7 @@
 							var minY = _bbox.ymin + j * _rowDelta;
 							var maxX = _bbox.xmin + (i + 1) * _colDelta;
 							var maxY = _bbox.ymin + (j + 1) * _rowDelta;
-							dataPool.push([ minX, minY, maxX, maxY, {col: i, row: j}]);	
+							dataPool.push([ minX, minY, maxX, maxY, {col: i, row: j, preFetching: false}]);	
 						}														
 					}
 				}				
@@ -104,7 +104,7 @@
 			return dataPool;
 		},
 		
-		queryNumberOfTiles: function(funcName, frame) {
+		checkFrameBbox: function(funcName, frame) {
 			var frameMinX = frame[0];
 			var frameMinY = frame[1];
 			var frameMaxX = frame[2];
@@ -120,6 +120,13 @@
 			else {
 				reply(funcName, false);
 			}			
+		},
+		
+		pushTastItem: function(item) {
+			if (stack != null) {
+				stack.push(item);
+				eventlisteners["updateTaskStack"].apply(self);
+			}						
 		},
 	
 		sortDatapool : function(pool, frame) {
@@ -144,9 +151,8 @@
 			setTimeout(function(){		
 				if (stack == null) {
 					return;
-				}				
-		
-				var matrixItem = stack.pop();
+				}						
+				var matrixItem = stack.shift();
 				if (typeof matrixItem == 'undefined') {
 					if (isStillUpdating) {
 						isStillUpdating = false;
@@ -162,7 +168,7 @@
 				} else {
 					reply("checkMasterPool", matrixItem);
 				}      										        							        			
-        	}, 1);
+        	}, 10*Math.random());
 		}
 	};
 	

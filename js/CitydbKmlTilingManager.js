@@ -3,6 +3,7 @@
  * Tiling manager for controlling dynamic loading and unloading KML/KMZ Tiles data
  *
  **/
+var GlobeTileTaskQueue = {};
 (function() {
 	function CitydbKmlTilingManager(citydbKmlLayerInstance){	
 		this.oTask = null;
@@ -129,7 +130,7 @@
     		var maxY = matrixItem[3];
     		
 			var colIndex = matrixItem[4].col;
-    		var rowIndex = matrixItem[4].row;
+    		var rowIndex = matrixItem[4].row;    		
     		var tileUrl = hostAndPath + layername + "_Tile_" + rowIndex + "_" + colIndex + "_" + displayForm + fileextension; 			
 
     		var lowerRightCorner;
@@ -172,7 +173,8 @@
 
     		if (networklinkCache.hasOwnProperty(tileUrl)) {
         		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
-        			if (!dataPoolKml.hasOwnProperty(tileUrl)) {		        				
+        			if (!dataPoolKml.hasOwnProperty(tileUrl)) {		        			
+        				networklinkCache[tileUrl].cacheStartTime = new Date().getTime();
         				var networklinkItem = networklinkCache[tileUrl].networklinkItem;
         				networklinkItem.lowerRightCorner = lowerRightCorner;
         				networklinkItem.upperRightCorner = upperRightCorner;
@@ -181,10 +183,10 @@
         				
 	        			var kmlDatasource = networklinkItem.kmlDatasource;
 	        			dataPoolKml[tileUrl] = networklinkItem;    
-        				dataSourceCollection.add(kmlDatasource).then(function() { 	  
-		        			console.log("loading layer...");	
+        				dataSourceCollection.add(kmlDatasource).then(function() { 	  		        			
         					scope.oTask.triggerEvent('updateTaskStack');
-		        			scope.oTask.triggerEvent('updateDataPoolRecord');		    	        			    										        							        			
+		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
+		        			console.log("loading layer from Cache...");	
         				}).otherwise(function(error) {
         					scope.oTask.triggerEvent('updateTaskStack');
         				});	  	    	        			  	        			
@@ -208,21 +210,39 @@
 					lowerLeftCorner: lowerLeftCorner        					
 				};
 				
-				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
-        			console.log("loading layer...");	
+				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {       				
         			scope.oTask.triggerEvent('updateDataPoolRecord');
 					dataSourceCollection.add(newKmlDatasource);    						 
         			dataPoolKml[tileUrl] = newNetworklinkItem;
-        			networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};
-
-        			newKmlDatasource.load(tileUrl).then(function(dataSource) { 
-        				scope.oTask.triggerEvent('updateTaskStack');
+        			networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};        			
+        			GlobeTileTaskQueue[tileUrl] = tileUrl;
+        			newKmlDatasource.load(tileUrl).then(function(dataSource) {
+        				console.log("loading layer from Server...");
+        				var tmpKey = hostAndPath + dataSource.name + fileextension; 
+        				delete GlobeTileTaskQueue[tmpKey];
+        				scope.oTask.triggerEvent('updateTaskStack');        				
     				}).otherwise(function(error) {
+    					console.log("HTTP request error in loading layer from Server...");
+        				delete GlobeTileTaskQueue[tileUrl];
     					scope.oTask.triggerEvent('updateTaskStack');
     				});
 				}	
 				else {	
-					scope.oTask.triggerEvent('updateTaskStack');
+					// pre-fetching...
+					if (matrixItem[4].preFetching && Object.keys(GlobeTileTaskQueue).length == 0) {
+						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
+						newKmlDatasource.load(tileUrl).then(function() {	
+							scope.oTask.triggerEvent('updateTaskStack');
+							console.log(["performing preFetching"]);        							        					        										        							        			
+	    				}).otherwise(function(error) {
+	    					console.log(["HTTP request error in preFetching"]); 
+	    					scope.oTask.triggerEvent('updateTaskStack');
+	    				});						
+					}
+					else {
+						matrixItem[4].preFetching = true;
+						scope.oTask.triggerEvent('pushTastItem', matrixItem);
+					}					
 				}       				
 			}
 		});
@@ -286,7 +306,7 @@
     		// Tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
     		setTimeout(function(){
     			scope.triggerWorker(false);		
-			}, 1000)     
+			}, 3000)     
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
@@ -404,9 +424,14 @@
 
             		var frame = [frameMinX, frameMinY, frameMaxX, frameMaxY];
             		var funcName = CitydbUtil.generateUUID();
-            		scope.oTask.triggerEvent('queryNumberOfTiles', funcName, frame);         		
+            		scope.oTask.triggerEvent('checkFrameBbox', funcName, frame);         		
                 	scope.oTask.addListener(funcName, function (isValidFrame) {
                 		if (isValidFrame) {    
+                			// buffer for pre-fetching, 300 meter
+                    		var offzet = 10;
+                    		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
+                    		var yOffzet = offzet / 111000;
+                        	frame = [frame[0] - xOffzet, frame[1] - yOffzet, frame[2] + xOffzet, frame[3] + yOffzet];
                 			deferred.resolve(frame);
                 		}
                 		else {
@@ -421,8 +446,7 @@
             		deferred.resolve(frame);
             	}
         	}
-    	}
-    		
+    	}    		
     	return deferred.promise;
     }
 
