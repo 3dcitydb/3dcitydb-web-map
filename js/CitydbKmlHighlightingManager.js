@@ -113,14 +113,7 @@
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
  					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
- 						var objectId;
- 						if (this.citydbKmlLayerInstance.pickSurface) {
- 							objectId = targetEntity.name;
- 						}
- 						else {
- 							objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
- 							
- 						}
+ 						var objectId = targetEntity.name;
  						_dataPool[objectId] = false;
  					}					
 				}							
@@ -144,50 +137,7 @@
 				}
 			}
 		}
-		else if (this.citydbKmlLayerInstance._layerType == "geometry") {
-			if (this.citydbKmlLayerInstance.pickSurface) {
-				for (var i = 0; i < primitives.length; i++) {
-					var primitive = primitives.get(i);
-					if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
-						for (j = 0; j < primitive._instanceIds.length; j++){	
-		 					var targetEntity = primitive._instanceIds[j];
-		 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
-								var parentEntity = targetEntity._parent
-								if (Cesium.defined(parentEntity)) {
-									this.cachedObjects[targetEntity.name] = parentEntity._children;
-								}
-								else {
-									if (targetEntity.name != "Tile border") {
-										this.cachedObjects[targetEntity.name] = [targetEntity];
-									}
-								}
-		 					}					
-						}	
-					}					
-				}
-			}
-			else {
-				for (var i = 0; i < primitives.length; i++) {
-					var primitive = primitives.get(i);
-					if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
-						for (j = 0; j < primitive._instanceIds.length; j++){	
-		 					var targetEntity = primitive._instanceIds[j];
-		 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
-								var objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-								if (!this.cachedObjects.hasOwnProperty(objectId)) {
-									var roofEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_RoofSurface');
-									var wallEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_WallSurface');
-									if (roofEntites != null && wallEntites != null) {
-										this.cachedObjects[objectId] = roofEntites.concat(wallEntites);
-									}
-								}	 						
-		 					}					
-						}	
-					}					
-				}
-			}
-		}
-		else if (this.citydbKmlLayerInstance._layerType == "extruded" || this.citydbKmlLayerInstance._layerType == "footprint") {
+		else if (this.citydbKmlLayerInstance._layerType == "extruded" || this.citydbKmlLayerInstance._layerType == "footprint" || this.citydbKmlLayerInstance._layerType == "geometry") {
 			for (var i = 0; i < primitives.length; i++) {
 				var primitive = primitives.get(i);
 				if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {

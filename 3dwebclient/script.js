@@ -25,7 +25,6 @@
 		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
 		name : "Berlin_Center_Footprint",
 		thematicDataUrl: "",
-		pickSurface: [false],
 		minLodPixels : 140,
 		maxLodPixels : Number.MAX_VALUE,
 		maxSizeOfCachedTiles : 50,
@@ -197,7 +196,6 @@
 				name : layerConfig.name,
 				thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
 				active: (layerConfig.active == "true"),
-				pickSurface: (layerConfig.pickSurface == "true"),
 				minLodPixels : Cesium.defaultValue(layerConfig.minLodPixels, 140),
 				maxLodPixels : Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
 				maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
@@ -280,7 +278,6 @@
 			addLayerViewModel.url = selectedLayer.url;
 			addLayerViewModel.name = selectedLayer.name;
 			addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
-			addLayerViewModel.pickSurface = [selectedLayer.pickSurface];
 			addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
 			addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
 			addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
@@ -292,7 +289,6 @@
 		var activeLayer = webMap.activeLayer;		
 		applySaving('url', activeLayer);
 		applySaving('name', activeLayer);
-		applySaving('pickSurface', activeLayer);
 		applySaving('thematicDataUrl', activeLayer);
 		applySaving('minLodPixels', activeLayer);
 		applySaving('maxLodPixels', activeLayer);
@@ -411,15 +407,8 @@
 			var primitive = object.primitive;
 			console.log(citydbKmlLayer);
 	 		console.log(primitive);
-	 		
-	 		
-	 		var globeId; 
-	 		if (citydbKmlLayer.pickSurface != true) {
-	 			globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-	 		}
-	 		else {
-	 			globeId = targetEntity.name;
-	 		}
+
+	 		var globeId = targetEntity.name; 
 	 		
 	 		createInfoTable(globeId, targetEntity, citydbKmlLayer);
 	 		
@@ -438,13 +427,7 @@
 			var targetEntity = object.id;
 	 		var primitive = object.primitive;
 
-	 		var globeId; 
-	 		if (citydbKmlLayer.pickSurface != true) {
-	 			globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-	 		}
-	 		else {
-	 			globeId = targetEntity.name;
-	 		}
+	 		var globeId = targetEntity.name;; 
 	 		
 			if (citydbKmlLayer.isInHighlightedList(globeId)) {
 				citydbKmlLayer.unHighlight([globeId]);
@@ -471,30 +454,12 @@
 				} 
 			}
 			else if (primitive instanceof Cesium.Primitive) {	
-				if ((targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1) && citydbKmlLayer.pickSurface != true) {
-					var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-					var roofEntities = citydbKmlLayer.getEntitiesById(globeId + '_RoofSurface');
-					var wallEntities = citydbKmlLayer.getEntitiesById(globeId + '_WallSurface');
-					
-					if (roofEntities != null && wallEntities != null) {
-						if (targetEntity.name.indexOf('_RoofSurface') > -1) {
-							_doMouseoverHighlighting(roofEntities, primitive, mainMouseOverhighlightColor);
-							_doMouseoverHighlighting(wallEntities, primitive, subMouseOverhighlightColor);
-						}
-						else {
-							_doMouseoverHighlighting(roofEntities, primitive, subMouseOverhighlightColor);
-							_doMouseoverHighlighting(wallEntities, primitive, mainMouseOverhighlightColor);
-						}
-					}
+				try{
+					var parentEntity = targetEntity._parent;	
+					var childrenEntities = parentEntity._children;						
 				}
-				else {
-					try{
-						var parentEntity = targetEntity._parent;	
-						var childrenEntities = parentEntity._children;						
-					}
-					catch(e){return;} // not valid entities
-					_doMouseoverHighlighting(childrenEntities, primitive, mouseOverhighlightColor);
-				}	
+				catch(e){return;} // not valid entities
+				_doMouseoverHighlighting(childrenEntities, primitive, mouseOverhighlightColor);
 			}
 		});
 		
@@ -511,25 +476,13 @@
 				} 
 			}
 			else if (primitive instanceof Cesium.Primitive) {				
-				if ((targetEntity.name.indexOf('_RoofSurface') > -1 || targetEntity.name.indexOf('_WallSurface') > -1)  && citydbKmlLayer.pickSurface != true) {
-					var globeId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-					var roofEntities = citydbKmlLayer.getEntitiesById(globeId + '_RoofSurface');
-					var wallEntities = citydbKmlLayer.getEntitiesById(globeId + '_WallSurface');
+				try{
+					var parentEntity = targetEntity._parent;	
+					var childrenEntities = parentEntity._children;		
 					
-					if (roofEntities != null && wallEntities != null) {
-						_dismissMouseoverHighlighting(roofEntities, primitive);
-						_dismissMouseoverHighlighting(wallEntities, primitive);
-					}
 				}
-				else {
-					try{
-						var parentEntity = targetEntity._parent;	
-						var childrenEntities = parentEntity._children;		
-						
-					}
-					catch(e){return;} // not valid entities
-					_dismissMouseoverHighlighting(childrenEntities, primitive);	
-				}
+				catch(e){return;} // not valid entities
+				_dismissMouseoverHighlighting(childrenEntities, primitive);	
 			}
 		});	 
 	 	
@@ -713,7 +666,6 @@
 				url : layer.url,
 				name : layer.name,
 				active: layer.active,
-				pickSurface: layer.pickSurface,
 				spreadsheetUrl: layer.thematicDataUrl,
 				minLodPixels: layer.minLodPixels,
 				maxLodPixels: layer.maxLodPixels,
@@ -826,7 +778,6 @@
 			url : addLayerViewModel.url,
 			name : addLayerViewModel.name,
 			thematicDataUrl : addLayerViewModel.thematicDataUrl,
-			pickSurface: addLayerViewModel.pickSurface[0],
 			minLodPixels: addLayerViewModel.minLodPixels,
 			maxLodPixels : addLayerViewModel.maxLodPixels,
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,

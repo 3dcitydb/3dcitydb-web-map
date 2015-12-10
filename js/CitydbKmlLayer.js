@@ -26,16 +26,7 @@
 		this._mouseInEvent = new Cesium.Event();
 		this._mouseOutEvent = new Cesium.Event();
 		
-		// extended variables for CitydbKmlLayer
-		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
-		if (typeof(this._pickSurface) == "string"){
-			if (this._pickSurface.toLowerCase() == "true") {
-				this._pickSurface = true;
-			}
-			else {
-				this._pickSurface = false;
-			}
-		}		
+		// extended variables for CitydbKmlLayer	
 		this._cesiumViewer = undefined;
 		this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
 		this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
@@ -61,7 +52,6 @@
 			"thematicDataUrl" : this.thematicDataUrl,
 			"thematicDataProvider" : this._thematicDataProvider,
 			"cityobjectsJsonUrl" : this.cityobjectsJsonUrl,
-			"pickSurface": this.pickSurface,
 			"minLodPixels": this.minLodPixels,
 			"maxLodPixels" : this.maxLodPixels,
 			"maxSizeOfCachedTiles": this.maxSizeOfCachedTiles,
@@ -133,25 +123,6 @@
 	    region : {
 	        get : function(){
 	        	return this._region;
-	        }
-	    },
-	    
-	    pickSurface : {
-	        get : function(){
-	        	return this._pickSurface;
-	        },
-	        set : function(value){
-	        	if (value instanceof String) {
-	    			if (value.toLowerCase() == "true") {
-	    				this._pickSurface = true;
-	    			}
-	    			else {
-	    				this._pickSurface = false;
-	    			}
-	    		}
-	        	else {
-	        		this._pickSurface = value;
-	        	}	
 	        }
 	    },
 	    
@@ -537,22 +508,7 @@
 				}
 			}
 		}
-		else if (this._layerType == "geometry") {
-			if (this.pickSurface) {
-				return this.getEntitiesById(objectId);
-			}
-			else {
-				var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
-				var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
-				if (roofEntites != null && wallEntites != null) {
-					return roofEntites.concat(wallEntites);
-				}
-				else {
-					return null;
-				}
-			}
-		}
-		else if (this._layerType == "extruded" || this._layerType == "footprint") {
+		else if (this._layerType == "extruded" || this._layerType == "footprint" || this._layerType == "geometry") {
 			return this.getEntitiesById(objectId);
 		}
 		return null;	
@@ -621,12 +577,7 @@
 					childEntity.addProperty("originalMaterial");
 				}	
 				childEntity.originalMaterial = this.getObjectMaterial(childEntity);
-				if (this._pickSurface != true) {
-					this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')]);
-				}
-				else {
-					this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name]);
-				}					
+				this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name]);				
 			}		
 		}	
 	};
@@ -688,13 +639,7 @@
 		else if (object instanceof Array) {
 			for (var i = 0; i < object.length; i++){	
 				var childEntity = object[i];					
-				var globeId;
-				if (this._pickSurface != true) {
-					globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-				}
-				else {
-					globeId = childEntity.name;
-				}
+				var globeId = childEntity.name;;
 				var material = this.getObjectMaterial(childEntity);
 				if (!material.color._value.equals(this._highlightedObjects[globeId])) {
 					return false;
@@ -750,13 +695,7 @@
 			for (var i = 0; i < object.length; i++){					
 				var childEntity = object[i];	
 				childEntity.show = true;	
-				var globeId;
-				if (this._pickSurface != true) {
-					globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-				}
-				else {
-					globeId = childEntity.name;
-				}			
+				var globeId = childEntity.name;			
 				if (!this.isInHighlightedList(globeId)) {
 					var originalMaterial = childEntity.originalMaterial;
 					if (Cesium.defined(originalMaterial)) {
