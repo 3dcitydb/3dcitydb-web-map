@@ -11,6 +11,7 @@
 	var _rownum;
 	var _colnum;
 	var _maxCountOfVisibleTiles;
+	var timers = {};
 
 	var eventlisteners = {
 		initWorker : function(frame, maxCountOfVisibleTiles) {
@@ -63,7 +64,10 @@
 		},
 	
 		abortAndnotifyWake : function() {
-			stack = null;
+			for (var id in timers){
+				clearTimeout(timers[id]);
+			}	
+			stack = [];
 			eventlisteners["notifyWake"].apply(self);
 		},
 	
@@ -123,10 +127,8 @@
 		},
 		
 		pushTastItem: function(item) {
-			if (stack != null) {
-				stack.push(item);
-				eventlisteners["updateTaskStack"].apply(self);
-			}						
+			stack.push(item);
+			eventlisteners["updateTaskStack"].apply(self);						
 		},
 	
 		sortDatapool : function(pool, frame) {
@@ -146,6 +148,17 @@
 	
 			return pool;
 		},
+		
+		generateUUID: function() {
+		    var d = new Date().getTime();
+		    var uuid = 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		        var r = (d + Math.random()*16)%16 | 0;
+		        d = Math.floor(d/16);
+		        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+		    });
+		    uuid = "UUID_" + uuid;
+		    return uuid;
+		},
 
 		updateTaskStack : function(pauseTime) {
 			var _time = 10*Math.random();
@@ -153,11 +166,9 @@
 			if (typeof pauseTime != 'undefined') {
 				_time = pauseTime;
 			}
-			
-			setTimeout(function(){	
-				if (stack == null) {
-					return;
-				}						
+			var uuid = eventlisteners["generateUUID"].apply(self);
+			var timer = setTimeout(function(){			
+				delete timers[uuid]
 				var matrixItem = stack.shift();
 				if (typeof matrixItem == 'undefined') {
 					if (isStillUpdating) {
@@ -175,6 +186,8 @@
 					reply("checkMasterPool", matrixItem);
 				}      										        							        			
         	}, _time);
+			
+			timers[uuid] = timer
 		}
 	};
 	

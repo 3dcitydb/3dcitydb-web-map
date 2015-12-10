@@ -407,8 +407,7 @@ var GlobeTileTaskQueue = {};
     	var frameHeight = canvas.clientHeight;
 
     	if (originHeight > frameHeight) {
-    		var frame = null;
-    		deferred.resolve(frame);
+    		deferred.resolve(null);
     	}
     	else {
         	var cartesian3LeftIndicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
@@ -446,20 +445,29 @@ var GlobeTileTaskQueue = {};
                 	scope.oTask.addListener(funcName, function (isValidFrame) {
                 		if (isValidFrame) {    
                 			var refPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth/2 , frameHeight)), scene);
-                			var refPointCarto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(refPoint)
-                			// buffer for pre-fetching, 300 meter
-                    		var offset = 10;
-                    		var xOffset = offset / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
-                    		var yOffset = offset / 111000;
-                        	frame = {
-                        		minX: frame.minX - xOffset,
-                        		maxX: frame.maxX + xOffset,
-                    			minY: frame.minY - yOffset,
-                    			maxY: frame.maxY + yOffset,
-                    			refX: Cesium.Math.toDegrees(refPointCarto.longitude),
-                    			refY: Cesium.Math.toDegrees(refPointCarto.latitude)
-                        	}
-                			deferred.resolve(frame);
+                			var refX;
+                			var refY;
+                			if (Cesium.defined(refPoint)) {
+                				var refPointCarto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(refPoint);
+                				refX = Cesium.Math.toDegrees(refPointCarto.longitude);
+                				refY = Cesium.Math.toDegrees(refPointCarto.latitude);
+                				// buffer with 300 meter for prefetching... 
+                        		var offset = 10;
+                        		var xOffset = offset / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
+                        		var yOffset = offset / 111000;
+                            	frame = {
+                            		minX: frame.minX - xOffset,
+                            		maxX: frame.maxX + xOffset,
+                        			minY: frame.minY - yOffset,
+                        			maxY: frame.maxY + yOffset,
+                        			refX: refX,
+                        			refY: refY
+                            	}
+                    			deferred.resolve(frame);
+                			}
+                			else {
+                	    		deferred.resolve(null);
+                			}               			                			
                 		}
                 		else {
                 			originHeight = originHeight + stepSize;
@@ -469,8 +477,7 @@ var GlobeTileTaskQueue = {};
                 	});	
             	}
             	else {
-            		var frame = null;
-            		deferred.resolve(frame);
+            		deferred.resolve(null);
             	}
         	}
     	}    		
