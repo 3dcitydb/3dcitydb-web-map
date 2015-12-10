@@ -11,6 +11,8 @@ var GlobeTileTaskQueue = {};
 		this.dataPoolKml = new Object();
 		this.networklinkCache = new Object();
 		this.boundingboxEntity = null;
+		this.timer = null;
+		this.startPrefetching = true;
 	}
 	
 	function calculatePixels(tilePolygon, framePolygon) {
@@ -124,6 +126,10 @@ var GlobeTileTaskQueue = {};
 				scope.oTask.triggerEvent('updateTaskStack');
 				return;
 			}
+			if (scope.timer != null) {
+				scope.oTask.triggerEvent('pushTastItem', matrixItem);
+				return;
+			}
 			var minX = matrixItem[0];
     		var minY = matrixItem[1];
     		var maxX = matrixItem[2];
@@ -228,11 +234,18 @@ var GlobeTileTaskQueue = {};
     				});
 				}	
 				else {	
-					// pre-fetching...
+					// prefetching...
 					if (matrixItem[4].preFetching && Object.keys(GlobeTileTaskQueue).length == 0) {
 						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
 						newKmlDatasource.load(tileUrl).then(function() {	
-							scope.oTask.triggerEvent('updateTaskStack');
+							if (scope.startPrefetching) {
+								console.log("---------------------start Prefeching........................");
+								scope.oTask.triggerEvent('updateTaskStack', 500);
+								scope.startPrefetching = false;
+							}
+							else {
+								scope.oTask.triggerEvent('updateTaskStack', 500);
+							}							
 							console.log(["performing preFetching"]);        							        					        										        							        			
 	    				}).otherwise(function(error) {
 	    					console.log(["HTTP request error in preFetching"]); 
@@ -367,7 +380,7 @@ var GlobeTileTaskQueue = {};
     	var frameHeight = canvas.clientHeight;
 
     	var originHeight = 0;
-    	var stepSize = frameHeight / 20;
+    	var stepSize = frameHeight / 10;
     	
     	return this.calcaulateFrameBbox(originHeight, stepSize, null);		
     };
@@ -422,16 +435,30 @@ var GlobeTileTaskQueue = {};
             		var frameMinY = Math.min(Cesium.Math.toDegrees(wgs84OfFrameCorner1.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.latitude));
             		var frameMaxY = Math.max(Cesium.Math.toDegrees(wgs84OfFrameCorner1.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.latitude));
 
-            		var frame = [frameMinX, frameMinY, frameMaxX, frameMaxY];
+            		var frame = {
+            			minX: frameMinX,
+            			maxX: frameMaxX,
+            			minY: frameMinY,
+            			maxY: frameMaxY
+            		};
             		var funcName = CitydbUtil.generateUUID();
             		scope.oTask.triggerEvent('checkFrameBbox', funcName, frame);         		
                 	scope.oTask.addListener(funcName, function (isValidFrame) {
                 		if (isValidFrame) {    
+                			var refPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth/2 , frameHeight)), scene);
+                			var refPointCarto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(refPoint)
                 			// buffer for pre-fetching, 300 meter
-                    		var offzet = 10;
-                    		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
-                    		var yOffzet = offzet / 111000;
-                        	frame = [frame[0] - xOffzet, frame[1] - yOffzet, frame[2] + xOffzet, frame[3] + yOffzet];
+                    		var offset = 10;
+                    		var xOffset = offset / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
+                    		var yOffset = offset / 111000;
+                        	frame = {
+                        		minX: frame.minX - xOffset,
+                        		maxX: frame.maxX + xOffset,
+                    			minY: frame.minY - yOffset,
+                    			maxY: frame.maxY + yOffset,
+                    			refX: Cesium.Math.toDegrees(refPointCarto.longitude),
+                    			refY: Cesium.Math.toDegrees(refPointCarto.latitude)
+                        	}
                 			deferred.resolve(frame);
                 		}
                 		else {
@@ -516,10 +543,12 @@ var GlobeTileTaskQueue = {};
     		if (scope.oTask.isSleep()) {
          		scope.oTask.wake();	
          		console.log("trigger starting...");
+         		scope.startPrefetching = true;
  				scope.oTask.triggerEvent('notifyWake');  
  			}
     		else {
     			if (updateTaskQueue) {
+    				scope.startPrefetching = true;
     				scope.oTask.triggerEvent('abortAndnotifyWake');  
     			}    			
     		}	
@@ -535,16 +564,15 @@ var GlobeTileTaskQueue = {};
     	var scope = this;
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var scene = cesiumViewer.scene;
-    	
-    	var timer = null;
+
     	scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function() {
-    		if (timer != null) {
-    			clearTimeout(timer);
+    		if (scope.timer != null) {
+    			clearTimeout(scope.timer);
     		}
-    		timer = setTimeout(function(){
+    		scope.timer = setTimeout(function(){
     			console.log("trigger Tiling manager by viewechanged event");
     			scope.triggerWorker(true); 
-    			timer = null;
+    			scope.timer = null;
     		}, 100 + 100*Math.random());    		
 		});
     };

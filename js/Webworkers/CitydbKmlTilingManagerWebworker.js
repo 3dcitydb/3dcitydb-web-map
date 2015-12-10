@@ -11,7 +11,7 @@
 	var _rownum;
 	var _colnum;
 	var _maxCountOfVisibleTiles;
-	
+
 	var eventlisteners = {
 		initWorker : function(frame, maxCountOfVisibleTiles) {
 			shouldRun = true;
@@ -39,7 +39,7 @@
 				return;
 			}
 				
-			// Tiles within the view frame are sorted, so that the tiles in the middle of the viewport will be loaded firstly
+			// Tiles within the view frame are sorted to make sure that the tiles near to the camera will be loaded with higher priority
 			stack = eventlisteners["sortDatapool"].apply(self, [ dataPool, frame ]);
 	
 			var batchSize = 5;	
@@ -78,10 +78,10 @@
 		queryByMatrix : function(frame) {
 			var dataPool = new Array();
 			
-			var frameMinX = frame[0];
-			var frameMinY = frame[1];
-			var frameMaxX = frame[2];
-			var frameMaxY = frame[3];
+			var frameMinX = frame.minX;
+			var frameMinY = frame.minY;
+			var frameMaxX = frame.maxX;
+			var frameMaxY = frame.maxY;
 			var minCol = Math.floor((frameMinX - _bbox.xmin) / _colDelta);
 			var maxCol = Math.floor((frameMaxX - _bbox.xmin) / _colDelta);
 			var minRow = Math.floor((frameMinY - _bbox.ymin) / _rowDelta);
@@ -105,10 +105,10 @@
 		},
 		
 		checkFrameBbox: function(funcName, frame) {
-			var frameMinX = frame[0];
-			var frameMinY = frame[1];
-			var frameMaxX = frame[2];
-			var frameMaxY = frame[3];
+			var frameMinX = frame.minX;
+			var frameMinY = frame.minY;
+			var frameMaxX = frame.maxX;
+			var frameMaxY = frame.maxY;
 			var minCol = Math.floor((frameMinX - _bbox.xmin) / _colDelta);
 			var maxCol = Math.floor((frameMaxX - _bbox.xmin) / _colDelta);
 			var minRow = Math.floor((frameMinY - _bbox.ymin) / _rowDelta);
@@ -130,8 +130,8 @@
 		},
 	
 		sortDatapool : function(pool, frame) {
-			var centerX = (frame[0] + frame[2]) / 2;
-			var centerY = (frame[1] + frame[3]) / 2;
+			var centerX = frame.refX;
+			var centerY = frame.refY;
 			pool.sort(function(a, b) {
 				var ax = (a[0] + a[2]) / 2;
 				var ay = (a[1] + a[3]) / 2;
@@ -147,8 +147,14 @@
 			return pool;
 		},
 
-		updateTaskStack : function() {
-			setTimeout(function(){		
+		updateTaskStack : function(pauseTime) {
+			var _time = 10*Math.random();
+			
+			if (typeof pauseTime != 'undefined') {
+				_time = pauseTime;
+			}
+			
+			setTimeout(function(){	
 				if (stack == null) {
 					return;
 				}						
@@ -168,7 +174,7 @@
 				} else {
 					reply("checkMasterPool", matrixItem);
 				}      										        							        			
-        	}, 10*Math.random());
+        	}, _time);
 		}
 	};
 	
