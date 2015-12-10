@@ -161,7 +161,7 @@
 		},
 
 		updateTaskStack : function(pauseTime) {
-			var _time = 10 + 10*Math.random();
+			var _time = 50 + 50*Math.random();
 			
 			if (typeof pauseTime != 'undefined') {
 				_time = pauseTime;
