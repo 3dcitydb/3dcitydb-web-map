@@ -46,7 +46,7 @@
 			var batchSize = 5;	
 			for (var i = 0; i < batchSize; i++) {
 				var matrixItem = stack.shift();
-				reply("checkMasterPool", matrixItem);
+				reply("checkMasterPool", matrixItem, stack);
 			}
 		},
 	
@@ -161,8 +161,7 @@
 		},
 
 		updateTaskStack : function(pauseTime) {
-			var _time = 50 + 50*Math.random();
-			
+			var _time = 50 + 50*Math.random();			
 			if (typeof pauseTime != 'undefined') {
 				_time = pauseTime;
 			}
@@ -183,7 +182,7 @@
 						}
 					}
 				} else {
-					reply("checkMasterPool", matrixItem);
+					reply("checkMasterPool", matrixItem, stack);
 				}      										        							        			
         	}, _time);
 			

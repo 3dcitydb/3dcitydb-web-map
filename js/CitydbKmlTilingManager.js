@@ -4,6 +4,7 @@
  *
  **/
 var GlobeTileTaskQueue = {};
+
 (function() {
 	function CitydbKmlTilingManager(citydbKmlLayerInstance){	
 		this.oTask = null;
@@ -13,6 +14,7 @@ var GlobeTileTaskQueue = {};
 		this.boundingboxEntity = null;
 		this.timer = null;
 		this.startPrefetching = true;
+		this.taskNumber = 0;		
 	}
 	
 	function calculatePixels(tilePolygon, framePolygon) {
@@ -117,11 +119,11 @@ var GlobeTileTaskQueue = {};
 		
 		/**
 		 * 
-		 * manage the caching and display of the obejcts
+		 * manage the caching and display of the objects
 		 * matrixItem -> [ minX, minY, maxX, maxY, colnum, rownum ]
 		 * 
 		 */
-		this.oTask.addListener("checkMasterPool", function (matrixItem) {
+		this.oTask.addListener("checkMasterPool", function (matrixItem, taskQueue) {
 			if (!Cesium.defined(matrixItem)) {
 				scope.oTask.triggerEvent('updateTaskStack');
 				return;
@@ -189,11 +191,13 @@ var GlobeTileTaskQueue = {};
         				
 	        			var kmlDatasource = networklinkItem.kmlDatasource;
 	        			dataPoolKml[tileUrl] = networklinkItem;    
-        				dataSourceCollection.add(kmlDatasource).then(function() { 	  		        			
+        				dataSourceCollection.add(kmlDatasource).then(function() {
+        					scope.taskNumber = taskQueue.length;
         					scope.oTask.triggerEvent('updateTaskStack');
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
 		        			console.log("loading layer from Cache...");	
         				}).otherwise(function(error) {
+        					scope.taskNumber = taskQueue.length;
         					scope.oTask.triggerEvent('updateTaskStack');
         				});	  	    	        			  	        			
         			} 
@@ -223,6 +227,7 @@ var GlobeTileTaskQueue = {};
         			networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};        			
         			GlobeTileTaskQueue[tileUrl] = tileUrl;
         			newKmlDatasource.load(tileUrl).then(function(dataSource) {
+        				scope.taskNumber = taskQueue.length;
         				console.log("loading layer from Server...");
         				var tmpKey = hostAndPath + dataSource.name + fileextension; 
         				delete GlobeTileTaskQueue[tmpKey];
@@ -237,7 +242,8 @@ var GlobeTileTaskQueue = {};
 					// prefetching...
 					if (matrixItem[4].preFetching && Object.keys(GlobeTileTaskQueue).length == 0) {
 						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
-						newKmlDatasource.load(tileUrl).then(function() {	
+						newKmlDatasource.load(tileUrl).then(function() {
+							scope.taskNumber = taskQueue.length;
 							if (scope.startPrefetching) {
 								console.log("---------------------start Prefeching........................");
 								scope.oTask.triggerEvent('updateTaskStack', 500);
@@ -318,6 +324,7 @@ var GlobeTileTaskQueue = {};
     		
     		// Tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
     		setTimeout(function(){
+    			scope.taskNumber = 0;
     			scope.triggerWorker(false);		
 			}, 1000 + 1000*Math.random());     
 		});	
@@ -449,19 +456,13 @@ var GlobeTileTaskQueue = {};
                 			var refY;
                 			if (Cesium.defined(refPoint)) {
                 				var refPointCarto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(refPoint);
-                				refX = Cesium.Math.toDegrees(refPointCarto.longitude);
-                				refY = Cesium.Math.toDegrees(refPointCarto.latitude);
-                				// buffer with 300 meter for prefetching... 
-                        		var offset = 10;
-                        		var xOffset = offset / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
-                        		var yOffset = offset / 111000;
                             	frame = {
-                            		minX: frame.minX - xOffset,
-                            		maxX: frame.maxX + xOffset,
-                        			minY: frame.minY - yOffset,
-                        			maxY: frame.maxY + yOffset,
-                        			refX: refX,
-                        			refY: refY
+                            		minX: frame.minX,
+                            		maxX: frame.maxX,
+                        			minY: frame.minY,
+                        			maxY: frame.maxY,
+                        			refX: Cesium.Math.toDegrees(refPointCarto.longitude),
+                        			refY: Cesium.Math.toDegrees(refPointCarto.latitude)
                             	}
                     			deferred.resolve(frame);
                 			}
@@ -571,6 +572,10 @@ var GlobeTileTaskQueue = {};
     	var scope = this;
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var scene = cesiumViewer.scene;
+    	
+    	setInterval(function(){
+			console.log(scope.taskNumber); 
+		}, 500);
 
     	scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function() {
     		if (scope.timer != null) {
