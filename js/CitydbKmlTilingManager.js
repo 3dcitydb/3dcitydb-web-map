@@ -319,7 +319,7 @@ var GlobeTileTaskQueue = {};
     		// Tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
     		setTimeout(function(){
     			scope.triggerWorker(false);		
-			}, 3000)     
+			}, 1000 + 1000*Math.random());     
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
