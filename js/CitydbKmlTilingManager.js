@@ -572,11 +572,6 @@ var GlobeTileTaskQueue = {};
     	var scope = this;
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var scene = cesiumViewer.scene;
-    	
-    	setInterval(function(){
-			console.log(scope.taskNumber); 
-		}, 500);
-
     	scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function() {
     		if (scope.timer != null) {
     			clearTimeout(scope.timer);
