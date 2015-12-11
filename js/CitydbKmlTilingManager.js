@@ -1,6 +1,10 @@
 /**
- * test
- * **/
+ *
+ * Tiling manager for controlling dynamic loading and unloading KML/KMZ Tiles data
+ *
+ **/
+var GlobeTileTaskQueue = {};
+
 (function() {
 	function CitydbKmlTilingManager(citydbKmlLayerInstance){	
 		this.oTask = null;
@@ -8,6 +12,9 @@
 		this.dataPoolKml = new Object();
 		this.networklinkCache = new Object();
 		this.boundingboxEntity = null;
+		this.timer = null;
+		this.startPrefetching = true;
+		this.taskNumber = 0;		
 	}
 	
 	function calculatePixels(tilePolygon, framePolygon) {
@@ -48,7 +55,7 @@
     	var minLodPixels = this.citydbKmlLayerInstance.minLodPixels;
     	var maxLodPixels = this.citydbKmlLayerInstance.maxLodPixels;
     	
-    	// start Hihgighting Manager
+    	// start Highlighting Manager
     	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
     		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doStart();
     	}
@@ -59,45 +66,24 @@
     	// Caching
     	var networklinkCache = this.networklinkCache;
     	
-    	// url of the data layer
+    	// Url of the data layer
     	var masterUrl = this.citydbKmlLayerInstance.url;
-    	
-		var hostAndPath = null, layername = null, displayForm = null, fileextension = null;
-    	// check if one json layer or kml layer...
-    	if (masterUrl.indexOf(".json") >= 0) {
-    		// parsing layer infos..
-			var jsonLayerInfo = this.citydbKmlLayerInstance._citydbKmlDataSource._proxy;			
-			hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
-			layername = jsonLayerInfo.layername;
-			displayForm = jsonLayerInfo.displayform;
-			fileextension = jsonLayerInfo.fileextension;
-			var colnum = jsonLayerInfo.colnum;
-			var rownum = jsonLayerInfo.rownum;  
-			var bbox = jsonLayerInfo.bbox;
-			var rowDelta = (bbox.ymax - bbox.ymin) / (rownum + 1);
-			var colDelta = (bbox.xmax - bbox.xmin) / (colnum + 1);
-			scope.oTask.triggerEvent('createMatrix', bbox, rowDelta, colDelta, rownum, colnum);	
-			// create the master bounding box 
-			scope.createBboxGeometry(bbox);    			
-    	}
-    	else {
-    		// creating R Tree as Data pool		
-			var networkLinkItems = this.citydbKmlLayerInstance._citydbKmlDataSource._entityCollection._entities._array; 			
-			scope.oTask.triggerEvent('createRTree', networkLinkItems.length - 1);
-			for(var i = 0; i < networkLinkItems.length; i++) {					        		
-    			var networkLinkKml = networkLinkItems[i];   
-    			var kmlLayerInfo = networkLinkKml._pathSubscription;
-          		if (typeof kmlLayerInfo != 'undefined') {
-          			var url = kmlLayerInfo.kmlUrl;
-	        		var minX = kmlLayerInfo.minX;
-	        		var minY = kmlLayerInfo.minY;
-	        		var maxX = kmlLayerInfo.maxX;
-	        		var maxY = kmlLayerInfo.maxY;
-	        		var item = [minX, minY, maxX, maxY, {key: url}];
-	        		scope.oTask.triggerEvent('addItemToRTree', item);
-          		}
-          	}
-    	}
+
+		// parsing layer info..
+		var jsonLayerInfo = this.citydbKmlLayerInstance._jsonLayerInfo;			
+		var hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
+		var layername = jsonLayerInfo.layername;
+		var displayForm = jsonLayerInfo.displayform;
+		var fileextension = jsonLayerInfo.fileextension;
+		var colnum = jsonLayerInfo.colnum;
+		var rownum = jsonLayerInfo.rownum;  
+		var bbox = jsonLayerInfo.bbox;
+		var rowDelta = (bbox.ymax - bbox.ymin) / (rownum + 1);
+		var colDelta = (bbox.xmax - bbox.xmin) / (colnum + 1);
+		scope.oTask.triggerEvent('createMatrix', bbox, rowDelta, colDelta, rownum, colnum);	
+		
+		// create the master bounding box 
+		scope.createBboxGeometry(bbox);    			
 
 		//------------------------------below are the relevant listeners call from the worker--------------------------------//
 
@@ -107,59 +93,54 @@
 		 * 
 		 */
 		this.oTask.addListener("removeDatasources", function () {					
-			for (var objUrl in dataPoolKml){
-            	var networklinkItem = dataPoolKml[objUrl];			                	
+			for (var tileUrl in dataPoolKml){
+            	var networklinkItem = dataPoolKml[tileUrl];			                	
         		var kmlDatasource = networklinkItem.kmlDatasource;
-        		var v1Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerRightCorner);
-        		var v2Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperRightCorner);
-        		var v3Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperLeftCorner);
-        		var v4Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerLeftCorner);
-        		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {
-        			var clientWidth = canvas.clientWidth;
-            		var clientHeight = canvas.clientHeight;					        							        		
-            		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
-    	        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
-    	        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);   	        	
-    	        	if (pixelCoveringSize < minLodPixels || pixelCoveringSize > maxLodPixels) {
-    	        		dataSourceCollection.remove(kmlDatasource);
-    	        		delete dataPoolKml[objUrl];
-    	        		scope.oTask.triggerEvent('updateDataPoolRecord');
-    	        	} 
-        		}
+        		var v1Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerRightCorner);
+        		var v2Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperRightCorner);
+        		var v3Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.upperLeftCorner);
+        		var v4Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, networklinkItem.lowerLeftCorner);        	
+    			var clientWidth = canvas.clientWidth;
+        		var clientHeight = canvas.clientHeight;					        							        		
+        		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
+	        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
+	        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);   	        	
+	        	if (pixelCoveringSize < minLodPixels || pixelCoveringSize > maxLodPixels) {
+	        		dataSourceCollection.remove(kmlDatasource);
+	        		delete dataPoolKml[tileUrl];
+	        		scope.oTask.triggerEvent('updateDataPoolRecord');
+	        	}         		
             }
-
-			if (masterUrl.indexOf(".json") >= 0) {
-				scope.oTask.triggerEvent('checkDataPool', scope.createFrameBbox(), 'matrix');   			
-        	}
-			else {
-				scope.oTask.triggerEvent('checkDataPool', scope.createFrameBbox(), 'rtree');
-			}
-			
+			var promise = scope.createFrameBbox();
+			Cesium.when(promise, function(frame){
+				scope.oTask.triggerEvent('checkDataPool', frame);   	
+			});								
 		});
 		
 		/**
 		 * 
-		 * manage the caching and display of the obejcts
+		 * manage the caching and display of the objects
 		 * matrixItem -> [ minX, minY, maxX, maxY, colnum, rownum ]
 		 * 
 		 */
-		this.oTask.addListener("checkMasterPool", function (matrixItem) {
+		this.oTask.addListener("checkMasterPool", function (matrixItem, taskQueue) {
+			if (!Cesium.defined(matrixItem)) {
+				scope.oTask.triggerEvent('updateTaskStack');
+				return;
+			}
+			if (scope.timer != null) {
+				scope.oTask.triggerEvent('pushTastItem', matrixItem);
+				return;
+			}
 			var minX = matrixItem[0];
     		var minY = matrixItem[1];
     		var maxX = matrixItem[2];
     		var maxY = matrixItem[3];
     		
-    		var objUrl = null;        		
-    		if (masterUrl.indexOf(".json") >= 0) {
-    			var colIndex = matrixItem[4].col;
-        		var rowIndex = matrixItem[4].row;
-        		objUrl = hostAndPath + layername + "_Tile_" + rowIndex + "_" + colIndex + "_" + displayForm + fileextension; 			
-        	}
-			else {
-				objUrl = matrixItem[4].key;
-			}
-    		
-    		
+			var colIndex = matrixItem[4].col;
+    		var rowIndex = matrixItem[4].row;    		
+    		var tileUrl = hostAndPath + layername + "_Tile_" + rowIndex + "_" + colIndex + "_" + displayForm + fileextension; 			
+
     		var lowerRightCorner;
 			var upperRightCorner;
 			var upperLeftCorner;
@@ -176,7 +157,7 @@
     			
         	}
         	else {        		     		
-        		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
+        		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight)), scene);
         		if (typeof intersectedPoint == 'undefined') {
         			scope.oTask.triggerEvent('updateTaskStack');
         			scope.oTask.triggerEvent('updateDataPoolRecord');	
@@ -189,126 +170,105 @@
     			lowerLeftCorner = Cesium.Cartesian3.fromDegrees(minX, minY, terrainHeight);	
         	}
 
-			var v1Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerRightCorner);
-    		var v2Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperRightCorner);
-    		var v3Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, upperLeftCorner);
-    		var v4Pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, lowerLeftCorner);
+			var v1Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, lowerRightCorner);
+    		var v2Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, upperRightCorner);
+    		var v3Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, upperLeftCorner);
+    		var v4Pos = CitydbSceneTransforms.wgs84ToWindowCoordinates(scene, lowerLeftCorner);
+	        							        		
+    		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
+        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
+        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);	        	
 
-    		if (typeof v1Pos != 'undefined' && typeof v2Pos != 'undefined' && typeof v3Pos != 'undefined'&& typeof v4Pos != 'undefined') {		        							        		
-        		var tilePolygon = [{x: v1Pos.x, y: v1Pos.y}, {x: v2Pos.x, y: v2Pos.y}, {x: v3Pos.x, y: v3Pos.y}, {x: v4Pos.x, y: v4Pos.y}];
-	        	var framePolygon = [{x: 0, y: 0}, {x: clientWidth, y: 0}, {x: clientWidth, y: clientHeight}, {x: 0, y: clientHeight}];
-	        	var pixelCoveringSize = calculatePixels(tilePolygon, framePolygon);	        	
-	        	
-	        	if (scope.citydbKmlLayerInstance.cacheTiles) { // with cache
-	        		if (networklinkCache.hasOwnProperty(objUrl)) {
-		        		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
-		        			if (!dataPoolKml.hasOwnProperty(objUrl)) {		        				
-		        				var networklinkItem = networklinkCache[objUrl].networklinkItem;
-		        				networklinkItem.lowerRightCorner = lowerRightCorner;
-		        				networklinkItem.upperRightCorner = upperRightCorner;
-		        				networklinkItem.upperLeftCorner = upperLeftCorner;
-		        				networklinkItem.lowerLeftCorner = lowerLeftCorner;
-		        				
-	    	        			var kmlDatasource = networklinkItem.kmlDatasource;
-	    	        			dataPoolKml[objUrl] = networklinkItem;    
-    	        				dataSourceCollection.add(kmlDatasource).then(function() { 	        					
-    	        					scope.oTask.triggerEvent('updateTaskStack');
-	    		        			console.log("loading layer...");	
-		    	        			// status was changed...
-				        			scope.oTask.triggerEvent('updateDataPoolRecord');		    	        			    										        							        			
-		        				}).otherwise(function(error) {
-		        					console.log(error);
-		        					scope.oTask.triggerEvent('updateTaskStack');
-		        				});	  	    	        			  	        			
-		        			} 
-		        			else {
-		        				scope.oTask.triggerEvent('updateTaskStack');
-		        			}
-		        		}
-		        		else {
-		        			scope.oTask.triggerEvent('updateTaskStack');
-		        		}		        				        		
-	        		}
-	    			else {
-	    				var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
-	    				var newNetworklinkItem = {
-	    					url: objUrl,
-	    					kmlDatasource: newKmlDatasource,
-	    					lowerRightCorner: lowerRightCorner,
-	    					upperRightCorner: upperRightCorner,
-	    					upperLeftCorner: upperLeftCorner,
-	    					lowerLeftCorner: lowerLeftCorner        					
-	    				};
-	    				networklinkCache[objUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	        				
-	    				       				
-	    				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
-    	        			console.log("loading layer...");	
-    	        			// status was changed...
-		        			scope.oTask.triggerEvent('updateDataPoolRecord');
-	    					dataSourceCollection.add(newKmlDatasource);    						 
-		        			dataPoolKml[objUrl] = newNetworklinkItem;
-		        			newKmlDatasource.load(objUrl).then(function() { 
-		        				scope.oTask.triggerEvent('updateTaskStack');
-	        				}).otherwise(function(error) {
-	        					console.log(error);
-	        					scope.oTask.triggerEvent('updateTaskStack');
-	        				});
-	    				}	
-	    				else {	 	    					
-	    					newKmlDatasource.load(objUrl).then(function() {	
-	    						scope.oTask.triggerEvent('updateTaskStack');
-	        					console.log("cache loaded...");	        							        					        										        							        			
-	        				}).otherwise(function(error) {
-	        					console.log(error);
-	        					scope.oTask.triggerEvent('updateTaskStack');
-	        				});
-	    				}       				
-	    			}
-	        	}
-	        	else { // no cache
-	        		if (!dataPoolKml.hasOwnProperty(objUrl)) {
-		        		var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
-						var newNetworklinkItem = {
-							url: objUrl,
-							kmlDatasource: newKmlDatasource,
-							lowerRightCorner: lowerRightCorner,
-							upperRightCorner: upperRightCorner,
-							upperLeftCorner: upperLeftCorner,
-							lowerLeftCorner: lowerLeftCorner        					
-						};       				
-						       				
-						if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {
-    	        			console.log("loading layer...");	
-    	        			// status was changed...
+    		if (networklinkCache.hasOwnProperty(tileUrl)) {
+        		if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) { 
+        			if (!dataPoolKml.hasOwnProperty(tileUrl)) {		        			
+        				networklinkCache[tileUrl].cacheStartTime = new Date().getTime();
+        				var networklinkItem = networklinkCache[tileUrl].networklinkItem;
+        				networklinkItem.lowerRightCorner = lowerRightCorner;
+        				networklinkItem.upperRightCorner = upperRightCorner;
+        				networklinkItem.upperLeftCorner = upperLeftCorner;
+        				networklinkItem.lowerLeftCorner = lowerLeftCorner;
+        				
+	        			var kmlDatasource = networklinkItem.kmlDatasource;
+	        			dataPoolKml[tileUrl] = networklinkItem;    
+        				dataSourceCollection.add(kmlDatasource).then(function() {
+        					scope.taskNumber = taskQueue.length;
+        					scope.oTask.triggerEvent('updateTaskStack');
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
-		        			
-		        			dataPoolKml[objUrl] = newNetworklinkItem;	        			
-		        			dataSourceCollection.add(newKmlDatasource).then(function() { 								
-							});  
-		        			newKmlDatasource.load(objUrl).then(function() {		        					
-			    				scope.oTask.triggerEvent('updateTaskStack');	        										        							        			
-		        			}).otherwise(function(error) {
-	        					console.log(error);
-	        					scope.oTask.triggerEvent('updateTaskStack');
-	        				});	
-						}
-						else {
-							scope.oTask.triggerEvent('updateTaskStack');
-						}
-		        	}
-		        	else {
-		        		scope.oTask.triggerEvent('updateTaskStack');
-		        	}
-	        	}				
+		        			console.log("loading layer from Cache...");	
+        				}).otherwise(function(error) {
+        					scope.taskNumber = taskQueue.length;
+        					scope.oTask.triggerEvent('updateTaskStack');
+        				});	  	    	        			  	        			
+        			} 
+        			else {
+        				scope.oTask.triggerEvent('updateTaskStack');
+        			}
+        		}
+        		else {
+        			scope.oTask.triggerEvent('updateTaskStack');
+        		}		        				        		
     		}
-    		else {        					        						        					
-				scope.oTask.triggerEvent('updateTaskStack');	        										        							        				        										        							        			               	
-    		}  				
+			else {
+				var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
+				var newNetworklinkItem = {
+					url: tileUrl,
+					kmlDatasource: newKmlDatasource,
+					lowerRightCorner: lowerRightCorner,
+					upperRightCorner: upperRightCorner,
+					upperLeftCorner: upperLeftCorner,
+					lowerLeftCorner: lowerLeftCorner        					
+				};
+				
+				if (pixelCoveringSize >= minLodPixels && pixelCoveringSize <= maxLodPixels) {       				
+        			scope.oTask.triggerEvent('updateDataPoolRecord');
+					dataSourceCollection.add(newKmlDatasource);    						 
+        			dataPoolKml[tileUrl] = newNetworklinkItem;
+        			networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};        			
+        			GlobeTileTaskQueue[tileUrl] = tileUrl;
+        			newKmlDatasource.load(tileUrl).then(function(dataSource) {
+        				scope.taskNumber = taskQueue.length;
+        				console.log("loading layer from Server...");
+        				var tmpKey = hostAndPath + dataSource.name + fileextension; 
+        				delete GlobeTileTaskQueue[tmpKey];
+        				scope.oTask.triggerEvent('updateTaskStack');        				
+    				}).otherwise(function(error) {
+    					console.log("HTTP request error in loading layer from Server...");
+        				delete GlobeTileTaskQueue[tileUrl];
+    					scope.oTask.triggerEvent('updateTaskStack');
+    				});
+				}	
+				else {	
+					// prefetching...
+					if (matrixItem[4].preFetching && Object.keys(GlobeTileTaskQueue).length == 0) {
+						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
+						newKmlDatasource.load(tileUrl).then(function() {
+							scope.taskNumber = taskQueue.length;
+							if (scope.startPrefetching) {
+								console.log("---------------------start Prefeching........................");
+								scope.oTask.triggerEvent('updateTaskStack', 500);
+								scope.startPrefetching = false;
+							}
+							else {
+								scope.oTask.triggerEvent('updateTaskStack', 500);
+							}							
+							console.log(["performing preFetching"]);        							        					        										        							        			
+	    				}).otherwise(function(error) {
+	    					console.log(["HTTP request error in preFetching"]); 
+	    					scope.oTask.triggerEvent('updateTaskStack');
+	    				});						
+					}
+					else {
+						matrixItem[4].preFetching = true;
+						scope.oTask.triggerEvent('pushTastItem', matrixItem);
+					}					
+				}       				
+			}
 		});
 
 		/**
 		 * 
-		 * Cachingsize = [number of displayed layers] + [cached layers]
+		 * Cache Size = [number of displayed layers] + [cached layers]
 		 * [cached layers] should not be bigger than a threshold value...
 		 * 
 		 */
@@ -350,29 +310,33 @@
 		
 		/**
 		 * 
-		 * update the statusbar and Highlighting status of the KML objects		
+		 * update the status bar and Highlighting status of the KML objects		
 		 *  
 		 */
 		scope.oTask.addListener("refreshView", function () {
 			scope.oTask.oListeners["cleanCaching"].call(this); 
 			scope.oTask.sleep();	
+			
 			// trigger Highlighting Manager again...
     		if (scope.citydbKmlLayerInstance.isHighlightingActivated) {
     			scope.citydbKmlLayerInstance.citydbKmlHighlightingManager.triggerWorker();
     		} 
+    		
+    		// Tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
+    		setTimeout(function(){
+    			scope.taskNumber = 0;
+    			scope.triggerWorker(false);		
+			}, 1000 + 1000*Math.random());     
 		});	
 		
 		//-------------------------------------------------------------------------------------------------//
 		
-	    // event Listeners are so far, we start the Networklink Manager worker...
+	    // event Listeners are so far, we start the Tiling Manager worker...
+		var promise = scope.createFrameBbox();
+		Cesium.when(promise, function(frame){
+			scope.oTask.triggerEvent('initWorker', frame, scope.citydbKmlLayerInstance.maxCountOfVisibleTiles);  	
+		});	
 
-		if (masterUrl.indexOf(".json") >= 0) {
-			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope.citydbKmlLayerInstance.maxCountOfVisibleTiles, 'matrix');  			
-    	}
-		else {
-			scope.oTask.triggerEvent('initWorker', scope.createFrameBbox(), scope.citydbKmlLayerInstance.maxCountOfVisibleTiles, 'rtree');
-		}
-				
 		this.runMonitoring();
     },
     
@@ -418,75 +382,112 @@
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var cesiumWidget = cesiumViewer.cesiumWidget; 
     	var scene = cesiumWidget.scene;
-    	var camera = scene.camera;
     	var canvas = scene.canvas;
-    	var globe = scene.globe;
-
     	var frameWidth = canvas.clientWidth;
     	var frameHeight = canvas.clientHeight;
 
-    	var factor = 0;
     	var originHeight = 0;
-    	var cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, 0));
+    	var stepSize = frameHeight / 10;
     	
-    	while (!Cesium.defined(cartesian3Indicator)) {
-    		factor++
-    		if (factor > 10)
-    			break;
-    		originHeight = originHeight + frameHeight*factor*0.1;
-    		cartesian3Indicator = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));    		
-    	}
-
-    	var cartesian3OfFrameCorner1;
-    	var cartesian3OfFrameCorner2;
-    	var cartesian3OfFrameCorner3;
-    	var cartesian3OfFrameCorner4;
-    	
-    	if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
-    		cartesian3OfFrameCorner1 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight));
-    		cartesian3OfFrameCorner2 = camera.pickEllipsoid(new Cesium.Cartesian2(0, originHeight));
-    		cartesian3OfFrameCorner3 = camera.pickEllipsoid(new Cesium.Cartesian2(0, frameHeight));
-    		cartesian3OfFrameCorner4 = camera.pickEllipsoid(new Cesium.Cartesian2(frameWidth, originHeight)); 
-    	}
-    	else {
-    		cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
-        	cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
-        	cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
-        	cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
-    	}
-    	
-    	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
-    		var wgs84OfFrameCorner1  = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
-    		var wgs84OfFrameCorner2 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner2);			
-    		var wgs84OfFrameCorner3 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner3);			
-    		var wgs84OfFrameCorner4 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner4);
-
-    		var frameMinX = Math.min(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
-    		var frameMaxX = Math.max(wgs84OfFrameCorner1.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.longitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.longitude*180 / Cesium.Math.PI);
-    		var frameMinY = Math.min(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
-    		var frameMaxY = Math.max(wgs84OfFrameCorner1.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner2.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner3.latitude*180 / Cesium.Math.PI, wgs84OfFrameCorner4.latitude*180 / Cesium.Math.PI);
-
-    		// buffer for caching, 300 meter
-    		var offzet = 10;
-    		var xOffzet = offzet / (111000 * Math.cos(Math.PI * (frameMinY + frameMaxY)/360));
-    		var yOffzet = offzet / 111000;
-/*    		this.createBboxGeometry({
-    			xmin: frameMinX - xOffzet,
-    			ymin: frameMinY - yOffzet, 
-    			xmax: frameMaxX + xOffzet, 
-    			ymax: frameMaxY + yOffzet
-    		}); */
-        	return [frameMinX - xOffzet, frameMinY - yOffzet, frameMaxX + xOffzet, frameMaxY + yOffzet];
-    	}
-    	else {
-    		// in the case when the camera are looking at air
-    		return [0,0,0,0];
-    	}		
+    	return this.calcaulateFrameBbox(originHeight, stepSize, null);		
     };
+    
+    CitydbKmlTilingManager.prototype.calcaulateFrameBbox = function(originHeight, stepSize, internalDeferred) {
+    	var scope = this;
+    	
+    	var deferred;
+    	if (internalDeferred == null) {
+    		deferred = Cesium.when.defer();
+    	}
+    	else {
+    		deferred = internalDeferred;
+    	}
+    	
+    	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
+    	var cesiumWidget = cesiumViewer.cesiumWidget; 
+    	var scene = cesiumWidget.scene;
+    	var camera = scene.camera;
+    	var canvas = scene.canvas;
+    	var globe = scene.globe;
+    	
+    	var frameWidth = canvas.clientWidth;
+    	var frameHeight = canvas.clientHeight;
+
+    	if (originHeight > frameHeight) {
+    		deferred.resolve(null);
+    	}
+    	else {
+        	var cartesian3LeftIndicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
+        	var cartesian3RightIndicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+        	
+        	if (!Cesium.defined(cartesian3LeftIndicator) || !Cesium.defined(cartesian3RightIndicator)) {
+        		originHeight = originHeight + stepSize;            	
+    			scope.calcaulateFrameBbox(originHeight, stepSize, deferred);
+    		}
+        	else {        		
+        		var cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
+            	var cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
+            	var cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
+            	var cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+
+            	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
+            		var wgs84OfFrameCorner1 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
+            		var wgs84OfFrameCorner2 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner2);			
+            		var wgs84OfFrameCorner3 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner3);			
+            		var wgs84OfFrameCorner4 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner4);
+
+            		var frameMinX = Math.min(Cesium.Math.toDegrees(wgs84OfFrameCorner1.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.longitude));
+            		var frameMaxX = Math.max(Cesium.Math.toDegrees(wgs84OfFrameCorner1.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.longitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.longitude));
+            		var frameMinY = Math.min(Cesium.Math.toDegrees(wgs84OfFrameCorner1.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.latitude));
+            		var frameMaxY = Math.max(Cesium.Math.toDegrees(wgs84OfFrameCorner1.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner2.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner3.latitude), Cesium.Math.toDegrees(wgs84OfFrameCorner4.latitude));
+
+            		var frame = {
+            			minX: frameMinX,
+            			maxX: frameMaxX,
+            			minY: frameMinY,
+            			maxY: frameMaxY
+            		};
+            		var funcName = CitydbUtil.generateUUID();
+            		scope.oTask.triggerEvent('checkFrameBbox', funcName, frame);         		
+                	scope.oTask.addListener(funcName, function (isValidFrame) {
+                		if (isValidFrame) {    
+                			var refPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth/2 , frameHeight)), scene);
+                			var refX;
+                			var refY;
+                			if (Cesium.defined(refPoint)) {
+                				var refPointCarto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(refPoint);
+                            	frame = {
+                            		minX: frame.minX,
+                            		maxX: frame.maxX,
+                        			minY: frame.minY,
+                        			maxY: frame.maxY,
+                        			refX: Cesium.Math.toDegrees(refPointCarto.longitude),
+                        			refY: Cesium.Math.toDegrees(refPointCarto.latitude)
+                            	}
+                    			deferred.resolve(frame);
+                			}
+                			else {
+                	    		deferred.resolve(null);
+                			}               			                			
+                		}
+                		else {
+                			originHeight = originHeight + stepSize;
+                			scope.calcaulateFrameBbox(originHeight, stepSize, deferred);
+                		}
+                		scope.oTask.removeListener(funcName);
+                	});	
+            	}
+            	else {
+            		deferred.resolve(null);
+            	}
+        	}
+    	}    		
+    	return deferred.promise;
+    }
 
     /**
      * 
-	 * check if the networklink manager is started of not
+	 * check if the Tiling manager is started of not
 	 * 
 	 */
     CitydbKmlTilingManager.prototype.isStarted = function() {
@@ -500,7 +501,7 @@
     
     /**
      * 
-	 * terminate the networklink manager
+	 * terminate the Tiling manager
 	 * 
 	 */
     CitydbKmlTilingManager.prototype.doTerminate = function() {
@@ -511,8 +512,8 @@
     		var cesiumViewer = this.citydbKmlLayerInstance._cesiumViewer;
         	var dataSourceCollection = cesiumViewer._dataSourceCollection;
         	        	
-    		for (var objUrl in this.dataPoolKml){
-            	var networklinkItem = this.dataPoolKml[objUrl];			                	
+    		for (var tileUrl in this.dataPoolKml){
+            	var networklinkItem = this.dataPoolKml[tileUrl];			                	
         		var kmlDatasource = networklinkItem.kmlDatasource;
         		dataSourceCollection.remove(kmlDatasource);
             }
@@ -523,7 +524,7 @@
     			cesiumViewer.entities.remove(this.boundingboxEntity);
     		}
     		
-    		// terminate Hihgighting Manager
+    		// terminate Highlighting Manager
         	if (this.citydbKmlLayerInstance.isHighlightingActivated) {
         		this.citydbKmlLayerInstance.citydbKmlHighlightingManager.doTerminate();
         	}
@@ -541,37 +542,47 @@
     
     /**
      * 
-	 * public function to trigger Networklnk Manager
+	 * public function to trigger Tiling Manager
 	 * 
 	 */          
-    CitydbKmlTilingManager.prototype.triggerWorker = function() {
+    CitydbKmlTilingManager.prototype.triggerWorker = function(updateTaskQueue) {
     	var scope = this;
     	if (scope.oTask != null) {       		
     		if (scope.oTask.isSleep()) {
          		scope.oTask.wake();	
          		console.log("trigger starting...");
+         		scope.startPrefetching = true;
  				scope.oTask.triggerEvent('notifyWake');  
  			}
     		else {
-    			scope.oTask.triggerEvent('abortAndnotifyWake');  
+    			if (updateTaskQueue) {
+    				scope.startPrefetching = true;
+    				scope.oTask.triggerEvent('abortAndnotifyWake');  
+    			}    			
     		}	
     	}            	
     },
     
     /**
      * 
-	 * control and manager the networklink manager and the highiting events
+	 * Tiling manager and the highlighting events
 	 * 
 	 */       
     CitydbKmlTilingManager.prototype.runMonitoring = function() {
     	var scope = this;
     	var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
     	var scene = cesiumViewer.scene;
-    	
     	scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function() {
-    		scope.triggerWorker();
+    		if (scope.timer != null) {
+    			clearTimeout(scope.timer);
+    		}
+    		scope.timer = setTimeout(function(){
+    			console.log("trigger Tiling manager by viewechanged event");
+    			scope.triggerWorker(true); 
+    			scope.timer = null;
+    		}, 100 + 100*Math.random());    		
 		});
     };
 		
 	window.CitydbKmlTilingManager = CitydbKmlTilingManager;
-})()
+})();

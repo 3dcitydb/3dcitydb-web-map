@@ -1,92 +1,74 @@
-
 /**
- * Defines the interface for a 3DCityDBLayer. This Object is an interface for
- * documentation purpose and is not intended to be instantiated directly.
- *
- * @alias CitydbKmlLayer
- * @constructor
- *
+ * 
+ * This JavaScript class implements the interface Layer3DCityDB defined in "3dcitydb-layer.js"  
+ * for processing KML/KMZ/glTF data exported by 3DCityDB-Importer-Exporter-Tool (version 3.1.0 or higher), 
+ * 
+ * @alias KmlDataSource
+ * 
  * @param {Object} [options] Object with the following properties:
- * @param {String} [options.url] url to the layer data
- * @param {String} [options.id] id of this layer 
- * @param {String} [options.name] name of this layer 
- * @param {String} [options.region] boundingbox  of this layer Cesium.Rectangle
- *
+ * @param {String} [options.url] Url to the layer data
+ * 
  */
 (function() {
 	function CitydbKmlLayer(options){	
+		
+		// variables defined in the 3dcitydb-layer-Interface
 		this._url = options.url;
 		this._name = options.name;
 		this._id = Cesium.defaultValue(options.id, Cesium.createGuid());		
 		this._region = options.region;
-		this._active = true;
-		this._highlightedObjects = {};		
-		this._hiddenObjects = [];
-		this._cameraPosition = {};
-		this._pickSurface = Cesium.defaultValue(options.pickSurface, false);
+		this._active = Cesium.defaultValue(options.active, true);
+		this._highlightedObjects = new Object();		
+		this._hiddenObjects = new Array();
+		this._cameraPosition = new Object();
+		this._clickEvent = new Cesium.Event();		
+		this._ctrlClickEvent = new Cesium.Event();
+		this._mouseInEvent = new Cesium.Event();
+		this._mouseOutEvent = new Cesium.Event();
+		
+		// extended variables for CitydbKmlLayer	
 		this._cesiumViewer = undefined;
-		this._jsonLayerInfo = undefined;
-		this._spreadsheetUrl = Cesium.defaultValue(options.spreadsheetUrl, "");
-	
+		this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
+		this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
+		this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
+		this._cityobjectsJsonData = new Object();	
 		this._maxSizeOfCachedTiles = Cesium.defaultValue(options.maxSizeOfCachedTiles, 50);	
-		this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
-		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);
-		
+		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);		
     	this._minLodPixels = Cesium.defaultValue(options.minLodPixels, undefined);
-    	this._maxLodPixels = Cesium.defaultValue(options.maxLodPixels,  undefined);
-		
-		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);	
-		
+    	this._maxLodPixels = Cesium.defaultValue(options.maxLodPixels,  undefined);		
+		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);			
 		this._activeHighlighting = Cesium.defaultValue(options.activeHighlighting, true);	
 		this._citydbKmlHighlightingManager = this._activeHighlighting? new CitydbKmlHighlightingManager(this): null;		
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		this._layerType = undefined;
-
-		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
-				
-		/**
-		 * handles ClickEvents
-		 * @type {Cesium.Event} clickEvent
-		 */
-		this._clickEvent = new Cesium.Event();
-		
-		this._ctrlClickEvent = new Cesium.Event();
-		
-		/**
-		 * handles ClickEvents
-		 * @type {Cesium.Event} clickEvent
-		 */
-		this._mouseInEvent = new Cesium.Event();
-		
-		/**
-		 * handles ClickEvents
-		 * @type {Cesium.Event} clickEvent
-		 */
-		this._mouseOutEvent = new Cesium.Event();
-		
-		this._startLoadingEvent = new Cesium.Event();
-		
-		this._finishLoadingEvent = new Cesium.Event();
-		
+		this._jsonLayerInfo = undefined;
+		this._startLoadingEvent = new Cesium.Event();		
+		this._finishLoadingEvent = new Cesium.Event();		
 		this._viewChangedEvent = new Cesium.Event();
+		this._configParameters = {
+			"id": this.id,
+			"url" : this.url,
+			"name" : this.name,
+			"thematicDataUrl" : this.thematicDataUrl,
+			"thematicDataProvider" : this._thematicDataProvider,
+			"cityobjectsJsonUrl" : this.cityobjectsJsonUrl,
+			"minLodPixels": this.minLodPixels,
+			"maxLodPixels" : this.maxLodPixels,
+			"maxSizeOfCachedTiles": this.maxSizeOfCachedTiles,
+			"maxCountOfVisibleTiles" : this.maxCountOfVisibleTiles
+		}
+		
+		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);				
 	}
 
 	Object.defineProperties(CitydbKmlLayer.prototype, {
-	    /**
-	     * Gets the active 
-	     * @memberof 3DCityDBLayer.prototype
-	     * @type {Boolean}
-	     */
+		
 	    active : {
 	        get : function(){
 	        	return this._active;
 	        }
 	    },
-	    /**
-	     * Gets the currently highlighted Objects as an array
-	     * @memberof 3DCityDBLayer.prototype
-	     * @type {Array}
-	     */
+
 	    highlightedObjects : {
 	        get : function(){
 	        	return this._highlightedObjects;
@@ -95,11 +77,7 @@
 	        	this._highlightedObjects = value;
 	        }	    
 	    },
-	    /**
-	     * Gets the currently hidden Objects as an array
-	     * @memberof 3DCityDBLayer.prototype
-	     * @type {Array}
-	     */
+
 	    hiddenObjects : {
 	        get : function(){
 	        	return this._hiddenObjects;
@@ -108,11 +86,7 @@
 	        	this._hiddenObjects = value;
 	        }	
 	    },
-	    /**
-	     * Gets/Sets the CameraPosition.
-	     * @memberof DataSource.prototype
-	     * @type {Object}
-	     */
+
 	    cameraPosition : {
 	        get : function(){
 	        	return this._cameraPosition;
@@ -121,11 +95,7 @@
 	        	this._cameraPosition = value;
 	        }
 	    },
-	    /**
-	     * Gets the url of the datasource
-	     * @memberof DataSource.prototype
-	     * @type {String}
-	     */
+
 	    url : {
 	        get : function(){
 	        	return this._url;
@@ -134,11 +104,7 @@
 	        	this._url = value;
 	        }
 	    },
-	    /**
-	     * Gets the name of this datasource.
-	     * @memberof DataSource.prototype
-	     * @type {String}
-	     */
+
 	    name : {
 	        get : function(){
 	        	return this._name;
@@ -147,42 +113,52 @@
 	        	this._name = value;
 	        }
 	    },
-	    /**
-	     * Gets the id of this datasource, the id should be unique.
-	     * @memberof DataSource.prototype
-	     * @type {String}
-	     */
+
 	    id : {
 	        get : function(){
 	        	return this._id;
 	        }
 	    },
-	    /**
-	     * Gets boundingbox of this layer as an Cesium Rectangle Object with longitude/latitude values in radians. 
-	     * @memberof DataSource.prototype
-	     * @type {Cesium.Rectangle}
-	     */
+
 	    region : {
 	        get : function(){
 	        	return this._region;
 	        }
 	    },
 	    
-	    pickSurface : {
+	    thematicDataUrl : {
 	        get : function(){
-	        	return this._pickSurface;
+	        	return this._thematicDataUrl;
 	        },
 	        set : function(value){
-	        	this._pickSurface = value;
+	        	this._thematicDataUrl = value;
 	        }
 	    },
 	    
-	    spreadsheetUrl : {
+	    thematicDataProvider : {
 	        get : function(){
-	        	return this._spreadsheetUrl;
+	        	return this._thematicDataProvider;
 	        },
 	        set : function(value){
-	        	this._spreadsheetUrl = value;
+	        	this._thematicDataProvider = value;
+	        }
+	    },
+	    
+	    cityobjectsJsonUrl : {
+	        get : function(){
+	        	return this._cityobjectsJsonUrl;
+	        },
+	        set : function(value){
+	        	this._cityobjectsJsonUrl = value;
+	        }
+	    },
+	    
+	    cityobjectsJsonData : {
+	        get : function(){
+	        	return this._cityobjectsJsonData;
+	        },
+	        set : function(value){
+	        	this._cityobjectsJsonData = value;
 	        }
 	    },
 	    
@@ -192,27 +168,12 @@
 	        }
 	    },
 	    
-	    jsonLayerInfo : {
-	        get : function(){
-	        	return this._jsonLayerInfo;
-	        }
-	    },
-	    
 	    citydbKmlDataSource : {
 	        get : function(){
 	        	return this._citydbKmlDataSource;
 	        }
 	    },
-	    	    
-	    cacheTiles : {
-	        get : function(){
-	        	return this._cacheTiles;
-	        },
-	        set : function(value){
-	        	this._cacheTiles = value;
-	        }
-	    },
-	    
+	    	    	    
 	    minLodPixels : {
 	        get : function(){
 	        	return this._minLodPixels;
@@ -237,7 +198,6 @@
 	        },
 	        set : function(value){
 	        	this._maxSizeOfCachedTiles = value;
-	        	this._cacheTiles = this._maxSizeOfCachedTiles <= 0? false: true;
 	        }
 	    },
 	    
@@ -266,220 +226,90 @@
 	        get : function(){
 	        	return this._citydbKmlHighlightingManager == null? false: true;
 	        }
+	    },
+	    
+	    configParameters : {
+	        get : function(){
+	        	return this._configParameters;
+	        }
 	    }
 	});
 
-
+	function loadMasterJSON(that, isFirstLoad) {
+		var deferred = Cesium.when.defer();
+		var jsonUrl = that._url;
+		that._startLoadingEvent.raiseEvent(that);
+		Cesium.loadJson(jsonUrl).then(function(json) {        	
+        	that._jsonLayerInfo = json;	
+        	that._layerType = json.displayform;
+            that._cameraPosition = {
+        		lat: (json.bbox.ymax + json.bbox.ymin) / 2,	
+        		lon: (json.bbox.xmax + json.bbox.xmin) / 2,
+    			range: 800,
+    			pitch: -50,
+    			heading: 6,
+    			altitude: 40
+        	}
+            
+            if (isFirstLoad) {
+            	if (!Cesium.defined(that._minLodPixels))
+                	that._minLodPixels = json.minLodPixels == -1? Number.MIN_VALUE: json.minLodPixels;
+                if (!Cesium.defined(that._maxLodPixels))
+                	that._maxLodPixels = json.maxLodPixels == -1? Number.MAX_VALUE: json.maxLodPixels;
+            }
+                       
+            if (that._active) {
+            	that._citydbKmlTilingManager.doStart();
+            	that._cesiumViewer.dataSources.add(that._citydbKmlDataSource);
+            }
+            
+            var jsonUrl = that._cityobjectsJsonUrl;
+            if (Cesium.defined(jsonUrl)) {
+            	Cesium.loadJson(jsonUrl).then(function(data) {
+					console.log(data);
+					deferred.resolve();
+					that._cityobjectsJsonData = data;
+					that._finishLoadingEvent.raiseEvent(that);
+				}).otherwise(function(error) {
+					console.log(error);
+					deferred.reject(error);
+					that._finishLoadingEvent.raiseEvent(that);
+				});	
+            }
+            else {
+            	deferred.resolve('There is no cityobjectJsonFile');
+            	that._finishLoadingEvent.raiseEvent(that);
+            }		            		                    
+		}).otherwise(function(error) {
+			console.log('can not find the json file for ' + kmlUrl);
+			deferred.reject(error);
+        	that._finishLoadingEvent.raiseEvent(that);
+		});
+		return deferred.promise;
+	}
+	
 	/**
 	 * adds this layer to the given Cesium viewer
 	 * @param {CesiumViewer} cesiumViewer
 	 */
 	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
-		this._startLoadingEvent.raiseEvent(this);
 		this._cesiumViewer = cesiumViewer;
-		var that = this;
-		if (this._url.indexOf(".json") >= 0) {	    		
-			jQuery.noConflict().ajax({		    	
-		        url: that._url +'?jsoncallback=?',   
-		        dataType: "jsonp",
-		        jsonpCallback: "handle_3DCityDB_data", // the function name was defined by 3DCityDB KML/collada Exporter
-		        timeout: 30000, // timeout in order to trigger the JQuery ajax error callback function
-		        success: function(json, status){		        	
-		        	that._citydbKmlDataSource._name = json.layername;	
-		        	that._citydbKmlDataSource._proxy = json;
-		        	that._layerType = json.displayform;
 
-		            that._cameraPosition = {
-		        		lat: (json.bbox.ymax + json.bbox.ymin) / 2,	
-		        		lon: (json.bbox.xmax + json.bbox.xmin) / 2,
-		    			range: 800,
-		    			tilt: 49,
-		    			heading: 6,
-		    			altitude: 40
-		        	}
-		            
-		            if (!Cesium.defined(that._minLodPixels))
-		            	that._minLodPixels = json.minLodPixels == -1? Number.MIN_VALUE: json.minLodPixels;
-		            if (!Cesium.defined(that._maxLodPixels))
-		            	that._maxLodPixels = json.maxLodPixels == -1? Number.MAX_VALUE: json.maxLodPixels;
-		            
-		    		cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-		            that._citydbKmlTilingManager.doStart();
-		            that._finishLoadingEvent.raiseEvent(that);		            
-		        },
-		        error: function(XHR, textStatus, errorThrown){
-		        	console.log('can not find the json file for ' + kmlUrl);
-		        	that._finishLoadingEvent.raiseEvent(that);
-		        }
-		    });	
-    	}
-		else {
-			this._citydbKmlDataSource.load(this._url).then(function() {
-				that._cameraPosition = that._citydbKmlDataSource._lookAt;
-				
-				// TODO
-				that._minLodPixels = 140
-				that._maxLodPixels = Number.MAX_VALUE;
-				
-				cesiumViewer.dataSources.add(that._citydbKmlDataSource);
-				that._citydbKmlTilingManager.doStart();
-				that._finishLoadingEvent.raiseEvent(that);
-		    });
-		}	
+		var that = this;
+		loadMasterJSON(that, true);
 		
-		Cesium.knockout.getObservable(that, '_highlightedObjects').subscribe(function() {					
+		Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function() {					
 			that._citydbKmlTilingManager.clearCaching();	
 	    });
 		
-		Cesium.knockout.getObservable(that, '_hiddenObjects').subscribe(function() {					
+		Cesium.knockout.getObservable(this, '_hiddenObjects').subscribe(function() {					
 			that._citydbKmlTilingManager.clearCaching();	
 	    });
 	}
-	
-	CitydbKmlLayer.prototype.zoomToLayer = function(){
-		var that = this;
-		var lat = this._cameraPosition.lat;
-		var lon = this._cameraPosition.lon;
-		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
-        var heading = Cesium.Math.toRadians(this._cameraPosition.heading);
-        var pitch = Cesium.Math.toRadians(this._cameraPosition.tilt - 90);
-        var range = this._cameraPosition.range;
-        
-        cesiumCamera.flyTo({
-            destination : Cesium.Cartesian3.fromDegrees(lon, lat, range),
-            complete: function() {
-            	cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
-            	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
-            	setTimeout(function(){
-            		that._citydbKmlTilingManager.triggerWorker();
-            	}, 3000)            	
-            }
-        })
-	}
 
-	/**
-	 * adds this layer to the given cesium viewer
-	 * @param {CesiumViewer} cesiumViewer
-	 */
 	CitydbKmlLayer.prototype.removeFromCesium = function(cesiumViewer){
 		this.activate(false);
 	}
-
-	/**
-	 * activates or deactivates the layer
-	 * @param {Boolean} value
-	 */
-	CitydbKmlLayer.prototype.activate = function(active){
-		if (active == false) {			
-			this._citydbKmlTilingManager.doTerminate();
-			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
-		}
-		else {
-			this._citydbKmlTilingManager.doStart();
-			this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);			
-		}
-		this._active = active;
-	}
-	
-	CitydbKmlLayer.prototype.reActivate = function(){
-		var deferred = Cesium.when.defer();
-		
-		if (!this._active) {
-			this.activate(true);
-			deferred.resolve(this._active);
-		}
-		else {
-			this.activate(false);
-			var that = this;
-			// here we simply activate layer one seconds layer...
-			setTimeout(function(){
-				that.activate(true);
-				deferred.resolve(this._active);
-        	}, 1000)  			
-		}
-		return deferred.promise;
-	}
-	
-	
-	/**
-	 * find and return the model object by Id (GMLID)
-	 * @param {String} Object Id
-	 * @return {Cesium.Model} Cesium Model instance having the corresponding GMLID
-	 */
-	
-	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
-		var primitives = this._cesiumViewer.scene.primitives;
-		if (this._layerType == "collada") {
-			for (var i = 0; i < primitives.length; i++) {
-				var primitive = primitives.get(i);
-				if (primitive instanceof Cesium.Model) {
-					if (primitive.ready) {
-						if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
-							return primitive;
-						}
-					}									
-				}
-			}
-		}
-		else if (this._layerType == "geometry") {
-			if (this.pickSurface) {
-				return this.getEntitiesById(objectId);
-			}
-			else {
-				var roofEntites = this.getEntitiesById(objectId + '_RoofSurface');
-				var wallEntites = this.getEntitiesById(objectId + '_WallSurface');
-				if (roofEntites != null && wallEntites != null) {
-					return roofEntites.concat(wallEntites);
-				}
-				else {
-					return null;
-				}
-			}
-		}
-		else if (this._layerType == "extruded" || this._layerType == "footprint") {
-			return this.getEntitiesById(objectId);
-		}
-		return null;	
-	};
-	
-	CitydbKmlLayer.prototype.getEntitiesById = function(objectId){		
-		var primitives = this._cesiumViewer.scene.primitives;
-		for (var i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Primitive) {					
- 				for (var j = 0; j < primitive._instanceIds.length; j++){
- 					var tmpprimitiveInstance = primitive._instanceIds[j];
-					if (tmpprimitiveInstance.name === objectId && tmpprimitiveInstance.layerId == this._id){						
-						var targetEntity = tmpprimitiveInstance;
-						var parentEntity = targetEntity._parent
-						if (Cesium.defined(parentEntity)) {
-							return parentEntity._children;
-						}						
-					}
-				}
-			}
-		}
-		return null;		
-	};
-	
-	CitydbKmlLayer.prototype.setEntityColorByPrimitive = function(entity, color){
-		var primitives = this._cesiumViewer.scene.primitives;
-		for (var i = 0; i < primitives.length; i++) {
-			var primitive = primitives.get(i);
-			if (primitive instanceof Cesium.Primitive) {					
- 				for (var j = 0; j < primitive._instanceIds.length; j++){	
- 					var tmpId = primitive._instanceIds[j].name;
- 					if (tmpId == entity.name && entity.layerId === this._id) {
- 						var attributes = primitive.getGeometryInstanceAttributes(entity);
- 						if (Cesium.defined(attributes)) {
- 							attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color); 
- 							return;
- 						}						
- 					}
-				}
-			}
-		}
-	};
 
 	/**
 	 * highlights one or more object with a given color;
@@ -491,46 +321,8 @@
 			this.highlightObject(this.getObjectById(id));
 		}	
 		this._highlightedObjects = this._highlightedObjects;
-	};
+	}
 	
-	CitydbKmlLayer.prototype.highlightObject = function(object){	
-		if (object == null)
-			return;
-		if (object instanceof Cesium.Model) {
-			if (object.ready) {
-				var highlightColor = this._highlightedObjects[object._id._name];
-				if (highlightColor) {
-					var materials = object._runtime.materialsByName;				
-					for (var materialId in materials){
-						materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
-					}
-				}			
-			}
-		}
-		else if (object instanceof Cesium.Entity) {
-			if (!Cesium.defined(object.originalMaterial)) {
-				object.addProperty("originalMaterial");
-			}	
-			object.originalMaterial = object.polygon.material;
-			object.polygon.material = this._highlightedObjects[object.name].clone();
-		}	
-		else if (object instanceof Array) {
-			for (var i = 0; i < object.length; i++){	
-				var childEntity = object[i];	
-				if (!Cesium.defined(childEntity.originalMaterial)) {
-					childEntity.addProperty("originalMaterial");
-				}	
-				childEntity.originalMaterial = childEntity.polygon.material;
-				if (this._pickSurface != true) {
-					childEntity.polygon.material = this._highlightedObjects[childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '')];
-				}
-				else {
-					childEntity.polygon.material = this._highlightedObjects[childEntity.name];
-				}				
-			}		
-		}	
-	};
-
 	/**
 	 * undo highlighting
 	 * @param {Array<String>} A list of Object Ids. The default material will be restored
@@ -547,102 +339,6 @@
 		this._highlightedObjects = this._highlightedObjects;
 	};
 	
-	CitydbKmlLayer.prototype.unHighlightObject = function(object){	
-		if (object == null)
-			return;
-		if (object instanceof Cesium.Model) {
-			if (object.ready) {
-				var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
-				var materials = object._runtime.materialsByName;			
-				for (var materialId in materials){
-					materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
-				}
-			}	
-		}
-		else if (object instanceof Cesium.Entity) {			
-			var originalMaterial = object.originalMaterial;
-			if (Cesium.defined(originalMaterial)) {
-				if (!this.isHiddenObject(object)) {
-					this.setEntityColorByPrimitive(object, originalMaterial.color._value.clone());	
-					setTimeout(function(){
-						object.polygon.material = originalMaterial;	
-					}, 100)
-				}			
-			}			
-		}	
-		else if (object instanceof Array) {
-			if (!this.isHiddenObject(object)) {
-				for (var i = 0; i < object.length; i++){	
-					var childEntity = object[i];	
-					var originalMaterial = childEntity.originalMaterial;
-					if (Cesium.defined(originalMaterial)) {
-						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
-						childEntity.polygon.material = originalMaterial;
-					}
-				}	
-			}				
-		}
-	};
-	
-	CitydbKmlLayer.prototype.unHighlightAllObjects = function(){
-		for (var id in this._highlightedObjects){
-			delete this._highlightedObjects[id];	
-			this.unHighlightObject(this.getObjectById(id));
-		}
-		this._highlightedObjects = this._highlightedObjects;
-		if (this._citydbKmlHighlightingManager != null)
-			this._citydbKmlHighlightingManager.triggerWorker();		
-	};
-
-	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
-		var object = this.getObjectById(id);
-		return this.isHighlightedObject(object);
-	};
-	
-	CitydbKmlLayer.prototype.isHighlightedObject = function(object){	
-		if (object instanceof Cesium.Model) {
-			var highlightColor = this._highlightedObjects[object._id._name];
-			if (!Cesium.defined(highlightColor)) {
-				return false;
-			}
-			var materials = object._runtime.materialsByName;
-			for (var materialId in materials){
-				if (!materials[materialId].getValue('emission').equals(Cesium.Cartesian4.fromColor(highlightColor))) {
-					return false;
-				}			
-			}
-		}	
-		else if (object instanceof Cesium.Entity) {			
-			if (!object.polygon.material.color._value.equals(this._highlightedObjects[object.name])) {
-				return false;
-			}
-		}	
-		else if (object instanceof Array) {
-			for (var i = 0; i < object.length; i++){	
-				var childEntity = object[i];					
-				var globeId;
-				if (this._pickSurface != true) {
-					globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-				}
-				else {
-					globeId = childEntity.name;
-				}
-				if (!childEntity.polygon.material.color._value.equals(this._highlightedObjects[globeId])) {
-					return false;
-				}
-			}		
-		}
-		return true;
-	};
-	
-	CitydbKmlLayer.prototype.isInHighlightedList = function(objectId){	
-		return this._highlightedObjects.hasOwnProperty(objectId);
-	};
-
-	CitydbKmlLayer.prototype.hasHighlightedObjects = function(){	
-		return Object.keys(this._highlightedObjects).length > 0? true : false;
-	};
-
 	/**
 	 * hideObjects
 	 * @param {Array<String>} A list of Object Ids which will be hidden
@@ -658,32 +354,6 @@
 		this._hiddenObjects = this._hiddenObjects;
 	};
 	
-	CitydbKmlLayer.prototype.hideObject = function(object){			
-		if (object == null)
-			return;
-		if (object instanceof Cesium.Model) {
-			if (object.ready) {
-				var nodes = object._runtime.nodesByName;
-				for (var nodeId in nodes){
-					var node = nodes[nodeId];
-					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-					publicNode.show = false;
-				}				
-			}
-		}
-		else if (object instanceof Cesium.Entity) {
-			object.show = false;
-		}
-		else if (object instanceof Array) {
-			for (var i = 0; i < object.length; i++){	
-				var childEntity = object[i];	
-				childEntity.show = false;
-			}		
-		}
-	//	console.log(object.show);
-	};
-
-
 	/**
 	 * showObjects, to undo hideObjects
 	 * @param {Array<String>} A list of Object Ids which will be unhidden. 
@@ -700,98 +370,46 @@
 		this._hiddenObjects = this._hiddenObjects;
 	};
 	
-	CitydbKmlLayer.prototype.showObject = function(object){
-		if (object == null)
-			return;
-		if (object instanceof Cesium.Model) {
-			if (object.ready) {
-				var nodes = object._runtime.nodesByName;
-				for (var nodeId in nodes){
-					var node = nodes[nodeId];
-					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-					publicNode.show = true;
-				}				
-			}
+	/**
+	 * activates or deactivates the layer
+	 * @param {Boolean} value
+	 */
+	CitydbKmlLayer.prototype.activate = function(active){
+		if (active == false) {			
+			this._citydbKmlTilingManager.doTerminate();
+			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
 		}
-		else if (object instanceof Cesium.Entity) {
-			object.show = true;				
-			if (!this.isInHighlightedList(object.name)) {
-				var originalMaterial = object.originalMaterial;
-				if (Cesium.defined(originalMaterial)) {
-					this.setEntityColorByPrimitive(object, originalMaterial.color._value.clone());	
-					setTimeout(function(){
-						object.polygon.material = originalMaterial;	
-					}, 100)
-				}
-			}
+		else {
+			this._citydbKmlTilingManager.doStart();
+			this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);			
 		}
-		else if (object instanceof Array) {
-			for (var i = 0; i < object.length; i++){					
-				var childEntity = object[i];	
-				childEntity.show = true;	
-				var globeId;
-				if (this._pickSurface != true) {
-					globeId = childEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-				}
-				else {
-					globeId = childEntity.name;
-				}			
-				if (!this.isInHighlightedList(globeId)) {
-					var originalMaterial = childEntity.originalMaterial;
-					if (Cesium.defined(originalMaterial)) {
-						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value);	
-						setTimeout(function(){
-							childEntity.polygon.material = originalMaterial;	
-						}, 100)	
-					}
-				}
-			}		
-		}	
-	};
+		this._active = active;
+	}
 	
-	CitydbKmlLayer.prototype.isHiddenObject = function(object){	
-		if (object instanceof Cesium.Model) {
-			if (object.ready) {
-				var nodes = object._runtime.nodesByName;
-				for (var nodeId in nodes){
-					var node = nodes[nodeId];
-					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-					return !publicNode.show;									
-				}				
-			}
-		}
-		else if (object instanceof Cesium.Entity) {
-			return !object.show;
-		}
-		else if (object instanceof Array) {
-			for (var i = 0; i < object.length; i++){	
-				var childEntity = object[i];	
-				return !childEntity.show;
-			}		
-		}
-		return true;
-	};
+	/**
+	 * zooms to the layer cameraPostion
+	 */	
+	CitydbKmlLayer.prototype.zoomToStartPosition = function(){
+		var that = this;
+		var lat = this._cameraPosition.lat;
+		var lon = this._cameraPosition.lon;
+		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
+        var heading = Cesium.Math.toRadians(this._cameraPosition.heading);
+        var pitch = Cesium.Math.toRadians(this._cameraPosition.pitch);
+        var range = this._cameraPosition.range;
+        var cesiumCamera = this._cesiumViewer.scene.camera;
+        cesiumCamera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(lon, lat, range),
+            complete: function() {
+            	cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+            	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
+            	setTimeout(function(){
+            		that._citydbKmlTilingManager.triggerWorker();
+            	}, 3000)            	
+            }
+        })
+	}
 	
-	CitydbKmlLayer.prototype.showAllObjects = function(){
-		for (var k = 0; k < this._hiddenObjects.length; k++){	
-			var objectId = this._hiddenObjects[k];			
-			this.showObject(this.getObjectById(objectId));
-		}
-		this._hiddenObjects = this._hiddenObjects;
-		
-		this._hiddenObjects = [];
-/*		if (this._citydbKmlHighlightingManager != null)
-			this._citydbKmlHighlightingManager.triggerWorker();		*/
-	};
-	
-	CitydbKmlLayer.prototype.isInHiddenList = function(objectId){	
-		return this._hiddenObjects.indexOf(objectId) > -1? true: false;
-	};
-	
-	CitydbKmlLayer.prototype.hasHiddenObjects = function(){	
-		return this._hiddenObjects.length > 0? true : false;
-	};
-
 	/**
 	 * removes an Eventhandler
 	 * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
@@ -857,6 +475,303 @@
 			this._viewChangedEvent.raiseEvent(object);
 		}
 	}
+	
+	//--------------------------------------------------------------------------------------------------------//
+	//---------------------- Extended Methods and Functions for CitydbKmlLayer--------------------------------//
+	//--------------------------------------------------------------------------------------------------------//
+		
+	CitydbKmlLayer.prototype.reActivate = function(){		
+		this._highlightedObjects = {};	
+		this._hiddenObjects = [];
+		this._cityobjectsJsonData = {};			
+		if (this._active) {
+			this._citydbKmlTilingManager.doTerminate();
+			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);	
+		}		
+		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);	
+		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
+
+		return loadMasterJSON(this, false);
+	}
+	
+	CitydbKmlLayer.prototype.getObjectById = function(objectId){		
+		var primitives = this._cesiumViewer.scene.primitives;
+		if (this._layerType == "collada") {
+			for (var i = 0; i < primitives.length; i++) {
+				var primitive = primitives.get(i);
+				if (primitive instanceof Cesium.Model) {
+					if (primitive.ready) {
+						if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
+							return primitive;
+						}
+					}									
+				}
+			}
+		}
+		else if (this._layerType == "extruded" || this._layerType == "footprint" || this._layerType == "geometry") {
+			return this.getEntitiesById(objectId);
+		}
+		return null;	
+	};
+	
+	CitydbKmlLayer.prototype.getEntitiesById = function(objectId){		
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (var i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {					
+ 				for (var j = 0; j < primitive._instanceIds.length; j++){
+ 					var tmpprimitiveInstance = primitive._instanceIds[j];
+					if (tmpprimitiveInstance.name === objectId && tmpprimitiveInstance.layerId == this._id){						
+						var targetEntity = tmpprimitiveInstance;
+						var parentEntity = targetEntity._parent
+						if (Cesium.defined(parentEntity)) {
+							return parentEntity._children;
+						}	
+						else {
+							return [targetEntity]
+						}
+					}
+				}
+			}
+		}
+		return null;		
+	};
+	
+	CitydbKmlLayer.prototype.setEntityColorByPrimitive = function(entity, color){
+		var primitives = this._cesiumViewer.scene.primitives;
+		for (var i = 0; i < primitives.length; i++) {
+			var primitive = primitives.get(i);
+			if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {					
+ 				for (var j = 0; j < primitive._instanceIds.length; j++){	
+ 					var tmpId = primitive._instanceIds[j].name;
+ 					if (tmpId == entity.name && entity.layerId === this._id) {
+ 						var attributes = primitive.getGeometryInstanceAttributes(entity);
+ 						if (Cesium.defined(attributes)) {
+ 							attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color); 
+ 							return;
+ 						}						
+ 					}
+				}
+			}
+		}
+	};
+	
+	CitydbKmlLayer.prototype.highlightObject = function(object){	
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var highlightColor = this._highlightedObjects[object._id._name];
+				if (highlightColor) {
+					var materials = object._runtime.materialsByName;				
+					for (var materialId in materials){
+						materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
+					}
+				}			
+			}
+		}	
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				if (!Cesium.defined(childEntity.originalMaterial)) {
+					childEntity.addProperty("originalMaterial");
+				}	
+				childEntity.originalMaterial = this.getObjectMaterial(childEntity);
+				this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name]);				
+			}		
+		}	
+	};
+	
+	CitydbKmlLayer.prototype.unHighlightObject = function(object){	
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
+				var materials = object._runtime.materialsByName;			
+				for (var materialId in materials){
+					materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
+				}
+			}	
+		}
+		else if (object instanceof Array) {
+			if (!this.isHiddenObject(object)) {
+				for (var i = 0; i < object.length; i++){	
+					var childEntity = object[i];	
+					var originalMaterial = childEntity.originalMaterial;
+					if (Cesium.defined(originalMaterial)) {
+						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());	
+						this.setObjectMaterial(childEntity, originalMaterial);
+					}
+				}	
+			}				
+		}
+	};
+	
+	CitydbKmlLayer.prototype.unHighlightAllObjects = function(){
+		for (var id in this._highlightedObjects){
+			delete this._highlightedObjects[id];	
+			this.unHighlightObject(this.getObjectById(id));
+		}
+		this._highlightedObjects = this._highlightedObjects;
+		if (this._citydbKmlHighlightingManager != null)
+			this._citydbKmlHighlightingManager.triggerWorker();		
+	};
+
+	CitydbKmlLayer.prototype.isHighlighted = function(objectId){	
+		var object = this.getObjectById(id);
+		return this.isHighlightedObject(object);
+	};
+	
+	CitydbKmlLayer.prototype.isHighlightedObject = function(object){	
+		if (object instanceof Cesium.Model) {
+			var highlightColor = this._highlightedObjects[object._id._name];
+			if (!Cesium.defined(highlightColor)) {
+				return false;
+			}
+			var materials = object._runtime.materialsByName;
+			for (var materialId in materials){
+				if (!materials[materialId].getValue('emission').equals(Cesium.Cartesian4.fromColor(highlightColor))) {
+					return false;
+				}			
+			}
+		}		
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];					
+				var globeId = childEntity.name;;
+				var material = this.getObjectMaterial(childEntity);
+				if (!material.color._value.equals(this._highlightedObjects[globeId])) {
+					return false;
+				}
+			}		
+		}
+		return true;
+	};
+	
+	CitydbKmlLayer.prototype.isInHighlightedList = function(objectId){	
+		return this._highlightedObjects.hasOwnProperty(objectId);
+	};
+
+	CitydbKmlLayer.prototype.hasHighlightedObjects = function(){	
+		return Object.keys(this._highlightedObjects).length > 0? true : false;
+	};
+
+	CitydbKmlLayer.prototype.hideObject = function(object){			
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var nodes = object._runtime.nodesByName;
+				for (var nodeId in nodes){
+					var node = nodes[nodeId];
+					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
+					publicNode.show = false;
+				}				
+			}
+		}
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				childEntity.show = false;
+			}		
+		}
+	};
+	
+	CitydbKmlLayer.prototype.showObject = function(object){
+		if (object == null)
+			return;
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var nodes = object._runtime.nodesByName;
+				for (var nodeId in nodes){
+					var node = nodes[nodeId];
+					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
+					publicNode.show = true;
+				}				
+			}
+		}
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){					
+				var childEntity = object[i];	
+				childEntity.show = true;	
+				var globeId = childEntity.name;			
+				if (!this.isInHighlightedList(globeId)) {
+					var originalMaterial = childEntity.originalMaterial;
+					if (Cesium.defined(originalMaterial)) {
+						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value);	
+						setTimeout(function(){	
+							this.setObjectMaterial(childEntity, originalMaterial);
+						}, 100)	
+					}
+				}
+			}		
+		}	
+	};
+	
+	CitydbKmlLayer.prototype.isHiddenObject = function(object){	
+		if (object instanceof Cesium.Model) {
+			if (object.ready) {
+				var nodes = object._runtime.nodesByName;
+				for (var nodeId in nodes){
+					var node = nodes[nodeId];
+					var publicNode = Cesium.defined(node) ? node.publicNode : undefined
+					return !publicNode.show;									
+				}				
+			}
+		}
+		else if (object instanceof Array) {
+			for (var i = 0; i < object.length; i++){	
+				var childEntity = object[i];	
+				return !childEntity.show;
+			}		
+		}
+		return true;
+	};
+	
+	CitydbKmlLayer.prototype.showAllObjects = function(){
+		for (var k = 0; k < this._hiddenObjects.length; k++){	
+			var objectId = this._hiddenObjects[k];			
+			this.showObject(this.getObjectById(objectId));
+		}
+		this._hiddenObjects = this._hiddenObjects;		
+		this._hiddenObjects = [];
+	};
+	
+	CitydbKmlLayer.prototype.isInHiddenList = function(objectId){	
+		return this._hiddenObjects.indexOf(objectId) > -1? true: false;
+	};
+	
+	CitydbKmlLayer.prototype.hasHiddenObjects = function(){	
+		return this._hiddenObjects.length > 0? true : false;
+	};
+	
+	CitydbKmlLayer.prototype.setObjectMaterial = function(object, material){	
+		if (Cesium.defined(object.polygon)) {
+			object.polygon.material = material;
+		}
+		else if (Cesium.defined(object.polyline)) {
+			object.polyline.material = material;
+		}
+		else if (Cesium.defined(object.point)) {
+			object.point.material = material;
+		}
+	};
+	
+	CitydbKmlLayer.prototype.getObjectMaterial = function(object){	
+		var geometryGraphic;
+		if (Cesium.defined(object.polygon)) {
+			geometryGraphic = object.polygon;
+		}
+		else if (Cesium.defined(object.polyline)) {
+			geometryGraphic = object.polyline;
+		}
+		else if (Cesium.defined(object.point)) {
+			geometryGraphic = object.point;
+		}
+		return geometryGraphic.material
+	};
+
 	window.CitydbKmlLayer = CitydbKmlLayer;
 })();
 

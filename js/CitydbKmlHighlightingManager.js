@@ -1,6 +1,8 @@
 /**
- * test
- * **/
+ *
+ * Highlighting Manager for controlling Appearance of objects created by the dynamically loaded KML/KMZ data tiles
+ *
+ **/
 (function() {
 	
 	function CitydbKmlHighlightingManager(citydbKmlLayerInstance) {		
@@ -21,7 +23,7 @@
     	
 		// add Listeners
 		this.oTask.addListener("checkMasterPool", function (objectId, visibility) {	
-		//	var obj = scope.citydbKmlLayerInstance.getObjectById(objectId);
+
 			var obj = scope.cachedObjects[objectId];
 			
 			if (obj != null) {
@@ -38,43 +40,55 @@
 						scope.oTask.triggerEvent('updateDataPool');
 					}
 				}
-				
-				// update Highlighting
-				if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {				
-					if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
-						scope.citydbKmlLayerInstance.highlightObject(obj);
-						scope.oTask.triggerEvent('updateDataPool');
-					}					
-				}
-				else {
-					if (scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
-						scope.citydbKmlLayerInstance.unHighlightObject(obj);
-						scope.oTask.triggerEvent('updateDataPool');
+								
+				setTimeout(function(){   	
+					// update Highlighting
+					if (scope.citydbKmlLayerInstance.isInHighlightedList(objectId)) {				
+						if (!scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
+							scope.citydbKmlLayerInstance.highlightObject(obj);
+							scope.oTask.triggerEvent('updateDataPool');
+						}					
 					}
-				}
+					else {
+						if (scope.citydbKmlLayerInstance.isHighlightedObject(obj)) {
+							scope.citydbKmlLayerInstance.unHighlightObject(obj);
+							scope.oTask.triggerEvent('updateDataPool');
+						}
+					}
+					scope.oTask.triggerEvent('updateTaskStack'); 
+			    }, 50);
 			}
-			setTimeout(function(){   	
-				scope.oTask.triggerEvent('updateTaskStack'); 		    	
-		    }, 50); 			
+			else {
+				setTimeout(function(){   	
+					scope.oTask.triggerEvent('updateTaskStack'); 		    	
+			    }, 50); 
+			}						
 		});
 
 		scope.oTask.addListener("refreshView", function (isStillUpdating, dataPool) {				
-			setTimeout(function(){   
-				if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
-					console.log("Highlighting Manager is sleeping...")
-					scope.oTask.sleep();
-				}
-				else {
-					if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
-						console.log("Highlighting manager repeat updating again...");
-						scope.rebuildDataPool(); 		    	  		    	
-					}
-					else {		
+			var cesiumViewer = scope.citydbKmlLayerInstance._cesiumViewer;
+			if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+				setTimeout(function(){   
+					if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
 						console.log("Highlighting Manager is sleeping...")
 						scope.oTask.sleep();
-					} 
-				}				 					
-		    }, 3000); 				
+					}
+					else {
+						if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
+							console.log("Highlighting manager repeat updating again...");
+							scope.rebuildDataPool(); 		    	  		    	
+						}
+						else {		
+							console.log("Highlighting Manager is sleeping...")
+							scope.oTask.sleep();
+						} 
+					}				 					
+			    }, 1000); 	
+			}	
+			else {
+				console.log("Highlighting Manager is sleeping...")
+				scope.oTask.sleep();
+			}				
 		});			
 
 		this.dataPool = this.generateDataPool();
@@ -95,18 +109,11 @@
 					}						
 				}	
 			}
-			else if (primitive instanceof Cesium.Primitive) {				
+			else if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {				
  				for (j = 0; j < primitive._instanceIds.length; j++){	
  					var targetEntity = primitive._instanceIds[j];
  					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
- 						var objectId;
- 						if (this.citydbKmlLayerInstance.pickSurface) {
- 							objectId = targetEntity.name;
- 						}
- 						else {
- 							objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
- 							
- 						}
+ 						var objectId = targetEntity.name;
  						_dataPool[objectId] = false;
  					}					
 				}							
@@ -130,52 +137,25 @@
 				}
 			}
 		}
-		else if (this.citydbKmlLayerInstance._layerType == "geometry") {
-			if (this.pickSurface) {
-				for (var i = 0; i < primitives.length; i++) {
-					var primitive = primitives.get(i);
-					for (j = 0; j < primitive._instanceIds.length; j++){	
-	 					var targetEntity = primitive._instanceIds[j];
-	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
-							var parentEntity = targetEntity._parent
-							if (Cesium.defined(parentEntity)) {
-								this.cachedObjects[targetEntity.name] = parentEntity._children;
-							}	
-	 					}					
-					}	
-				}
-			}
-			else {
-				for (var i = 0; i < primitives.length; i++) {
-					var primitive = primitives.get(i);
-					for (j = 0; j < primitive._instanceIds.length; j++){	
-	 					var targetEntity = primitive._instanceIds[j];
-	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
-							var objectId = targetEntity.name.replace('_RoofSurface', '').replace('_WallSurface', '');
-							if (!this.cachedObjects.hasOwnProperty(objectId)) {
-								var roofEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_RoofSurface');
-								var wallEntites = this.citydbKmlLayerInstance.getEntitiesById(objectId + '_WallSurface');
-								if (roofEntites != null && wallEntites != null) {
-									this.cachedObjects[objectId] = roofEntites.concat(wallEntites);
-								}
-							}	 						
-	 					}					
-					}	
-				}
-			}
-		}
-		else if (this.citydbKmlLayerInstance._layerType == "extruded" || this.citydbKmlLayerInstance._layerType == "footprint") {
+		else if (this.citydbKmlLayerInstance._layerType == "extruded" || this.citydbKmlLayerInstance._layerType == "footprint" || this.citydbKmlLayerInstance._layerType == "geometry") {
 			for (var i = 0; i < primitives.length; i++) {
 				var primitive = primitives.get(i);
-				for (var j = 0; j < primitive._instanceIds.length; j++){	
- 					var targetEntity = primitive._instanceIds[j];
- 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
- 						var parentEntity = targetEntity._parent
-						if (Cesium.defined(parentEntity)) {
-							this.cachedObjects[targetEntity.name] = parentEntity._children;
-						}
- 					}					
-				}	
+				if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
+					for (var j = 0; j < primitive._instanceIds.length; j++){	
+	 					var targetEntity = primitive._instanceIds[j];
+	 					if (Cesium.defined(targetEntity.name) && targetEntity.layerId === this.citydbKmlLayerInstance._id) {
+	 						var parentEntity = targetEntity._parent
+							if (Cesium.defined(parentEntity)) {
+								this.cachedObjects[targetEntity.name] = parentEntity._children;
+							}
+							else {
+								if (targetEntity.name != "Tile border") {
+									this.cachedObjects[targetEntity.name] = [targetEntity];
+								}
+							}
+	 					}					
+					}	
+				}				
 			}
 		}
 	}

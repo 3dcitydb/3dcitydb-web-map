@@ -1,5 +1,5 @@
 /**
- * 
+ * Web Worker for controlling Appearance of objects created by the dynamically loaded KML/KMZ data tiles
  */
 (function() {
 	var dataPool = new Object();
