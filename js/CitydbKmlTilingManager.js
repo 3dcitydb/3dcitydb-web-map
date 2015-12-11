@@ -190,14 +190,17 @@ var GlobeTileTaskQueue = {};
         				networklinkItem.lowerLeftCorner = lowerLeftCorner;
         				
 	        			var kmlDatasource = networklinkItem.kmlDatasource;
-	        			dataPoolKml[tileUrl] = networklinkItem;    
+	        			dataPoolKml[tileUrl] = networklinkItem;  
+	        			var tmpId = CitydbUtil.generateUUID();
+	        			GlobeTileTaskQueue[tmpId] = tileUrl;
+	        			scope.taskNumber = taskQueue.length;
         				dataSourceCollection.add(kmlDatasource).then(function() {
-        					scope.taskNumber = taskQueue.length;
+        					delete GlobeTileTaskQueue[tmpId];   
         					scope.oTask.triggerEvent('updateTaskStack');
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
 		        			console.log("loading layer from Cache...");	
         				}).otherwise(function(error) {
-        					scope.taskNumber = taskQueue.length;
+        					delete GlobeTileTaskQueue[tmpId];   
         					scope.oTask.triggerEvent('updateTaskStack');
         				});	  	    	        			  	        			
         			} 
@@ -225,25 +228,25 @@ var GlobeTileTaskQueue = {};
 					dataSourceCollection.add(newKmlDatasource);    						 
         			dataPoolKml[tileUrl] = newNetworklinkItem;
         			networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};        			
-        			GlobeTileTaskQueue[tileUrl] = tileUrl;
+        			var tmpId = CitydbUtil.generateUUID();
+        			GlobeTileTaskQueue[tmpId] = tileUrl;
+        			scope.taskNumber = taskQueue.length;
         			newKmlDatasource.load(tileUrl).then(function(dataSource) {
-        				scope.taskNumber = taskQueue.length;
         				console.log("loading layer from Server...");
-        				var tmpKey = hostAndPath + dataSource.name + fileextension; 
-        				delete GlobeTileTaskQueue[tmpKey];
+        				delete GlobeTileTaskQueue[tmpId];
         				scope.oTask.triggerEvent('updateTaskStack');        				
     				}).otherwise(function(error) {
     					console.log("HTTP request error in loading layer from Server...");
-        				delete GlobeTileTaskQueue[tileUrl];
+    					delete GlobeTileTaskQueue[tmpId];
     					scope.oTask.triggerEvent('updateTaskStack');
     				});
 				}	
 				else {	
 					// prefetching...
-					if (matrixItem[4].preFetching && Object.keys(GlobeTileTaskQueue).length == 0) {
+					if (matrixItem[4].preFetching) {
 						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
-						newKmlDatasource.load(tileUrl).then(function() {
-							scope.taskNumber = taskQueue.length;
+						scope.taskNumber = taskQueue.length;
+						newKmlDatasource.load(tileUrl).then(function() {							
 							if (scope.startPrefetching) {
 								console.log("---------------------start Prefeching........................");
 								scope.oTask.triggerEvent('updateTaskStack', 500);
