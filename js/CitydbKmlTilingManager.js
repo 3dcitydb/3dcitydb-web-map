@@ -243,7 +243,7 @@ var GlobeTileTaskQueue = {};
 				}	
 				else {	
 					// prefetching...
-					if (matrixItem[4].preFetching) {
+					if (matrixItem[4].preFetching && Object.keys(GlobeTileTaskQueue).length == 0) {
 						networklinkCache[tileUrl] = {networklinkItem: newNetworklinkItem, cacheStartTime: new Date().getTime()};	
 						scope.taskNumber = taskQueue.length;
 						newKmlDatasource.load(tileUrl).then(function() {							
