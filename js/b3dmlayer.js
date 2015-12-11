@@ -17,7 +17,7 @@
  */
 
 function B3DMLayer(options){
-	this._url = options.url;
+	this._url = Cesium.appendForwardSlash(options.url);
 	this._id = options.id;
 	this._name = options.name;
 	this._region = options.region;
