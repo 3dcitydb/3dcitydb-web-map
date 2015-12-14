@@ -72,6 +72,7 @@ var GlobeTileTaskQueue = {};
 		// parsing layer info..
 		var jsonLayerInfo = this.citydbKmlLayerInstance._jsonLayerInfo;			
 		var hostAndPath = CitydbUtil.get_host_and_path_from_URL(masterUrl);
+		var version = jsonLayerInfo.version;
 		var layername = jsonLayerInfo.layername;
 		var displayForm = jsonLayerInfo.displayform;
 		var fileextension = jsonLayerInfo.fileextension;
@@ -138,8 +139,15 @@ var GlobeTileTaskQueue = {};
     		var maxY = matrixItem[3];
     		
 			var colIndex = matrixItem[4].col;
-    		var rowIndex = matrixItem[4].row;    		
-    		var tileUrl = hostAndPath + layername + "_Tile_" + rowIndex + "_" + colIndex + "_" + displayForm + fileextension; 			
+    		var rowIndex = matrixItem[4].row; 
+    		
+    		var tileUrl; 	
+    		if (version == "1.0.0") {
+    			tileUrl = hostAndPath + "Tiles/" + rowIndex + "/" + colIndex + "/" + layername + "_Tile_" + rowIndex + "_" + colIndex + "_" + displayForm + fileextension;
+    		}
+    		else {
+    			tileUrl = hostAndPath + layername + "_Tile_" + rowIndex + "_" + colIndex + "_" + displayForm + fileextension; 	
+    		}    				
 
     		var lowerRightCorner;
 			var upperRightCorner;
