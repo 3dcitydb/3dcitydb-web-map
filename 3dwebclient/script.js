@@ -17,8 +17,7 @@
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1],
 		timeline: false,
 		animation : false,
-		fullscreenButton: false,
-		infoBox: false
+		fullscreenButton: false
 	});
 		
 	var cesiumCamera = cesiumViewer.scene.camera;
