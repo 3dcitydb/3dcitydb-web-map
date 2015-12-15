@@ -14,7 +14,11 @@
 	
 	// create 3Dcitydb-web-map instance
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
-		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1]
+		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1],
+		timeline: false,
+		animation : false,
+		fullscreenButton: false,
+		infoBox: false
 	});
 		
 	var cesiumCamera = cesiumViewer.scene.camera;
