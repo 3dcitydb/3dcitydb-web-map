@@ -49,7 +49,7 @@
 	WebMap3DCityDB.prototype.passEventToLayer = function(modifier, object){
 		if(object){
 			var i = 0;
-			if(Cesium.BatchedModel && object instanceof Cesium.BatchedModel){
+			if(Cesium.Cesium3DTileFeature && object instanceof Cesium.Cesium3DTileFeature){
 				var url = object.primitive.url;
 				for(i = 0; i < this._layers.length; i++){
 					if(this._layers[i].url == url){
