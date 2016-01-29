@@ -206,13 +206,13 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 			//TODO styling stuff and highlighting/hide stuff is now always performed on each update, could perhaps not be so performant
 			// Styling stuff
 			if(that._style instanceof Cesium.Color){
-				tile.content.batchTableResources.setAllColor(that._style);
+				tile.content._batchTableResources.setAllColor(that._style);
 			}else if(isFunction(that._style)){
-				batchSize = tile.content.batchLength;
+				batchSize = tile.content.featuresLength;
 				for(var j = 0; j < batchSize; j++){
-					model = tile.content.getModel(j);
-					var jsonObject = getObjectForBatchId(tile.content.batchTableResources.batchTable, j, true);
-					color = that._style.call(null, jsonObject, bindBatchTableToFunction(getAttributesFromParent, tile.content.batchTableResources.batchTable));
+					model = tile.content.getFeature(j);
+					var jsonObject = getObjectForBatchId(tile.content._batchTableResources.batchTable, j, true);
+					color = that._style.call(null, jsonObject, bindBatchTableToFunction(getAttributesFromParent, tile.content._batchTableResources.batchTable));
 					if(color === false){
 						model.show = false;
 					}else{
@@ -224,8 +224,8 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				}
 			}
 			// Highlighting and Hide stuff
-				var batchTable = tile.content.batchTableResources.batchTable;
-				batchSize = tile.content.batchTableResources.batchLength;
+				var batchTable = tile.content._batchTableResources.batchTable;
+				batchSize = tile.content._batchTableResources.featuresLength;
 				var batchId = 0;
 				var batchIds =[];
 				var model = null;
@@ -244,7 +244,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 
 						for(var k = 0; k < batchIds.length; k++){
 							//var color = new Cesium.Color(1,1,1,1);
-							model = tile.content.getModel(batchIds[k]);
+							model = tile.content.getFeature(batchIds[k]);
 							that._highlightedObjectsOriginalModels[id][batchIds[k]] = model;
 							color = model.color;
 							if(!that._highlightedObjectsOriginalColor[id]){
@@ -257,7 +257,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 				}
 				for(var key in that._hiddenObjects){
 					batchId = getFirstBatchIdByProperty(batchTable, "id", key);
-					if(batchId !== -1){
+					if(batchId !== null){
 						batchIds =[];
 						if(batchId >= batchSize){
 							var rootId = getRootId(batchTable, key);
@@ -267,7 +267,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 						}
 						for(var l = 0; l < batchIds.length; l++){
 							//var color = new Cesium.Color(1,1,1,1);
-							model = tile.content.getModel(batchIds[l]);
+							model = tile.content.getFeature(batchIds[l]);
 							that._hiddenObjectsModels[key][batchIds[l]] = model;
 							model.show = false;
 						}
@@ -279,6 +279,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 		}
 		//console.log(tile);
 	});
+
 };
 
 function bindBatchTableToFunction(func, batchTable){
@@ -569,7 +570,7 @@ B3DMLayer.prototype.registerEventHandler = function(event, callback){
 B3DMLayer.prototype.triggerEvent = function(event, object){
 	var objectId = object.getProperty("id");
 	var batchTable = object._batchTableResources.batchTable;
-	var batchSize =  object._batchTableResources.batchLength;
+	var batchSize =  object._batchTableResources.featuresLength;
 	if(this.clickPickMode === "toplevelfeature"){
 		objectId = getRootId(batchTable, objectId);
 	}
