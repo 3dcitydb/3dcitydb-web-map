@@ -93,9 +93,9 @@
 			
 			/** i --> column (X); j --> row (Y) */	
 			for ( var i = minCol; i <= maxCol; i++ ) {
-				if (i >= 0 && i <= _colnum) {
+				if (i >= 0 && i < _colnum) {
 					for ( var j = minRow; j <= maxRow; j++ ) {
-						if (j >= 0 && j <= _rownum) {
+						if (j >= 0 && j < _rownum) {
 							var minX = _bbox.xmin + i * _colDelta;
 							var minY = _bbox.ymin + j * _rowDelta;
 							var maxX = _bbox.xmin + (i + 1) * _colDelta;

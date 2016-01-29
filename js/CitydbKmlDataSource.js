@@ -1307,10 +1307,33 @@
         var position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
         
         var orientationNode = queryFirstNode(modelNode, 'Orientation', namespaces.kml);
+        
         var headingValue = queryNumericValue(orientationNode, 'heading', namespaces.kml);
-		var heading = Cesium.Math.toRadians(headingValue - 180);
-		var pitch = Cesium.Math.toRadians(180);
-		var roll = 0;
+        if (!defined(headingValue)) {
+        	headingValue = 0;
+        }
+        
+        var tiltValue = queryNumericValue(orientationNode, 'tilt', namespaces.kml);
+        if (!defined(tiltValue)) {
+        	tiltValue = 0;
+        }
+        
+        var rollValue = queryNumericValue(orientationNode, 'roll', namespaces.kml);
+        if (!defined(rollValue)) {
+        	rollValue = 0;
+        }
+        
+        var heading = Cesium.Math.toRadians(headingValue);
+		var pitch = Cesium.Math.toRadians(tiltValue);
+		var roll = Cesium.Math.toRadians(rollValue);
+		
+		// Backward compatible....
+		var gltfVersion = CitydbUtil.parse_query_string('gltf_version', window.location.href);
+        if (gltfVersion == '0.8') {
+        	var heading = Cesium.Math.toRadians(headingValue - 180);
+    		var pitch = Cesium.Math.toRadians(180);
+        }
+		
 		var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
 		
 		var linkNode = queryFirstNode(modelNode, 'Link', namespaces.kml);

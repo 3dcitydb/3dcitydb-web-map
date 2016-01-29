@@ -78,9 +78,14 @@ var GlobeTileTaskQueue = {};
 		var fileextension = jsonLayerInfo.fileextension;
 		var colnum = jsonLayerInfo.colnum;
 		var rownum = jsonLayerInfo.rownum;  
+		var gltfVersion = CitydbUtil.parse_query_string('gltf_version', window.location.href);
+        if (gltfVersion == '0.8') {
+        	colnum = colnum + 1;
+        	rownum = rownum + 1;
+        }
 		var bbox = jsonLayerInfo.bbox;
-		var rowDelta = (bbox.ymax - bbox.ymin) / (rownum + 1);
-		var colDelta = (bbox.xmax - bbox.xmin) / (colnum + 1);
+		var rowDelta = (bbox.ymax - bbox.ymin) / (rownum);
+		var colDelta = (bbox.xmax - bbox.xmin) / (colnum);
 		scope.oTask.triggerEvent('createMatrix', bbox, rowDelta, colDelta, rownum, colnum);	
 		
 		// create the master bounding box 
