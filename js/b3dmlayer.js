@@ -237,7 +237,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 						batchIds = [];
 						if(batchId >= batchSize){
 							//var rootId = getRootId(batchTable, id);
-							batchIds = getBatchIdsOfChildrenByBatchId(batchTable, batchId);
+							batchIds = getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
 						} else{
 							batchIds.push(batchId);
 						}
@@ -371,6 +371,26 @@ function getBatchIdsOfChildrenByBatchId(batchTable, batchId){
         }
     }
     return batchIds;
+}
+
+function getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId){
+	var batchIds = [];
+	var parentBatchIds = [batchId];
+	if(batchTable["parentPosition"]){
+		for(var i = batchTable["parentPosition"].length - 1; i >= 0; i-- ){
+			for(var j = 0; j < parentBatchIds.length; j++){
+				if(batchTable["parentPosition"][i] === parentBatchIds[j]){
+					if(i >= batchSize){
+						parentBatchIds.push(i);
+					}else{
+						batchIds.push(i);
+					}
+				}
+			}
+
+		}
+	}
+	return batchIds;
 }
 
 function getBatchIdsByProperty(batchTable, property, value){
