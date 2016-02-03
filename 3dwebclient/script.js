@@ -97,16 +97,22 @@
 			document.title = titleStr;
 		}			
 		
-		// extended search command for searching object by gmlid
-		cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 	
-			var gmlId = cesiumViewer.geocoder.viewModel._searchText;	
-			var promise = zoomToObject(gmlId);
-			Cesium.when(promise, function(result) {
-				info.cancel = true;
-	        	cesiumViewer.geocoder.viewModel.searchText = "Object " + gmlId + " has been found!";
-			},function() {
-				throw new Cesium.DeveloperError(arguments);
-			});	
+		// It's an extended Geocoder widget which can also be used for searching object by its gmlid. In the input field, you just need to add two colons before the gmlid
+		// For example, if you want to search object with a gmlid "BLDG_0003000b006b51e2", you need to type "::BLDG_0003000b006b51e2" in the input field	
+		// Here, the cityobjectjson (or GoogleFusionTable) is required that provides location information of the objects. 
+		cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 
+			var searchText = cesiumViewer.geocoder.viewModel._searchText;
+			var gmlId = "";
+			if (searchText.indexOf("::") > -1) {
+				info.cancel = true;	
+				gmlId = searchText.replace("::", "");
+				cesiumViewer.geocoder.viewModel._searchText = "Searching now......."
+			}			
+			zoomToObjectById(gmlId, function() {									
+	        	cesiumViewer.geocoder.viewModel.searchText = gmlId;
+			}, function() {
+				console.log('You need either the cityobjectjson file or GoogleFusionTable which contains location information of the city objects');
+			});			
 	  	});
 		
 		//	inspect the status of the showed and cached tiles	
@@ -201,13 +207,13 @@
 		
 		var highlightingListElement = document.getElementById("citydb_highlightinglist");
 		highlightingListElement.onchange = function() {			
-            zoomToObject(this.value);
+			zoomToObjectById(this.value);
             highlightingListElement.selectedIndex = 0;
         };
         
 		var hiddenListElement = document.getElementById("citydb_hiddenlist");
 		hiddenListElement.onchange = function() {			
-            zoomToObject(this.value);
+			zoomToObjectById(this.value);
             hiddenListElement.selectedIndex = 0;
         };
 		
@@ -287,7 +293,7 @@
 		
 		// update GUI:
 		var nodes = document.getElementById('citydb_layerlistpanel').childNodes;
-		for (i = 0; i < nodes.length; i += 3) {
+		for (var i = 0; i < nodes.length; i += 3) {
 			var layerOption = nodes[i];
 			if (layerOption.id == activeLayer.id) {
 				layerOption.childNodes[2].innerHTML = activeLayer.name;
@@ -484,7 +490,7 @@
 				catch(e){return;} // not valid entities
 				_dismissMouseoverHighlighting(childrenEntities, primitive);	
 			}
-		});	 
+		})	 
 	 	
 		function _doMouseoverHighlighting(_childrenEntities, _primitive, _mouseOverhighlightColor) {
 			for (var i = 0; i < _childrenEntities.length; i++){	
@@ -738,39 +744,72 @@
   		}
   	};
   	
-  	function zoomToObject(gmlId) {
-  		var thematicDataUrl = webMap.activeLayer.thematicDataUrl;  
-		var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
-		var _deferred = Cesium.when.defer();
-		Cesium.when(promise, function(result) {
-			var centroid = result["CENTROID"];
-	        if (centroid) {	  
-	        	var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
-	            var lon = parseFloat(res[0]);
-	            var lat = parseFloat(res[1]);
-	    		var center = Cesium.Cartesian3.fromDegrees(lon, lat);
-    	        var heading = Cesium.Math.toRadians(0);
-    	        var pitch = Cesium.Math.toRadians(-50);
-    	        var range = 150;
-
-	            cesiumCamera.flyTo({
-	                destination : Cesium.Cartesian3.fromDegrees(lon, lat, range),
-	                complete: function() {
-	                	cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
-	                	cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
-	                	_deferred.resolve(gmlId);
-	                }
-	            })
-	        }
-	        else {
-	        	_deferred.reject(gmlId);
-	        }
-		}, function() {
-			throw new Cesium.DeveloperError(arguments);
-		});		        
-	
-  		return _deferred;
-  	}
+  	function zoomToObjectById (gmlId, callBackFunc, errorCallbackFunc) {
+  		gmlId = gmlId.trim();
+		var activeLayer = webMap._activeLayer;
+		if (Cesium.defined(activeLayer)) {
+			var cityobjectsJsonData = activeLayer.cityobjectsJsonData;
+			var obj = cityobjectsJsonData[gmlId];
+	        if (obj) {
+	            var lon = (obj.envelope[0] + obj.envelope[2]) / 2.0;
+	            var lat = (obj.envelope[1] + obj.envelope[3]) / 2.0;
+	            flyToMapLocation(lat, lon, callBackFunc);          
+	        }	
+			else {
+				var thematicDataUrl = webMap.activeLayer.thematicDataUrl;  
+				var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
+				Cesium.when(promise, function(result) {
+					var centroid = result["CENTROID"];
+			        if (centroid) {	  
+			        	var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
+			            var lon = parseFloat(res[0]);
+			            var lat = parseFloat(res[1]);
+			            flyToMapLocation(lat, lon, callBackFunc);  
+			        }
+			        else {
+			        	if (Cesium.defined(errorCallbackFunc)) {
+							errorCallbackFunc.call(this);
+		            	}
+			        }
+				}, function() {
+					if (Cesium.defined(errorCallbackFunc)) {
+						errorCallbackFunc.call(this);
+	            	}
+				});		
+			}
+		}		
+	};
+  	
+  	function flyToMapLocation(lat, lon, callBackFunc) {
+		var cesiumWidget = webMap._cesiumViewerInstance.cesiumWidget; 
+		var scene = cesiumWidget.scene;
+    	var camera = scene.camera;
+    	var canvas = scene.canvas;
+    	var globe = scene.globe;
+    	var clientWidth = canvas.clientWidth;
+		var clientHeight = canvas.clientHeight;	          
+        camera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(lon, lat, 2000),
+            complete: function() {
+            	var timer = setInterval(function(){
+            		if (webMap._cesiumViewerInstance.scene.globe._surface._tileLoadQueue.length == 0) { 
+            			var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
+                    	var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;
+                    	var center = Cesium.Cartesian3.fromDegrees(lon, lat, terrainHeight);
+                        var heading = Cesium.Math.toRadians(0);
+                        var pitch = Cesium.Math.toRadians(-50);
+                    	var range = 200;   
+                    	camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+                    	camera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
+                    	if (Cesium.defined(callBackFunc)) {
+                    		callBackFunc.call(this);
+                    	}
+                    	clearInterval(timer);
+            		}	
+            	}, 1000)            	
+            }
+        })		
+	}
   	
   	function addNewLayer() {
   		var _layers = new Array();
