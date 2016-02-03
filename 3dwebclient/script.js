@@ -3,8 +3,7 @@
 	 * @name 3DCityDB-Web-Map-Client
 	 * @description CesiumJS and 3DCityDB based web client for interactive 3D visualization and exploration of large semantic 3D city models 
 	 * @author Zhihang Yao <zhihang.yao@tum.de>, Thomas H.Kolbe <thomas.kolbe@tum.de>
-	 * @version 07.09.2015, TU München
-	 * @Copyright (c)2015 TU München, Chair of Geoinformatics <http://www.gis.bgu.tum.de/> 
+	 * @Copyright (c)2015-2016 Technische Universität München, Chair of Geoinformatics <http://www.gis.bgu.tum.de/> 
 	 * @licence GNU Lesser General Public License Version 3.0
 	 */
 
@@ -42,7 +41,8 @@
         tooltip : 'NYC Orthoimagery',
 		url: 'http://www.orthos.dhses.ny.gov/ArcGIS/services/Latest/MapServer/WMSServer',
 		layers : '0',
-		additionalParameters: ''
+		additionalParameters: '',
+		proxyUrl: '/proxy/'
 	};  	
   	Cesium.knockout.track(addWmsViewModel);
 	Cesium.knockout.applyBindings(addWmsViewModel, document.getElementById('citydb_addwmspanel'));	
@@ -134,28 +134,6 @@
 				addTerrainProvider();
 			}
 		})			
-	}
-	
-	/*---------------------------------  	Vorarlberg Demo      ----------------------------------------*/ 
-	
-	function loadWmsAndTerrainForVorarlberg() {
-		addWmsViewModel = {
-	        name : 'Vorarlberg WMS Service',
-	        iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
-	        tooltip : 'Voralberg Orthoimagery',
-			url: 'http://vogis.cnv.at/mapserver/mapserv',
-			layers : 'ef2012_12cm',
-			additionalParameters: 'map=i_luftbilder_r_wms.map'
-		};
-		addWebMapServiceProvider();
-		
-		addTerrainViewModel = {
-	        name : 'Vorarlberg Terrain Model',
-	        iconUrl : 'http://cdn.flaggenplatz.de/media/catalog/product/all/4489b.gif',
-	        tooltip : 'Vorarlberg Terrain Model',
-	    	url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/vorarlberg_DGM'
-		}; 
-		addTerrainProvider();
 	}
 	    
     /*---------------------------------  methods and functions  ----------------------------------------*/ 
@@ -809,15 +787,7 @@
   	
 	function addWebMapServiceProvider() {
 		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-		var proxyUrl;
-		if (location.host.indexOf('8000') > -1) {
-			proxyUrl = '/proxy/'
-		}
-		else {
-			proxyUrl = location.protocol + '//' + location.host + '/proxy/'
-		}
-		
-		console.log(proxyUrl);
+		console.log(addWmsViewModel.proxyUrl);
 		var wmsProviderViewModel = new Cesium.ProviderViewModel({
 	        name : addWmsViewModel.name,
 	        iconUrl : addWmsViewModel.iconUrl,
@@ -827,7 +797,7 @@
 	    			url: addWmsViewModel.url,
 	    			layers : addWmsViewModel.layers,
 	    			parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters),
-	    			proxy: new Cesium.DefaultProxy(proxyUrl)
+	    			proxy: new Cesium.DefaultProxy(addWmsViewModel.proxyUrl)
 	    		});
 	        }
 	    });
