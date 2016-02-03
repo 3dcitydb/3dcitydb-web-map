@@ -30,6 +30,7 @@
 		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
 		name : "Berlin_Center_Footprint",
 		thematicDataUrl: "",
+		cityobjectsJsonUrl: "",
 		minLodPixels : 140,
 		maxLodPixels : Number.MAX_VALUE,
 		maxSizeOfCachedTiles : 50,
@@ -149,25 +150,25 @@
 			var layers = webMap._layers;
 			var numberOfshowedTiles = 0;
 			var numberOfCachedTiles = 0;
-			var isLoadingTiles = false;
+			var numberOfTasks = 0;
 	  		for (var i = 0; i < layers.length; i++) {
 	  			if (layers[i].active) {	  				
 	  				numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
 	  				numberOfCachedTiles = numberOfCachedTiles +  Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
-	  				if (layers[i].citydbKmlTilingManager.isDataStreaming()) {
-	  					isLoadingTiles = true;
-	  				}
+	  				numberOfTasks = numberOfTasks + layers[i].citydbKmlTilingManager.taskNumber;
 	  			} 	
 	  		}
 	  		showedTilesInspector.innerHTML = 'Number of showed Tiles: ' + numberOfshowedTiles;
 			cachedTilesInspector.innerHTML = 'Number of cached Tiles: ' + (numberOfCachedTiles - numberOfshowedTiles);
 			
-/*			var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
-			if (isLoadingTiles)
+			var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
+			if (numberOfTasks > 0) {
 				loadingTilesInspector.style.display = 'block';
-			else
-				loadingTilesInspector.style.display = 'none';*/
-		}, 1000);		
+	  		}
+	  		else {
+	  			loadingTilesInspector.style.display = 'none';
+	  		}
+		}, 200);		
 	}
 	
 	function getLayersFromUrl() {
@@ -180,6 +181,7 @@
 				url : layerConfig.url,
 				name : layerConfig.name,
 				thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
+				cityobjectsJsonUrl: Cesium.defaultValue(layerConfig.cityobjectsJsonUrl, ""),
 				active: (layerConfig.active == "true"),
 				minLodPixels : Cesium.defaultValue(layerConfig.minLodPixels, 140),
 				maxLodPixels : Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
@@ -263,6 +265,7 @@
 			addLayerViewModel.url = selectedLayer.url;
 			addLayerViewModel.name = selectedLayer.name;
 			addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
+			addLayerViewModel.cityobjectsJsonUrl = selectedLayer.cityobjectsJsonUrl;
 			addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
 			addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
 			addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
@@ -275,15 +278,27 @@
 		applySaving('url', activeLayer);
 		applySaving('name', activeLayer);
 		applySaving('thematicDataUrl', activeLayer);
+		applySaving('cityobjectsJsonUrl', activeLayer);
 		applySaving('minLodPixels', activeLayer);
 		applySaving('maxLodPixels', activeLayer);
 		applySaving('maxSizeOfCachedTiles', activeLayer);
 		applySaving('maxCountOfVisibleTiles', activeLayer);
 		console.log(activeLayer);
 		
+		// update GUI:
+		var nodes = document.getElementById('citydb_layerlistpanel').childNodes;
+		for (i = 0; i < nodes.length; i += 3) {
+			var layerOption = nodes[i];
+			if (layerOption.id == activeLayer.id) {
+				layerOption.childNodes[2].innerHTML = activeLayer.name;
+			};
+		}
+		
 		document.getElementById('loadingIndicator').style.display = 'block';	
 		var promise = activeLayer.reActivate();
 		Cesium.when(promise, function(result){
+			document.getElementById('loadingIndicator').style.display = 'none';
+		},function(error){
 			document.getElementById('loadingIndicator').style.display = 'none';
 		})
 		
@@ -652,6 +667,7 @@
 				name : layer.name,
 				active: layer.active,
 				spreadsheetUrl: layer.thematicDataUrl,
+				cityobjectsJsonUrl: layer.cityobjectsJsonUrl,
 				minLodPixels: layer.minLodPixels,
 				maxLodPixels: layer.maxLodPixels,
 				maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
@@ -763,6 +779,7 @@
 			url : addLayerViewModel.url,
 			name : addLayerViewModel.name,
 			thematicDataUrl : addLayerViewModel.thematicDataUrl,
+			cityobjectsJsonUrl : addLayerViewModel.cityobjectsJsonUrl,
 			minLodPixels: addLayerViewModel.minLodPixels,
 			maxLodPixels : addLayerViewModel.maxLodPixels,
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
