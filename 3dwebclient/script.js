@@ -18,7 +18,10 @@
 		animation : false,
 		fullscreenButton: false
 	});
-		
+	
+	navigationInitialization('cesiumContainer', cesiumViewer);
+	document.getElementsByClassName('cesium-infoBox')[0].style.zIndex='300';
+
 	var cesiumCamera = cesiumViewer.scene.camera;
 	var webMap = new WebMap3DCityDB(cesiumViewer);	
 
@@ -84,6 +87,7 @@
 			cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
 			var cesiumInfoBoxElement = document.getElementsByClassName('cesium-infoBox')[0];
 			cesiumInfoBoxElement.style.top = '90px';
+			cesiumInfoBoxElement.style.zIndex='300';
 		}	
 		
 		// set title of the web page
@@ -158,11 +162,11 @@
 	  		showedTilesInspector.innerHTML = 'Number of showed Tiles: ' + numberOfshowedTiles;
 			cachedTilesInspector.innerHTML = 'Number of cached Tiles: ' + (numberOfCachedTiles - numberOfshowedTiles);
 			
-			var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
+/*			var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
 			if (isLoadingTiles)
 				loadingTilesInspector.style.display = 'block';
 			else
-				loadingTilesInspector.style.display = 'none';
+				loadingTilesInspector.style.display = 'none';*/
 		}, 1000);		
 	}
 	
