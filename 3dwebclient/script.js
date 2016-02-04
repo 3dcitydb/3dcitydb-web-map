@@ -592,8 +592,6 @@
 	    } 
 	    else {
 	    	// default camera postion
-	    	var extent = new Cesium.Rectangle.fromDegrees(13.34572857, 52.5045771, 13.427975, 52.658449);
-	    	cesiumCamera.viewRectangle(extent);
 	    	deferred.resolve("fly to the default camera position");;
 	    }
 	    return deferred;
@@ -609,11 +607,13 @@
             destination : Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
             complete: function() {
             	cesiumCamera.setView({
-        		    positionCartographic : new Cesium.Cartographic(Cesium.Math.toRadians(longitude), Cesium.Math.toRadians(latitude), height),
-        		    heading : Cesium.Math.toRadians(cameraPosition.heading),
-        		    pitch : Cesium.Math.toRadians(cameraPosition.pitch),
-        		    roll : Cesium.Math.toRadians(cameraPosition.roll)
-        		});
+            		destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
+            		orientation: {
+            			heading : Cesium.Math.toRadians(cameraPosition.heading),
+            		    pitch : Cesium.Math.toRadians(cameraPosition.pitch),
+            		    roll : Cesium.Math.toRadians(cameraPosition.roll)
+            		}
+            	});
             	deferred.resolve("fly to the desired camera position");
             }
         });	
@@ -623,15 +623,21 @@
     // Creation of a scene link for sharing with other people..
  	function generateLink(){
 		var cameraPosition = getCurrentCameraPostion();
-		var	projectLink = location.protocol + '//' + location.host + location.pathname + '?' +
-         	'&title=' + document.title +
+		var	projectLink = location.protocol + '//' + location.host + location.pathname + '?';
+		var gltf_version = CitydbUtil.parse_query_string('gltf_version', window.location.href);
+		
+		if (gltf_version)
+			projectLink = projectLink + 'gltf_version=' + gltf_version;
+		
+		projectLink = projectLink +
+			'&title=' + document.title +
 			'&latitude=' + cameraPosition.latitude +
 			'&longitude=' + cameraPosition.longitude +
 			'&height=' + cameraPosition.height +
 			'&heading=' + cameraPosition.heading +
 			'&pitch=' + cameraPosition.pitch +
 			'&roll=' + cameraPosition.roll + 
-			'&' + layersToQuery(); 	
+			'&' + layersToQuery();      		
 		var basemap = basemapToQuery();
 		if (basemap != null) {
 			projectLink = projectLink + '&' + basemap;
