@@ -907,7 +907,7 @@
   		var imageWin = window.open("");
   		imageWin.document.write("<html><head>" +
   				"<title>" + imageUri + "</title></head><body>" +
-  				'<img src="' + imageUri + '"height="97%" width="100%">' + 
+  				'<img src="' + imageUri + '"width="100%">' + 
   				"</body></html>");
   		return imageWin;
 	}
