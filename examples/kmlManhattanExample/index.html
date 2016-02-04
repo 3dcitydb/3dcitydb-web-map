@@ -11,7 +11,7 @@
   <title>New York City demo</title>
   
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script src="../../ThirdParty/Cesium-1-16/Cesium.js"></script> 
+  <script src="../../ThirdParty/Cesium-1-18/Cesium.js"></script> 
   <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
   <script src="../../js/3dcitydb-web-map.js"></script>  
   <script src="../../js/CitydbUtil.js"></script>  
@@ -23,7 +23,7 @@
   <script src="../../js/CitydbKmlLayer.js"></script> 
   
   <style>
-     @import url(../../ThirdParty/Cesium-1-16/Widgets/widgets.css);
+     @import url(../../ThirdParty/Cesium-1-18/Widgets/widgets.css);
       html, body, #cesiumContainer {
           top: 0px;
           left: 0px;
@@ -49,7 +49,7 @@
   <div id="cesiumContainer"></div>
    <div id="uiMenu">
     <button type="button" onclick="addLayers()">add KML/KMZ Data Layers</button>
-    <button type="button" onclick="removeLayers()">remove KML/KMZ Data Layer</button>
+    <button type="button" onclick="removeLayers()">remove KML/KMZ Data Layers</button>
   </div>
   <script>
 	// Initialize Cesium Viewer
@@ -71,15 +71,15 @@
 	
 	var addLayers = function() {
 		buildingLayer = new CitydbKmlLayer({
-			url : './data/Buildings/NYC_Building_Extruded_MasterJSON.json'
+			url : './data/Buildings/NYC_Manhattan_Buildings_extruded_MasterJSON.json'
 		});
 		
 		lotLayer = new CitydbKmlLayer({
-			url : './data/Lot/NYC_Lot_Footprint_MasterJSON.json'
+			url : './data/Lots/NYC_Manhattan_Lots_footprint_MasterJSON.json'
 		});
 		
 		streetLayer = new CitydbKmlLayer({
-			url : './data/Street/NYC_Street_Footprint_MasterJSON.json'
+			url : './data/Streets/NYC_Manhattan_Streets_footprint_MasterJSON.json'
 		});
 		
 		webMap.addLayer(buildingLayer);
