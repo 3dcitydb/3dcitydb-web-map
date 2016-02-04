@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <link rel="icon" type="image/png" href="../../theme/img/favicon.png" sizes="16x16">
+  <title>Railway Scene LoD3 demo</title>
+  
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="../../ThirdParty/Cesium-1-18/Cesium.js"></script> 
+  <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
+  <script src="../../js/3dcitydb-web-map.js"></script>  
+  <script src="../../js/CitydbUtil.js"></script>  
+  <script src="../../js/CitydbWebworker.js"></script>
+  <script src="../../js/CitydbSceneTransforms.js"></script> 
+  <script src="../../js/CitydbKmlHighlightingManager.js"></script>   
+  <script src="../../js/CitydbKmlTilingManager.js"></script>  
+  <script src="../../js/CitydbKmlDataSource.js"></script>    
+  <script src="../../js/CitydbKmlLayer.js"></script> 
+  
+  <style>
+     @import url(../../ThirdParty/Cesium-1-18/Widgets/widgets.css);
+      html, body, #cesiumContainer {
+          top: 0px;
+          left: 0px;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          z-index: -1;
+      }
+      #uiMenu {
+          border-radius:5px;
+          padding: 10px;
+          position:absolute;
+          left: 20px;
+          font-family: "Arial";
+          z-index: 99999;
+      }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+   <div id="uiMenu">
+    <button type="button" onclick="addLayers()">add glTF Data Layers</button>
+    <button type="button" onclick="removeLayers()">remove glTF Data Layers</button>
+  </div>
+  <script>
+	Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq'
+	
+	var viewer = new Cesium.Viewer('cesiumContainer', {
+		baseLayerPicker : false
+	});
+	
+	var observable = Cesium.knockout.getObservable(viewer, '_selectedEntity');
+	observable.subscribe(function(entity) {
+		if (!Cesium.defined(entity)) {
+			var layers = webMap._layers;
+	  		for (var i = 0; i < layers.length; i++) {
+	  			if (layers[i].active) {
+	  				layers[i].unHighlightAllObjects();
+	  			} 			
+	  		} 
+		}
+	});	
+	
+	var webMap = new WebMap3DCityDB(viewer);
+	webMap.activateViewChangedEvent(true);
+	webMap.activateMouseMoveEvents(true);
+	webMap.activateMouseClickEvents(true);
+	
+	var mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);	
+	var mouseClickhighlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
+	
+	var dataLayer;	
+	
+	var addLayers = function() {
+		dataLayer = new CitydbKmlLayer({
+			url : './Railway_Scene_LoD3/Railway_Scene_LoD3_collada_MasterJSON.json'
+		});
+		
+		dataLayer.registerEventHandler("CLICK", function(object) {			
+			var targetEntity = object.id;
+	 		var primitive = object.primitive;
+	 		var id = targetEntity.name; 
+	 		
+	 		if (primitive instanceof Cesium.Model) {
+	 			dataLayer.unHighlightAllObjects();  									
+				var highlightThis = {};			
+				highlightThis[id] = mouseClickhighlightColor;
+				dataLayer.highlight(highlightThis); 
+	 		}									
+		});
+		
+		dataLayer.registerEventHandler("MOUSEIN", function(object) {
+			var targetEntity = object.id;
+	 		var primitive = object.primitive;
+			var id = targetEntity.name;
+	 		
+	 		if (dataLayer.isInHighlightedList(id))
+				return; 
+	 		
+			if (primitive instanceof Cesium.Model) {				
+				var materials = object.mesh._materials;
+				for (var i = 0; i < materials.length; i++) {
+					materials[i].setValue('emission', Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
+				} 
+			}
+		});
+		
+		dataLayer.registerEventHandler("MOUSEOUT", function(object) {
+	 		var primitive = object.primitive;
+	 		var targetEntity = object.id;
+	 		var id = targetEntity.name;
+	 		
+	 		if (dataLayer.isInHighlightedList(id))
+				return; 
+	 		
+			if (primitive instanceof Cesium.Model) {				
+				var materials = object.mesh._materials;
+				for (var i = 0; i < materials.length; i++) {
+					materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
+				} 
+			}
+		})	
+
+		webMap.addLayer(dataLayer);
+
+		dataLayer.registerEventHandler("FINISHLOADING", function(loadedcitydbLayer) {
+			loadedcitydbLayer.zoomToStartPosition();
+		});		
+	};
+	
+	var removeLayers = function() {
+		webMap.removeLayer(dataLayer.id);
+	};	
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Written by null, version "null" -->
+<kml xmlns:atom="http://www.w3.org/2005/Atom" xmlns="http://www.opengis.net/kml/2.2" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:gx="http://www.google.com/kml/ext/2.2">
+  <Document>
+    <name>Railway_Scene_LoD3</name>
+    <open>true</open>
+    <LookAt>
+      <longitude>13.032767318594875</longitude>
+      <latitude>52.33061113268489</latitude>
+      <altitude>0.0</altitude>
+      <heading>0.0</heading>
+      <tilt>60.0</tilt>
+      <range>970.0</range>
+    </LookAt>
+    <Style id="frameStyle">
+      <LineStyle>
+        <width>4.0</width>
+      </LineStyle>
+    </Style>
+    <Placemark>
+      <name>Tile border</name>
+      <styleUrl>#frameStyle</styleUrl>
+      <LineString>
+        <tessellate>true</tessellate>
+        <coordinates>13.030096681170717,52.32964881460045 13.035437956019035,52.32964881460045 13.035437956019035,52.33157345076934 13.030096681170717,52.33157345076934 13.030096681170717,52.32964881460045</coordinates>
+      </LineString>
+    </Placemark>
+    <Folder>
+      <name>Railway_Scene_LoD3_Tile_0_0</name>
+      <NetworkLink>
+        <name>Display as collada</name>
+        <Region>
+          <LatLonAltBox>
+            <north>52.33157345076934</north>
+            <south>52.32964881460045</south>
+            <east>13.035437956019035</east>
+            <west>13.030096681170717</west>
+          </LatLonAltBox>
+          <Lod>
+            <minLodPixels>120.0</minLodPixels>
+            <maxLodPixels>-1.0</maxLodPixels>
+          </Lod>
+        </Region>
+        <Link>
+          <href>Tiles\0\0\Railway_Scene_LoD3_Tile_0_0_collada.kml</href>
+          <viewRefreshMode>onRegion</viewRefreshMode>
+          <viewFormat/>
+        </Link>
+      </NetworkLink>
+    </Folder>
+  </Document>
+</kml>
