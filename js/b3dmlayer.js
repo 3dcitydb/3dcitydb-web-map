@@ -201,7 +201,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
 		var batchSize;
 		var color;
 
-		if((!tile._lastUpdated || tile._lastUpdated < that._lastUpdated) && tile.content instanceof Cesium.Batched3DModel3DTileContentProvider){
+		if((!tile._lastUpdated || tile._lastUpdated < that._lastUpdated) && tile.content instanceof Cesium.Batched3DModel3DTileContent){
 
 			//TODO styling stuff and highlighting/hide stuff is now always performed on each update, could perhaps not be so performant
 			// Styling stuff
