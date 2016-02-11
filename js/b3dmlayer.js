@@ -597,14 +597,14 @@ B3DMLayer.prototype.triggerEvent = function(event, object){
 	var JSONobject;
 	if(event == "CLICK"){
 		JSONobject = getObjectForId(batchTable, objectId);
-		JSONobject.position = object.position ? object.position : {};
+		JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
 		this._clickEvent.raiseEvent(objectId, JSONobject);
 	}else if(event == "CTRLCLICK"){
 		if (this.clickPickMode !== "toplevelfeature" && this.ctrlclickPickMode == "toplevelfeature"){
 			 objectId = getRootId(batchTable, objectId);
 		}
 		JSONobject = getObjectForId(batchTable, objectId);
-		JSONobject.position = object.position ? object.position : {};
+		JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
 		this._ctrlclickEvent.raiseEvent(objectId, JSONobject);
 	}else if(event == "MOUSEIN"){
 		if(this.mouseMoveId != objectId){
