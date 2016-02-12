@@ -194,6 +194,7 @@ B3DMLayer.prototype.addToCesium = function(cesiumViewer){
     	debugShowBoundingVolume : this._debugging,
     	debugShowContentsBoundingVolume : this._debugging
     });
+    this._cesium3DTileset.modelOptions = {"incrementallyLoadTextures":false};
 	cesiumViewer.scene.primitives.add(this._cesium3DTileset);
 	var that = this;
 
