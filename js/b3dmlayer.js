@@ -1,5 +1,3 @@
-
-
 /**
  * Defines an Wrapper around the .
  *
@@ -16,53 +14,56 @@
  *
  */
 
-function B3DMLayer(options){
-	this._url = Cesium.appendForwardSlash(options.url);
-	this._id = options.id;
-	this._name = options.name;
-	this._region = options.region;
-	this._highlightedObjects = {};
-	this._lastUpdated = Date.now();
-	this._highlightedObjectsOriginalColor = {};
-	this._highlightedObjectsOriginalModels = {};
-	//this._highlightedObjectsToRemove = [];
-	this._active = false;
-	this._hiddenObjects = {};
-	this._hiddenObjectsModels = {};
-	this._cameraPosition = {};
+function B3DMLayer(options) {
+    this._url = Cesium.appendForwardSlash(options.url);
+    this._id = options.id;
+    this._name = options.name;
+    this._region = options.region;
+    this._highlightedObjects = {};
+    this._lastUpdated = Date.now();
+    this._styleLastUpdated = Date.now();
+    this._highlightedObjectsOriginalColor = {};
+    this._highlightedObjectsOriginalModels = {};
+    //this._highlightedObjectsToRemove = [];
+    this._active = false;
+    this._hiddenObjects = {};
+    this._hiddenObjectsModels = {};
+    this._cameraPosition = {};
 
-	this._style	= options.style;
-	this._debugging = options["debugging"] ? options["debugging"] : false;
+    this._styleDirty = false;
 
-	/**
-	 * handles ClickEvents
-	 * @type {Cesium.Event} clickEvent
-	 */
-	this._clickEvent = new Cesium.Event();
+    this._style = options.style;
+    this._debugging = options["debugging"] ? options["debugging"] : false;
 
-	/**
-	 * handles ClickEvents
-	 * @type {Cesium.Event} clickEvent
-	 */
-	this._ctrlclickEvent = new Cesium.Event();
+    /**
+     * handles ClickEvents
+     * @type {Cesium.Event} clickEvent
+     */
+    this._clickEvent = new Cesium.Event();
 
-	/**
-	 * handles ClickEvents
-	 * @type {Cesium.Event} clickEvent
-	 */
-	this._mouseInEvent = new Cesium.Event();
+    /**
+     * handles ClickEvents
+     * @type {Cesium.Event} clickEvent
+     */
+    this._ctrlclickEvent = new Cesium.Event();
 
-	/**
-	 * handles ClickEvents
-	 * @type {Cesium.Event} clickEvent
-	 */
-	this._mouseOutEvent = new Cesium.Event();
+    /**
+     * handles ClickEvents
+     * @type {Cesium.Event} clickEvent
+     */
+    this._mouseInEvent = new Cesium.Event();
 
-	/** pickmode can be toplevelfeature or clickedfeature */
-	this.clickPickMode = "toplevelfeature";
+    /**
+     * handles ClickEvents
+     * @type {Cesium.Event} clickEvent
+     */
+    this._mouseOutEvent = new Cesium.Event();
 
-	/** pickmode can be toplevelfeature or clickedfeature */
-	this.ctrlclickPickMode = "toplevelfeature";
+    /** pickmode can be toplevelfeature or clickedfeature */
+    this.clickPickMode = "toplevelfeature";
+
+    /** pickmode can be toplevelfeature or clickedfeature */
+    this.ctrlclickPickMode = "toplevelfeature";
 
 }
 
@@ -73,9 +74,9 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof 3DCityDBLayer.prototype
      * @type {Boolean}
      */
-    active : {
-        get : function(){
-        	return this._active;
+    active: {
+        get: function () {
+            return this._active;
         }
     },
     /**
@@ -83,9 +84,9 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof 3DCityDBLayer.prototype
      * @type {Array}
      */
-    highlightedObjects : {
-        get : function(){
-        	return this._highlightedObjects;
+    highlightedObjects: {
+        get: function () {
+            return this._highlightedObjects;
         }
     },
     /**
@@ -93,9 +94,9 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof 3DCityDBLayer.prototype
      * @type {Array}
      */
-    hiddenObjects : {
-        get : function(){
-        	return this._hiddenObjects;
+    hiddenObjects: {
+        get: function () {
+            return this._hiddenObjects;
         }
     },
     /**
@@ -103,12 +104,12 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof DataSource.prototype
      * @type {Object}
      */
-    cameraPosition : {
-        get : function(){
-        	return this._cameraPosition;
+    cameraPosition: {
+        get: function () {
+            return this._cameraPosition;
         },
-        set : function(value){
-        	this._cameraPosition = value;
+        set: function (value) {
+            this._cameraPosition = value;
         }
     },
     /**
@@ -116,9 +117,9 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof DataSource.prototype
      * @type {String}
      */
-    url : {
-        get : function(){
-        	return this._url;
+    url: {
+        get: function () {
+            return this._url;
         }
     },
     /**
@@ -126,9 +127,9 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof DataSource.prototype
      * @type {String}
      */
-    name : {
-        get : function(){
-        	return this._name;
+    name: {
+        get: function () {
+            return this._name;
         }
     },
     /**
@@ -136,9 +137,9 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof DataSource.prototype
      * @type {String}
      */
-    id : {
-        get : function(){
-        	return this._id;
+    id: {
+        get: function () {
+            return this._id;
         }
     },
     /**
@@ -146,21 +147,21 @@ Object.defineProperties(B3DMLayer.prototype, {
      * @memberof DataSource.prototype
      * @type {Cesium.Rectangle}
      */
-    region : {
-        get : function(){
-        	return this._region;
+    region: {
+        get: function () {
+            return this._region;
         }
     },
-		/**
+    /**
      * Gets the style of this layer can be a function or a Cesium.Color
      * @memberof DataSource.prototype
      * @type  {Cesium.Color | Function}
      */
-		style : {
-			get : function(){
-				return this._style;
-			}
-		}
+    style: {
+        get: function () {
+            return this._style;
+        }
+    }
 
 });
 
@@ -168,205 +169,215 @@ Object.defineProperties(B3DMLayer.prototype, {
  * Whether to return the clicked feature itself or its (parent) top-level feature
  * @param {string} pickMode "toplevelfeature" | "clickedfeature"
  */
-B3DMLayer.prototype.setClickPickMode = function(pickMode){
-	if(pickMode == "toplevelfeature" || pickMode == "clickedfeature"){
-		if(pickMode != this.clickPickMode){
-			this.clickPickMode = pickMode;
-		}
-	}
+B3DMLayer.prototype.setClickPickMode = function (pickMode) {
+    if (pickMode == "toplevelfeature" || pickMode == "clickedfeature") {
+        if (pickMode != this.clickPickMode) {
+            this.clickPickMode = pickMode;
+        }
+    }
 };
 function isFunction(functionToCheck) {
- var getType = {};
- return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
 /**
  * adds this layer to the given cesium viewer
  * @param {CesiumViewer} cesiumViewer
  */
-B3DMLayer.prototype.addToCesium = function(cesiumViewer){
-	this._cesium3DTileset = new Cesium.Cesium3DTileset({
-    	url:this._url, //"http://PC205/temp/b3dm/tms",
-    	maximumScreenSpaceError : 16,
-    	debugShowStatistics : this._debugging,
-    	debugFreezeFrame : false,
-    	debugShowBox : this._debugging,
-    	debugShowcontentBox : this._debugging,
-    	debugShowBoundingVolume : this._debugging,
-    	debugShowContentsBoundingVolume : this._debugging
+B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
+    this._cesium3DTileset = new Cesium.Cesium3DTileset({
+        url: this._url, //"http://PC205/temp/b3dm/tms",
+        maximumScreenSpaceError: 16,
+        debugShowStatistics: this._debugging,
+        debugFreezeFrame: false,
+        debugShowBox: this._debugging,
+        debugShowcontentBox: this._debugging,
+        debugShowBoundingVolume: this._debugging,
+        debugShowContentsBoundingVolume: this._debugging
     });
-    this._cesium3DTileset.modelOptions = {"incrementallyLoadTextures":false};
-	cesiumViewer.scene.primitives.add(this._cesium3DTileset);
-	var that = this;
+    this._cesium3DTileset.modelOptions = {"incrementallyLoadTextures": false};
+    cesiumViewer.scene.primitives.add(this._cesium3DTileset);
+    var that = this;
 
-	this._cesium3DTileset.tileVisible.addEventListener(function(tile){
-		var batchSize;
-		var color;
+    this._cesium3DTileset.tileVisible.addEventListener(function (tile) {
 
-		if((!tile._lastUpdated || tile._lastUpdated < that._lastUpdated) && tile.content instanceof Cesium.Batched3DModel3DTileContent){
+        var color;
 
-			//TODO styling stuff and highlighting/hide stuff is now always performed on each update, could perhaps not be so performant
-			// Styling stuff
-			if(that._style instanceof Cesium.Color){
-				tile.content._batchTableResources.setAllColor(that._style);
-			}else if(isFunction(that._style)){
-				batchSize = tile.content.featuresLength;
-				for(var j = 0; j < batchSize; j++){
-					model = tile.content.getFeature(j);
-					var jsonObject = getObjectForBatchId(tile.content._batchTableResources.batchTable, j, true);
-					color = that._style.call(null, jsonObject, bindBatchTableToFunction(getAttributesFromParent, tile.content._batchTableResources.batchTable));
-					if(color === false){
-						model.show = false;
-					}else{
-						//model.show = true;
-					}
-					if (color){
-						model.color = color;
-					}
-				}
-			}
-			// Highlighting and Hide stuff
-				var batchTable = tile.content._batchTableResources.batchTable;
-				batchSize = tile.content._batchTableResources.featuresLength;
-				var batchId = 0;
-				var batchIds =[];
-				var model = null;
-				for(var i = 0; i < batchTable["id"].length; i++){
-					var id = batchTable["id"][i];
-					if(that._highlightedObjects[id]){
-						// highlight
-						batchId = i;
-						batchIds = [];
-						if(batchId >= batchSize){
-							//var rootId = getRootId(batchTable, id);
-							batchIds = getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
-						} else{
-							batchIds.push(batchId);
-						}
+        if ((!tile._lastUpdated || tile._lastUpdated < that._lastUpdated) && tile.content instanceof Cesium.Batched3DModel3DTileContent) {
 
-						for(var k = 0; k < batchIds.length; k++){
-							//var color = new Cesium.Color(1,1,1,1);
-							model = tile.content.getFeature(batchIds[k]);
-							that._highlightedObjectsOriginalModels[id][batchIds[k]] = model;
-							color = model.color;
-							if(!that._highlightedObjectsOriginalColor[id]){
-								that._highlightedObjectsOriginalColor[id] = {};
-							}
-							that._highlightedObjectsOriginalColor[id][batchIds[k]] = color.clone();
-							model.color = that._highlightedObjects[id];
-						}
-					}
-				}
-				for(var key in that._hiddenObjects){
-					batchId = getFirstBatchIdByProperty(batchTable, "id", key);
-					if(batchId !== null){
-						batchIds =[];
-						if(batchId >= batchSize){
-							var rootId = getRootId(batchTable, key);
-							batchIds = getBatchIdsOfChildrenByBatchId(batchTable, batchId);
-						} else{
-							batchIds.push(batchId);
-						}
-						for(var l = 0; l < batchIds.length; l++){
-							//var color = new Cesium.Color(1,1,1,1);
-							model = tile.content.getFeature(batchIds[l]);
-							that._hiddenObjectsModels[key][batchIds[l]] = model;
-							model.show = false;
-						}
-					}
-				}
+            var batchTable = tile.content._batchTableResources.batchTable;
+            var batchSize = tile.content._batchTableResources.featuresLength;
 
-				tile["_lastUpdated"] = Date.now();
+            // First: styling of the complete layer either by a single color or a function (attribute values -> colors)
+            if (that._styleLastUpdated > tile._lastUpdated){
+                // only if the style actually changed
+                var model;
+                if (that._style instanceof Cesium.Color) {
+                    tile.content._batchTableResources.setAllColor(that._style);
+                } else if (isFunction(that._style)) {
+                    batchSize = tile.content.featuresLength;
+                    for (var j = 0; j < batchSize; j++) {
+                        model = tile.content.getFeature(j);
+                        var jsonObject = getObjectForBatchId(batchTable, j, true);
+                        color = that._style.call(null, jsonObject, bindBatchTableToFunction(getAttributesFromParent, batchTable));
+                        if (color === false) {
+                            model.show = false;
+                        } else {
+                            //model.show = true;
+                        }
+                        if (color) {
+                            model.color = color;
+                        }
+                    }
+                }
+            }
 
-		}
-		//console.log(tile);
-	});
+            // Second: Highlighting of individual objects
+            var batchIdsToHighlight = [];
+            var currentModel, currentColor;
+            batchTable["id"].forEach(function (id, batchId) {
+                if (that._highlightedObjects[id]) {
+                    // Highlight object with "id" and "batchId"
+                    batchIdsToHighlight = [];
+                    if (batchId >= batchSize) {
+                        // clicked object is sub-element of object to highlight -> get all other sub-elements
+                        batchIdsToHighlight = getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
+                    } else {
+                        batchIdsToHighlight.push(batchId);
+                    }
+
+                    batchIdsToHighlight.forEach(function (batchId) {
+                        //Copy original model
+                        currentModel = tile.content.getFeature(batchId);
+                        that._highlightedObjectsOriginalModels[id][batchId] = currentModel;
+
+                        //Copy current color if not yet set
+                        currentColor = currentModel.color;
+                        if (!that._highlightedObjectsOriginalColor[id]) {
+                            that._highlightedObjectsOriginalColor[id] = {};
+                        }
+                        if (!that._highlightedObjectsOriginalColor[id][batchId] || that._styleLastUpdated > tile._lastUpdated) {
+                            // only set the original color if not yet set OR reset the original color if the style has changed.
+                            // otherwise the blue is overwriting the original color in the second run
+                            that._highlightedObjectsOriginalColor[id][batchId] = currentColor.clone();
+                        }
+
+                        //Set new color
+                        currentModel.color = that._highlightedObjects[id];
+                    }, that);
+                }
+            }, that);
+
+            // Third: hiding of individual objects
+            var batchId, batchIdsToHide;
+            for (var hiddenObjectId in that._hiddenObjects) {
+                batchId = getFirstBatchIdByProperty(batchTable, "id", hiddenObjectId);
+                if (batchId !== null) {
+                    batchIdsToHide = [];
+                    if (batchId >= batchSize) {
+                        batchIdsToHide = getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
+                    } else {
+                        batchIdsToHide.push(batchId);
+                    }
+                    batchIdsToHide.forEach(function(batchId){
+                        model = tile.content.getFeature(batchId);
+                        that._hiddenObjectsModels[hiddenObjectId][batchId] = model;
+                        model.show = false;
+                    }, that);
+                }
+            }
+
+            tile["_lastUpdated"] = Date.now();
+
+        }
+    });
 
 };
 
-function bindBatchTableToFunction(func, batchTable){
-	return function(jsonObject){
-		return func.call(this, batchTable,jsonObject);
-	};
+function bindBatchTableToFunction(func, batchTable) {
+    return function (jsonObject) {
+        return func.call(this, batchTable, jsonObject);
+    };
 }
 
-function getAttributesFromParent(batchTable, jsonObject){
-	var parentBatchId = jsonObject.parentPosition || -1;
-	if (parentBatchId !== -1){
-			return getObjectForBatchId(batchTable, parentBatchId, true);
-	} else {
-		return null;
-	}
+function getAttributesFromParent(batchTable, jsonObject) {
+    var parentBatchId = jsonObject.parentPosition || -1;
+    if (parentBatchId !== -1) {
+        return getObjectForBatchId(batchTable, parentBatchId, true);
+    } else {
+        return null;
+    }
 }
 
-function getObjectForBatchId(batchTable, batchId, skipChildren){
-	var jsonObject = {};
-	jsonObject.id = getPropertyByBatchId(batchTable, "id", batchId);
-	jsonObject.type = getPropertyByBatchId(batchTable, "classId", batchId);
-	jsonObject.batchId = batchId;
-	jsonObject.attributes = {};
-	jsonObject.children = [];
-	if (batchTable.attributes && batchTable.attributes[batchId]){
-		if (batchTable.attributes.attributes){
-			// JSON style attributes in B3DM
-			jsonObject.attributes = batchTable.attributes.attributes[batchId];
-		} else{
-			// Flat hierarchy attributes in B3DM
-			jsonObject.attributes = batchTable.attributes[batchId];
-		}
-	}
-	if (batchTable.parentPosition && batchTable.parentPosition[batchId]){
-		jsonObject.parentPosition = batchTable.parentPosition[batchId];
-	}
-	if (jsonObject.attributes.Address){
-		var	address = jsonObject.attributes.Address;
-		var addressJsonObject = {
-			// this has to be replaced with the id in the future
-			id : "Address",
-			type : "_1",
-			batchId : null,
-		 	attributes : address,
-			children : []
-		};
-		jsonObject.children.push(addressJsonObject);
-	}
-	/*
-	if (jsonObject.attributes.vcs_Addresses){
-		var address;
-		var addressJsonObject;
-		for (var i = 0; i < jsonObject.attributes.vcs_Addresses[i].length; i++){
-			address = jsonObject.attributes.vcs_Addresses[i];
-			addressJsonObject.id = null;
-			addressJsonObject.type = "-1";
-			addressJsonObject.batchId = null;
-			addressJsonObject.attributes = address;
-			jsonObject.children.push(addressJsonObject);
-		}
-	}
-	*/
-	if (skipChildren){
-		return jsonObject;
-	} else{
-		var childrenBatchIds = getBatchIdsOfChildrenByBatchId(batchTable, jsonObject.batchId);
-		for(var i = 0; i < childrenBatchIds.length; i++){
-			var childBatchId = childrenBatchIds[i];
-			jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));
-		}
-		return jsonObject;
-	}
+function getObjectForBatchId(batchTable, batchId, skipChildren) {
+    var jsonObject = {};
+    jsonObject.id = getPropertyByBatchId(batchTable, "id", batchId);
+    jsonObject.type = getPropertyByBatchId(batchTable, "classId", batchId);
+    jsonObject.batchId = batchId;
+    jsonObject.attributes = {};
+    jsonObject.children = [];
+    if (batchTable.attributes && batchTable.attributes[batchId]) {
+        if (batchTable.attributes.attributes) {
+            // JSON style attributes in B3DM
+            jsonObject.attributes = batchTable.attributes.attributes[batchId];
+        } else {
+            // Flat hierarchy attributes in B3DM
+            jsonObject.attributes = batchTable.attributes[batchId];
+        }
+    }
+    if (batchTable.parentPosition && batchTable.parentPosition[batchId]) {
+        jsonObject.parentPosition = batchTable.parentPosition[batchId];
+    }
+    if (jsonObject.attributes.Address) {
+        var address = jsonObject.attributes.Address;
+        var addressJsonObject = {
+            // this has to be replaced with the id in the future
+            id: "Address",
+            type: "_1",
+            batchId: null,
+            attributes: address,
+            children: []
+        };
+        jsonObject.children.push(addressJsonObject);
+    }
+    /*
+     if (jsonObject.attributes.vcs_Addresses){
+     var address;
+     var addressJsonObject;
+     for (var i = 0; i < jsonObject.attributes.vcs_Addresses[i].length; i++){
+     address = jsonObject.attributes.vcs_Addresses[i];
+     addressJsonObject.id = null;
+     addressJsonObject.type = "-1";
+     addressJsonObject.batchId = null;
+     addressJsonObject.attributes = address;
+     jsonObject.children.push(addressJsonObject);
+     }
+     }
+     */
+    if (skipChildren) {
+        return jsonObject;
+    } else {
+        var childrenBatchIds = getBatchIdsOfChildrenByBatchId(batchTable, jsonObject.batchId);
+        for (var i = 0; i < childrenBatchIds.length; i++) {
+            var childBatchId = childrenBatchIds[i];
+            jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));
+        }
+        return jsonObject;
+    }
 }
 
-function getObjectForId(batchTable, id){
-	var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
-	return getObjectForBatchId(batchTable, batchId);
+function getObjectForId(batchTable, id) {
+    var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
+    return getObjectForBatchId(batchTable, batchId);
 }
 
-function getBatchIdsOfChildrenByBatchId(batchTable, batchId){
-	// TODO this only gets the batchids of one level higher.. not recursively yet!
-	var batchIds = [];
-	var parentBatchIds = batchTable["parentPosition"];
-	if(parentBatchIds){
-        for(var i = 0; i < parentBatchIds.length; i++){
-            if(parentBatchIds[i] === batchId){
+function getBatchIdsOfChildrenByBatchId(batchTable, batchId) {
+    // TODO this only gets the batchids of one level higher.. not recursively yet!
+    var batchIds = [];
+    var parentBatchIds = batchTable["parentPosition"];
+    if (parentBatchIds) {
+        for (var i = 0; i < parentBatchIds.length; i++) {
+            if (parentBatchIds[i] === batchId) {
                 batchIds.push(i);
             }
         }
@@ -374,32 +385,32 @@ function getBatchIdsOfChildrenByBatchId(batchTable, batchId){
     return batchIds;
 }
 
-function getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId){
-	var batchIds = [];
-	var parentBatchIds = [batchId];
-	if(batchTable["parentPosition"]){
-		for(var i = batchTable["parentPosition"].length - 1; i >= 0; i-- ){
-			for(var j = 0; j < parentBatchIds.length; j++){
-				if(batchTable["parentPosition"][i] === parentBatchIds[j]){
-					if(i >= batchSize){
-						parentBatchIds.push(i);
-					}else{
-						batchIds.push(i);
-					}
-				}
-			}
+function getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId) {
+    var batchIds = [];
+    var parentBatchIds = [batchId];
+    if (batchTable["parentPosition"]) {
+        for (var i = batchTable["parentPosition"].length - 1; i >= 0; i--) {
+            for (var j = 0; j < parentBatchIds.length; j++) {
+                if (batchTable["parentPosition"][i] === parentBatchIds[j]) {
+                    if (i >= batchSize) {
+                        parentBatchIds.push(i);
+                    } else {
+                        batchIds.push(i);
+                    }
+                }
+            }
 
-		}
-	}
-	return batchIds;
+        }
+    }
+    return batchIds;
 }
 
-function getBatchIdsByProperty(batchTable, property, value){
-	var batchIds = [];
-	var propertyValues = batchTable[property];
-	if(propertyValues){
-        for(var i = 0; i < propertyValues.length; i++){
-            if(value == propertyValues[i]){
+function getBatchIdsByProperty(batchTable, property, value) {
+    var batchIds = [];
+    var propertyValues = batchTable[property];
+    if (propertyValues) {
+        for (var i = 0; i < propertyValues.length; i++) {
+            if (value == propertyValues[i]) {
                 batchIds.push(i);
             }
         }
@@ -407,101 +418,101 @@ function getBatchIdsByProperty(batchTable, property, value){
     return batchIds;
 }
 
-function getFirstBatchIdByProperty(batchTable, property, value){
-	var i = batchTable[property].indexOf(value);
-	if(i < 0){
-		return null;
-	}else{
-		return i;
-	}
+function getFirstBatchIdByProperty(batchTable, property, value) {
+    var i = batchTable[property].indexOf(value);
+    if (i < 0) {
+        return null;
+    } else {
+        return i;
+    }
 
 }
-function getPropertyByBatchId(batchTable, property, batchId){
-	return batchTable[property][batchId];
+function getPropertyByBatchId(batchTable, property, batchId) {
+    return batchTable[property][batchId];
 }
-function getRootId(batchTable, id){
-	var parentBatchId;
-	var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
-	parentBatchId = batchTable.parentPosition[batchId];
-	while(parentBatchId !== -1){
-		batchId = parentBatchId;
-		parentBatchId = batchTable.parentPosition[batchId];
-	}
-	return batchTable.id[batchId];
+function getRootId(batchTable, id) {
+    var parentBatchId;
+    var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
+    parentBatchId = batchTable.parentPosition[batchId];
+    while (parentBatchId !== -1) {
+        batchId = parentBatchId;
+        parentBatchId = batchTable.parentPosition[batchId];
+    }
+    return batchTable.id[batchId];
 }
 
 /**
  * adds this layer to the given cesium viewer
  * @param {CesiumViewer} cesiumViewer
  */
-B3DMLayer.prototype.removeFromCesium = function(cesiumViewer){
-	cesiumViewer.scene.primitives.remove(this._cesium3DTileset);
+B3DMLayer.prototype.removeFromCesium = function (cesiumViewer) {
+    cesiumViewer.scene.primitives.remove(this._cesium3DTileset);
 };
-
 
 
 /**
  * activates or deactivates the layer
  * @param {Boolean} value
  */
-B3DMLayer.prototype.activate = function(active){
-	if(this._cesium3DTileset){
-		this._cesium3DTileset.show = active;
-	}
+B3DMLayer.prototype.activate = function (active) {
+    if (this._cesium3DTileset) {
+        this._cesium3DTileset.show = active;
+    }
 };
 
 /**
  * highlights one or more object with a given color;
  * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
  */
-B3DMLayer.prototype.highlight = function(toHighlight){
-	var highlightedObjects = this._highlightedObjects;
-	var dirty = false;
-	for (var id in toHighlight){
-		if(!highlightedObjects[id]){
-			highlightedObjects[id] = toHighlight[id];
-			this._highlightedObjectsOriginalModels[id] = {};
-			dirty = true;
-		}
-		delete toHighlight[id];
-	}
-	if(dirty){
-		this._lastUpdated = Date.now();
-	}
+B3DMLayer.prototype.highlight = function (toHighlight) {
+    var highlightedObjects = this._highlightedObjects;
+    var dirty = false;
+    for (var id in toHighlight) {
+        if (!highlightedObjects[id]) {
+            highlightedObjects[id] = toHighlight[id];
+            this._highlightedObjectsOriginalModels[id] = {};
+            dirty = true;
+        }
+        delete toHighlight[id];
+    }
+    if (dirty) {
+        this._lastUpdated = Date.now();
+    }
 };
 
 /**
  * undo highlighting
  * @param {Array<String>} A list of Object Ids. The default material will be restored
  */
-B3DMLayer.prototype.unHighlight = function(toUnHighlight){
-	for(var i = 0; i < toUnHighlight.length; i++){
-		var id = toUnHighlight[i];
-		if(this._highlightedObjects[id]){
+B3DMLayer.prototype.unHighlight = function (toUnHighlight) {
+    for (var i = 0; i < toUnHighlight.length; i++) {
+        var id = toUnHighlight[i];
+        if (this._highlightedObjects[id]) {
 
-			var models = this._highlightedObjectsOriginalModels[id];
-			for (var batchId in models) { //j = 0; j < models.length; j++){
-				if(this._highlightedObjectsOriginalColor[id] && !models[batchId]._batchTableResources.isDestroyed()){
-					models[batchId].color = this._highlightedObjectsOriginalColor[id][batchId];
-				}
-			}
-			this._highlightedObjectsOriginalModels[id] = {};
-			//delete this._highlightedObjectsOriginalModels[id];
-			delete this._highlightedObjects[id];
-			delete this._highlightedObjectsOriginalColor[id];
-		}
-	}
-	//this._lastUpdated = Date.now();
+            var models = this._highlightedObjectsOriginalModels[id];
+            for (var batchId in models) { //j = 0; j < models.length; j++){
+                if (this._highlightedObjectsOriginalColor[id] && !models[batchId]._batchTableResources.isDestroyed()) {
+                    models[batchId].color = this._highlightedObjectsOriginalColor[id][batchId];
+                }
+            }
+            this._highlightedObjectsOriginalModels[id] = {};
+            // the next line was commented out, couldnt see why so removed comment
+            delete this._highlightedObjectsOriginalModels[id];
+            delete this._highlightedObjects[id];
+            delete this._highlightedObjectsOriginalColor[id];
+        }
+    }
+    //this._lastUpdated = Date.now();
 };
 /**
  * clear all current Highlighted Objects
  */
-B3DMLayer.prototype.clearHighlight = function(){
-	var toUnHighlight = [];
-	for(var key in this._highlightedObjects){
-		toUnHighlight.push(key);
-	}
-	this.unHighlight(toUnHighlight);
+B3DMLayer.prototype.clearHighlight = function () {
+    var toUnHighlight = [];
+    for (var key in this._highlightedObjects) {
+        toUnHighlight.push(key);
+    }
+    this.unHighlight(toUnHighlight);
 };
 
 
@@ -509,20 +520,20 @@ B3DMLayer.prototype.clearHighlight = function(){
  * hideObjects
  * @param {Array<String>} A list of Object Ids which will be hidden
  */
-B3DMLayer.prototype.hideObjects = function(toHide){
-	var hiddenObjects = this._hiddenObjects;
-	var dirty = false;
-	for (var i = 0; i < toHide.length; i++){
-		if(!hiddenObjects[toHide[i]]){
-			hiddenObjects[toHide[i]] = true;
-			this._hiddenObjectsModels[toHide[i]] = {};
-			dirty = true;
-		}
-		//delete toHide[toHide[i]];
-	}
-	if(dirty){
-		this._lastUpdated = Date.now();
-	}
+B3DMLayer.prototype.hideObjects = function (toHide) {
+    var hiddenObjects = this._hiddenObjects;
+    var dirty = false;
+    for (var i = 0; i < toHide.length; i++) {
+        if (!hiddenObjects[toHide[i]]) {
+            hiddenObjects[toHide[i]] = true;
+            this._hiddenObjectsModels[toHide[i]] = {};
+            dirty = true;
+        }
+        //delete toHide[toHide[i]];
+    }
+    if (dirty) {
+        this._lastUpdated = Date.now();
+    }
 };
 
 
@@ -530,22 +541,21 @@ B3DMLayer.prototype.hideObjects = function(toHide){
  * showObjects, to undo hideObjects
  * @param {Array<String>} A list of Object Ids which will be unhidden.
  */
-B3DMLayer.prototype.showObjects = function(toUnhide){
-	for(var i = 0; i < toUnhide.length; i++){
-		var id = toUnhide[i];
-		if(this._hiddenObjects[id]){
+B3DMLayer.prototype.showObjects = function (toUnhide) {
+    for (var i = 0; i < toUnhide.length; i++) {
+        var id = toUnhide[i];
+        if (this._hiddenObjects[id]) {
 
-			var models = this._hiddenObjectsModels[id];
-			for (var batchId in models) { //j = 0; j < models.length; j++){
-				models[batchId].show = true;
-			}
-			this._hiddenObjectsModels[id] = {};
-			//delete this._hiddenObjectsModels[id];
-			delete this._hiddenObjects[id];
-		}
-	}
+            var models = this._hiddenObjectsModels[id];
+            for (var batchId in models) { //j = 0; j < models.length; j++){
+                models[batchId].show = true;
+            }
+            this._hiddenObjectsModels[id] = {};
+            //delete this._hiddenObjectsModels[id];
+            delete this._hiddenObjects[id];
+        }
+    }
 };
-
 
 
 /**
@@ -553,16 +563,16 @@ B3DMLayer.prototype.showObjects = function(toUnhide){
  * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
  * @param {function} callback function to be called
  */
-B3DMLayer.prototype.removeEventHandler = function(event, callback){
-	if(event == "CLICK"){
-		this._clickEvent.removeEventListener(callback, this);
-	}else if(event == "CTRLCLICK"){
-		this._ctrlclickEvent.removeEventListener(callback, this);
-	}else if(event == "MOUSEIN"){
-		this._mouseInEvent.removeEventListener(callback, this);
-	}else if(event == "MOUSEOUT"){
-		this._mouseOutEvent.removeEventListener(callback, this);
-	}
+B3DMLayer.prototype.removeEventHandler = function (event, callback) {
+    if (event == "CLICK") {
+        this._clickEvent.removeEventListener(callback, this);
+    } else if (event == "CTRLCLICK") {
+        this._ctrlclickEvent.removeEventListener(callback, this);
+    } else if (event == "MOUSEIN") {
+        this._mouseInEvent.removeEventListener(callback, this);
+    } else if (event == "MOUSEOUT") {
+        this._mouseOutEvent.removeEventListener(callback, this);
+    }
 };
 
 /**
@@ -571,16 +581,16 @@ B3DMLayer.prototype.removeEventHandler = function(event, callback){
  * @param {function} callback function to be called
  * @return {String} id of the event Handler, can be used to remove the event Handler
  */
-B3DMLayer.prototype.registerEventHandler = function(event, callback){
-	if(event == "CLICK"){
-		this._clickEvent.addEventListener(callback, this);
-	}else if(event == "CTRLCLICK"){
-		this._ctrlclickEvent.addEventListener(callback, this);
-	}else if(event == "MOUSEIN"){
-		this._mouseInEvent.addEventListener(callback, this);
-	}else if(event == "MOUSEOUT"){
-		this._mouseOutEvent.addEventListener(callback, this);
-	}
+B3DMLayer.prototype.registerEventHandler = function (event, callback) {
+    if (event == "CLICK") {
+        this._clickEvent.addEventListener(callback, this);
+    } else if (event == "CTRLCLICK") {
+        this._ctrlclickEvent.addEventListener(callback, this);
+    } else if (event == "MOUSEIN") {
+        this._mouseInEvent.addEventListener(callback, this);
+    } else if (event == "MOUSEOUT") {
+        this._mouseOutEvent.addEventListener(callback, this);
+    }
 };
 
 /**
@@ -588,43 +598,44 @@ B3DMLayer.prototype.registerEventHandler = function(event, callback){
  * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
  * @param {*} arguments, any number of arguments
  */
-B3DMLayer.prototype.triggerEvent = function(event, object){
-	var objectId = object.getProperty("id");
-	var batchTable = object._batchTableResources.batchTable;
-	var batchSize =  object._batchTableResources.featuresLength;
-	if(this.clickPickMode === "toplevelfeature"){
-		objectId = getRootId(batchTable, objectId);
-	}
-	var JSONobject;
-	if(event == "CLICK"){
-		JSONobject = getObjectForId(batchTable, objectId);
-		JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
-		this._clickEvent.raiseEvent(objectId, JSONobject);
-	}else if(event == "CTRLCLICK"){
-		if (this.clickPickMode !== "toplevelfeature" && this.ctrlclickPickMode == "toplevelfeature"){
-			 objectId = getRootId(batchTable, objectId);
-		}
-		JSONobject = getObjectForId(batchTable, objectId);
-		JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
-		this._ctrlclickEvent.raiseEvent(objectId, JSONobject);
-	}else if(event == "MOUSEIN"){
-		if(this.mouseMoveId != objectId){
-			this.mouseMoveId = objectId;
-			this._mouseInEvent.raiseEvent(objectId);
-		}
-	}else if(event == "MOUSEOUT"){
-		if(this.mouseMoveId == objectId){
-			this.mouseMoveId = null;
-			this._mouseOutEvent.raiseEvent(objectId);
-		}
-	}
+B3DMLayer.prototype.triggerEvent = function (event, object) {
+    var objectId = object.getProperty("id");
+    var batchTable = object._batchTableResources.batchTable;
+    var batchSize = object._batchTableResources.featuresLength;
+    if (this.clickPickMode === "toplevelfeature") {
+        objectId = getRootId(batchTable, objectId);
+    }
+    var JSONobject;
+    if (event == "CLICK") {
+        JSONobject = getObjectForId(batchTable, objectId);
+        JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
+        this._clickEvent.raiseEvent(objectId, JSONobject);
+    } else if (event == "CTRLCLICK") {
+        if (this.clickPickMode !== "toplevelfeature" && this.ctrlclickPickMode == "toplevelfeature") {
+            objectId = getRootId(batchTable, objectId);
+        }
+        JSONobject = getObjectForId(batchTable, objectId);
+        JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
+        this._ctrlclickEvent.raiseEvent(objectId, JSONobject);
+    } else if (event == "MOUSEIN") {
+        if (this.mouseMoveId != objectId) {
+            this.mouseMoveId = objectId;
+            this._mouseInEvent.raiseEvent(objectId);
+        }
+    } else if (event == "MOUSEOUT") {
+        if (this.mouseMoveId == objectId) {
+            this.mouseMoveId = null;
+            this._mouseOutEvent.raiseEvent(objectId);
+        }
+    }
 };
 
 /**
  * sets the Style for the whole layer
  * @param {Cesium.Color | Function} a cesium color, or a function which returns a cesium color
  */
-B3DMLayer.prototype.setStyle = function(color){
-	this._style = color;
-	this._lastUpdated = Date.now();
+B3DMLayer.prototype.setStyle = function (color) {
+    this._style = color;
+    this._lastUpdated = Date.now();
+    this._styleLastUpdated = Date.now();
 };
