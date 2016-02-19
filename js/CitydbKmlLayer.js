@@ -252,9 +252,9 @@
         	}
             
             if (isFirstLoad) {
-            	if (!Cesium.defined(that._minLodPixels))
+            	if (!that._minLodPixels)
                 	that._minLodPixels = json.minLodPixels == -1? Number.MIN_VALUE: json.minLodPixels;
-                if (!Cesium.defined(that._maxLodPixels))
+                if (!that._maxLodPixels)
                 	that._maxLodPixels = json.maxLodPixels == -1? Number.MAX_VALUE: json.maxLodPixels;
             }
                        

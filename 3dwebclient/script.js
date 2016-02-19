@@ -27,24 +27,24 @@
 
 	// set default input parameter value and bind the view and model
   	var addLayerViewModel = {
-		url : "http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/Berlin_Center_LoDs/Berlin_Center_Footprint/Berlin_Center_Footprint_MasterJSON.json",
-		name : "Berlin_Center_Footprint",
+		url : "URL of the Master JSON file",
+		name : "My KML/glTF data layer",
 		thematicDataUrl: "",
 		cityobjectsJsonUrl: "",
-		minLodPixels : 140,
-		maxLodPixels : Number.MAX_VALUE,
-		maxSizeOfCachedTiles : 50,
+		minLodPixels : "",
+		maxLodPixels : "",
+		maxSizeOfCachedTiles : 100,
 		maxCountOfVisibleTiles : 200
 	};  	
   	Cesium.knockout.track(addLayerViewModel);
 	Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
 	
   	var addWmsViewModel = {
-        name : 'NYC Orthoimagery WMS Service',
-        iconUrl : 'http://icons.iconarchive.com/icons/iconscity/flags/256/usa-icon.png',
-        tooltip : 'NYC Orthoimagery',
-		url: 'http://www.orthos.dhses.ny.gov/ArcGIS/services/Latest/MapServer/WMSServer',
-		layers : '0',
+        name : '',
+        iconUrl : '',
+        tooltip : '',
+		url: '',
+		layers : '',
 		additionalParameters: '',
 		proxyUrl: '/proxy/'
 	};  	
@@ -52,10 +52,10 @@
 	Cesium.knockout.applyBindings(addWmsViewModel, document.getElementById('citydb_addwmspanel'));	
 	
   	var addTerrainViewModel = {
-        name : 'NYC_Terrain',
-        iconUrl : 'http://icons.iconarchive.com/icons/iconscity/flags/256/usa-icon.png',
-        tooltip : 'Terrain of New York City created by TUM',
-    	url : 'http://www.3dcitydb.net/3dcitydb/fileadmin/mydata/terrain/Kachel_NYC_m/'
+        name : '',
+        iconUrl : '',
+        tooltip : '',
+    	url : ''
 	};  	
   	Cesium.knockout.track(addTerrainViewModel);
 	Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('citydb_addterrainpanel'));
@@ -165,7 +165,7 @@
 	  			} 	
 	  		}
 	  		showedTilesInspector.innerHTML = 'Number of showed Tiles: ' + numberOfshowedTiles;
-			cachedTilesInspector.innerHTML = 'Number of cached Tiles: ' + (numberOfCachedTiles - numberOfshowedTiles);
+			cachedTilesInspector.innerHTML = 'Number of cached Tiles: ' + numberOfCachedTiles;
 			
 			var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
 			if (numberOfTasks > 0) {
