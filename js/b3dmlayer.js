@@ -328,6 +328,7 @@ function getObjectForBatchId(batchTable, batchId, skipChildren) {
     if (batchTable.parentPosition && batchTable.parentPosition[batchId]) {
         jsonObject.parentPosition = batchTable.parentPosition[batchId];
     }
+    jsonObject.attributes["gmlId"] = jsonObject.id;
     if (jsonObject.attributes.Address) {
         var address = jsonObject.attributes.Address;
         var addressJsonObject = {
