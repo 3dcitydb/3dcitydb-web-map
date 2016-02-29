@@ -29,7 +29,7 @@ function B3DMLayer(options) {
     this._hiddenObjects = {};
     this._hiddenObjectsModels = {};
     this._cameraPosition = {};
-
+    this._allowPicking = options["allowPicking"] ? options["allowPicking"] : true;
     this._styleDirty = false;
 
     this._style = options.style;
@@ -195,7 +195,7 @@ B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
         debugShowBoundingVolume: this._debugging,
         debugShowContentsBoundingVolume: this._debugging
     });
-    this._cesium3DTileset.modelOptions = {"incrementallyLoadTextures": false};
+    this._cesium3DTileset.modelOptions = {"incrementallyLoadTextures": false, "allowPicking":this._allowPicking};
     cesiumViewer.scene.primitives.add(this._cesium3DTileset);
     var that = this;
 
