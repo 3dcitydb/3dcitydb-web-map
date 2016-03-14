@@ -29,11 +29,12 @@ function B3DMLayer(options) {
     this._hiddenObjects = {};
     this._hiddenObjectsModels = {};
     this._cameraPosition = {};
-    this._allowPicking = options["allowPicking"] ? options["allowPicking"] : true;
+    this._allowPicking = (typeof options["allowPicking"] != 'undefined') ? options["allowPicking"] : true;
     this._styleDirty = false;
 
     this._style = options.style;
     this._debugging = options["debugging"] ? options["debugging"] : false;
+    this._maximumScreenSpaceError = options["screenSpaceError"] ? options["screenSpaceError"] : 16;
 
     /**
      * handles ClickEvents
@@ -187,7 +188,7 @@ function isFunction(functionToCheck) {
 B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
     this._cesium3DTileset = new Cesium.Cesium3DTileset({
         url: this._url, //"http://PC205/temp/b3dm/tms",
-        maximumScreenSpaceError: 16,
+        maximumScreenSpaceError: this._maximumScreenSpaceError,
         debugShowStatistics: this._debugging,
         debugFreezeFrame: false,
         debugShowBox: this._debugging,
