@@ -3,3 +3,6 @@ server.js
 .settings
 /.project
 /memorandum.txt
+.gitignore
+data
+*.gitignore
