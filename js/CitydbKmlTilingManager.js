@@ -124,7 +124,7 @@ var GlobeTileTaskQueue = {};
 					batchSize = Number(batchSize);
 				}
 				else {
-					batchSize = 5;
+					batchSize = 3;
 				}
 				scope.oTask.triggerEvent('checkDataPool', frame, batchSize);   	
 			});								
