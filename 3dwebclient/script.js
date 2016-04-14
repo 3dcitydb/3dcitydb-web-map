@@ -625,12 +625,17 @@
 		var cameraPosition = getCurrentCameraPostion();
 		var	projectLink = location.protocol + '//' + location.host + location.pathname + '?';
 		var gltf_version = CitydbUtil.parse_query_string('gltf_version', window.location.href);
+		var batchSize = CitydbUtil.parse_query_string('batchSize', window.location.href);
 		
+		if (!batchSize) 
+			batchSize = 3
+			
 		if (gltf_version)
 			projectLink = projectLink + 'gltf_version=' + gltf_version;
 		
-		projectLink = projectLink +
-			'&title=' + document.title +
+		projectLink = projectLink +			
+			'title=' + document.title +
+			'&batchSize=' + batchSize +
 			'&latitude=' + cameraPosition.latitude +
 			'&longitude=' + cameraPosition.longitude +
 			'&height=' + cameraPosition.height +

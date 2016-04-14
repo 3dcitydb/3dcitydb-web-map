@@ -119,7 +119,14 @@ var GlobeTileTaskQueue = {};
             }
 			var promise = scope.createFrameBbox();
 			Cesium.when(promise, function(frame){
-				scope.oTask.triggerEvent('checkDataPool', frame);   	
+				var batchSize = CitydbUtil.parse_query_string('batchSize', window.location.href);
+				if (batchSize) {
+					batchSize = Number(batchSize);
+				}
+				else {
+					batchSize = 5;
+				}
+				scope.oTask.triggerEvent('checkDataPool', frame, batchSize);   	
 			});								
 		});
 		
