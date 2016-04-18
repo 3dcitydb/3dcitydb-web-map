@@ -177,7 +177,7 @@ B3DMLayer.prototype.setClickPickMode = function (pickMode) {
         }
     }
 };
-function isFunction(functionToCheck) {
+B3DMLayer.isFunction = function(functionToCheck) {
     var getType = {};
     return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
@@ -215,12 +215,12 @@ B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
                 var model;
                 if (that._style instanceof Cesium.Color) {
                     tile.content._batchTableResources.setAllColor(that._style);
-                } else if (isFunction(that._style)) {
+                } else if (B3DMLayer.isFunction(that._style)) {
                     batchSize = tile.content.featuresLength;
                     for (var j = 0; j < batchSize; j++) {
                         model = tile.content.getFeature(j);
-                        var jsonObject = getObjectForBatchId(batchTable, j, true);
-                        color = that._style.call(null, jsonObject, bindBatchTableToFunction(getAttributesFromParent, batchTable));
+                        var jsonObject = B3DMLayer.getObjectForBatchId(batchTable, j, true);
+                        color = that._style.call(null, jsonObject, B3DMLayer.bindBatchTableToFunction(B3DMLayer.getAttributesFromParent, batchTable));
                         if (color === false) {
                             model.show = false;
                         } else {
@@ -242,7 +242,7 @@ B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
                     batchIdsToHighlight = [];
                     if (batchId >= batchSize) {
                         // clicked object is sub-element of object to highlight -> get all other sub-elements
-                        batchIdsToHighlight = getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
+                        batchIdsToHighlight = B3DMLayer.getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
                     } else {
                         batchIdsToHighlight.push(batchId);
                     }
@@ -272,11 +272,11 @@ B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
             // Third: hiding of individual objects
             var batchId, batchIdsToHide;
             for (var hiddenObjectId in that._hiddenObjects) {
-                batchId = getFirstBatchIdByProperty(batchTable, "id", hiddenObjectId);
+                batchId = B3DMLayer.getFirstBatchIdByProperty(batchTable, "id", hiddenObjectId);
                 if (batchId !== null) {
                     batchIdsToHide = [];
                     if (batchId >= batchSize) {
-                        batchIdsToHide = getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
+                        batchIdsToHide = B3DMLayer.getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
                     } else {
                         batchIdsToHide.push(batchId);
                     }
@@ -295,25 +295,25 @@ B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
 
 };
 
-function bindBatchTableToFunction(func, batchTable) {
+B3DMLayer.bindBatchTableToFunction = function(func, batchTable) {
     return function (jsonObject) {
         return func.call(this, batchTable, jsonObject);
     };
 }
 
-function getAttributesFromParent(batchTable, jsonObject) {
+B3DMLayer.getAttributesFromParent = function(batchTable, jsonObject) {
     var parentBatchId = jsonObject.parentPosition || -1;
     if (parentBatchId !== -1) {
-        return getObjectForBatchId(batchTable, parentBatchId, true);
+        return B3DMLayer.getObjectForBatchId(batchTable, parentBatchId, true);
     } else {
         return null;
     }
 }
 
-function getObjectForBatchId(batchTable, batchId, skipChildren) {
+B3DMLayer.getObjectForBatchId = function(batchTable, batchId, skipChildren) {
     var jsonObject = {};
-    jsonObject.id = getPropertyByBatchId(batchTable, "id", batchId);
-    jsonObject.type = getPropertyByBatchId(batchTable, "classId", batchId);
+    jsonObject.id = B3DMLayer.getPropertyByBatchId(batchTable, "id", batchId);
+    jsonObject.type = B3DMLayer.getPropertyByBatchId(batchTable, "classId", batchId);
     jsonObject.batchId = batchId;
     jsonObject.attributes = {};
     jsonObject.children = [];
@@ -359,21 +359,21 @@ function getObjectForBatchId(batchTable, batchId, skipChildren) {
     if (skipChildren) {
         return jsonObject;
     } else {
-        var childrenBatchIds = getBatchIdsOfChildrenByBatchId(batchTable, jsonObject.batchId);
+        var childrenBatchIds = B3DMLayer.getBatchIdsOfChildrenByBatchId(batchTable, jsonObject.batchId);
         for (var i = 0; i < childrenBatchIds.length; i++) {
             var childBatchId = childrenBatchIds[i];
-            jsonObject.children.push(getObjectForBatchId(batchTable, childBatchId));
+            jsonObject.children.push(B3DMLayer.getObjectForBatchId(batchTable, childBatchId));
         }
         return jsonObject;
     }
 }
 
-function getObjectForId(batchTable, id) {
-    var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
-    return getObjectForBatchId(batchTable, batchId);
+B3DMLayer.getObjectForId = function(batchTable, id) {
+    var batchId = B3DMLayer.getFirstBatchIdByProperty(batchTable, "id", id);
+    return B3DMLayer.getObjectForBatchId(batchTable, batchId);
 }
 
-function getBatchIdsOfChildrenByBatchId(batchTable, batchId) {
+B3DMLayer.getBatchIdsOfChildrenByBatchId = function(batchTable, batchId) {
     // TODO this only gets the batchids of one level higher.. not recursively yet!
     var batchIds = [];
     var parentBatchIds = batchTable["parentPosition"];
@@ -387,7 +387,7 @@ function getBatchIdsOfChildrenByBatchId(batchTable, batchId) {
     return batchIds;
 }
 
-function getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId) {
+B3DMLayer.getGeometryBatchIdsOfChildrenByBatchId = function(batchTable, batchSize, batchId) {
     var batchIds = [];
     var parentBatchIds = [batchId];
     if (batchTable["parentPosition"]) {
@@ -407,7 +407,7 @@ function getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId) 
     return batchIds;
 }
 
-function getBatchIdsByProperty(batchTable, property, value) {
+B3DMLayer.getBatchIdsByProperty = function(batchTable, property, value) {
     var batchIds = [];
     var propertyValues = batchTable[property];
     if (propertyValues) {
@@ -420,7 +420,7 @@ function getBatchIdsByProperty(batchTable, property, value) {
     return batchIds;
 }
 
-function getFirstBatchIdByProperty(batchTable, property, value) {
+B3DMLayer.getFirstBatchIdByProperty = function(batchTable, property, value) {
     var i = batchTable[property].indexOf(value);
     if (i < 0) {
         return null;
@@ -429,12 +429,12 @@ function getFirstBatchIdByProperty(batchTable, property, value) {
     }
 
 }
-function getPropertyByBatchId(batchTable, property, batchId) {
+B3DMLayer.getPropertyByBatchId = function(batchTable, property, batchId) {
     return batchTable[property][batchId];
 }
-function getRootId(batchTable, id) {
+B3DMLayer.getRootId = function(batchTable, id) {
     var parentBatchId;
-    var batchId = getFirstBatchIdByProperty(batchTable, "id", id);
+    var batchId = B3DMLayer.getFirstBatchIdByProperty(batchTable, "id", id);
     parentBatchId = batchTable.parentPosition[batchId];
     while (parentBatchId !== -1) {
         batchId = parentBatchId;
@@ -605,18 +605,18 @@ B3DMLayer.prototype.triggerEvent = function (event, object) {
     var batchTable = object._batchTableResources.batchTable;
     var batchSize = object._batchTableResources.featuresLength;
     if (this.clickPickMode === "toplevelfeature") {
-        objectId = getRootId(batchTable, objectId);
+        objectId = B3DMLayer.getRootId(batchTable, objectId);
     }
     var JSONobject;
     if (event == "CLICK") {
-        JSONobject = getObjectForId(batchTable, objectId);
+        JSONobject = B3DMLayer.getObjectForId(batchTable, objectId);
         JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
         this._clickEvent.raiseEvent(objectId, JSONobject);
     } else if (event == "CTRLCLICK") {
         if (this.clickPickMode !== "toplevelfeature" && this.ctrlclickPickMode == "toplevelfeature") {
-            objectId = getRootId(batchTable, objectId);
+            objectId = B3DMLayer.getRootId(batchTable, objectId);
         }
-        JSONobject = getObjectForId(batchTable, objectId);
+        JSONobject = B3DMLayer.getObjectForId(batchTable, objectId);
         JSONobject.clickedPosition = object.clickedPosition ? object.clickedPosition : {};
         this._ctrlclickEvent.raiseEvent(objectId, JSONobject);
     } else if (event == "MOUSEIN") {
