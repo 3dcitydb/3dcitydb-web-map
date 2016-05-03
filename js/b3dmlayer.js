@@ -204,92 +204,95 @@ B3DMLayer.prototype.addToCesium = function (cesiumViewer) {
 
         var color;
 
-        if ((!tile._lastUpdated || tile._lastUpdated < that._lastUpdated) && tile.content instanceof Cesium.Batched3DModel3DTileContent) {
+        if (tile.content instanceof Cesium.Batched3DModel3DTileContent) {
 
-            var batchTable = tile.content._batchTableResources.batchTable;
-            var batchSize = tile.content._batchTableResources.featuresLength;
+            if (!tile._lastUpdated || tile._lastUpdated < that._lastUpdated) {
 
-            // First: styling of the complete layer either by a single color or a function (attribute values -> colors)
-            if (that._styleLastUpdated > tile._lastUpdated){
-                // only if the style actually changed
-                var model;
-                if (that._style instanceof Cesium.Color) {
-                    tile.content._batchTableResources.setAllColor(that._style);
-                } else if (B3DMLayer.isFunction(that._style)) {
-                    batchSize = tile.content.featuresLength;
-                    for (var j = 0; j < batchSize; j++) {
-                        model = tile.content.getFeature(j);
-                        var jsonObject = B3DMLayer.getObjectForBatchId(batchTable, j, true);
-                        color = that._style.call(null, jsonObject, B3DMLayer.bindBatchTableToFunction(B3DMLayer.getAttributesFromParent, batchTable));
-                        if (color === false) {
-                            model.show = false;
+                var batchTable = tile.content._batchTableResources.batchTable;
+                var batchSize = tile.content._batchTableResources.featuresLength;
+
+                // First: styling of the complete layer either by a single color or a function (attribute values -> colors)
+                if (!tile._lastUpdated ||  tile._lastUpdated < that._styleLastUpdated) {
+                    // only if the style actually changed
+                    var model;
+                    if (that._style instanceof Cesium.Color) {
+                        tile.content._batchTableResources.setAllColor(that._style);
+                    } else if (B3DMLayer.isFunction(that._style)) {
+                        batchSize = tile.content.featuresLength;
+                        for (var j = 0; j < batchSize; j++) {
+                            model = tile.content.getFeature(j);
+                            var jsonObject = B3DMLayer.getObjectForBatchId(batchTable, j, true);
+                            color = that._style.call(null, jsonObject, B3DMLayer.bindBatchTableToFunction(B3DMLayer.getAttributesFromParent, batchTable));
+                            if (color === false) {
+                                model.show = false;
+                            } else {
+                                //model.show = true;
+                            }
+                            if (color) {
+                                model.color = color;
+                            }
+                        }
+                    }
+                }
+
+                // Second: Highlighting of individual objects
+                var batchIdsToHighlight = [];
+                var currentModel, currentColor;
+                batchTable["id"].forEach(function (id, batchId) {
+                    if (that._highlightedObjects[id]) {
+                        // Highlight object with "id" and "batchId"
+                        batchIdsToHighlight = [];
+                        if (batchId >= batchSize) {
+                            // clicked object is sub-element of object to highlight -> get all other sub-elements
+                            batchIdsToHighlight = B3DMLayer.getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
                         } else {
-                            //model.show = true;
+                            batchIdsToHighlight.push(batchId);
                         }
-                        if (color) {
-                            model.color = color;
+
+                        batchIdsToHighlight.forEach(function (batchId) {
+                            //Copy original model
+                            currentModel = tile.content.getFeature(batchId);
+                            that._highlightedObjectsOriginalModels[id][batchId] = currentModel;
+
+                            //Copy current color if not yet set
+                            currentColor = currentModel.color;
+                            if (!that._highlightedObjectsOriginalColor[id]) {
+                                that._highlightedObjectsOriginalColor[id] = {};
+                            }
+                            if (!that._highlightedObjectsOriginalColor[id][batchId] || that._styleLastUpdated > tile._lastUpdated) {
+                                // only set the original color if not yet set OR reset the original color if the style has changed.
+                                // otherwise the blue is overwriting the original color in the second run
+                                that._highlightedObjectsOriginalColor[id][batchId] = currentColor.clone();
+                            }
+
+                            //Set new color
+                            currentModel.color = that._highlightedObjects[id];
+                        }, that);
+                    }
+                }, that);
+
+                // Third: hiding of individual objects
+                var batchId, batchIdsToHide;
+                for (var hiddenObjectId in that._hiddenObjects) {
+                    batchId = B3DMLayer.getFirstBatchIdByProperty(batchTable, "id", hiddenObjectId);
+                    if (batchId !== null) {
+                        batchIdsToHide = [];
+                        if (batchId >= batchSize) {
+                            batchIdsToHide = B3DMLayer.getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
+                        } else {
+                            batchIdsToHide.push(batchId);
                         }
+                        batchIdsToHide.forEach(function (batchId) {
+                            model = tile.content.getFeature(batchId);
+                            that._hiddenObjectsModels[hiddenObjectId][batchId] = model;
+                            model.show = false;
+                        }, that);
                     }
                 }
+
+                tile["_lastUpdated"] = Date.now();
+
             }
-
-            // Second: Highlighting of individual objects
-            var batchIdsToHighlight = [];
-            var currentModel, currentColor;
-            batchTable["id"].forEach(function (id, batchId) {
-                if (that._highlightedObjects[id]) {
-                    // Highlight object with "id" and "batchId"
-                    batchIdsToHighlight = [];
-                    if (batchId >= batchSize) {
-                        // clicked object is sub-element of object to highlight -> get all other sub-elements
-                        batchIdsToHighlight = B3DMLayer.getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
-                    } else {
-                        batchIdsToHighlight.push(batchId);
-                    }
-
-                    batchIdsToHighlight.forEach(function (batchId) {
-                        //Copy original model
-                        currentModel = tile.content.getFeature(batchId);
-                        that._highlightedObjectsOriginalModels[id][batchId] = currentModel;
-
-                        //Copy current color if not yet set
-                        currentColor = currentModel.color;
-                        if (!that._highlightedObjectsOriginalColor[id]) {
-                            that._highlightedObjectsOriginalColor[id] = {};
-                        }
-                        if (!that._highlightedObjectsOriginalColor[id][batchId] || that._styleLastUpdated > tile._lastUpdated) {
-                            // only set the original color if not yet set OR reset the original color if the style has changed.
-                            // otherwise the blue is overwriting the original color in the second run
-                            that._highlightedObjectsOriginalColor[id][batchId] = currentColor.clone();
-                        }
-
-                        //Set new color
-                        currentModel.color = that._highlightedObjects[id];
-                    }, that);
-                }
-            }, that);
-
-            // Third: hiding of individual objects
-            var batchId, batchIdsToHide;
-            for (var hiddenObjectId in that._hiddenObjects) {
-                batchId = B3DMLayer.getFirstBatchIdByProperty(batchTable, "id", hiddenObjectId);
-                if (batchId !== null) {
-                    batchIdsToHide = [];
-                    if (batchId >= batchSize) {
-                        batchIdsToHide = B3DMLayer.getGeometryBatchIdsOfChildrenByBatchId(batchTable, batchSize, batchId);
-                    } else {
-                        batchIdsToHide.push(batchId);
-                    }
-                    batchIdsToHide.forEach(function(batchId){
-                        model = tile.content.getFeature(batchId);
-                        that._hiddenObjectsModels[hiddenObjectId][batchId] = model;
-                        model.show = false;
-                    }, that);
-                }
-            }
-
-            tile["_lastUpdated"] = Date.now();
-
         }
     });
 
