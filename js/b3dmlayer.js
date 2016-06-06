@@ -162,6 +162,14 @@ Object.defineProperties(B3DMLayer.prototype, {
         get: function () {
             return this._style;
         }
+    },
+    maximumScreenSpaceError : {
+        get : function(){
+            return this._cesium3DTileset.maximumScreenSpaceError
+        },
+        set: function (value) {
+            this._cesium3DTileset.maximumScreenSpaceError = value;
+        }
     }
 
 });
