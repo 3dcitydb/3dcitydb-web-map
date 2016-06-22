@@ -486,7 +486,7 @@ B3DMLayer.prototype.highlight = function (toHighlight) {
             this._highlightedObjectsOriginalModels[id] = {};
             dirty = true;
         }
-        delete toHighlight[id];
+        //delete toHighlight[id];
     }
     if (dirty) {
         this._lastUpdated = Date.now();
