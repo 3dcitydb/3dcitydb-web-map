@@ -12,11 +12,15 @@
 	Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';
 	
 	// create 3Dcitydb-web-map instance
+	var shadows = CitydbUtil.parse_query_string('shadows', window.location.href);
+	var terrainShadows = CitydbUtil.parse_query_string('terrainShadows', window.location.href);
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1],
-		timeline: false,
+		timeline: (shadows == "true"),
 		animation : false,
-		fullscreenButton: false
+		fullscreenButton: false,
+		shadows: (shadows == "true"),
+		terrainShadows: (terrainShadows == "true")
 	});
 	
 	navigationInitialization('cesiumContainer', cesiumViewer);
@@ -636,6 +640,8 @@
 		projectLink = projectLink +			
 			'title=' + document.title +
 			'&batchSize=' + batchSize +
+			'&shadows=' + cesiumViewer.shadows +
+			'&terrainShadows=' + cesiumViewer.terrainShadows +
 			'&latitude=' + cameraPosition.latitude +
 			'&longitude=' + cameraPosition.longitude +
 			'&height=' + cameraPosition.height +
@@ -923,6 +929,14 @@
   		imageWin.focus();
   		imageWin.print();
   		imageWin.close();
+	}
+	
+	function toggleShadows() {
+		cesiumViewer.shadows = !cesiumViewer.shadows;
+	}
+	
+	function toggleTerrainShadows() {
+		cesiumViewer.terrainShadows = !cesiumViewer.terrainShadows;
 	}
 	
 	function createInfoTable(gmlid, cesiumEntity, citydbLayer) {

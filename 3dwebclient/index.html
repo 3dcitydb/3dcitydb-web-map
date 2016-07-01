@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="../theme/img/favicon.png" sizes="16x16">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   	
-  <script src="../ThirdParty/Cesium-1-20/Cesium.js"></script> 
+  <script src="../ThirdParty/Cesium/Cesium.js"></script> 
   <script src="../ThirdParty/Intersection/IntersectionAPI.js"></script>
   <script src="../ThirdParty/Cesium-Navigation/Cesium-Navigation.js"></script>
   <link rel="stylesheet" type="text/css" href="../ThirdParty/Cesium-Navigation/Cesium-Navigation.css" />
@@ -25,7 +25,7 @@
   <script src="../js/CitydbKmlLayer.js"></script> 
   
   <style>
-	@import url(../ThirdParty/Cesium-1-20/Widgets/widgets.css);
+	@import url(../ThirdParty/Cesium/Widgets/widgets.css);
 	
 	html, body, #cesiumContainer {
 		top: 0px;
@@ -370,6 +370,14 @@
 					<button type="button" style="width: 100%;" class="cesium-button" onclick="printCurrentview()">Print current view</button>	
 				</div>						
 			</div>	
+			<div>
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="toggleShadows()">Toggle Shadows</button>		
+				</div>			
+				<div class="citydb_short_container">
+					<button type="button" style="width: 100%;" class="cesium-button" onclick="toggleTerrainShadows()">Toggle Terrain Shadows</button>	
+				</div>						
+			</div>
 			<div class="citydb_long_container">	
 				<select id = "citydb_showinexternalmaps" style="width: 100%;" onchange="showInExternalMaps()" class="cesium-button">
 					<option selected="selected" disabled="disabled">Show the selected object in External Maps</option>	
