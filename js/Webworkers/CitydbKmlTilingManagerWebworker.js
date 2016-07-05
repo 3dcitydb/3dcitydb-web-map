@@ -33,7 +33,7 @@
 
 			dataPool = eventlisteners["queryByMatrix"].apply(self, [ frame ]);	
 
-			console.log("Size of the generated datapool is: " + dataPool.length);
+	//		console.log("Size of the generated datapool is: " + dataPool.length);
 			if (dataPool.length == 0) {
 				stack = [];
 				eventlisteners["updateTaskStack"].apply(self);
@@ -172,7 +172,6 @@
 					if (isStillUpdating) {
 						isStillUpdating = false;
 						reply("removeDatasources");
-						console.log("Tiling Manager repeat searching again...");
 					} else {
 						if (shouldRun == true) {
 							shouldRun = false;

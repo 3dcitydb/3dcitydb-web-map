@@ -218,7 +218,7 @@ var GlobeTileTaskQueue = {};
         					delete GlobeTileTaskQueue[tmpId];   
         					scope.oTask.triggerEvent('updateTaskStack');
 		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
-		        			console.log("loading layer from Cache...");	
+		        			console.log("loading data tile from Cache...");	
         				}).otherwise(function(error) {
         					delete GlobeTileTaskQueue[tmpId];   
         					scope.oTask.triggerEvent('updateTaskStack');
@@ -252,7 +252,7 @@ var GlobeTileTaskQueue = {};
         			GlobeTileTaskQueue[tmpId] = tileUrl;
         			scope.taskNumber = taskQueue.length;
         			newKmlDatasource.load(tileUrl).then(function(dataSource) {
-        				console.log("loading layer from Server...");
+        				console.log("loading data tile from Server...");
         				delete GlobeTileTaskQueue[tmpId];
         				scope.oTask.triggerEvent('updateTaskStack');        				
     				}).otherwise(function(error) {
@@ -268,7 +268,7 @@ var GlobeTileTaskQueue = {};
 						scope.taskNumber = taskQueue.length;
 						newKmlDatasource.load(tileUrl).then(function() {							
 							if (scope.startPrefetching) {
-								console.log("---------------------start Prefeching........................");
+								console.log("---------------------start Prefetching........................");
 								scope.oTask.triggerEvent('updateTaskStack', 500);
 								scope.startPrefetching = false;
 							}
@@ -327,7 +327,7 @@ var GlobeTileTaskQueue = {};
 				delete networklinkCache[cacheRocordID];
     			cacheSize--;
     		}
-			console.log("Current Cache size is: " + Object.keys(scope.networklinkCache).length);		        										        							        			           
+		//	console.log("Current Cache size is: " + Object.keys(scope.networklinkCache).length);		        										        							        			           
 		});
 		
 		
@@ -348,7 +348,7 @@ var GlobeTileTaskQueue = {};
     		// Tiling manger keeps running to look up possible data tiles to be loaded event when Cesium idle...
     		setTimeout(function(){
     			scope.taskNumber = 0;
-    			scope.triggerWorker(false);		
+    			scope.triggerWorker(false);	
 			}, 1000 + 1000*Math.random());     
 		});	
 		
@@ -573,7 +573,6 @@ var GlobeTileTaskQueue = {};
     	if (scope.oTask != null) {       		
     		if (scope.oTask.isSleep()) {
          		scope.oTask.wake();	
-         		console.log("trigger starting...");
          		scope.startPrefetching = true;
  				scope.oTask.triggerEvent('notifyWake');  
  			}
@@ -600,7 +599,7 @@ var GlobeTileTaskQueue = {};
     			clearTimeout(scope.timer);
     		}
     		scope.timer = setTimeout(function(){
-    			console.log("trigger Tiling manager by viewechanged event");
+    			console.log("Wake up Tiling Manager from sleep");
     			scope.triggerWorker(true); 
     			scope.timer = null;
     		}, 100 + 100*Math.random());    		

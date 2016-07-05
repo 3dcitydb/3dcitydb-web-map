@@ -70,23 +70,22 @@
 			if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
 				setTimeout(function(){   
 					if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
-						console.log("Highlighting Manager is sleeping...")
+						console.log("Highlighting Manager falls asleep...");
 						scope.oTask.sleep();
 					}
 					else {
 						if (scope.citydbKmlLayerInstance.hasHighlightedObjects() || scope.citydbKmlLayerInstance.hasHiddenObjects()) {	
-							console.log("Highlighting manager repeat updating again...");
 							scope.rebuildDataPool(); 		    	  		    	
 						}
 						else {		
-							console.log("Highlighting Manager is sleeping...")
+							console.log("Highlighting Manager falls asleep...");
 							scope.oTask.sleep();
 						} 
 					}				 					
 			    }, 1000); 	
 			}	
 			else {
-				console.log("Highlighting Manager is sleeping...")
+				console.log("Highlighting Manager falls asleep...");
 				scope.oTask.sleep();
 			}				
 		});			
@@ -174,7 +173,7 @@
     			return;
     		if (scope.oTask.isSleep()) {
          		scope.oTask.wake();	
-         		console.log("trigger starting...");
+         		console.log("Wake up Highlighting Manager from sleep");
          		scope.rebuildDataPool();  
  			}
     	}            	
@@ -200,7 +199,7 @@
     
     CitydbKmlHighlightingManager.prototype.rebuildDataPool = function() {
     	if (this.oTask != null) {
-			console.log("Tiling manager is sleeping and update the data pool now " + this.citydbKmlLayerInstance.name);
+			console.log("Tiling Manager is sleeping, update the cached objects of layer: " + this.citydbKmlLayerInstance.name);
 			this.updateCachedObjects();
 			this.dataPool = this.generateDataPool();	
 			this.oTask.triggerEvent('rebuildDataPool', this.dataPool);
