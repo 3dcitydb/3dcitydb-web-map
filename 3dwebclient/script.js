@@ -31,13 +31,13 @@
 
 	// set default input parameter value and bind the view and model
   	var addLayerViewModel = {
-		url : "URL of the Master JSON file",
-		name : "My KML/glTF data layer",
+		url : "",
+		name : "",
 		thematicDataUrl: "",
 		cityobjectsJsonUrl: "",
 		minLodPixels : "",
 		maxLodPixels : "",
-		maxSizeOfCachedTiles : 100,
+		maxSizeOfCachedTiles : 200,
 		maxCountOfVisibleTiles : 200
 	};  	
   	Cesium.knockout.track(addLayerViewModel);
@@ -837,7 +837,7 @@
 			thematicDataUrl : addLayerViewModel.thematicDataUrl,
 			cityobjectsJsonUrl : addLayerViewModel.cityobjectsJsonUrl,
 			minLodPixels: addLayerViewModel.minLodPixels,
-			maxLodPixels : addLayerViewModel.maxLodPixels,
+			maxLodPixels : addLayerViewModel.maxLodPixels == -1? Number.MAX_VALUE : addLayerViewModel.maxLodPixels,
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
 			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles
 		}));
