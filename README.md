@@ -13,6 +13,12 @@ The key features and functionalities of the 3DCityDB-Web-Map-Client is summarize
 * Support for on-the-fly activating and deactivating shadow visualization of 3D objects (only for glTF, KML is currently not supported yet) and Cesium digital terrain models
 * Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of generating a scene link including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers etc.  
 
+Architecture
+-------
+<p align="center">
+<img src="theme/img/3dcitydb-web-map-client-architecture.jpg" width="800" />
+</p>
+
 
 License
 -------
