@@ -1,7 +1,7 @@
 3DCityDB-Web-Map-Client
 ==================================
 
-The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of arbitrarily large semantic 3D city models in CityGML. It utilizes the [Cesium Virtual Globe](http://www.apache.org/licenses/LICENSE-2.0) as its 3D geo-visualization engine on top of HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
+The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of arbitrarily large semantic 3D city models in CityGML. It utilizes the [Cesium Virtual Globe](http://cesiumjs.org/index.html) as its 3D geo-visualization engine on top of HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
 
 The key features and functionalities of the 3DCityDB-Web-Map-Client is summarized as follows: 
 
