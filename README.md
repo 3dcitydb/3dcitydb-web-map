@@ -6,7 +6,7 @@ The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for hig
 The key features and functionalities of the 3DCityDB-Web-Map-Client is summarized as follows: 
 
 * Support for efficient displaying, caching, prefetching, dynamic loading and unloading of large pre-styled 3D visualization models in the form of tiled KML/glTF datasets exported from the 3DCityDB using the Importer/Exporter
-* Intuitive user interface for adding and removing arbitrary number of data layers like 3D visualization model (KML/glTF), WMS imagery layer and Cesium digital terrain model
+* Intuitive user interface for adding and removing arbitrary number of data layers like 3D visualization model (KML/glTF), WMS imagery layer, and Cesium digital terrain model
 * Support for linking the 3D visualization models (KML/glTF) with the cloud-based Google Fusion Table allowing for querying the thematic data of every 3D object
 * Support for rich interaction with 3D visualization models (KML/glTF), for example, highlighting of 3D objects on mouseover and mouseclick as well as hiding and showing of the selected 3D objects
 * Support for exploring a 3D object of interest from different view perspectives using third-party mapping services like Microsoft Bing Maps with oblique view, Google Streetview, and a combined version (DualMaps) 
@@ -51,7 +51,7 @@ For best performance, it is strongly recommended to use Google Chrome.
 
 Documentation
 -------------
-A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client is installed with the 3DCityDB Importer/Exporter tool and is also available [online](http://www.3dcitydb.org/3dcitydb/documentation/).
+A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client is installed with the 3DCityDB Importer/Exporter and is also available [online](http://www.3dcitydb.org/3dcitydb/documentation/).
 
 Contributing
 ------------
