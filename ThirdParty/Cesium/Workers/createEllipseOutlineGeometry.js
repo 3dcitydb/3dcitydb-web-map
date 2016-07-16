@@ -1351,63 +1351,6 @@ define('Core/Cartesian3',[
     };
 
     /**
-     * Flattens an array of Cartesian3s into an array of components.
-     *
-     * @param {Cartesian3[]} array The array of cartesians to pack.
-     * @param {Number[]} result The array onto which to store the result.
-     * @returns {Number[]} The packed array.
-     */
-    Cartesian3.packArray = function(array, result) {
-                if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
-        
-        var length = array.length;
-        if (!defined(result)) {
-            result = new Array(length * 3);
-        } else {
-            result.length = length * 3;
-        }
-
-        for (var i = 0; i < length; ++i) {
-            Cartesian3.pack(array[i], result, i * 3);
-        }
-        return result;
-    };
-
-    /**
-     * Unpacks an array of cartesian components into an array of Cartesian3s.
-     *
-     * @param {Number[]} array The array of components to unpack.
-     * @param {Cartesian3[]} result The array onto which to store the result.
-     * @returns {Cartesian3[]} The unpacked array.
-     */
-    Cartesian3.unpackArray = function(array, result) {
-                if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
-        if (array.length < 3) {
-            throw new DeveloperError('array length cannot be less than 3.');
-        }
-        if (array.length % 3 !== 0) {
-            throw new DeveloperError('array length must be a multiple of 3.');
-        }
-        
-        var length = array.length;
-        if (!defined(result)) {
-            result = new Array(length / 3);
-        } else {
-            result.length = length / 3;
-        }
-
-        for (var i = 0; i < length; i += 3) {
-            var index = i / 3;
-            result[index] = Cartesian3.unpack(array, i, result[index]);
-        }
-        return result;
-    };
-
-    /**
      * Creates a Cartesian3 from three consecutive elements in an array.
      * @function
      *
@@ -1973,9 +1916,9 @@ define('Core/Cartesian3',[
             throw new DeveloperError('latitude is required');
         }
         
-        longitude = CesiumMath.toRadians(longitude);
-        latitude = CesiumMath.toRadians(latitude);
-        return Cartesian3.fromRadians(longitude, latitude, height, ellipsoid, result);
+        var lon = CesiumMath.toRadians(longitude);
+        var lat = CesiumMath.toRadians(latitude);
+        return Cartesian3.fromRadians(lon, lat, height, ellipsoid, result);
     };
 
     var scratchN = new Cartesian3();
@@ -2036,30 +1979,15 @@ define('Core/Cartesian3',[
      */
     Cartesian3.fromDegreesArray = function(coordinates, ellipsoid, result) {
                 if (!defined(coordinates)) {
-            throw new DeveloperError('coordinates is required.');
-        }
-        if (coordinates.length < 2) {
-            throw new DeveloperError('coordinates length cannot be less than 2.');
-        }
-        if (coordinates.length % 2 !== 0) {
-            throw new DeveloperError('coordinates length must be a multiple of 2.');
+            throw new DeveloperError('positions is required.');
         }
         
-        var length = coordinates.length;
-        if (!defined(result)) {
-            result = new Array(length / 2);
-        } else {
-            result.length = length / 2;
+        var pos = new Array(coordinates.length);
+        for (var i = 0; i < coordinates.length; i++) {
+            pos[i] = CesiumMath.toRadians(coordinates[i]);
         }
 
-        for (var i = 0; i < length; i += 2) {
-            var longitude = coordinates[i];
-            var latitude = coordinates[i + 1];
-            var index = i / 2;
-            result[index] = Cartesian3.fromDegrees(longitude, latitude, 0, ellipsoid, result[index]);
-        }
-
-        return result;
+        return Cartesian3.fromRadiansArray(pos, ellipsoid, result);
     };
 
     /**
@@ -2075,27 +2003,26 @@ define('Core/Cartesian3',[
      */
     Cartesian3.fromRadiansArray = function(coordinates, ellipsoid, result) {
                 if (!defined(coordinates)) {
-            throw new DeveloperError('coordinates is required.');
+            throw new DeveloperError('positions is required.');
         }
         if (coordinates.length < 2) {
-            throw new DeveloperError('coordinates length cannot be less than 2.');
+            throw new DeveloperError('positions length cannot be less than 2.');
         }
         if (coordinates.length % 2 !== 0) {
-            throw new DeveloperError('coordinates length must be a multiple of 2.');
+            throw new DeveloperError('positions length must be a multiple of 2.');
         }
         
         var length = coordinates.length;
         if (!defined(result)) {
-            result = new Array(length / 2);
+            result = new Array(length/2);
         } else {
-            result.length = length / 2;
+            result.length = length/2;
         }
 
-        for (var i = 0; i < length; i += 2) {
-            var longitude = coordinates[i];
-            var latitude = coordinates[i + 1];
-            var index = i / 2;
-            result[index] = Cartesian3.fromRadians(longitude, latitude, 0, ellipsoid, result[index]);
+        for ( var i = 0; i < length; i+=2) {
+            var lon = coordinates[i];
+            var lat = coordinates[i+1];
+            result[i/2] = Cartesian3.fromRadians(lon, lat, 0, ellipsoid, result[i/2]);
         }
 
         return result;
@@ -2104,7 +2031,7 @@ define('Core/Cartesian3',[
     /**
      * Returns an array of Cartesian3 positions given an array of longitude, latitude and height values where longitude and latitude are given in degrees.
      *
-     * @param {Number[]} coordinates A list of longitude, latitude and height values. Values alternate [longitude, latitude, height, longitude, latitude, height...].
+     * @param {Number[]} coordinates A list of longitude, latitude and height values. Values alternate [longitude, latitude, height,, longitude, latitude, height...].
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the position lies.
      * @param {Cartesian3[]} [result] An array of Cartesian3 objects to store the result.
      * @returns {Cartesian3[]} The array of positions.
@@ -2114,37 +2041,29 @@ define('Core/Cartesian3',[
      */
     Cartesian3.fromDegreesArrayHeights = function(coordinates, ellipsoid, result) {
                 if (!defined(coordinates)) {
-            throw new DeveloperError('coordinates is required.');
+            throw new DeveloperError('positions is required.');
         }
         if (coordinates.length < 3) {
-            throw new DeveloperError('coordinates length cannot be less than 3.');
+            throw new DeveloperError('positions length cannot be less than 3.');
         }
         if (coordinates.length % 3 !== 0) {
-            throw new DeveloperError('coordinates length must be a multiple of 3.');
+            throw new DeveloperError('positions length must be a multiple of 3.');
         }
         
-        var length = coordinates.length;
-        if (!defined(result)) {
-            result = new Array(length / 3);
-        } else {
-            result.length = length / 3;
+        var pos = new Array(coordinates.length);
+        for (var i = 0; i < coordinates.length; i+=3) {
+            pos[i] = CesiumMath.toRadians(coordinates[i]);
+            pos[i+1] = CesiumMath.toRadians(coordinates[i+1]);
+            pos[i+2] = coordinates[i+2];
         }
 
-        for (var i = 0; i < length; i += 3) {
-            var longitude = coordinates[i];
-            var latitude = coordinates[i + 1];
-            var height = coordinates[i + 2];
-            var index = i / 3;
-            result[index] = Cartesian3.fromDegrees(longitude, latitude, height, ellipsoid, result[index]);
-        }
-
-        return result;
+        return Cartesian3.fromRadiansArrayHeights(pos, ellipsoid, result);
     };
 
     /**
      * Returns an array of Cartesian3 positions given an array of longitude, latitude and height values where longitude and latitude are given in radians.
      *
-     * @param {Number[]} coordinates A list of longitude, latitude and height values. Values alternate [longitude, latitude, height, longitude, latitude, height...].
+     * @param {Number[]} coordinates A list of longitude, latitude and height values. Values alternate [longitude, latitude, height,, longitude, latitude, height...].
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the position lies.
      * @param {Cartesian3[]} [result] An array of Cartesian3 objects to store the result.
      * @returns {Cartesian3[]} The array of positions.
@@ -2154,28 +2073,27 @@ define('Core/Cartesian3',[
      */
     Cartesian3.fromRadiansArrayHeights = function(coordinates, ellipsoid, result) {
                 if (!defined(coordinates)) {
-            throw new DeveloperError('coordinates is required.');
+            throw new DeveloperError('positions is required.');
         }
         if (coordinates.length < 3) {
-            throw new DeveloperError('coordinates length cannot be less than 3.');
+            throw new DeveloperError('positions length cannot be less than 3.');
         }
         if (coordinates.length % 3 !== 0) {
-            throw new DeveloperError('coordinates length must be a multiple of 3.');
+            throw new DeveloperError('positions length must be a multiple of 3.');
         }
         
         var length = coordinates.length;
         if (!defined(result)) {
-            result = new Array(length / 3);
+            result = new Array(length/3);
         } else {
-            result.length = length / 3;
+            result.length = length/3;
         }
 
-        for (var i = 0; i < length; i += 3) {
-            var longitude = coordinates[i];
-            var latitude = coordinates[i + 1];
-            var height = coordinates[i + 2];
-            var index = i / 3;
-            result[index] = Cartesian3.fromRadians(longitude, latitude, height, ellipsoid, result[index]);
+        for ( var i = 0; i < length; i+=3) {
+            var lon = coordinates[i];
+            var lat = coordinates[i+1];
+            var alt = coordinates[i+2];
+            result[i/3] = Cartesian3.fromRadians(lon, lat, alt, ellipsoid, result[i/3]);
         }
 
         return result;
@@ -5165,57 +5083,6 @@ define('Core/Cartesian4',[
     };
 
     /**
-     * Flattens an array of Cartesian4s into and array of components.
-     *
-     * @param {Cartesian4[]} array The array of cartesians to pack.
-     * @param {Number[]} result The array onto which to store the result.
-     * @returns {Number[]} The packed array.
-     */
-    Cartesian4.packArray = function(array, result) {
-                if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
-        
-        var length = array.length;
-        if (!defined(result)) {
-            result = new Array(length * 4);
-        } else {
-            result.length = length * 4;
-        }
-
-        for (var i = 0; i < length; ++i) {
-            Cartesian4.pack(array[i], result, i * 4);
-        }
-        return result;
-    };
-
-    /**
-     * Unpacks an array of cartesian components into and array of Cartesian4s.
-     *
-     * @param {Number[]} array The array of components to unpack.
-     * @param {Cartesian4[]} result The array onto which to store the result.
-     * @returns {Cartesian4[]} The unpacked array.
-     */
-    Cartesian4.unpackArray = function(array, result) {
-                if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
-        
-        var length = array.length;
-        if (!defined(result)) {
-            result = new Array(length / 4);
-        } else {
-            result.length = length / 4;
-        }
-
-        for (var i = 0; i < length; i += 4) {
-            var index = i / 4;
-            result[index] = Cartesian4.unpack(array, i, result[index]);
-        }
-        return result;
-    };
-
-    /**
      * Creates a Cartesian4 from four consecutive elements in an array.
      * @function
      *
@@ -6518,14 +6385,14 @@ define('Core/Matrix4',[
       * @param {Matrix4} result The object in which the result will be stored.
       * @returns {Matrix4} The modified result parameter.
       *
-      * @exception {DeveloperError} fovY must be in (0, PI].
+      * @exception {DeveloperError} fovY must be in [0, PI).
       * @exception {DeveloperError} aspectRatio must be greater than zero.
       * @exception {DeveloperError} near must be greater than zero.
       * @exception {DeveloperError} far must be greater than zero.
       */
     Matrix4.computePerspectiveFieldOfView = function(fovY, aspectRatio, near, far, result) {
                 if (fovY <= 0.0 || fovY > Math.PI) {
-            throw new DeveloperError('fovY must be in (0, PI].');
+            throw new DeveloperError('fovY must be in [0, PI).');
         }
         if (aspectRatio <= 0.0) {
             throw new DeveloperError('aspectRatio must be greater than zero.');
@@ -9035,61 +8902,6 @@ define('Core/Rectangle',[
 
         for ( var i = 0, len = cartographics.length; i < len; i++) {
             var position = cartographics[i];
-            west = Math.min(west, position.longitude);
-            east = Math.max(east, position.longitude);
-            south = Math.min(south, position.latitude);
-            north = Math.max(north, position.latitude);
-
-            var lonAdjusted = position.longitude >= 0 ?  position.longitude : position.longitude +  CesiumMath.TWO_PI;
-            westOverIDL = Math.min(westOverIDL, lonAdjusted);
-            eastOverIDL = Math.max(eastOverIDL, lonAdjusted);
-        }
-
-        if(east - west > eastOverIDL - westOverIDL) {
-            west = westOverIDL;
-            east = eastOverIDL;
-
-            if (east > CesiumMath.PI) {
-                east = east - CesiumMath.TWO_PI;
-            }
-            if (west > CesiumMath.PI) {
-                west = west - CesiumMath.TWO_PI;
-            }
-        }
-
-        if (!defined(result)) {
-            return new Rectangle(west, south, east, north);
-        }
-
-        result.west = west;
-        result.south = south;
-        result.east = east;
-        result.north = north;
-        return result;
-    };
-
-    /**
-     * Creates the smallest possible Rectangle that encloses all positions in the provided array.
-     *
-     * @param {Cartesian[]} cartesians The list of Cartesian instances.
-     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid the cartesians are on.
-     * @param {Rectangle} [result] The object onto which to store the result, or undefined if a new instance should be created.
-     * @returns {Rectangle} The modified result parameter or a new Rectangle instance if none was provided.
-     */
-    Rectangle.fromCartesianArray = function(cartesians, ellipsoid, result) {
-                if (!defined(cartesians)) {
-            throw new DeveloperError('cartesians is required.');
-        }
-        
-        var west = Number.MAX_VALUE;
-        var east = -Number.MAX_VALUE;
-        var westOverIDL = Number.MAX_VALUE;
-        var eastOverIDL = -Number.MAX_VALUE;
-        var south = Number.MAX_VALUE;
-        var north = -Number.MAX_VALUE;
-
-        for ( var i = 0, len = cartesians.length; i < len; i++) {
-            var position = ellipsoid.cartesianToCartographic(cartesians[i]);
             west = Math.min(west, position.longitude);
             east = Math.max(east, position.longitude);
             south = Math.min(south, position.latitude);
