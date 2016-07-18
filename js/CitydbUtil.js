@@ -75,6 +75,101 @@ var CitydbUtil = {
         }else {
             return url.substring(0, url.lastIndexOf("/")+1);
         };
+	},
+	/**
+	 * Show a confirmation dialog with Title, messages, and YES&NO buttons.
+	 * The code is mainly based on and inspired by the code of the Cesium class "CesiumWidget"
+	 * 
+	 */
+	showAlertWindow: function (mode, title, message, yesBtnCallback, noBtnCallback) {		
+		var element = cesiumViewer.cesiumWidget._element;
+        var overlay = document.createElement('div');
+        overlay.className = 'cesium-widget-errorPanel';
+
+        var content = document.createElement('div');
+        content.className = 'cesium-widget-errorPanel-content';
+        overlay.appendChild(content);
+
+        var errorHeader = document.createElement('div');
+        errorHeader.className = 'cesium-widget-errorPanel-header';
+        errorHeader.appendChild(document.createTextNode(title));
+        content.appendChild(errorHeader);
+
+        var errorPanelScroller = document.createElement('div');
+        errorPanelScroller.className = 'cesium-widget-errorPanel-scroll';
+        content.appendChild(errorPanelScroller);
+        function resizeCallback() {
+        	errorPanelScroller.style.maxHeight = Math.max(Math.round(element.clientHeight * 0.9 - 100), 30) + 'px';
+        }
+        resizeCallback();
+        if (Cesium.defined(window.addEventListener)) {
+            window.addEventListener('resize', resizeCallback, false);
+        }
+
+        if (Cesium.defined(message)) {
+            var errorMessage = document.createElement('div');
+            errorMessage.className = 'cesium-widget-errorPanel-message';
+            errorMessage.innerHTML = '<p>' + message + '</p>';
+            errorPanelScroller.appendChild(errorMessage);
+        }
+
+        var buttonPanel = document.createElement('div');
+        buttonPanel.className = 'cesium-widget-errorPanel-buttonPanel';
+        content.appendChild(buttonPanel);
+
+        if (mode == "YESNO") {
+        	var yesButton = document.createElement('button');
+            yesButton.setAttribute('type', 'button');
+            yesButton.className = 'cesium-button';
+            yesButton.appendChild(document.createTextNode('Yes'));
+            yesButton.onclick = function() {
+                if (Cesium.defined(resizeCallback) && Cesium.defined(window.removeEventListener)) {
+                    window.removeEventListener('resize', resizeCallback, false);
+                }
+                element.removeChild(overlay);
+                if (Cesium.defined(yesBtnCallback)) {
+                	yesBtnCallback.call(this);
+                }  
+            };
+
+            var noButton = document.createElement('button');
+            noButton.setAttribute('type', 'button');
+            noButton.className = 'cesium-button';
+            noButton.appendChild(document.createTextNode('No'));
+            noButton.onclick = function() {
+                if (Cesium.defined(resizeCallback) && Cesium.defined(window.removeEventListener)) {
+                    window.removeEventListener('resize', resizeCallback, false);
+                }
+                element.removeChild(overlay);
+                if (Cesium.defined(noBtnCallback)) {
+                	noBtnCallback.call(this);
+                }                
+            };
+            
+            buttonPanel.appendChild(yesButton);
+            buttonPanel.appendChild(noButton);
+        }
+        else if (mode == "OK") {
+        	var okButton = document.createElement('button');
+        	okButton.setAttribute('type', 'button');
+        	okButton.className = 'cesium-button';
+        	okButton.appendChild(document.createTextNode('OK'));
+        	okButton.onclick = function() {
+                if (Cesium.defined(resizeCallback) && Cesium.defined(window.removeEventListener)) {
+                    window.removeEventListener('resize', resizeCallback, false);
+                }
+                element.removeChild(overlay);
+                if (Cesium.defined(yesBtnCallback)) {
+                	yesBtnCallback.call(this);
+                }  
+            };
+            buttonPanel.appendChild(okButton);
+        }
+        
+        element.appendChild(overlay);
+        
+        var showErrorPaneElement = document.getElementsByClassName('cesium-widget-errorPanel-content')[0];
+  		showErrorPaneElement.style.width = '400px'; 
 	}
 }; 
 

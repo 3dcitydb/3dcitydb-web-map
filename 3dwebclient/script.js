@@ -646,6 +646,11 @@
 	}
 	
     // Creation of a scene link for sharing with other people..
+	function showSceneLink() {
+		var sceneLink = generateLink();
+		CitydbUtil.showAlertWindow("OK", "Scene Link", '<a href="' + sceneLink + '" style="color:#c0c0c0" target="_blank">' + sceneLink + '</a>');
+	}
+	
  	function generateLink(){
 		var cameraPosition = getCurrentCameraPostion();
 		var	projectLink = location.protocol + '//' + location.host + location.pathname + '?';
@@ -656,7 +661,7 @@
 			batchSize = 3
 			
 		if (gltf_version)
-			projectLink = projectLink + 'gltf_version=' + gltf_version;
+			projectLink = projectLink + 'gltf_version=' + gltf_version + "&";
 		
 		projectLink = projectLink +			
 			'title=' + document.title +
@@ -679,7 +684,8 @@
 		if (terrain != null) {
 			projectLink = projectLink + '&' + terrain;
 		}
-		showPopupInfoBox("Scene Link", '<a href="' + projectLink + '" style="color:#c0c0c0" target="_blank">' + projectLink + '</a>');
+		
+		return projectLink;
   	};
   	
   	function getCurrentCameraPostion(){
@@ -954,10 +960,27 @@
 	
 	function toggleShadows() {
 		cesiumViewer.shadows = !cesiumViewer.shadows;
+		if (cesiumViewer.shadows && !cesiumViewer.timeline) {
+			CitydbUtil.showAlertWindow("YESNO", "Switching on shadows now", 'Do you want to display the timeline which' +
+					' allows you to change the current date and time? Please note that "Yes" will reload the entire scene in a new browser window.', 
+			function() {
+				var sceneLink = generateLink();
+				window.open(sceneLink);			
+			});	
+		}	
+		if (!cesiumViewer.shadows) {
+			cesiumViewer.terrainShadows = false;
+		}
 	}
 	
 	function toggleTerrainShadows() {
 		cesiumViewer.terrainShadows = !cesiumViewer.terrainShadows;
+		if (cesiumViewer.terrainShadows && !cesiumViewer.shadows) {
+			CitydbUtil.showAlertWindow("OK", "Switching on terrain shadows now", 'Please note that shadows for 3D models will also be switched on.', 
+			function() {
+				toggleShadows();		
+			});	
+		}		
 	}
 	
 	function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
@@ -1084,9 +1107,3 @@
 		
 		window.open(mapLink);
 	}
-	
-	function showPopupInfoBox(title, message) { 		
-  		cesiumViewer.cesiumWidget.showErrorPanel(title, message, 'Click "OK" button to continue... ');
-  		var showErrorPaneElement = document.getElementsByClassName('cesium-widget-errorPanel-content')[0];
-  		showErrorPaneElement.style.width = '400px'; 
-	}	
