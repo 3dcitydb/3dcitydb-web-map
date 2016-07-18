@@ -131,12 +131,13 @@
 				info.cancel = true;	
 				gmlId = searchText.replace("::", "");
 				cesiumViewer.geocoder.viewModel._searchText = "Searching now......."
-			}			
-			zoomToObjectById(gmlId, function() {									
-	        	cesiumViewer.geocoder.viewModel.searchText = gmlId;
-			}, function() {
-				console.log('You need either the cityobjectjson file or GoogleFusionTable which contains location information of the city objects');
-			});			
+				zoomToObjectById(gmlId, function() {									
+		        	cesiumViewer.geocoder.viewModel.searchText = gmlId;
+				}, function() {
+					cesiumViewer.geocoder.viewModel.searchText = gmlId;
+					cesiumViewer.geocoder.viewModel.search.call(this);
+				});		
+			}							
 	  	});
 		
 		//	inspect the status of the showed and cached tiles	
