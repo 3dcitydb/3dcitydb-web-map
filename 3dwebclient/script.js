@@ -37,7 +37,7 @@
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1],
 		timeline: (shadows == "true"),
-		animation : false,
+		animation : (shadows == "true"),
 		fullscreenButton: false,
 		shadows: (shadows == "true"),
 		terrainShadows: (terrainShadows == "true")
@@ -959,10 +959,9 @@
 		cesiumViewer.shadows = !cesiumViewer.shadows;
 		if (cesiumViewer.shadows && !cesiumViewer.timeline) {
 			CitydbUtil.showAlertWindow("YESNO", "Switching on shadows now", 'Do you want to display the timeline which' +
-					' allows you to change the current date and time? Please note that "Yes" will reload the entire scene in a new browser window.', 
+					' allows you to change the current date and time? Please note that "Yes" will reload the entire scene in the browser window.', 
 			function() {
-				var sceneLink = generateLink();
-				window.open(sceneLink);			
+				window.location.href = generateLink();	
 			});	
 		}	
 		if (!cesiumViewer.shadows) {
