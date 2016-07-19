@@ -121,23 +121,20 @@
 			document.title = titleStr;
 		}			
 		
-		// It's an extended Geocoder widget which can also be used for searching object by its gmlid. In the input field, you just need to add two colons before the gmlid
-		// For example, if you want to search object with a gmlid "BLDG_0003000b006b51e2", you need to type "::BLDG_0003000b006b51e2" in the input field	
-		// Here, the cityobjectjson (or GoogleFusionTable) is required that provides location information of the objects. 
-		cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){ 
-			var searchText = cesiumViewer.geocoder.viewModel._searchText;
-			var gmlId = "";
-			if (searchText.indexOf("::") > -1) {
+		// It's an extended Geocoder widget which can also be used for searching object by its gmlid.
+		cesiumViewer.geocoder.viewModel._searchCommand.beforeExecute.addEventListener(function(info){
+			var callGeocodingService = info.args[0];
+			if (callGeocodingService != true) {
+				var gmlId = cesiumViewer.geocoder.viewModel.searchText;
 				info.cancel = true;	
-				gmlId = searchText.replace("::", "");
-				cesiumViewer.geocoder.viewModel._searchText = "Searching now......."
+				cesiumViewer.geocoder.viewModel.searchText = "Searching now......."
 				zoomToObjectById(gmlId, function() {									
 		        	cesiumViewer.geocoder.viewModel.searchText = gmlId;
 				}, function() {
 					cesiumViewer.geocoder.viewModel.searchText = gmlId;
-					cesiumViewer.geocoder.viewModel.search.call(this);
-				});		
-			}							
+					cesiumViewer.geocoder.viewModel.search.call(this, true);
+				});
+			}											
 	  	});
 		
 		//	inspect the status of the showed and cached tiles	
