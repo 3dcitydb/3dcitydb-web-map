@@ -102,7 +102,7 @@
 	    var creditDisplay = cesiumViewer.scene.frameState.creditDisplay;
 	    var citydbCreditLogo = new Cesium.Credit('3DCityDB', citydbLogoData, 'http://www.3dcitydb.net/');
 	    creditDisplay.addDefaultCredit(citydbCreditLogo);
-	    var tumCreditLogo = new Cesium.Credit('© 2015 Chair of Geoinformatics TU München', undefined, "https://www.gis.bgu.tum.de/en/home/");
+	    var tumCreditLogo = new Cesium.Credit('© 2016 Chair of Geoinformatics TU München', undefined, "https://www.gis.bgu.tum.de/en/home/");
 	    creditDisplay.addDefaultCredit(tumCreditLogo);
 	    
 	    // activate debug mode
