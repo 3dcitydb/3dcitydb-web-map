@@ -589,6 +589,14 @@
 			if (object.ready) {
 				var highlightColor = this._highlightedObjects[object._id._name];
 				if (highlightColor) {
+					var targetEntity = object._id;
+					if (!Cesium.defined(targetEntity.originalMaterial)) {
+						targetEntity.addProperty("originalMaterial");
+						var materials = primitive._runtime.materialsByName;				
+						for (var materialId in materials){
+							targetEntity.originalMaterial = materials[materialId].getValue('emission').clone();
+						}
+					}	
 					var materials = object._runtime.materialsByName;				
 					for (var materialId in materials){
 						materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
@@ -613,10 +621,10 @@
 			return;
 		if (object instanceof Cesium.Model) {
 			if (object.ready) {
-				var unHighlightColor = new Cesium.Color(0.0, 0.0, 0.0, 1)
+				var targetEntity = object._id;
 				var materials = object._runtime.materialsByName;			
 				for (var materialId in materials){
-					materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(unHighlightColor));
+					materials[materialId].setValue('emission', targetEntity.originalMaterial);
 				}
 			}	
 		}

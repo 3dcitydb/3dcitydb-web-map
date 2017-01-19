@@ -474,7 +474,14 @@
 	 		if (citydbKmlLayer.isInHighlightedList(targetEntity.name))
 				return;
 	 		
-			if (primitive instanceof Cesium.Model) {				
+			if (primitive instanceof Cesium.Model) {	
+				if (!Cesium.defined(targetEntity.originalMaterial)) {
+					targetEntity.addProperty("originalMaterial");
+					var materials = primitive._runtime.materialsByName;				
+					for (var materialId in materials){
+						targetEntity.originalMaterial = materials[materialId].getValue('emission').clone();
+					}
+				}	
 				var materials = object.mesh._materials;
 				for (var i = 0; i < materials.length; i++) {
 					// do mouseOver highlighting
@@ -500,7 +507,8 @@
 				var materials = object.mesh._materials;
 				for (var i = 0; i < materials.length; i++) {
 					// dismiss highlighting
-					materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
+					console.log(targetEntity.originalMaterial);
+					materials[i].setValue('emission', targetEntity.originalMaterial);
 				} 
 			}
 			else if (primitive instanceof Cesium.Primitive) {				
