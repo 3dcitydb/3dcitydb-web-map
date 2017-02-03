@@ -62,7 +62,7 @@
 		this._maxCountOfVisibleTiles = Cesium.defaultValue(options.maxCountOfVisibleTiles, 200);		
     	this._minLodPixels = Cesium.defaultValue(options.minLodPixels, undefined);
     	this._maxLodPixels = Cesium.defaultValue(options.maxLodPixels,  undefined);		
-		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);			
+		this._citydbKmlDataSource = undefined;		
 		this._activeHighlighting = Cesium.defaultValue(options.activeHighlighting, true);	
 		this._citydbKmlHighlightingManager = this._activeHighlighting? new CitydbKmlHighlightingManager(this): null;		
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
@@ -320,7 +320,11 @@
 	 */
 	CitydbKmlLayer.prototype.addToCesium = function(cesiumViewer){
 		this._cesiumViewer = cesiumViewer;
-
+		this._citydbKmlDataSource = new CitydbKmlDataSource({
+			layerId: this._id,
+			camera: cesiumViewer.scene.camera,
+		    canvas: cesiumViewer.scene.canvas
+		});	
 		var that = this;
 		loadMasterJSON(that, true);
 		
@@ -514,7 +518,11 @@
 			this._citydbKmlTilingManager.doTerminate();
 			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);	
 		}		
-		this._citydbKmlDataSource = new CitydbKmlDataSource(this._id);	
+		this._citydbKmlDataSource = new CitydbKmlDataSource({
+			layerId: this._id,
+			camera: this._cesiumViewer.scene.camera,
+		    canvas: this._cesiumViewer.scene.canvas
+		});	
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 
 		return loadMasterJSON(this, false);
@@ -592,7 +600,7 @@
 					var targetEntity = object._id;
 					if (!Cesium.defined(targetEntity.originalMaterial)) {
 						targetEntity.addProperty("originalMaterial");
-						var materials = primitive._runtime.materialsByName;				
+						var materials = object._runtime.materialsByName;				
 						for (var materialId in materials){
 							targetEntity.originalMaterial = materials[materialId].getValue('emission').clone();
 						}

@@ -34,63 +34,63 @@
 	// loading referenced Cesium classes
     
     var AssociativeArray = Cesium.AssociativeArray;
-    var BoundingRectangle = Ceisum.BoundingRectangle;
-    var Cartesian2 = Ceisum.Cartesian2;
-    var Cartesian3 = Ceisum.Cartesian3;
-    var Cartographic = Ceisum.Cartographic;
-    var ClockRange = Ceisum.ClockRange;
-    var ClockStep = Ceisum.ClockStep;
-    var Color = Ceisum.Color;
-    var createGuid = Ceisum.createGuid;
-    var defaultValue = Ceisum.defaultValue;
-    var defined = Ceisum.defined;
-    var defineProperties = Ceisum.definePropertie;
-    var DeveloperError = Ceisum.DeveloperError;
-    var Ellipsoid = Ceisum.Ellipsoid;
-    var Event = Ceisum.Event;
-    var getAbsoluteUri= Ceisum.getAbsoluteUri;
-    var getExtensionFromUri = Ceisum.getExtensionFromUri;
-    var getFilenameFromUri = Ceisum.getFilenameFromUri;
-    var Iso8601 = Ceisum.Iso8601;
-    var joinUrls = Ceisum.joinUrls;
-    var JulianDate = Ceisum.JulianDate;
-    var loadBlob= Ceisum.loadBlob;
-    var loadXML = Ceisum.loadXML;
-    var CesiumMath = Ceisum.CesiumMath;
-    var NearFarScalar = Ceisum.NearFarScalar;
-    var PinBuilder = Ceisum.PinBuilder;
-    var PolygonHierarchy = Ceisum.PolygonHierarchy;
+    var BoundingRectangle = Cesium.BoundingRectangle;
+    var Cartesian2 = Cesium.Cartesian2;
+    var Cartesian3 = Cesium.Cartesian3;
+    var Cartographic = Cesium.Cartographic;
+    var ClockRange = Cesium.ClockRange;
+    var ClockStep = Cesium.ClockStep;
+    var Color = Cesium.Color;
+    var createGuid = Cesium.createGuid;
+    var defaultValue = Cesium.defaultValue;
+    var defined = Cesium.defined;
+    var defineProperties = Cesium.defineProperties;
+    var DeveloperError = Cesium.DeveloperError;
+    var Ellipsoid = Cesium.Ellipsoid;
+    var Event = Cesium.Event;
+    var getAbsoluteUri= Cesium.getAbsoluteUri;
+    var getExtensionFromUri = Cesium.getExtensionFromUri;
+    var getFilenameFromUri = Cesium.getFilenameFromUri;
+    var Iso8601 = Cesium.Iso8601;
+    var joinUrls = Cesium.joinUrls;
+    var JulianDate = Cesium.JulianDate;
+    var loadBlob= Cesium.loadBlob;
+    var loadXML = Cesium.loadXML;
+    var CesiumMath = Cesium.CesiumMath;
+    var NearFarScalar = Cesium.NearFarScalar;
+    var PinBuilder = Cesium.PinBuilder;
+    var PolygonHierarchy = Cesium.PolygonHierarchy;
     var Rectangle = Cesium.Rectangle;
-    var RuntimeError = Ceisum.RuntimeError;
-    var TimeInterval = Ceisum.TimeInterval;
-    var TimeIntervalCollection = Ceisum.TimeIntervalCollection;
-    var HeightReference = Ceisum.HeightReference;
-    var HorizontalOrigin = Ceisum.HorizontalOrigin;
-    var LabelStyle = Ceisum.LabelStyle;
-    var SceneMode = Ceisum.SceneMode;
-    var Autolinker = Ceisum.Autolinker;
-    var Uri = Ceisum.Uri;
-    var when = Ceisum.when;
-    var zip = Ceisum.zip;
-    var BillboardGraphics = Ceisum.BillboardGraphics;
-    var CompositePositionProperty = Ceisum.CompositePositionProperty;
-    var CorridorGraphics = Ceisum.CorridorGraphics;
-    var DataSource = Ceisum.DataSource;
-    var DataSourceClock = Ceisum.DataSourceClock;
-    var Entity = Ceisum.Entity;
-    var EntityCluster = Ceisum.EntityCluster;
-    var EntityCollection = Ceisum.EntityCollection;
-    var LabelGraphics = Ceisum.LabelGraphics;
-    var PathGraphics = Ceisum.PathGraphics;
-    var PolygonGraphics = Ceisum.PolygonGraphics;
-    var PolylineGraphics = Ceisum.PolylineGraphics;
-    var PositionPropertyArray = Ceisum.PositionPropertyArray;
-    var RectangleGraphics = Ceisum.RectangleGraphics;
-    var ReferenceProperty = Ceisum.ReferenceProperty;
-    var SampledPositionProperty = Ceisum.SampledPositionProperty;
-    var ScaledPositionProperty = Ceisum.ScaledPositionProperty;
-    var TimeIntervalCollectionProperty = Ceisum.TimeIntervalCollectionProperty;
-    var WallGraphic = Ceisum.WallGraphic;
+    var RuntimeError = Cesium.RuntimeError;
+    var TimeInterval = Cesium.TimeInterval;
+    var TimeIntervalCollection = Cesium.TimeIntervalCollection;
+    var HeightReference = Cesium.HeightReference;
+    var HorizontalOrigin = Cesium.HorizontalOrigin;
+    var LabelStyle = Cesium.LabelStyle;
+    var SceneMode = Cesium.SceneMode;
+    var Autolinker = Cesium.Autolinker;
+    var Uri = Cesium.Uri;
+    var when = Cesium.when;
+    var zip = Cesium.zip;
+    var BillboardGraphics = Cesium.BillboardGraphics;
+    var CompositePositionProperty = Cesium.CompositePositionProperty;
+    var CorridorGraphics = Cesium.CorridorGraphics;
+    var DataSource = Cesium.DataSource;
+    var DataSourceClock = Cesium.DataSourceClock;
+    var Entity = Cesium.Entity;
+    var EntityCluster = Cesium.EntityCluster;
+    var EntityCollection = Cesium.EntityCollection;
+    var LabelGraphics = Cesium.LabelGraphics;
+    var PathGraphics = Cesium.PathGraphics;
+    var PolygonGraphics = Cesium.PolygonGraphics;
+    var PolylineGraphics = Cesium.PolylineGraphics;
+    var PositionPropertyArray = Cesium.PositionPropertyArray;
+    var RectangleGraphics = Cesium.RectangleGraphics;
+    var ReferenceProperty = Cesium.ReferenceProperty;
+    var SampledPositionProperty = Cesium.SampledPositionProperty;
+    var ScaledPositionProperty = Cesium.ScaledPositionProperty;
+    var TimeIntervalCollectionProperty = Cesium.TimeIntervalCollectionProperty;
+    var WallGraphic = Cesium.WallGraphic;
 
     // IE 8 doesn't have a DOM parser and can't run Cesium anyway, so just bail.
  // IE 8 doesn't have a DOM parser and can't run Cesium anyway, so just bail.
@@ -257,7 +257,7 @@
 
     // an optional context is passed to allow for some malformed kmls (those with multiple geometries with same ids) to still parse
     // correctly, as they do in Google Earth.
-    function createEntity(node, entityCollection, context) {
+    function createEntity(node, entityCollection, context, layerId) {
         var id = queryStringAttribute(node, 'id');
         id = defined(id) && id.length !== 0 ? id : createGuid();
         if(defined(context)){
@@ -277,11 +277,17 @@
         entity = entityCollection.add(new Entity({id : id}));
         if (!defined(entity.kml)) {
             entity.addProperty('kml');
+            entity.addProperty('layerId');
             entity.kml = new KmlFeatureData();
+            entity.layerId = layerId;
         }
         return entity;
     }
-
+    
+	function createId(node) {
+		return defined(node) && defined(node.id) && node.id.length !== 0 ? node.id : createGuid();
+	}
+    
     function isExtrudable(altitudeMode, gxAltitudeMode) {
         return altitudeMode === 'absolute' || altitudeMode === 'relativeToGround' || gxAltitudeMode === 'relativeToSeaFloor';
     }
@@ -1349,7 +1355,7 @@
             var childNode = childNodes.item(i);
             var geometryProcessor = geometryTypes[childNode.localName];
             if (defined(geometryProcessor)) {
-                var childEntity = createEntity(childNode, entityCollection, context);
+                var childEntity = createEntity(childNode, entityCollection, context, dataSource._layerId);
                 childEntity.parent = entity;
                 childEntity.name = entity.name;
                 childEntity.availability = entity.availability;
@@ -1505,7 +1511,7 @@
     }
 
     function processFeature(dataSource, parent, featureNode, entityCollection, styleCollection, sourceUri, uriResolver, promises, context) {
-        var entity = createEntity(featureNode, entityCollection, context);
+        var entity = createEntity(featureNode, entityCollection, context, dataSource._layerId);
         var kmlData = entity.kml;
         var styleEntity = computeFinalStyle(entity, dataSource, featureNode, styleCollection, sourceUri, uriResolver);
 
@@ -1571,15 +1577,67 @@
         };
     }
 
+    function processModel(dataSource, entityCollection, modelNode, entity, styleEntity, context, sourceUri) {
+		var locationNode = queryFirstNode(modelNode, 'Location', namespaces.kml);
+		var longitude = queryNumericValue(locationNode, 'longitude', namespaces.kml);
+		var latitude = queryNumericValue(locationNode, 'latitude', namespaces.kml);
+		var height = queryNumericValue(locationNode, 'altitude', namespaces.kml);
+        var position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
+        
+        var orientationNode = queryFirstNode(modelNode, 'Orientation', namespaces.kml);
+        
+        var headingValue = queryNumericValue(orientationNode, 'heading', namespaces.kml);
+        if (!defined(headingValue)) {
+        	headingValue = 0;
+        }
+        
+        var tiltValue = queryNumericValue(orientationNode, 'tilt', namespaces.kml);
+        if (!defined(tiltValue)) {
+        	tiltValue = 0;
+        }
+        
+        var rollValue = queryNumericValue(orientationNode, 'roll', namespaces.kml);
+        if (!defined(rollValue)) {
+        	rollValue = 0;
+        }
+        
+        var heading = Cesium.Math.toRadians(headingValue);
+		var pitch = Cesium.Math.toRadians(tiltValue);
+		var roll = Cesium.Math.toRadians(rollValue);
+		
+		// Backward compatible....
+		var gltfVersion = CitydbUtil.parse_query_string('gltf_version', window.location.href);
+        if (gltfVersion == '0.8') {
+        	var heading = Cesium.Math.toRadians(headingValue - 180);
+    		var pitch = Cesium.Math.toRadians(180);
+        }
+		
+        var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+		var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+		
+		var linkNode = queryFirstNode(modelNode, 'Link', namespaces.kml);
+		var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
+		var uri = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".gltf").trim()); 
+		
+		entity.label = '';
+		entity.position = position;
+		entity.orientation = orientation;
+		entity.model = {
+			uri : uri,
+			asynchronous: false
+		};
+    }
+    
     var geometryTypes = {
         Point : processPoint,
         LineString : processLineStringOrLinearRing,
         LinearRing : processLineStringOrLinearRing,
         Polygon : processPolygon,
-        Track : processTrack,
+        Track : processTrack,       
         MultiTrack : processMultiTrack,
         MultiGeometry : processMultiGeometry,
-        Model : processUnsupportedGeometry
+        Model : processModel
+    //    Model : processUnsupportedGeometry
     };
 
     function processDocument(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context) {
@@ -1603,8 +1661,50 @@
     }
 
     function processFolder(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context) {
-        var r = processFeature(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context);
-        processDocument(dataSource, r.entity, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context);
+/*        var r = processFeature(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context);
+        processDocument(dataSource, r.entity, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context);*/
+
+        console.log("loading 3DCityDB KML Networklink files...");
+		var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
+		
+		// "node" ist the <Folder> tag	
+		var networklinkEntity = new Entity(createId(node));		
+		var networklinkNode = queryFirstNode(node, 'NetworkLink', namespaces.kml);
+		
+		if (typeof networklinkNode != 'undefined') {
+			// store the path of the coresponding Networklink
+			var linkNode = queryFirstNode(networklinkNode, 'Link', namespaces.kml);		
+			var networklinkUrl = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).trim()); 		
+			
+			// Store the boundingbox of each Networklink entity				
+			var latLonAltBoxNode = queryFirstNode(queryFirstNode(networklinkNode, 'Region', namespaces.kml), 'LatLonAltBox', namespaces.kml) ;
+			var minX = queryNumericValue(latLonAltBoxNode, 'west', namespaces.kml);
+			var minY = queryNumericValue(latLonAltBoxNode, 'south',namespaces.kml);
+			var maxX = queryNumericValue(latLonAltBoxNode, 'east', namespaces.kml);
+			var maxY = queryNumericValue(latLonAltBoxNode, 'north', namespaces.kml);
+			
+			// we use the attribute "_pathSubscription" as a hook to save the relevant information
+			networklinkEntity._pathSubscription = {
+				minX: minX,
+				minY: minY,
+				maxX: maxX,
+				maxY: maxY,
+				kmlUrl: networklinkUrl
+			};
+
+			// pass the name to the networklink entity which will be labeled in the layer tree	
+			networklinkEntity.name = queryStringValue(node, 'name', namespaces.kml);
+			
+			// add the networklink entity to the master entityCollection
+			entityCollection.add(networklinkEntity);
+		}
+		else {
+			parent = new Entity(createId(node));
+			parent.name = queryStringValue(node, 'name', namespaces.kml);
+			entityCollection.add(parent);
+			processDocument(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver);
+		}
+    
     }
 
     function processPlacemark(dataSource, parent, placemark, entityCollection, styleCollection, sourceUri, uriResolver, promises, context) {
@@ -1620,7 +1720,7 @@
             if (defined(geometryProcessor)) {
                 // pass the placemark entity id as a context for case of defining multiple child entities together to handle case
                 // where some malformed kmls reuse the same id across placemarks, which works in GE, but is not technically to spec.
-                geometryProcessor(dataSource, entityCollection, childNode, entity, styleEntity, entity.id);
+                geometryProcessor(dataSource, entityCollection, childNode, entity, styleEntity, entity.id, sourceUri);
                 hasGeometry = true;
             }
         }
@@ -1889,7 +1989,7 @@
         return queryString;
     }
 
-    function processNetworkLink(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context) {
+    /*function processNetworkLink(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context) {
         var r = processFeature(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context);
         var networkEntity = r.entity;
 
@@ -2022,14 +2122,26 @@
                 promises.push(promise);
             }
         }
-    }
+    }*/
 
+    function processLookAt(dataSource, parent, node, entityCollection, styleCollection, sourceUri, uriResolver, promises, context) {
+        dataSource._lookAt = {
+    		lat: queryNumericValue(node, 'latitude', namespaces.kml),	
+    		lon: queryNumericValue(node, 'longitude', namespaces.kml),
+			range: queryNumericValue(node, 'range', namespaces.kml),
+			tilt: queryNumericValue(node, 'tilt', namespaces.kml),
+			heading:  queryNumericValue(node, 'heading', namespaces.kml),
+			altitude: queryNumericValue(node, 'altitude', namespaces.kml)
+    	}
+    }
+        
     // Ensure Specs/Data/KML/unsupported.kml is kept up to date with these supported types
     var featureTypes = {
         Document : processDocument,
         Folder : processFolder,
+        LookAt : processLookAt,
         Placemark : processPlacemark,
-        NetworkLink : processNetworkLink,
+  //      NetworkLink : processNetworkLink,
         GroundOverlay : processGroundOverlay,
         PhotoOverlay : processUnsupportedFeature,
         ScreenOverlay : processUnsupportedFeature,
@@ -2269,6 +2381,8 @@
             up : defined(camera) ? Cartesian3.clone(camera.upWC) : undefined,
             bbox : defined(camera) ? camera.computeViewRectangle() : Rectangle.clone(Rectangle.MAX_VALUE)
         };
+        this._layerId = options.layerId;
+        this._lookAt = null;
     }
 
     /**

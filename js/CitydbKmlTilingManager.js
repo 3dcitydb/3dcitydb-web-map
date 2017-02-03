@@ -259,7 +259,11 @@ var GlobeTileTaskQueue = {};
         		}		        				        		
     		}
 			else {
-				var newKmlDatasource = new CitydbKmlDataSource(scope.citydbKmlLayerInstance.id);
+				var newKmlDatasource = new CitydbKmlDataSource({
+					layerId: scope.citydbKmlLayerInstance.id,
+					camera: scope.citydbKmlLayerInstance.cesiumViewer.scene.camera,
+				    canvas: scope.citydbKmlLayerInstance.cesiumViewer.scene.canvas
+				});
 				var newNetworklinkItem = {
 					url: tileUrl,
 					kmlDatasource: newKmlDatasource,
