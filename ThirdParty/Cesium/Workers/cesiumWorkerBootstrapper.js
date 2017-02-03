@@ -1,7 +1,7 @@
 /**
  * Cesium - https://github.com/AnalyticalGraphicsInc/cesium
  *
- * Copyright 2011-2015 Cesium Contributors
+ * Copyright 2011-2017 Cesium Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,8 +200,9 @@ var requirejs, require, define;
     /**
      * Constructs an error with a pointer to an URL with more information.
      * @param {String} id the error ID that maps to an ID on a web page.
-     * @param {String} message human readable error.
+     * @param {String} msg human readable error.
      * @param {Error} [err] the original error, if there is one.
+     * @param {RequireModules} requireModules The modules required but not found.
      *
      * @returns {Error}
      */
@@ -2145,3 +2146,4 @@ var requirejs, require, define;
     //Set up with config info.
     req(cfg);
 }(this));
+
