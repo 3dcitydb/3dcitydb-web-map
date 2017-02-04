@@ -327,6 +327,7 @@
 		Cesium.when(promise, function(result){
 			document.getElementById('loadingIndicator').style.display = 'none';
 		},function(error){
+			CitydbUtil.showAlertWindow("OK", "Error", error.message);
 			document.getElementById('loadingIndicator').style.display = 'none';
 		})
 		
@@ -433,9 +434,6 @@
 		citydbKmlLayer.registerEventHandler("CLICK", function(object) {			
 			var targetEntity = object.id;
 			var primitive = object.primitive;
-			console.log(citydbKmlLayer);
-	 		console.log(primitive);
-
 	 		var globeId = targetEntity.name; 
 	 		
 	 		createInfoTable(globeId, targetEntity, citydbKmlLayer);

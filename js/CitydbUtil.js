@@ -76,6 +76,14 @@ var CitydbUtil = {
             return url.substring(0, url.lastIndexOf("/")+1);
         };
 	},
+	
+	get_suffix_from_filename: function (name) {
+	    if (name.lastIndexOf(".")==-1){
+	  		return name;
+	  	}else{
+	    	return name.substring(name.lastIndexOf(".") + 1, name.length);
+	    };
+	},
 	/**
 	 * Show a confirmation dialog with Title, messages, and YES&NO buttons.
 	 * The code is mainly based on and inspired by the code of the Cesium class "CesiumWidget"
