@@ -343,6 +343,9 @@
 	}
 
 	function loadLayerGroup(_layers) {
+		if (_layers.length == 0)
+			return;
+		
 		var k = 0;		
 		registerLayerEventHandler(_layers[k]);
 		
