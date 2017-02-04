@@ -824,7 +824,12 @@
 	            	}
 				});		
 			}
-		}		
+		}	
+		else {
+			if (Cesium.defined(errorCallbackFunc)) {
+				errorCallbackFunc.call(this);
+        	}
+		}
 	};
   	
   	function flyToMapLocation(lat, lon, callBackFunc) {
