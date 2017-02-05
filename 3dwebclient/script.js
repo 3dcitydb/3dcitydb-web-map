@@ -492,7 +492,13 @@
 			else if (primitive instanceof Cesium.Primitive) {	
 				try{
 					var parentEntity = targetEntity._parent;	
-					var childrenEntities = parentEntity._children;						
+					var childrenEntities;		
+					if (Cesium.defined(parentEntity)) {
+						childrenEntities = parentEntity._children;	
+					}
+					else {
+						childrenEntities = [targetEntity];	
+					}					
 				}
 				catch(e){return;} // not valid entities
 				_doMouseoverHighlighting(childrenEntities, primitive, mouseOverhighlightColor);
@@ -515,8 +521,13 @@
 			else if (primitive instanceof Cesium.Primitive) {				
 				try{
 					var parentEntity = targetEntity._parent;	
-					var childrenEntities = parentEntity._children;		
-					
+					var childrenEntities;		
+					if (Cesium.defined(parentEntity)) {
+						childrenEntities = parentEntity._children;	
+					}
+					else {
+						childrenEntities = [targetEntity];	
+					}	
 				}
 				catch(e){return;} // not valid entities
 				_dismissMouseoverHighlighting(childrenEntities, primitive);	
