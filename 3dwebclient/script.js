@@ -472,6 +472,9 @@
 			var targetEntity = object.id;
 	 		var primitive = object.primitive;
 	 		
+	 		if (!Cesium.defined(targetEntity) || !Cesium.defined(primitive))
+				return;
+	 		
 	 		if (citydbKmlLayer.isInHighlightedList(targetEntity.name))
 				return;
 	 		
@@ -508,8 +511,13 @@
 	 	citydbKmlLayer.registerEventHandler("MOUSEOUT", function(object) {
 	 		var primitive = object.primitive;
 	 		var targetEntity = object.id;
+	 		
+	 		if (!Cesium.defined(targetEntity) || !Cesium.defined(primitive))
+				return;
+	 		
 	 		if (citydbKmlLayer.isInHighlightedList(targetEntity.name))
 				return; 
+	 		
 			if (primitive instanceof Cesium.Model) {				
 				var materials = object.mesh._materials;
 				for (var i = 0; i < materials.length; i++) {

@@ -362,8 +362,17 @@
 				that._finishLoadingEvent.raiseEvent(that);
 		    });		
 		}
-		else {
-			return;
+		else {					
+			this._citydbKmlDataSource = new Cesium.Cesium3DTileset({
+			    url : this._url
+			});
+			this._startLoadingEvent.raiseEvent(this);
+			this._citydbKmlDataSource.readyPromise.then(function(tileset) {
+				if (that._active) {				
+					cesiumViewer.scene.primitives.add(tileset);
+	            }			
+				that._finishLoadingEvent.raiseEvent(that);	
+			});
 		}
 
 		Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function() {		
@@ -445,17 +454,33 @@
 	 * @param {Boolean} value
 	 */
 	CitydbKmlLayer.prototype.activate = function(active){
-		if (active == false) {	
-			if (this._urlSuffix == 'json')
+		this._active = active;
+		if (this._urlSuffix == 'json') {
+			if (active == false) {
 				this._citydbKmlTilingManager.doTerminate();			
-			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
+				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
+			}
+			else {
+				this._citydbKmlTilingManager.doStart();			
+				this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);	
+			}			
+		}
+		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
+			if (active == false) {		
+				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
+			}
+			else {		
+				this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);	
+			}	
 		}
 		else {
-			if (this._urlSuffix == 'json')
-				this._citydbKmlTilingManager.doStart();			
-			this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);			
-		}
-		this._active = active;
+			if (active == false) {				
+				this._cesiumViewer.scene.primitives.remove(this._citydbKmlDataSource);
+			}
+			else {	
+				this.reActivate();	
+			}
+		}		
 	}
 	
 	/**
@@ -483,9 +508,12 @@
 	            }
 	        })	
 		}
-		else {
+		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
 			this._cesiumViewer.flyTo(this._citydbKmlDataSource);			
-		}		
+		}	
+		else {
+			this._cesiumViewer.scene.camera.flyToBoundingSphere(this._citydbKmlDataSource.boundingVolume._boundingSphere);
+		}
 	}
 	
 	/**
@@ -563,11 +591,19 @@
 		this._hiddenObjects = [];
 		this._cityobjectsJsonData = {};			
 		if (this._active) {
-			if (this._urlSuffix == 'json')
+			if (this._urlSuffix == 'json') {
 				this._citydbKmlTilingManager.doTerminate();			
-			this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);	
+				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
+			}
+			else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
+				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
+			}	
+			else {
+				this._cesiumViewer.scene.primitives.remove(this._citydbKmlDataSource);
+			}
 		}	
 		var deferred = Cesium.when.defer();
+		var that = this;
 		if (this._urlSuffix == 'json') {
 			this._citydbKmlDataSource = new CitydbKmlDataSource({
 				layerId: this._id,
@@ -575,7 +611,6 @@
 			    canvas: this._cesiumViewer.scene.canvas
 			});	
 			this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
-
 			return loadMasterJSON(this, false);
 		}
 		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
@@ -583,8 +618,7 @@
 				camera: cesiumViewer.scene.camera,
 			    canvas: cesiumViewer.scene.canvas
 			});	
-			this._startLoadingEvent.raiseEvent(this);
-			var that = this;
+			this._startLoadingEvent.raiseEvent(this);			
 			this._citydbKmlDataSource.load(this._url).then(function(dataSource) {
 				assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
 				cesiumViewer.dataSources.add(dataSource);
@@ -597,8 +631,19 @@
 			return deferred.promise;
 		}
 		else {
-			deferred.reject(new Cesium.DeveloperError('Unsupported data source: ' + that._url));
-			return deferred.promise; 
+			this._citydbKmlDataSource = new Cesium.Cesium3DTileset({
+			    url : this._url
+			});
+			this._startLoadingEvent.raiseEvent(this);		
+			this._citydbKmlDataSource.readyPromise.then(function(tileset) {			
+				that._cesiumViewer.scene.primitives.add(tileset);			
+				that._finishLoadingEvent.raiseEvent(that);
+				deferred.resolve();
+			}).otherwise(function(error) {
+				deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+	        	that._finishLoadingEvent.raiseEvent(that);
+			});;			
+			return deferred.promise;
 		}
 	}
 	
