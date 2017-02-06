@@ -8619,7 +8619,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Creates an rectangle given the boundary longitude and latitude in degrees.
+     * Creates a rectangle given the boundary longitude and latitude in degrees.
      *
      * @param {Number} [west=0.0] The westernmost longitude in degrees in the range [-180.0, 180.0].
      * @param {Number} [south=0.0] The southernmost latitude in degrees in the range [-90.0, 90.0].
@@ -8781,7 +8781,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Duplicates an Rectangle.
+     * Duplicates a Rectangle.
      *
      * @param {Rectangle} rectangle The rectangle to clone.
      * @param {Rectangle} [result] The object onto which to store the result, or undefined if a new instance should be created.
@@ -8862,7 +8862,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Checks an Rectangle's properties and throws if they are not in valid ranges.
+     * Checks a Rectangle's properties and throws if they are not in valid ranges.
      *
      * @param {Rectangle} rectangle The rectangle to validate
      *
@@ -8892,7 +8892,7 @@ define('Core/Rectangle',[
             };
 
     /**
-     * Computes the southwest corner of an rectangle.
+     * Computes the southwest corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -8911,7 +8911,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the northwest corner of an rectangle.
+     * Computes the northwest corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -8930,7 +8930,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the northeast corner of an rectangle.
+     * Computes the northeast corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -8949,7 +8949,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the southeast corner of an rectangle.
+     * Computes the southeast corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -8968,7 +8968,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the center of an rectangle.
+     * Computes the center of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the center
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -9190,7 +9190,7 @@ define('Core/Rectangle',[
 
     var subsampleLlaScratch = new Cartographic();
     /**
-     * Samples an rectangle so that it includes a list of Cartesian points suitable for passing to
+     * Samples a rectangle so that it includes a list of Cartesian points suitable for passing to
      * {@link BoundingSphere#fromPoints}.  Sampling is necessary to account
      * for rectangles that cover the poles or cross the equator.
      *
@@ -9510,7 +9510,7 @@ define('Core/BoundingSphere',[
     };
 
     /**
-     * Computes a bounding sphere from an rectangle projected in 2D.  The bounding sphere accounts for the
+     * Computes a bounding sphere from a rectangle projected in 2D.  The bounding sphere accounts for the
      * object's minimum and maximum heights over the rectangle.
      *
      * @param {Rectangle} rectangle The rectangle around which to create a bounding sphere.
@@ -9556,7 +9556,7 @@ define('Core/BoundingSphere',[
     var fromRectangle3DScratch = [];
 
     /**
-     * Computes a bounding sphere from an rectangle in 3D. The bounding sphere is created using a subsample of points
+     * Computes a bounding sphere from a rectangle in 3D. The bounding sphere is created using a subsample of points
      * on the ellipsoid and contained in the rectangle. It may not be accurate for all rectangles on all types of ellipsoids.
      *
      * @param {Rectangle} rectangle The valid rectangle used to create a bounding sphere.
@@ -13605,6 +13605,21 @@ define('Core/WebGLConstants',[
         UNPACK_COLORSPACE_CONVERSION_WEBGL : 0x9243,
         BROWSER_DEFAULT_WEBGL : 0x9244,
 
+        // WEBGL_compressed_texture_s3tc
+        COMPRESSED_RGB_S3TC_DXT1_EXT : 0x83F0,
+        COMPRESSED_RGBA_S3TC_DXT1_EXT : 0x83F1,
+        COMPRESSED_RGBA_S3TC_DXT3_EXT : 0x83F2,
+        COMPRESSED_RGBA_S3TC_DXT5_EXT : 0x83F3,
+
+        // WEBGL_compressed_texture_pvrtc
+        COMPRESSED_RGB_PVRTC_4BPPV1_IMG : 0x8C00,
+        COMPRESSED_RGB_PVRTC_2BPPV1_IMG : 0x8C01,
+        COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : 0x8C02,
+        COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : 0x8C03,
+
+        // WEBGL_compressed_texture_etc1
+        COMPRESSED_RGB_ETC1_WEBGL : 0x8D64,
+
         // Desktop OpenGL
         DOUBLE : 0x140A,
 
@@ -14857,7 +14872,7 @@ define('Core/IndexDatatype',[
      * or <code>Uint32Array</code> depending on the number of vertices.
      *
      * @param {Number} numberOfVertices Number of vertices that the indices will reference.
-     * @param {Any} indicesLengthOrArray Passed through to the typed array constructor.
+     * @param {*} indicesLengthOrArray Passed through to the typed array constructor.
      * @returns {Uint16Array|Uint32Array} A <code>Uint16Array</code> or <code>Uint32Array</code> constructed with <code>indicesLengthOrArray</code>.
      *
      * @example

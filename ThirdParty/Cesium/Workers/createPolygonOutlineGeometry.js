@@ -8719,7 +8719,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Creates an rectangle given the boundary longitude and latitude in degrees.
+     * Creates a rectangle given the boundary longitude and latitude in degrees.
      *
      * @param {Number} [west=0.0] The westernmost longitude in degrees in the range [-180.0, 180.0].
      * @param {Number} [south=0.0] The southernmost latitude in degrees in the range [-90.0, 90.0].
@@ -8881,7 +8881,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Duplicates an Rectangle.
+     * Duplicates a Rectangle.
      *
      * @param {Rectangle} rectangle The rectangle to clone.
      * @param {Rectangle} [result] The object onto which to store the result, or undefined if a new instance should be created.
@@ -8962,7 +8962,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Checks an Rectangle's properties and throws if they are not in valid ranges.
+     * Checks a Rectangle's properties and throws if they are not in valid ranges.
      *
      * @param {Rectangle} rectangle The rectangle to validate
      *
@@ -8992,7 +8992,7 @@ define('Core/Rectangle',[
             };
 
     /**
-     * Computes the southwest corner of an rectangle.
+     * Computes the southwest corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -9011,7 +9011,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the northwest corner of an rectangle.
+     * Computes the northwest corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -9030,7 +9030,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the northeast corner of an rectangle.
+     * Computes the northeast corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -9049,7 +9049,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the southeast corner of an rectangle.
+     * Computes the southeast corner of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the corner
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -9068,7 +9068,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Computes the center of an rectangle.
+     * Computes the center of a rectangle.
      *
      * @param {Rectangle} rectangle The rectangle for which to find the center
      * @param {Cartographic} [result] The object onto which to store the result.
@@ -9290,7 +9290,7 @@ define('Core/Rectangle',[
 
     var subsampleLlaScratch = new Cartographic();
     /**
-     * Samples an rectangle so that it includes a list of Cartesian points suitable for passing to
+     * Samples a rectangle so that it includes a list of Cartesian points suitable for passing to
      * {@link BoundingSphere#fromPoints}.  Sampling is necessary to account
      * for rectangles that cover the poles or cross the equator.
      *
@@ -9610,7 +9610,7 @@ define('Core/BoundingSphere',[
     };
 
     /**
-     * Computes a bounding sphere from an rectangle projected in 2D.  The bounding sphere accounts for the
+     * Computes a bounding sphere from a rectangle projected in 2D.  The bounding sphere accounts for the
      * object's minimum and maximum heights over the rectangle.
      *
      * @param {Rectangle} rectangle The rectangle around which to create a bounding sphere.
@@ -9656,7 +9656,7 @@ define('Core/BoundingSphere',[
     var fromRectangle3DScratch = [];
 
     /**
-     * Computes a bounding sphere from an rectangle in 3D. The bounding sphere is created using a subsample of points
+     * Computes a bounding sphere from a rectangle in 3D. The bounding sphere is created using a subsample of points
      * on the ellipsoid and contained in the rectangle. It may not be accurate for all rectangles on all types of ellipsoids.
      *
      * @param {Rectangle} rectangle The valid rectangle used to create a bounding sphere.
@@ -11477,6 +11477,21 @@ define('Core/WebGLConstants',[
         CONTEXT_LOST_WEBGL : 0x9242,
         UNPACK_COLORSPACE_CONVERSION_WEBGL : 0x9243,
         BROWSER_DEFAULT_WEBGL : 0x9244,
+
+        // WEBGL_compressed_texture_s3tc
+        COMPRESSED_RGB_S3TC_DXT1_EXT : 0x83F0,
+        COMPRESSED_RGBA_S3TC_DXT1_EXT : 0x83F1,
+        COMPRESSED_RGBA_S3TC_DXT3_EXT : 0x83F2,
+        COMPRESSED_RGBA_S3TC_DXT5_EXT : 0x83F3,
+
+        // WEBGL_compressed_texture_pvrtc
+        COMPRESSED_RGB_PVRTC_4BPPV1_IMG : 0x8C00,
+        COMPRESSED_RGB_PVRTC_2BPPV1_IMG : 0x8C01,
+        COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : 0x8C02,
+        COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : 0x8C03,
+
+        // WEBGL_compressed_texture_etc1
+        COMPRESSED_RGB_ETC1_WEBGL : 0x8D64,
 
         // Desktop OpenGL
         DOUBLE : 0x140A,
@@ -18185,6 +18200,668 @@ define('Core/loadJson',[
 });
 
 /*global define*/
+define('Core/Queue',[
+        './defineProperties'
+    ], function(
+        defineProperties) {
+    'use strict';
+
+    /**
+     * A queue that can enqueue items at the end, and dequeue items from the front.
+     *
+     * @alias Queue
+     * @constructor
+     */
+    function Queue() {
+        this._array = [];
+        this._offset = 0;
+        this._length = 0;
+    }
+
+    defineProperties(Queue.prototype, {
+        /**
+         * The length of the queue.
+         *
+         * @memberof Queue.prototype
+         *
+         * @type {Number}
+         * @readonly
+         */
+        length : {
+            get : function() {
+                return this._length;
+            }
+        }
+    });
+
+    /**
+     * Enqueues the specified item.
+     *
+     * @param {Object} item The item to enqueue.
+     */
+    Queue.prototype.enqueue = function(item) {
+        this._array.push(item);
+        this._length++;
+    };
+
+    /**
+     * Dequeues an item.  Returns undefined if the queue is empty.
+     *
+     * @returns {Object} The the dequeued item.
+     */
+    Queue.prototype.dequeue = function() {
+        if (this._length === 0) {
+            return undefined;
+        }
+
+        var array = this._array;
+        var offset = this._offset;
+        var item = array[offset];
+        array[offset] = undefined;
+
+        offset++;
+        if ((offset > 10) && (offset * 2 > array.length)) {
+            //compact array
+            this._array = array.slice(offset);
+            offset = 0;
+        }
+
+        this._offset = offset;
+        this._length--;
+
+        return item;
+    };
+
+    /**
+     * Returns the item at the front of the queue.  Returns undefined if the queue is empty.
+     *
+     * @returns {Object} The item at the front of the queue.
+     */
+    Queue.prototype.peek = function() {
+        if (this._length === 0) {
+            return undefined;
+        }
+
+        return this._array[this._offset];
+    };
+
+    /**
+     * Check whether this queue contains the specified item.
+     *
+     * @param {Object} item The item to search for.
+     */
+    Queue.prototype.contains = function(item) {
+        return this._array.indexOf(item) !== -1;
+    };
+
+    /**
+     * Remove all items from the queue.
+     */
+    Queue.prototype.clear = function() {
+        this._array.length = this._offset = this._length = 0;
+    };
+
+    /**
+     * Sort the items in the queue in-place.
+     *
+     * @param {Queue~Comparator} compareFunction A function that defines the sort order.
+     */
+    Queue.prototype.sort = function(compareFunction) {
+        if (this._offset > 0) {
+            //compact array
+            this._array = this._array.slice(this._offset);
+            this._offset = 0;
+        }
+
+        this._array.sort(compareFunction);
+    };
+
+    /**
+     * A function used to compare two items while sorting a queue.
+     * @callback Queue~Comparator
+     *
+     * @param {Object} a An item in the array.
+     * @param {Object} b An item in the array.
+     * @returns {Number} Returns a negative value if <code>a</code> is less than <code>b</code>,
+     *          a positive value if <code>a</code> is greater than <code>b</code>, or
+     *          0 if <code>a</code> is equal to <code>b</code>.
+     *
+     * @example
+     * function compareNumbers(a, b) {
+     *     return a - b;
+     * }
+     */
+
+    return Queue;
+});
+
+/*global define*/
+define('Core/Request',[
+        './defaultValue'
+    ], function(
+        defaultValue) {
+    'use strict';
+
+    /**
+     * Stores information for making a request using {@link RequestScheduler}.
+     *
+     * @exports Request
+     *
+     * @private
+     */
+    function Request(options) {
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+
+        /**
+         * The URL to request.
+         */
+        this.url = options.url;
+
+        /**
+         * Extra parameters to send with the request. For example, HTTP headers or jsonp parameters.
+         */
+        this.parameters = options.parameters;
+
+        /**
+         * The actual function that makes the request.
+         */
+        this.requestFunction = options.requestFunction;
+
+        /**
+         * Type of request. Used for more fine-grained priority sorting.
+         */
+        this.type = options.type;
+
+        /**
+         * Specifies that the request should be deferred until an open slot is available.
+         * A deferred request will always return a promise, which is suitable for data
+         * sources and utility functions.
+         */
+        this.defer = defaultValue(options.defer, false);
+
+        /**
+         * The distance from the camera, used to prioritize requests.
+         */
+        this.distance = defaultValue(options.distance, 0.0);
+
+        // Helper members for RequestScheduler
+
+        /**
+         * A promise for when a deferred request can start.
+         *
+         * @private
+         */
+        this.startPromise = undefined;
+
+        /**
+         * Reference to a {@link RequestScheduler~RequestServer}.
+         *
+         * @private
+         */
+        this.server = options.server;
+    }
+
+    return Request;
+});
+
+/*global define*/
+define('Core/RequestType',[
+        '../Core/freezeObject'
+    ], function(
+        freezeObject) {
+    'use strict';
+
+    /**
+     * @private
+     */
+    var RequestType = {
+        TERRAIN : 0,
+        IMAGERY : 1,
+        TILES3D : 2,
+        OTHER : 3
+    };
+
+    return freezeObject(RequestType);
+});
+
+/*global define*/
+define('Core/RequestScheduler',[
+        '../ThirdParty/Uri',
+        '../ThirdParty/when',
+        './defaultValue',
+        './defined',
+        './defineProperties',
+        './DeveloperError',
+        './Queue',
+        './Request',
+        './RequestType'
+    ], function(
+        Uri,
+        when,
+        defaultValue,
+        defined,
+        defineProperties,
+        DeveloperError,
+        Queue,
+        Request,
+        RequestType) {
+    'use strict';
+
+    function RequestBudget(request) {
+        /**
+         * Total requests allowed this frame.
+         */
+        this.total = 0;
+
+        /**
+         * Total requests used this frame.
+         */
+        this.used = 0;
+
+        /**
+         * Server of the request.
+         */
+        this.server = request.server;
+
+        /**
+         * Type of request. Used for more fine-grained priority sorting.
+         */
+        this.type = request.type;
+    }
+
+    /**
+     * Stores the number of active requests at a particular server. Areas that commonly makes requests may store
+     * a reference to this object in order to quickly determine whether a request can be issued (e.g. Cesium3DTile).
+     */
+    function RequestServer(serverName) {
+        /**
+         * Number of active requests at this server.
+         */
+        this.activeRequests = 0;
+
+        /**
+         * The name of the server.
+         */
+        this.serverName = serverName;
+    }
+
+    RequestServer.prototype.hasAvailableRequests = function() {
+        return RequestScheduler.hasAvailableRequests() && (this.activeRequests < RequestScheduler.maximumRequestsPerServer);
+    };
+
+    RequestServer.prototype.getNumberOfAvailableRequests = function() {
+        return RequestScheduler.maximumRequestsPerServer - this.activeRequests;
+    };
+
+    var activeRequestsByServer = {};
+    var activeRequests = 0;
+    var budgets = [];
+    var leftoverRequests = [];
+    var deferredRequests = new Queue();
+
+    var stats = {
+        numberOfRequestsThisFrame : 0
+    };
+
+    /**
+     * Because browsers throttle the number of parallel requests allowed to each server
+     * and across all servers, this class tracks the number of active requests in progress
+     * and prioritizes incoming requests.
+     *
+     * @exports RequestScheduler
+     *
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     *
+     * @private
+     */
+    function RequestScheduler() {
+    }
+
+    function distanceSortFunction(a, b) {
+        return a.distance - b.distance;
+    }
+
+    function getBudget(request) {
+        var budget;
+        var length = budgets.length;
+        for (var i = 0; i < length; ++i) {
+            budget = budgets[i];
+            if ((budget.server === request.server) && (budget.type === request.type)) {
+                return budget;
+            }
+        }
+        // Not found, create a new budget
+        budget = new RequestBudget(request);
+        budgets.push(budget);
+        return budget;
+    }
+
+    RequestScheduler.resetBudgets = function() {
+        showStats();
+        clearStats();
+
+        if (!RequestScheduler.prioritize || !RequestScheduler.throttle) {
+            return;
+        }
+
+        // Reset budget totals
+        var length = budgets.length;
+        for (var i = 0; i < length; ++i) {
+            budgets[i].total = 0;
+            budgets[i].used = 0;
+        }
+
+        // Sort all leftover requests by distance
+        var requests = leftoverRequests;
+        requests.sort(distanceSortFunction);
+
+        // Allocate new budgets based on the distances of leftover requests
+        var availableRequests = RequestScheduler.getNumberOfAvailableRequests();
+        var requestsLength = requests.length;
+        for (var j = 0; (j < requestsLength) && (availableRequests > 0); ++j) {
+            var request = requests[j];
+            var budget = getBudget(request);
+            var budgetAvailable = budget.server.getNumberOfAvailableRequests();
+            if (budget.total < budgetAvailable) {
+                ++budget.total;
+                --availableRequests;
+            }
+        }
+
+        requests.length = 0;
+    };
+
+    var pageUri = typeof document !== 'undefined' ? new Uri(document.location.href) : new Uri();
+
+    /**
+     * Get the server name from a given url.
+     *
+     * @param {String} url The url.
+     * @returns {String} The server name.
+     */
+    RequestScheduler.getServerName = function(url) {
+                if (!defined(url)) {
+            throw new DeveloperError('url is required.');
+        }
+        
+        var uri = new Uri(url).resolve(pageUri);
+        uri.normalize();
+        var serverName = uri.authority;
+        if (!/:/.test(serverName)) {
+            serverName = serverName + ':' + (uri.scheme === 'https' ? '443' : '80');
+        }
+        return serverName;
+    };
+
+    /**
+     * Get the request server from a given url.
+     *
+     * @param {String} url The url.
+     * @returns {RequestServer} The request server.
+     */
+    RequestScheduler.getRequestServer = function(url) {
+        var serverName = RequestScheduler.getServerName(url);
+        var server = activeRequestsByServer[serverName];
+        if (!defined(server)) {
+            server = new RequestServer(serverName);
+            activeRequestsByServer[serverName] = server;
+        }
+        return server;
+    };
+
+    /**
+     * Get the number of available slots at the server pointed to by the url.
+     *
+     * @param {String} url The url to check.
+     * @returns {Number} The number of available slots.
+     */
+    RequestScheduler.getNumberOfAvailableRequestsByServer = function(url) {
+        return RequestScheduler.getRequestServer(url).getNumberOfAvailableRequests();
+    };
+
+    /**
+     * Get the number of available slots across all servers.
+     *
+     * @returns {Number} The number of available slots.
+     */
+    RequestScheduler.getNumberOfAvailableRequests = function() {
+        return RequestScheduler.maximumRequests - activeRequests;
+    };
+
+    /**
+     * Checks if there are available slots to make a request at the server pointed to by the url.
+     *
+     * @param {String} [url] The url to check.
+     * @returns {Boolean} Returns true if there are available slots, otherwise false.
+     */
+    RequestScheduler.hasAvailableRequestsByServer = function(url) {
+        return RequestScheduler.getRequestServer(url).hasAvailableRequests();
+    };
+
+    /**
+     * Checks if there are available slots to make a request, considering the total
+     * number of available slots across all servers.
+     *
+     * @returns {Boolean} Returns true if there are available slots, otherwise false.
+     */
+    RequestScheduler.hasAvailableRequests = function() {
+        return activeRequests < RequestScheduler.maximumRequests;
+    };
+
+    function requestComplete(request) {
+        --activeRequests;
+        --request.server.activeRequests;
+
+        // Start a deferred request immediately now that a slot is open
+        var deferredRequest = deferredRequests.dequeue();
+        if (defined(deferredRequest)) {
+            deferredRequest.startPromise.resolve(deferredRequest);
+        }
+    }
+
+    function startRequest(request) {
+        ++activeRequests;
+        ++request.server.activeRequests;
+
+        return when(request.requestFunction(request.url, request.parameters), function(result) {
+            requestComplete(request);
+            return result;
+        }).otherwise(function(error) {
+            requestComplete(request);
+            return when.reject(error);
+        });
+    }
+
+    function deferRequest(request) {
+        deferredRequests.enqueue(request);
+        var deferred = when.defer();
+        request.startPromise = deferred;
+        return deferred.promise.then(startRequest);
+    }
+
+    function handleLeftoverRequest(request) {
+        if (RequestScheduler.prioritize) {
+            leftoverRequests.push(request);
+        }
+    }
+
+    /**
+     * A function that will make a request if there are available slots to the server.
+     * Returns undefined immediately if the request would exceed the maximum, allowing
+     * the caller to retry later instead of queueing indefinitely under the browser's control.
+     *
+     * @param {Request} request The request object.
+     *
+     * @returns {Promise.<Object>|undefined} Either undefined, meaning the request would exceed the maximum number of
+     *          parallel requests, or a Promise for the requested data.
+     *
+     * @example
+     * // throttle requests for an image
+     * var url = 'http://madeupserver.example.com/myImage.png';
+     * var requestFunction = function(url) {
+     *   // in this simple example, loadImage could be used directly as requestFunction.
+     *   return Cesium.loadImage(url);
+     * };
+     * var request = new Request({
+     *   url : url,
+     *   requestFunction : requestFunction
+     * });
+     * var promise = Cesium.RequestScheduler.schedule(request);
+     * if (!Cesium.defined(promise)) {
+     *   // too many active requests in progress, try again later.
+     * } else {
+     *   promise.then(function(image) {
+     *     // handle loaded image
+     *   });
+     * }
+     *
+     */
+    RequestScheduler.schedule = function(request) {
+                if (!defined(request)) {
+            throw new DeveloperError('request is required.');
+        }
+        if (!defined(request.url)) {
+            throw new DeveloperError('request.url is required.');
+        }
+        if (!defined(request.requestFunction)) {
+            throw new DeveloperError('request.requestFunction is required.');
+        }
+        
+        ++stats.numberOfRequestsThisFrame;
+
+        if (!RequestScheduler.throttle) {
+            return request.requestFunction(request.url, request.parameters);
+        }
+
+        if (!defined(request.server)) {
+            request.server = RequestScheduler.getRequestServer(request.url);
+        }
+
+        if (!request.server.hasAvailableRequests()) {
+            if (!request.defer) {
+                // No available slots to make the request, return undefined
+                handleLeftoverRequest(request);
+                return undefined;
+            } else {
+                // If no slots are available, the request is deferred until a slot opens up.
+                // Return a promise even if the request can't be completed immediately.
+                return deferRequest(request);
+            }
+        }
+
+        if (RequestScheduler.prioritize && defined(request.type) && !request.defer) {
+            var budget = getBudget(request);
+            if (budget.used >= budget.total) {
+                // Request does not fit in the budget, return undefined
+                handleLeftoverRequest(request);
+                return undefined;
+            }
+            ++budget.used;
+        }
+
+        return startRequest(request);
+    };
+
+    /**
+     * A function that will make a request when an open slot is available. Always returns
+     * a promise, which is suitable for data sources and utility functions.
+     *
+     * @param {String} url The URL to request.
+     * @param {RequestScheduler~RequestFunction} requestFunction The actual function that
+     *        makes the request.
+     * @param {Object} [parameters] Extra parameters to send with the request.
+     * @param {RequestType} [requestType] Type of request. Used for more fine-grained priority sorting.
+     *
+     * @returns {Promise.<Object>} A Promise for the requested data.
+     */
+    RequestScheduler.request = function(url, requestFunction, parameters, requestType) {
+        return RequestScheduler.schedule(new Request({
+            url : url,
+            parameters : parameters,
+            requestFunction : requestFunction,
+            defer : true,
+            type : defaultValue(requestType, RequestType.OTHER)
+        }));
+    };
+
+    function clearStats() {
+        stats.numberOfRequestsThisFrame = 0;
+    }
+
+    function showStats() {
+        if (!RequestScheduler.debugShowStatistics) {
+            return;
+        }
+
+        if (stats.numberOfRequestsThisFrame > 0) {
+            console.log('Number of requests attempted: ' + stats.numberOfRequestsThisFrame);
+        }
+
+        var numberOfActiveRequests = RequestScheduler.maximumRequests - RequestScheduler.getNumberOfAvailableRequests();
+        if (numberOfActiveRequests > 0) {
+            console.log('Number of active requests: ' + numberOfActiveRequests);
+        }
+    }
+
+    /**
+     * Clears the request scheduler before each spec.
+     *
+     * @private
+     */
+    RequestScheduler.clearForSpecs = function() {
+        activeRequestsByServer = {};
+        activeRequests = 0;
+        budgets = [];
+        leftoverRequests = [];
+        deferredRequests = new Queue();
+        stats = {
+            numberOfRequestsThisFrame : 0
+        };
+    };
+
+    /**
+     * Specifies the maximum number of requests that can be simultaneously open to a single server.  If this value is higher than
+     * the number of requests per server actually allowed by the web browser, Cesium's ability to prioritize requests will be adversely
+     * affected.
+     * @type {Number}
+     * @default 6
+     */
+    RequestScheduler.maximumRequestsPerServer = 6;
+
+    /**
+     * Specifies the maximum number of requests that can be simultaneously open for all servers.  If this value is higher than
+     * the number of requests actually allowed by the web browser, Cesium's ability to prioritize requests will be adversely
+     * affected.
+     * @type {Number}
+     * @default 10
+     */
+    RequestScheduler.maximumRequests = 10;
+
+    /**
+     * Specifies if the request scheduler should prioritize incoming requests
+     * @type {Boolean}
+     * @default true
+     */
+    RequestScheduler.prioritize = true;
+
+    /**
+     * Specifies if the request scheduler should throttle incoming requests, or let the browser queue requests under its control.
+     * @type {Boolean}
+     * @default true
+     */
+    RequestScheduler.throttle = true;
+
+    /**
+     * When true, log statistics to the console every frame
+     * @type {Boolean}
+     * @default false
+     */
+    RequestScheduler.debugShowStatistics = false;
+
+    return RequestScheduler;
+});
+
+/*global define*/
 define('Core/EarthOrientationParameters',[
         '../ThirdParty/when',
         './binarySearch',
@@ -18195,6 +18872,7 @@ define('Core/EarthOrientationParameters',[
         './JulianDate',
         './LeapSecond',
         './loadJson',
+        './RequestScheduler',
         './RuntimeError',
         './TimeConstants',
         './TimeStandard'
@@ -18208,6 +18886,7 @@ define('Core/EarthOrientationParameters',[
         JulianDate,
         LeapSecond,
         loadJson,
+        RequestScheduler,
         RuntimeError,
         TimeConstants,
         TimeStandard) {
@@ -18282,7 +18961,7 @@ define('Core/EarthOrientationParameters',[
         } else if (defined(options.url)) {
             // Download EOP data.
             var that = this;
-            this._downloadPromise = when(loadJson(options.url), function(eopData) {
+            this._downloadPromise = when(RequestScheduler.request(options.url, loadJson), function(eopData) {
                 onDataReady(that, eopData);
             }, function() {
                 that._dataError = 'An error occurred while retrieving the EOP data from the URL ' + options.url + '.';
@@ -18813,6 +19492,8 @@ define('Core/joinUrls',[
      * @param {String|Uri} first The base URL.
      * @param {String|Uri} second The URL path to join to the base URL.  If this URL is absolute, it is returned unmodified.
      * @param {Boolean} [appendSlash=true] The boolean determining whether there should be a forward slash between first and second.
+     *
+     * @return {String} The combined url
      * @private
      */
     function joinUrls(first, second, appendSlash) {
@@ -18848,6 +19529,9 @@ define('Core/joinUrls',[
         var baseUri = first;
         if (second.isAbsolute()) {
             baseUri = second;
+            if (second.scheme === 'data') {
+                return second.toString();
+            }
         }
 
         var url = '';
@@ -19054,6 +19738,7 @@ define('Core/Iau2006XysData',[
         './Iau2006XysSample',
         './JulianDate',
         './loadJson',
+        './RequestScheduler',
         './TimeStandard'
     ], function(
         when,
@@ -19063,6 +19748,7 @@ define('Core/Iau2006XysData',[
         Iau2006XysSample,
         JulianDate,
         loadJson,
+        RequestScheduler,
         TimeStandard) {
     'use strict';
 
@@ -19291,7 +19977,7 @@ define('Core/Iau2006XysData',[
             chunkUrl = buildModuleUrl('Assets/IAU2006_XYS/IAU2006_XYS_' + chunkIndex + '.json');
         }
 
-        when(loadJson(chunkUrl), function(chunk) {
+        when(RequestScheduler.request(chunkUrl, loadJson), function(chunk) {
             xysData._chunkDownloadsInProgress[chunkIndex] = false;
 
             var samples = xysData._samples;
@@ -23103,7 +23789,7 @@ define('Core/IndexDatatype',[
      * or <code>Uint32Array</code> depending on the number of vertices.
      *
      * @param {Number} numberOfVertices Number of vertices that the indices will reference.
-     * @param {Any} indicesLengthOrArray Passed through to the typed array constructor.
+     * @param {*} indicesLengthOrArray Passed through to the typed array constructor.
      * @returns {Uint16Array|Uint32Array} A <code>Uint16Array</code> or <code>Uint32Array</code> constructed with <code>indicesLengthOrArray</code>.
      *
      * @example
@@ -26962,142 +27648,6 @@ define('Core/PolygonPipeline',[
     };
 
     return PolygonPipeline;
-});
-
-/*global define*/
-define('Core/Queue',[
-        './defineProperties'
-    ], function(
-        defineProperties) {
-    'use strict';
-
-    /**
-     * A queue that can enqueue items at the end, and dequeue items from the front.
-     *
-     * @alias Queue
-     * @constructor
-     */
-    function Queue() {
-        this._array = [];
-        this._offset = 0;
-        this._length = 0;
-    }
-
-    defineProperties(Queue.prototype, {
-        /**
-         * The length of the queue.
-         *
-         * @memberof Queue.prototype
-         *
-         * @type {Number}
-         * @readonly
-         */
-        length : {
-            get : function() {
-                return this._length;
-            }
-        }
-    });
-
-    /**
-     * Enqueues the specified item.
-     *
-     * @param {Object} item The item to enqueue.
-     */
-    Queue.prototype.enqueue = function(item) {
-        this._array.push(item);
-        this._length++;
-    };
-
-    /**
-     * Dequeues an item.  Returns undefined if the queue is empty.
-     *
-     * @returns {Object} The the dequeued item.
-     */
-    Queue.prototype.dequeue = function() {
-        if (this._length === 0) {
-            return undefined;
-        }
-
-        var array = this._array;
-        var offset = this._offset;
-        var item = array[offset];
-        array[offset] = undefined;
-
-        offset++;
-        if ((offset > 10) && (offset * 2 > array.length)) {
-            //compact array
-            this._array = array.slice(offset);
-            offset = 0;
-        }
-
-        this._offset = offset;
-        this._length--;
-
-        return item;
-    };
-
-    /**
-     * Returns the item at the front of the queue.  Returns undefined if the queue is empty.
-     *
-     * @returns {Object} The item at the front of the queue.
-     */
-    Queue.prototype.peek = function() {
-        if (this._length === 0) {
-            return undefined;
-        }
-
-        return this._array[this._offset];
-    };
-
-    /**
-     * Check whether this queue contains the specified item.
-     *
-     * @param {Object} item The item to search for.
-     */
-    Queue.prototype.contains = function(item) {
-        return this._array.indexOf(item) !== -1;
-    };
-
-    /**
-     * Remove all items from the queue.
-     */
-    Queue.prototype.clear = function() {
-        this._array.length = this._offset = this._length = 0;
-    };
-
-    /**
-     * Sort the items in the queue in-place.
-     *
-     * @param {Queue~Comparator} compareFunction A function that defines the sort order.
-     */
-    Queue.prototype.sort = function(compareFunction) {
-        if (this._offset > 0) {
-            //compact array
-            this._array = this._array.slice(this._offset);
-            this._offset = 0;
-        }
-
-        this._array.sort(compareFunction);
-    };
-
-    /**
-     * A function used to compare two items while sorting a queue.
-     * @callback Queue~Comparator
-     *
-     * @param {Object} a An item in the array.
-     * @param {Object} b An item in the array.
-     * @returns {Number} Returns a negative value if <code>a</code> is less than <code>b</code>,
-     *          a positive value if <code>a</code> is greater than <code>b</code>, or
-     *          0 if <code>a</code> is equal to <code>b</code>.
-     *
-     * @example
-     * function compareNumbers(a, b) {
-     *     return a - b;
-     * }
-     */
-
-    return Queue;
 });
 
 /*global define*/
