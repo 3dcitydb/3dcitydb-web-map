@@ -353,12 +353,14 @@
 				camera: cesiumViewer.scene.camera,
 			    canvas: cesiumViewer.scene.canvas
 			});	
-			that._startLoadingEvent.raiseEvent(that);
+			this._startLoadingEvent.raiseEvent(this);
 			this._citydbKmlDataSource.load(this._url).then(function(dataSource) {
 				assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
-				cesiumViewer.dataSources.add(dataSource);
+				if (that._active) {				
+					cesiumViewer.dataSources.add(dataSource);
+	            }				
 				that._finishLoadingEvent.raiseEvent(that);
-		    });
+		    });		
 		}
 		else {
 			return;
