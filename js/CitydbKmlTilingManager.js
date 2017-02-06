@@ -203,7 +203,7 @@ var GlobeTileTaskQueue = {};
     			
         	}
         	else {        		     		
-        		var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight)), scene);
+        		var intersectedPoint = pickGlobeOrEllipsoid(new Cesium.Cartesian2(clientWidth/2 , clientHeight), scene);
         		if (typeof intersectedPoint == 'undefined') {
         			scope.oTask.triggerEvent('updateTaskStack');
         			scope.oTask.triggerEvent('updateDataPoolRecord');	
@@ -445,7 +445,7 @@ var GlobeTileTaskQueue = {};
     	return this.calcaulateFrameBbox(originHeight, stepSize, null);		
     };
     
-    CitydbKmlTilingManager.prototype.calcaulateFrameBbox = function(originHeight, stepSize, internalDeferred) {
+    CitydbKmlTilingManager.prototype.calcaulateFrameBbox = function(originHeight, stepSize, internalDeferred) {   	
     	var scope = this;
     	
     	var deferred;
@@ -470,18 +470,18 @@ var GlobeTileTaskQueue = {};
     		deferred.resolve(null);
     	}
     	else {
-        	var cartesian3LeftIndicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
-        	var cartesian3RightIndicator = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+        	var cartesian3LeftIndicator = pickGlobeOrEllipsoid(new Cesium.Cartesian2(0 , originHeight), scene);
+        	var cartesian3RightIndicator = pickGlobeOrEllipsoid(new Cesium.Cartesian2(frameWidth , originHeight), scene);
         	
         	if (!Cesium.defined(cartesian3LeftIndicator) || !Cesium.defined(cartesian3RightIndicator)) {
         		originHeight = originHeight + stepSize;            	
     			scope.calcaulateFrameBbox(originHeight, stepSize, deferred);
     		}
         	else {        		
-        		var cartesian3OfFrameCorner1 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , frameHeight)), scene);
-            	var cartesian3OfFrameCorner2 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , originHeight)), scene);
-            	var cartesian3OfFrameCorner3 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(0 , frameHeight)), scene);
-            	var cartesian3OfFrameCorner4 = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth , originHeight)), scene);
+        		var cartesian3OfFrameCorner1 = pickGlobeOrEllipsoid(new Cesium.Cartesian2(frameWidth , frameHeight), scene);
+            	var cartesian3OfFrameCorner2 = pickGlobeOrEllipsoid(new Cesium.Cartesian2(0 , originHeight), scene);
+            	var cartesian3OfFrameCorner3 = pickGlobeOrEllipsoid(new Cesium.Cartesian2(0 , frameHeight), scene);
+            	var cartesian3OfFrameCorner4 = pickGlobeOrEllipsoid(new Cesium.Cartesian2(frameWidth , originHeight), scene);
 
             	if (Cesium.defined(cartesian3OfFrameCorner1) && Cesium.defined(cartesian3OfFrameCorner2) && Cesium.defined(cartesian3OfFrameCorner3) && Cesium.defined(cartesian3OfFrameCorner4)) {
             		var wgs84OfFrameCorner1 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian3OfFrameCorner1);			
@@ -504,7 +504,7 @@ var GlobeTileTaskQueue = {};
             		scope.oTask.triggerEvent('checkFrameBbox', funcName, frame);         		
                 	scope.oTask.addListener(funcName, function (isValidFrame) {
                 		if (isValidFrame) {    
-                			var refPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(frameWidth/2 , frameHeight)), scene);
+                			var refPoint = pickGlobeOrEllipsoid(new Cesium.Cartesian2(frameWidth/2 , frameHeight), scene);
                 			var refX;
                 			var refY;
                 			if (Cesium.defined(refPoint)) {
@@ -536,6 +536,16 @@ var GlobeTileTaskQueue = {};
         	}
     	}    		
     	return deferred.promise;
+    }
+    
+    
+    function pickGlobeOrEllipsoid(screenCoordinates, scene) {
+    	if (scene.mode == Cesium.SceneMode.SCENE3D) {
+    		return scene.globe.pick(scene.camera.getPickRay(screenCoordinates), scene);
+    	}
+    	else {
+    		return scene.camera.pickEllipsoid(screenCoordinates);
+    	}
     }
 
     /**
