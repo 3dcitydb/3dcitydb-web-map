@@ -932,7 +932,7 @@
                                 }
                             }
                         } else {
-                            console.log('KML - Unsupported StyleMap key: ' + key);
+                        //    console.log('KML - Unsupported StyleMap key: ' + key);
                         }
                     }
                 }

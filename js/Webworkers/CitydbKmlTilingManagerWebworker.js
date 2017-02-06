@@ -201,7 +201,6 @@
 					} else {
 						if (shouldRun == true) {
 							shouldRun = false;
-							console.log("Tiling Manager is sleeping...");
 							reply("refreshView");
 						}
 					}
