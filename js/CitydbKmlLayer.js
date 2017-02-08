@@ -29,11 +29,6 @@
  * This JavaScript class implements the interface Layer3DCityDB defined in "3dcitydb-layer.js"  
  * for processing KML/KMZ/glTF data exported by 3DCityDB-Importer-Exporter-Tool (version 3.1.0 or higher), 
  * 
- * @alias KmlDataSource
- * 
- * @param {Object} [options] Object with the following properties:
- * @param {String} [options.url] Url to the layer data
- * 
  */
 (function() {
 	function CitydbKmlLayer(options){	
@@ -384,17 +379,8 @@
 				that._finishLoadingEvent.raiseEvent(that);
 		    });		
 		}
-		else {					
-			this._citydbKmlDataSource = new Cesium.Cesium3DTileset({
-			    url : this._url
-			});
-			this._startLoadingEvent.raiseEvent(this);
-			this._citydbKmlDataSource.readyPromise.then(function(tileset) {
-				if (that._active) {				
-					cesiumViewer.scene.primitives.add(tileset);
-	            }			
-				that._finishLoadingEvent.raiseEvent(that);	
-			});
+		else {
+			
 		}
 		
 		this.registerMouseEventHandlers();
@@ -644,7 +630,7 @@
 			}	
 		}
 		else {
-			this._citydbKmlDataSource.show = active;
+
 		}		
 	}
 	
@@ -677,7 +663,7 @@
 			this._cesiumViewer.flyTo(this._citydbKmlDataSource);			
 		}	
 		else {
-			this._cesiumViewer.scene.camera.flyToBoundingSphere(this._citydbKmlDataSource.boundingVolume._boundingSphere);
+
 		}
 	}
 	
@@ -764,7 +750,7 @@
 				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
 			}	
 			else {
-				this._cesiumViewer.scene.primitives.remove(this._citydbKmlDataSource);
+
 			}
 		}	
 		var deferred = Cesium.when.defer();
@@ -796,19 +782,7 @@
 			return deferred.promise;
 		}
 		else {
-			this._citydbKmlDataSource = new Cesium.Cesium3DTileset({
-			    url : this._url
-			});
-			this._startLoadingEvent.raiseEvent(this);		
-			this._citydbKmlDataSource.readyPromise.then(function(tileset) {			
-				that._cesiumViewer.scene.primitives.add(tileset);			
-				that._finishLoadingEvent.raiseEvent(that);
-				deferred.resolve();
-			}).otherwise(function(error) {
-				deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
-	        	that._finishLoadingEvent.raiseEvent(that);
-			});;			
-			return deferred.promise;
+			
 		}
 	}
 	

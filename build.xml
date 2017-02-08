@@ -49,6 +49,7 @@
             <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlDataSource.js" />
             <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlHighlightingManager.js" />
         	<fileset dir="${SRC_JS_DIR}" includes="CitydbKmlLayer.js" />
+        	<fileset dir="${SRC_JS_DIR}" includes="Cesium3DTilesDataLayer.js" />
             <fileset dir="${SRC_JS_DIR}" includes="CitydbKmlTilingManager.js" />
         	<fileset dir="${SRC_JS_DIR}" includes="CitydbSceneTransforms.js" />
         	<fileset dir="${SRC_JS_DIR}" includes="CitydbUtil.js" />

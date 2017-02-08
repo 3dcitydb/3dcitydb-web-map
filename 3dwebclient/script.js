@@ -180,7 +180,7 @@
 			var numberOfCachedTiles = 0;
 			var numberOfTasks = 0;
 	  		for (var i = 0; i < layers.length; i++) {
-	  			if (layers[i].active) {	  				
+	  			if (layers[i].active && Cesium.defined(layers[i].citydbKmlTilingManager)) {	  	
 	  				numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
 	  				numberOfCachedTiles = numberOfCachedTiles +  Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
 	  				numberOfTasks = numberOfTasks + layers[i].citydbKmlTilingManager.taskNumber;
@@ -205,7 +205,7 @@
 		var layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
 		while (layerConfigString) {
 			var layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);
-			nLayers.push(new CitydbKmlLayer({
+			var options = {
 				url : layerConfig.url,
 				name : layerConfig.name,
 				thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
@@ -215,7 +215,16 @@
 				maxLodPixels : Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
 				maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
 				maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
-			}));			
+			}
+			console.log(CitydbUtil.get_suffix_from_filename(layerConfig.url));
+			console.log(['kml','kmz','json'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1);
+			if (['kml','kmz','json'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1) {
+				nLayers.push(new CitydbKmlLayer(options));
+	  		}
+	  		else {
+	  			nLayers.push(new Cesium3DTilesDataLayer(options));
+	  		}	
+						
 			index++;
 			layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
 		}
@@ -427,11 +436,23 @@
 	    layerlistpanel.appendChild(layerOption);
   	}
 	
-	function addEventListeners(citydbKmlLayer) {
-		citydbKmlLayer.registerEventHandler("CLICK", function(object) {			
-			var targetEntity = object.id;
-	 		var objectId = targetEntity.name; 	 		
-	 		createInfoTable(objectId, targetEntity, citydbKmlLayer);					
+	function addEventListeners(layer) {
+		layer.registerEventHandler("CLICK", function(object) {		
+			var objectId;
+			var targetEntity;
+			if (layer instanceof CitydbKmlLayer) {
+				targetEntity = object.id;
+		 		objectId = targetEntity.name; 
+			}
+			else if (layer instanceof Cesium3DTilesDataLayer) {
+				objectId = object._batchTable.batchTableJson.id[object._batchId];
+				targetEntity = new Cesium.Entity({
+					id: objectId
+				});
+				cesiumViewer.selectedEntity = targetEntity;
+			}
+				 		
+	 		createInfoTable(objectId, targetEntity, layer);					
 		});
 	}
  	
@@ -752,8 +773,7 @@
   	
   	function addNewLayer() {
   		var _layers = new Array();
-  		
-		_layers.push(new CitydbKmlLayer({
+  		var options = {
 			url : addLayerViewModel.url,
 			name : addLayerViewModel.name,
 			thematicDataUrl : addLayerViewModel.thematicDataUrl,
@@ -762,7 +782,13 @@
 			maxLodPixels : addLayerViewModel.maxLodPixels == -1? Number.MAX_VALUE : addLayerViewModel.maxLodPixels,
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
 			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles
-		}));
+		}
+  		if (['kml','kmz','json'].indexOf(CitydbUtil.get_suffix_from_filename(addLayerViewModel.url)) > -1) {
+  			_layers.push(new CitydbKmlLayer(options));
+  		}
+  		else {
+  			_layers.push(new Cesium3DTilesDataLayer(options));
+  		}		
 		
 		loadLayerGroup(_layers);	
   	}  
