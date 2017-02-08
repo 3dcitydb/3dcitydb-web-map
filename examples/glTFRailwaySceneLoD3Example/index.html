@@ -110,51 +110,6 @@
 		dataLayer = new CitydbKmlLayer({
 			url : './Railway_Scene_LoD3/Railway_Scene_LoD3_collada_MasterJSON.json'
 		});
-		
-		dataLayer.registerEventHandler("CLICK", function(object) {			
-			var targetEntity = object.id;
-	 		var primitive = object.primitive;
-	 		var id = targetEntity.name; 
-	 		
-	 		if (primitive instanceof Cesium.Model) {
-	 			dataLayer.unHighlightAllObjects();  									
-				var highlightThis = {};			
-				highlightThis[id] = mouseClickhighlightColor;
-				dataLayer.highlight(highlightThis); 
-	 		}									
-		});
-		
-		dataLayer.registerEventHandler("MOUSEIN", function(object) {
-			var targetEntity = object.id;
-	 		var primitive = object.primitive;
-			var id = targetEntity.name;
-	 		
-	 		if (dataLayer.isInHighlightedList(id))
-				return; 
-	 		
-			if (primitive instanceof Cesium.Model) {				
-				var materials = object.mesh._materials;
-				for (var i = 0; i < materials.length; i++) {
-					materials[i].setValue('emission', Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
-				} 
-			}
-		});
-		
-		dataLayer.registerEventHandler("MOUSEOUT", function(object) {
-	 		var primitive = object.primitive;
-	 		var targetEntity = object.id;
-	 		var id = targetEntity.name;
-	 		
-	 		if (dataLayer.isInHighlightedList(id))
-				return; 
-	 		
-			if (primitive instanceof Cesium.Model) {				
-				var materials = object.mesh._materials;
-				for (var i = 0; i < materials.length; i++) {
-					materials[i].setValue('emission', new Cesium.Cartesian4(0.0, 0.0, 0.0, 1));
-				} 
-			}
-		})	
 
 		webMap.addLayer(dataLayer);
 

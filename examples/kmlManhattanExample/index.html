@@ -87,7 +87,12 @@
 	viewer.camera.setView({destination: extent})
 	
 	var webMap = new WebMap3DCityDB(viewer);
-	webMap.activateViewChangedEvent(true);
+	
+	// activate Events
+	webMap.activateViewChangedEvent(true);			
+	webMap.activateMouseClickEvents(true);
+	webMap.activateMouseMoveEvents(true);
+
 	
 	var buildingLayer;
 	var lotLayer;

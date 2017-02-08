@@ -72,6 +72,10 @@
 		this._startLoadingEvent = new Cesium.Event();		
 		this._finishLoadingEvent = new Cesium.Event();		
 		this._viewChangedEvent = new Cesium.Event();
+		
+		this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
+		this._mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
+		
 		this._configParameters = {
 			"id": this.id,
 			"url" : this.url,
@@ -264,6 +268,24 @@
 	        }
 	    },
 	    
+	    highlightColor : {
+	        get : function(){
+	        	return this._highlightColor;
+	        },
+	        set : function(value){
+	        	this._highlightColor = value;
+	        }
+	    },
+	    
+	    mouseOverhighlightColor : {
+	        get : function(){
+	        	return this._mouseOverhighlightColor;
+	        },
+	        set : function(value){
+	        	this._mouseOverhighlightColor = value;
+	        }
+	    },
+	    
 	    configParameters : {
 	        get : function(){
 	        	return this._configParameters;
@@ -374,6 +396,8 @@
 				that._finishLoadingEvent.raiseEvent(that);	
 			});
 		}
+		
+		this.registerMouseEventHandlers();
 
 		Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function() {		
 			if (that._urlSuffix == 'json')
@@ -390,6 +414,152 @@
 		this.activate(false);
 	}
 
+	CitydbKmlLayer.prototype.registerMouseEventHandlers = function(){	
+		var highlightColor = this._highlightColor;
+		var mouseOverhighlightColor = this._mouseOverhighlightColor;
+		var scope = this;
+		
+		scope.registerEventHandler("CLICK", function(object) {			
+			var targetEntity = object.id;
+			var primitive = object.primitive;
+	 		var objectId = targetEntity.name; 
+
+	 		if (objectId == "Tile border")
+	 			return;
+	 		
+	 		if (scope.isInHighlightedList(objectId))
+				return; 
+	 	    // clear all other Highlighting status and just highlight the clicked object...
+	 		scope.unHighlightAllObjects();  									
+			var highlightThis = {};
+			
+			highlightThis[objectId] = highlightColor;
+			scope.highlight(highlightThis); 						
+		});
+		
+		// CtrlclickEvent Handler for Multi-Selection and Highlighting...
+		scope.registerEventHandler("CTRLCLICK", function(object) {
+			var targetEntity = object.id;
+	 		var primitive = object.primitive;
+
+	 		var objectId = targetEntity.name;
+	 		
+	 		if (objectId == "Tile border")
+	 			return;
+	 		
+			if (scope.isInHighlightedList(objectId)) {
+				scope.unHighlight([objectId]);
+			}else {
+				var highlightThis = {};				
+				highlightThis[objectId] = highlightColor;
+				scope.highlight(highlightThis); 
+			}								
+		});
+		
+		// MouseIn- and MouseOut-Event Handler for MouseOver-Highlighting
+		scope.registerEventHandler("MOUSEIN", function(object) {
+			var targetEntity = object.id;
+	 		var primitive = object.primitive;
+	 		
+	 		if (!Cesium.defined(targetEntity) || !Cesium.defined(primitive))
+				return;
+	 		
+	 		if (scope.isInHighlightedList(targetEntity.name))
+				return;
+	 		
+			if (primitive instanceof Cesium.Model) {	
+				if (!Cesium.defined(targetEntity.originalMaterial)) {
+					targetEntity.addProperty("originalMaterial");
+					var materials = primitive._runtime.materialsByName;				
+					for (var materialId in materials){
+						targetEntity.originalMaterial = materials[materialId].getValue('emission').clone();
+					}
+				}	
+				var materials = object.mesh._materials;
+				for (var i = 0; i < materials.length; i++) {
+					// do mouseOver highlighting
+					materials[i].setValue('emission', Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
+				} 
+			}
+			else if (primitive instanceof Cesium.Primitive) {	
+				try{
+					var parentEntity = targetEntity._parent;	
+					var childrenEntities;		
+					if (Cesium.defined(parentEntity)) {
+						childrenEntities = parentEntity._children;	
+					}
+					else {
+						childrenEntities = [targetEntity];	
+					}					
+				}
+				catch(e){return;} // not valid entities
+				_doMouseoverHighlighting(childrenEntities, primitive, mouseOverhighlightColor);
+			}
+		});
+		
+		scope.registerEventHandler("MOUSEOUT", function(object) {
+	 		var primitive = object.primitive;
+	 		var targetEntity = object.id;
+	 		
+	 		if (!Cesium.defined(targetEntity) || !Cesium.defined(primitive))
+				return;
+	 		
+	 		if (scope.isInHighlightedList(targetEntity.name))
+				return; 
+	 		
+			if (primitive instanceof Cesium.Model) {				
+				var materials = object.mesh._materials;
+				for (var i = 0; i < materials.length; i++) {
+					// dismiss highlighting
+					console.log(targetEntity.originalMaterial);
+					materials[i].setValue('emission', targetEntity.originalMaterial);
+				} 
+			}
+			else if (primitive instanceof Cesium.Primitive) {				
+				try{
+					var parentEntity = targetEntity._parent;	
+					var childrenEntities;		
+					if (Cesium.defined(parentEntity)) {
+						childrenEntities = parentEntity._children;	
+					}
+					else {
+						childrenEntities = [targetEntity];	
+					}	
+				}
+				catch(e){return;} // not valid entities
+				_dismissMouseoverHighlighting(childrenEntities, primitive);	
+			}
+		})	 
+	 	
+		function _doMouseoverHighlighting(_childrenEntities, _primitive, _mouseOverhighlightColor) {
+			for (var i = 0; i < _childrenEntities.length; i++){	
+				var childEntity = _childrenEntities[i];							
+				var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
+				if (!Cesium.defined(childEntity.originalSurfaceColor)) {
+					childEntity.addProperty("originalSurfaceColor");
+				}						
+				childEntity.originalSurfaceColor = attributes.color;
+				attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(_mouseOverhighlightColor); 
+			}
+		}
+		
+		function _dismissMouseoverHighlighting(_childrenEntities, _primitive) {
+			for (var i = 0; i < _childrenEntities.length; i++){	
+				var childEntity = _childrenEntities[i];	
+				var originalSurfaceColor = childEntity.originalSurfaceColor;
+				try{
+					var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
+					attributes.color = originalSurfaceColor; 
+				}
+				catch(e){
+					console.log(e);
+					/* escape the DeveloperError exception: "This object was destroyed..." */
+				}
+			}
+		}
+	
+	}
+	
 	/**
 	 * highlights one or more object with a given color;
 	 * @param {Object<String, Cesium.Color>} An Object with the id and a Cesium Color value
@@ -474,12 +644,7 @@
 			}	
 		}
 		else {
-			if (active == false) {				
-				this._cesiumViewer.scene.primitives.remove(this._citydbKmlDataSource);
-			}
-			else {	
-				this.reActivate();	
-			}
+			this._citydbKmlDataSource.show = active;
 		}		
 	}
 	
@@ -799,9 +964,9 @@
 		else if (object instanceof Array) {
 			for (var i = 0; i < object.length; i++){	
 				var childEntity = object[i];					
-				var globeId = childEntity.name;;
+				var objectId = childEntity.name;;
 				var material = this.getObjectMaterial(childEntity);
-				if (!material.color._value.equals(this._highlightedObjects[globeId])) {
+				if (!material.color._value.equals(this._highlightedObjects[objectId])) {
 					return false;
 				}
 			}		
@@ -855,8 +1020,8 @@
 			for (var i = 0; i < object.length; i++){					
 				var childEntity = object[i];	
 				childEntity.show = true;	
-				var globeId = childEntity.name;			
-				if (!this.isInHighlightedList(globeId)) {
+				var objectId = childEntity.name;			
+				if (!this.isInHighlightedList(objectId)) {
 					var originalMaterial = childEntity.originalMaterial;
 					if (Cesium.defined(originalMaterial)) {
 						this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value);	
