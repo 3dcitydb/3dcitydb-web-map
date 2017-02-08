@@ -46,6 +46,7 @@
   <script src="../../js/CitydbKmlHighlightingManager.js"></script>   
   <script src="../../js/CitydbKmlTilingManager.js"></script>  
   <script src="../../js/CitydbKmlDataSource.js"></script>    
+  <script src="../../js/Cesium3DTilesDataLayer.js"></script>  
   <script src="../../js/CitydbKmlLayer.js"></script> 
   
   <style>
@@ -74,8 +75,8 @@
 <body>
   <div id="cesiumContainer"></div>
    <div id="uiMenu">
-    <button type="button" onclick="addLayers()">add KML/KMZ Data Layers</button>
-    <button type="button" onclick="removeLayers()">remove KML/KMZ Data Layers</button>
+    <button type="button" onclick="addLayers()">add Data Layers</button>
+    <button type="button" onclick="removeLayers()">remove Data Layers</button>
   </div>
   <script>
 	Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq'
@@ -99,8 +100,8 @@
 	var streetLayer;
 	
 	var addLayers = function() {
-		buildingLayer = new CitydbKmlLayer({
-			url : './data/Buildings/NYC_Manhattan_Buildings_extruded_MasterJSON.json'
+		buildingLayer = new Cesium3DTilesDataLayer({
+			url : 'https://cesiumjs.org/NewYork/3DTilesGml/'
 		});
 		
 		lotLayer = new CitydbKmlLayer({
@@ -111,10 +112,16 @@
 			url : './data/Streets/NYC_Manhattan_Streets_footprint_MasterJSON.json'
 		});
 		
+		subwayLayer = new CitydbKmlLayer({
+			url : './data/subway/new_york_subway.kml'
+		});
+		
 		webMap.addLayer(buildingLayer);
 		webMap.addLayer(lotLayer);
 		webMap.addLayer(streetLayer);
-		buildingLayer.registerEventHandler("FINISHLOADING", function(loadedcitydbLayer) {
+		webMap.addLayer(subwayLayer);
+		
+		streetLayer.registerEventHandler("FINISHLOADING", function(loadedcitydbLayer) {
 			loadedcitydbLayer.zoomToStartPosition();
 		});		
 	};
@@ -123,6 +130,7 @@
 		webMap.removeLayer(buildingLayer.id);
 		webMap.removeLayer(lotLayer.id);
 		webMap.removeLayer(streetLayer.id);
+		webMap.removeLayer(subwayLayer.id);
 	};	
 </script>
 </body>
