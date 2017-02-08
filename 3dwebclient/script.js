@@ -179,18 +179,26 @@
 			var numberOfshowedTiles = 0;
 			var numberOfCachedTiles = 0;
 			var numberOfTasks = 0;
+			var tilesLoaded = true;
 	  		for (var i = 0; i < layers.length; i++) {
-	  			if (layers[i].active && Cesium.defined(layers[i].citydbKmlTilingManager)) {	  	
-	  				numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
-	  				numberOfCachedTiles = numberOfCachedTiles +  Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
-	  				numberOfTasks = numberOfTasks + layers[i].citydbKmlTilingManager.taskNumber;
+	  			var layer = layers[i];
+	  			if (layers[i].active) {
+	  				if (layer instanceof CitydbKmlLayer) {
+	  					numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
+		  				numberOfCachedTiles = numberOfCachedTiles +  Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
+		  				numberOfTasks = numberOfTasks + layers[i].citydbKmlTilingManager.taskNumber;
+	  				}
+	  				if (layer instanceof Cesium3DTilesDataLayer) {
+	  					numberOfshowedTiles = numberOfshowedTiles + layer._tileset._selectedTiles.length;
+	  					tilesLoaded = layer._tileset._tilesLoaded;
+	  				}	  				
 	  			} 	
 	  		}
 	  		showedTilesInspector.innerHTML = 'Number of showed Tiles: ' + numberOfshowedTiles;
 			cachedTilesInspector.innerHTML = 'Number of cached Tiles: ' + numberOfCachedTiles;
 			
 			var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
-			if (numberOfTasks > 0) {
+			if (numberOfTasks > 0 || !tilesLoaded) {
 				loadingTilesInspector.style.display = 'block';
 	  		}
 	  		else {
@@ -445,6 +453,7 @@
 		 		objectId = targetEntity.name; 
 			}
 			else if (layer instanceof Cesium3DTilesDataLayer) {
+				console.log(object);
 				objectId = object._batchTable.batchTableJson.id[object._batchId];
 				targetEntity = new Cesium.Entity({
 					id: objectId

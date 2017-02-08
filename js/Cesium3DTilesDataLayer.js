@@ -240,33 +240,30 @@
 	Cesium3DTilesDataLayer.prototype.registerTilesLoadedEventHandler = function(){
 		var scope = this;
 		var timer = null;
-		this._tileset.allTilesLoaded.addEventListener(function() {
-			updater();
-			function updater() {
-				if (timer != null)
-					clearTimeout(timer);
-				
-				timer = setTimeout(function(){
-					var loadedTiles = scope._tileset._selectedTiles;
-					for (var i = 0; i < loadedTiles.length; i++) {
-						if (loadedTiles[i]._content.constructor.name == 'Empty3DTileContent')
-							continue;
-						var features = loadedTiles[i]._content._features;
-						var featuresLength = loadedTiles[i]._content.featuresLength;
-						for (var k = 0; k < featuresLength; k++) {
-							if (Cesium.defined(features)) {
-								var object = features[k];
-								if (Cesium.Color.equals(object.color, scope._highlightColor)) {
-									scope.unHighlightObject(object);
-								}
-							}
-						}				
+		this._tileset.tileVisible.addEventListener(function(tile) {
+			var features = tile._content._features;
+			var featuresLength = tile._content.featuresLength;
+			for (var k = 0; k < featuresLength; k++) {
+				if (Cesium.defined(features)) {
+					var object = features[k];
+					var objectId = object._batchTable.batchTableJson.id[object._batchId];
+					
+					if (scope.isInHighlightedList(objectId) && !Cesium.Color.equals(object.color, scope._highlightColor)) {
+						scope.highlightObject(object)
 					}
-					scope.highlight(scope.highlightedObjects);
-					scope.hideObjects(scope.hiddenObjects);
-					updater();
-				}, 1000);
-			} 				
+					
+					if (!scope.isInHighlightedList(objectId) && Cesium.Color.equals(object.color, scope._highlightColor)) {
+						scope.unHighlightObject(object);
+					}
+					
+					if (scope.isInHiddenList(objectId)) {
+						scope.hideObject(object);
+					}
+					else {
+						scope.showObject(object);
+					}
+				}
+			}	
 		});
 	}
 	
