@@ -36,11 +36,11 @@
 	var terrainShadows = CitydbUtil.parse_query_string('terrainShadows', window.location.href);
 	var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 		selectedImageryProviderViewModel  : Cesium.createDefaultImageryProviderViewModels()[1],
-		timeline: (shadows == "true"),
-		animation : (shadows == "true"),
+		timeline: true,
+		animation : true,
 		fullscreenButton: false,
 		shadows: (shadows == "true"),
-		terrainShadows: (terrainShadows == "true")
+		terrainShadows: parseInt(terrainShadows)
 	});
 	
 	navigationInitialization('cesiumContainer', cesiumViewer);
@@ -890,26 +890,21 @@
 	
 	function toggleShadows() {
 		cesiumViewer.shadows = !cesiumViewer.shadows;
-		if (cesiumViewer.shadows && !cesiumViewer.timeline) {
-			CitydbUtil.showAlertWindow("YESNO", "Switching on shadows now", 'Do you want to display the timeline which' +
-					' allows you to change the current date and time? Please note that "Yes" will reload the entire scene in the browser window.', 
-			function() {
-				window.location.href = generateLink();	
-			});	
-		}	
-		if (!cesiumViewer.shadows) {
-			cesiumViewer.terrainShadows = false;
-		}
 	}
 	
 	function toggleTerrainShadows() {
-		cesiumViewer.terrainShadows = !cesiumViewer.terrainShadows;
-		if (cesiumViewer.terrainShadows && !cesiumViewer.shadows) {
-			CitydbUtil.showAlertWindow("OK", "Switching on terrain shadows now", 'Please note that shadows for 3D models will also be switched on.', 
-			function() {
-				toggleShadows();		
-			});	
-		}		
+		if (cesiumViewer.terrainShadows == Cesium.ShadowMode.ENABLED) {
+			cesiumViewer.terrainShadows = Cesium.ShadowMode.DISABLED;
+		}			
+		else {
+			cesiumViewer.terrainShadows = Cesium.ShadowMode.ENABLED;
+			if (!cesiumViewer.shadows) {
+				CitydbUtil.showAlertWindow("OK", "Switching on terrain shadows now", 'Please note that shadows for 3D models will also be switched on.', 
+				function() {
+					toggleShadows();		
+				});	
+			}
+		}
 	}
 	
 	function createInfoTable(gmlid, cesiumEntity, citydbLayer) {

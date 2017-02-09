@@ -766,13 +766,13 @@
 		}
 		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
 			this._citydbKmlDataSource = new Cesium.KmlDataSource({
-				camera: cesiumViewer.scene.camera,
-			    canvas: cesiumViewer.scene.canvas
+				camera: this._cesiumViewer.scene.camera,
+			    canvas: this._cesiumViewer.scene.canvas
 			});	
 			this._startLoadingEvent.raiseEvent(this);			
 			this._citydbKmlDataSource.load(this._url).then(function(dataSource) {
 				assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
-				cesiumViewer.dataSources.add(dataSource);
+				that._cesiumViewer.dataSources.add(dataSource);
 				that._finishLoadingEvent.raiseEvent(that);
 				deferred.resolve();
 		    }).otherwise(function(error) {
