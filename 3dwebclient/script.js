@@ -454,7 +454,14 @@
 			}
 			else if (layer instanceof Cesium3DTilesDataLayer) {
 				console.log(object);
-				objectId = object._batchTable.batchTableJson.id[object._batchId];
+				if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
+					return;
+				
+				var idArray = object._batchTable.batchTableJson.id;
+				if (!Cesium.defined(idArray))
+					return;					
+				var objectId = idArray[object._batchId];
+				
 				targetEntity = new Cesium.Entity({
 					id: objectId
 				});

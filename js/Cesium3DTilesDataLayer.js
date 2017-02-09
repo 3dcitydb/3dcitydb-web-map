@@ -231,7 +231,7 @@
 			if (that._active) {				
 				cesiumViewer.scene.primitives.add(tileset);
             }			
-			that._finishLoadingEvent.raiseEvent(that);	
+			that._finishLoadingEvent.raiseEvent(that);
 			that.registerTilesLoadedEventHandler();
 			that.registerMouseEventHandlers();
 		});
@@ -241,12 +241,18 @@
 		var scope = this;
 		var timer = null;
 		this._tileset.tileVisible.addEventListener(function(tile) {
+			if (!(tile._content instanceof Cesium.Batched3DModel3DTileContent))
+				return;
 			var features = tile._content._features;
 			var featuresLength = tile._content.featuresLength;
 			for (var k = 0; k < featuresLength; k++) {
 				if (Cesium.defined(features)) {
 					var object = features[k];
-					var objectId = object._batchTable.batchTableJson.id[object._batchId];
+					
+					var idArray = object._batchTable.batchTableJson.id;
+					if (!Cesium.defined(idArray))
+						return;					
+					var objectId = idArray[object._batchId];
 					
 					if (scope.isInHighlightedList(objectId) && !Cesium.Color.equals(object.color, scope._highlightColor)) {
 						scope.highlightObject(object)
@@ -273,8 +279,13 @@
 		
 		var scope = this;
 		scope.registerEventHandler("CLICK", function(object) {	
-			var objectId = object._batchTable.batchTableJson.id[object._batchId];
-			console.log (objectId);
+			if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
+				return;
+			
+			var idArray = object._batchTable.batchTableJson.id;
+			if (!Cesium.defined(idArray))
+				return;					
+			var objectId = idArray[object._batchId];
 			
 	 		if (scope.isInHighlightedList(objectId))
 				return; 
@@ -289,7 +300,13 @@
 		
 		// CtrlclickEvent Handler for Multi-Selection and Highlighting...
 		scope.registerEventHandler("CTRLCLICK", function(object) {
-			var objectId = object._batchTable.batchTableJson.id[object._batchId];
+			if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
+				return;
+			
+			var idArray = object._batchTable.batchTableJson.id;
+			if (!Cesium.defined(idArray))
+				return;					
+			var objectId = idArray[object._batchId];
 	 		
 			if (scope.isInHighlightedList(objectId)) {
 				scope.unHighlight([objectId]);
@@ -300,8 +317,14 @@
 			}								
 		});
 		
-		scope.registerEventHandler("MOUSEIN", function(object) {			
-			var objectId = object._batchTable.batchTableJson.id[object._batchId];
+		scope.registerEventHandler("MOUSEIN", function(object) {	
+			if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
+				return;
+			
+			var idArray = object._batchTable.batchTableJson.id;
+			if (!Cesium.defined(idArray))
+				return;					
+			var objectId = idArray[object._batchId];
 			
 			if (scope.isInHighlightedList(objectId))
 				return;
@@ -311,7 +334,13 @@
 		});
 		
 		scope.registerEventHandler("MOUSEOUT", function(object) {
-			var objectId = object._batchTable.batchTableJson.id[object._batchId];
+			if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
+				return;
+			
+			var idArray = object._batchTable.batchTableJson.id;
+			if (!Cesium.defined(idArray))
+				return;					
+			var objectId = idArray[object._batchId];
 			
 			if (scope.isInHighlightedList(objectId))
 				return;
@@ -384,15 +413,21 @@
 				this.highlightObject(objects[i]);
 			}				
 		}	
-		this._highlightedObjects = this._highlightedObjects;
-	
+		this._highlightedObjects = this._highlightedObjects;	
 	}
 	
 	Cesium3DTilesDataLayer.prototype.highlightObject = function(object){
 		if (object == null)
 			return;
 		
-		var objectId = object._batchTable.batchTableJson.id[object._batchId];		
+		if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
+			return;
+		
+		var idArray = object._batchTable.batchTableJson.id;
+		if (!Cesium.defined(idArray))
+			return;
+		
+		var objectId = idArray[object._batchId];		
 		var highlightColor = this._highlightedObjects[objectId];
 		if (highlightColor) {
 			if (!Cesium.defined(object.getProperty("originalColorValue"))) {
@@ -406,10 +441,14 @@
 		var objects = [];
 		var loadedTiles = this._tileset._selectedTiles;
 		for (var i = 0; i < loadedTiles.length; i++) {
-			if (loadedTiles[i]._content.constructor.name == 'Empty3DTileContent')
+			if (!(loadedTiles[i]._content instanceof Cesium.Batched3DModel3DTileContent))
 				continue;
-			var batchTableMemberIds = loadedTiles[i]._content.batchTable.batchTableJson.id;
-			var index = batchTableMemberIds.indexOf(objectId);
+			
+			var idArray = loadedTiles[i]._content.batchTable.batchTableJson.id;
+			if (!Cesium.defined(idArray))
+				break;
+			
+			var index = idArray.indexOf(objectId);
 			if (index > -1 && Cesium.defined(loadedTiles[i]._content._features)) {
 				var object = loadedTiles[i]._content._features[index];
 				objects.push(object);
