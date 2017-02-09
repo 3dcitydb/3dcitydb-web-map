@@ -890,6 +890,9 @@
 	
 	function toggleShadows() {
 		cesiumViewer.shadows = !cesiumViewer.shadows;
+		if (!cesiumViewer.shadows) {
+			cesiumViewer.terrainShadows = Cesium.ShadowMode.DISABLED;
+		}	 
 	}
 	
 	function toggleTerrainShadows() {
