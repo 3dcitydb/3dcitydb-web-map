@@ -96,7 +96,6 @@
 			if (cesiumViewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
 				setTimeout(function(){   
 					if (scope.citydbKmlLayerInstance.citydbKmlTilingManager.isDataStreaming()) {
-						console.log("Highlighting Manager falls asleep...");
 						scope.oTask.sleep();
 					}
 					else {
@@ -104,14 +103,12 @@
 							scope.rebuildDataPool(); 		    	  		    	
 						}
 						else {		
-							console.log("Highlighting Manager falls asleep...");
 							scope.oTask.sleep();
 						} 
 					}				 					
 			    }, 1000); 	
 			}	
 			else {
-				console.log("Highlighting Manager falls asleep...");
 				scope.oTask.sleep();
 			}				
 		});			

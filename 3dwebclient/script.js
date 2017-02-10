@@ -145,7 +145,6 @@
 		
 		// Zoom to desired camera position and load layers if encoded in the url...	
 		zoomToDefaultCameraPosition().then(function(info){
-			console.log(info);
 			var layers = getLayersFromUrl();
 			loadLayerGroup(layers);
 			
@@ -224,8 +223,7 @@
 				maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
 				maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
 			}
-			console.log(CitydbUtil.get_suffix_from_filename(layerConfig.url));
-			console.log(['kml','kmz','json'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1);
+
 			if (['kml','kmz','json'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1) {
 				nLayers.push(new CitydbKmlLayer(options));
 	  		}
@@ -369,12 +367,14 @@
 		function _loadLayer(index) {
 			var promise = webMap.addLayer(_layers[index]);
 			Cesium.when(promise, function(addedLayer){
+				console.log(addedLayer);
 				addLayerToList(addedLayer);
 				if (index < (_layers.length - 1)) {
 					index++;
 					_loadLayer(index);
 				}
 				else {
+					webMap._activeLayer = _layers[0];
 					document.getElementById('loadingIndicator').style.display = 'none';
 				}		
 			}).otherwise(function(error) {

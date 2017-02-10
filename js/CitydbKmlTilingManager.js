@@ -240,11 +240,12 @@ var GlobeTileTaskQueue = {};
 	        			var tmpId = CitydbUtil.generateUUID();
 	        			GlobeTileTaskQueue[tmpId] = tileUrl;
 	        			scope.taskNumber = taskQueue.length;
+	        			
+	        			// loading data tile from Cache	
         				dataSourceCollection.add(kmlDatasource).then(function() {
         					delete GlobeTileTaskQueue[tmpId];   
         					scope.oTask.triggerEvent('updateTaskStack');
-		        			scope.oTask.triggerEvent('updateDataPoolRecord');	
-		        			console.log("loading data tile from Cache...");	
+		        			scope.oTask.triggerEvent('updateDataPoolRecord');			        			
         				}).otherwise(function(error) {
         					delete GlobeTileTaskQueue[tmpId];   
         					scope.oTask.triggerEvent('updateTaskStack');
@@ -282,11 +283,10 @@ var GlobeTileTaskQueue = {};
         			GlobeTileTaskQueue[tmpId] = tileUrl;
         			scope.taskNumber = taskQueue.length;
         			newKmlDatasource.load(tileUrl).then(function(dataSource) {
-        				console.log("loading data tile from Server...");
+        				// loading data tile from Server
         				delete GlobeTileTaskQueue[tmpId];
         				scope.oTask.triggerEvent('updateTaskStack');        				
     				}).otherwise(function(error) {
-    					console.log("HTTP request error in loading layer from Server...");
     					delete GlobeTileTaskQueue[tmpId];
     					scope.oTask.triggerEvent('updateTaskStack');
     				});
@@ -298,16 +298,13 @@ var GlobeTileTaskQueue = {};
 						scope.taskNumber = taskQueue.length;
 						newKmlDatasource.load(tileUrl).then(function() {							
 							if (scope.startPrefetching) {
-								console.log("---------------------start Prefetching........................");
 								scope.oTask.triggerEvent('updateTaskStack', 500);
 								scope.startPrefetching = false;
 							}
 							else {
 								scope.oTask.triggerEvent('updateTaskStack', 500);
-							}							
-							console.log(["performing preFetching"]);        							        					        										        							        			
+							}							;        							        					        										        							        			
 	    				}).otherwise(function(error) {
-	    					console.log(["HTTP request error in preFetching"]); 
 	    					scope.oTask.triggerEvent('updateTaskStack');
 	    				});						
 					}
@@ -639,7 +636,6 @@ var GlobeTileTaskQueue = {};
     			clearTimeout(scope.timer);
     		}
     		scope.timer = setTimeout(function(){
-    			console.log("Wake up Tiling Manager from sleep");
     			scope.triggerWorker(true); 
     			scope.timer = null;
     		}, 100 + 100*Math.random());    		
