@@ -224,9 +224,8 @@
 		});
 
 		this._tileset.readyPromise.then(function(tileset) {
-			if (that._active) {				
-				cesiumViewer.scene.primitives.add(tileset);
-            }			
+			cesiumViewer.scene.primitives.add(tileset);
+			tileset.show = that._active;			
 			that.registerTilesLoadedEventHandler();
 			that.registerMouseEventHandlers();
 			deferred.resolve(that);
@@ -381,11 +380,9 @@
 	Cesium3DTilesDataLayer.prototype.reActivate = function(){
 		var that = this;
 		var deferred = Cesium.when.defer();
-		if (this._active) {		
-			this._highlightedObjects = {};
-			this._hiddenObjects = [];
-			this._cesiumViewer.scene.primitives.remove(this._tileset);				
-		}
+		this._highlightedObjects = {};
+		this._hiddenObjects = [];
+		this._cesiumViewer.scene.primitives.remove(this._tileset);	
 			
 		this._tileset = new Cesium.Cesium3DTileset({
 		    url : this._url
@@ -397,7 +394,7 @@
 			deferred.resolve();
 		}).otherwise(function() {
 			deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
-		});;
+		});
 		
 		return deferred.promise;
 	}	
