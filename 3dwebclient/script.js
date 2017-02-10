@@ -779,16 +779,16 @@
   	function addNewLayer() {
   		var _layers = new Array();
   		var options = {
-			url : addLayerViewModel.url,
-			name : addLayerViewModel.name,
-			thematicDataUrl : addLayerViewModel.thematicDataUrl,
-			cityobjectsJsonUrl : addLayerViewModel.cityobjectsJsonUrl,
+			url : addLayerViewModel.url.trim(),
+			name : addLayerViewModel.name.trim(),
+			thematicDataUrl : addLayerViewModel.thematicDataUrl.trim(),
+			cityobjectsJsonUrl : addLayerViewModel.cityobjectsJsonUrl.trim(),
 			minLodPixels: addLayerViewModel.minLodPixels,
 			maxLodPixels : addLayerViewModel.maxLodPixels == -1? Number.MAX_VALUE : addLayerViewModel.maxLodPixels,
 			maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
 			maxCountOfVisibleTiles : addLayerViewModel.maxCountOfVisibleTiles
 		}
-  		if (['kml','kmz','json'].indexOf(CitydbUtil.get_suffix_from_filename(addLayerViewModel.url)) > -1) {
+  		if (['kml','kmz','json'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
   			_layers.push(new CitydbKmlLayer(options));
   		}
   		else {
@@ -817,17 +817,16 @@
   	
 	function addWebMapServiceProvider() {
 		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-		console.log(addWmsViewModel.proxyUrl);
 		var wmsProviderViewModel = new Cesium.ProviderViewModel({
-	        name : addWmsViewModel.name,
-	        iconUrl : addWmsViewModel.iconUrl,
-	        tooltip : addWmsViewModel.tooltip,
+	        name : addWmsViewModel.name.trim(),
+	        iconUrl : addWmsViewModel.iconUrl.trim(),
+	        tooltip : addWmsViewModel.tooltip.trim(),
 	        creationFunction : function() {
 	            return new Cesium.WebMapServiceImageryProvider({
-	    			url: addWmsViewModel.url,
-	    			layers : addWmsViewModel.layers,
-	    			parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters),
-	    			proxy: new Cesium.DefaultProxy(addWmsViewModel.proxyUrl)
+	    			url: addWmsViewModel.url.trim(),
+	    			layers : addWmsViewModel.layers.trim(),
+	    			parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim()),
+	    			proxy: new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
 	    		});
 	        }
 	    });
@@ -845,12 +844,12 @@
 	function addTerrainProvider() {
 		var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
 		var demProviderViewModel = new Cesium.ProviderViewModel({
-	        name : addTerrainViewModel.name,
-	        iconUrl : addTerrainViewModel.iconUrl,
-	        tooltip : addTerrainViewModel.tooltip,
+	        name : addTerrainViewModel.name.trim(),
+	        iconUrl : addTerrainViewModel.iconUrl.trim(),
+	        tooltip : addTerrainViewModel.tooltip.trim(),
 	        creationFunction : function() {
 	            return new Cesium.CesiumTerrainProvider({
-	    			url : addTerrainViewModel.url
+	    			url : addTerrainViewModel.url.trim()
 	    		});
 	        }
 	    })
