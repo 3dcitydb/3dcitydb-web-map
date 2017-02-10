@@ -359,6 +359,7 @@
 				camera: cesiumViewer.scene.camera,
 			    canvas: cesiumViewer.scene.canvas
 			});	
+			this.registerMouseEventHandlers();
 			return loadMasterJSON(that, true);
 		}
 		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
