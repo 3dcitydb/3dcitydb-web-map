@@ -368,6 +368,7 @@
 			var promise = webMap.addLayer(_layers[index]);
 			Cesium.when(promise, function(addedLayer){
 				console.log(addedLayer);
+				addEventListeners(addedLayer);
 				addLayerToList(addedLayer);
 				if (index < (_layers.length - 1)) {
 					index++;
