@@ -78,10 +78,6 @@
 		 */
 		this._mouseOutEvent = new Cesium.Event();
 		
-		this._startLoadingEvent = new Cesium.Event();
-		
-		this._finishLoadingEvent = new Cesium.Event();
-		
 		this._viewChangedEvent = new Cesium.Event();
 		
 		Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
@@ -221,8 +217,8 @@
 	Cesium3DTilesDataLayer.prototype.addToCesium = function(cesiumViewer){
 		var that = this;
 		this._cesiumViewer = cesiumViewer;
+		var deferred = Cesium.when.defer();
 		
-		this._startLoadingEvent.raiseEvent(this);		
 		this._tileset = new Cesium.Cesium3DTileset({
 		    url : this._url
 		});
@@ -231,10 +227,14 @@
 			if (that._active) {				
 				cesiumViewer.scene.primitives.add(tileset);
             }			
-			that._finishLoadingEvent.raiseEvent(that);
 			that.registerTilesLoadedEventHandler();
 			that.registerMouseEventHandlers();
+			deferred.resolve(that);
+		}).otherwise(function() {
+			deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
 		});
+		
+		return deferred.promise;
 	}
 	
 	Cesium3DTilesDataLayer.prototype.registerTilesLoadedEventHandler = function(){
@@ -386,18 +386,18 @@
 			this._hiddenObjects = [];
 			this._cesiumViewer.scene.primitives.remove(this._tileset);				
 		}
-		
-		this._startLoadingEvent.raiseEvent(this);		
+			
 		this._tileset = new Cesium.Cesium3DTileset({
 		    url : this._url
 		});
 
 		this._tileset.readyPromise.then(function(tileset) {			
 			that._cesiumViewer.scene.primitives.add(tileset);			
-			that._finishLoadingEvent.raiseEvent(that);
 			that.registerTilesLoadedEventHandler();
 			deferred.resolve();
-		});
+		}).otherwise(function() {
+			deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+		});;
 		
 		return deferred.promise;
 	}	
@@ -572,10 +572,6 @@
 			this._mouseInEvent.removeEventListener(callback, this);
 		}else if(event == "MOUSEOUT"){
 			this._mouseOutEvent.removeEventListener(callback, this);
-		}else if(event == "STARTLOADING"){
-			this._startLoadingEvent.removeEventListener(callback, this);
-		}else if(event == "FINISHLOADING"){
-			this._finishLoadingEvent.removeEventListener(callback, this);
 		}else if(event == "VIEWCHANGED"){
 			this._viewChangedEvent.removeEventListener(callback, this);
 		}
@@ -595,10 +591,6 @@
 			this._mouseInEvent.addEventListener(callback, this);
 		}else if(event == "MOUSEOUT"){
 			this._mouseOutEvent.addEventListener(callback, this);
-		}else if(event == "STARTLOADING"){
-			this._startLoadingEvent.addEventListener(callback, this);
-		}else if(event == "FINISHLOADING"){
-			this._finishLoadingEvent.addEventListener(callback, this);
 		}else if(event == "VIEWCHANGED"){
 			this._viewChangedEvent.addEventListener(callback, this);
 		}

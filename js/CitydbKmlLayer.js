@@ -63,9 +63,7 @@
 		this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
 		this._layerType = undefined;
 		this._jsonLayerInfo = undefined;
-		this._urlSuffix = undefined;
-		this._startLoadingEvent = new Cesium.Event();		
-		this._finishLoadingEvent = new Cesium.Event();		
+		this._urlSuffix = undefined;	
 		this._viewChangedEvent = new Cesium.Event();
 		
 		this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
@@ -291,7 +289,6 @@
 	function loadMasterJSON(that, isFirstLoad) {
 		var deferred = Cesium.when.defer();
 		var jsonUrl = that._url;
-		that._startLoadingEvent.raiseEvent(that);
 		Cesium.loadJson(jsonUrl).then(function(json) {        	
         	that._jsonLayerInfo = json;	
         	that._layerType = json.displayform;
@@ -320,21 +317,19 @@
             var cityobjectsJsonUrl = that._cityobjectsJsonUrl;
             if (Cesium.defined(cityobjectsJsonUrl)) {
             	Cesium.loadJson(cityobjectsJsonUrl).then(function(data) {
-					deferred.resolve();
+					deferred.resolve(that);
 					that._cityobjectsJsonData = data;
-					that._finishLoadingEvent.raiseEvent(that);
-				}).otherwise(function(error) {
-					deferred.resolve();
-					that._finishLoadingEvent.raiseEvent(that);
+				}).otherwise(function() {
+					deferred.resolve(that);
 				});	
             }
             else {
-            	that._finishLoadingEvent.raiseEvent(that);
-            }		            		                    
+            	deferred.resolve(that);
+            }
 		}).otherwise(function(error) {
 			deferred.reject(new Cesium.DeveloperError('Failed to load: ' + jsonUrl));
-        	that._finishLoadingEvent.raiseEvent(that);
 		});
+		
 		return deferred.promise;
 	}
 	
@@ -357,30 +352,33 @@
 		this._cesiumViewer = cesiumViewer;		
 		this._urlSuffix = CitydbUtil.get_suffix_from_filename(this._url);
 		var that = this;
+		var deferred = Cesium.when.defer();
 		if (this._urlSuffix == 'json') {
 			this._citydbKmlDataSource = new CitydbKmlDataSource({
 				layerId: this._id,
 				camera: cesiumViewer.scene.camera,
 			    canvas: cesiumViewer.scene.canvas
 			});	
-			loadMasterJSON(that, true);
+			return loadMasterJSON(that, true);
 		}
 		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
 			this._citydbKmlDataSource = new Cesium.KmlDataSource({
 				camera: cesiumViewer.scene.camera,
 			    canvas: cesiumViewer.scene.canvas
 			});	
-			this._startLoadingEvent.raiseEvent(this);
+			
 			this._citydbKmlDataSource.load(this._url).then(function(dataSource) {
 				assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
 				if (that._active) {				
 					cesiumViewer.dataSources.add(dataSource);
-	            }				
-				that._finishLoadingEvent.raiseEvent(that);
-		    });		
+	            }	
+				deferred.resolve(that);
+		    }).otherwise(function(error) {
+				deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+			});		
 		}
 		else {
-			
+			deferred.reject(new Cesium.DeveloperError('Unsupported Datasource from: ' + that._url));
 		}
 		
 		this.registerMouseEventHandlers();
@@ -394,6 +392,8 @@
 			if (that._urlSuffix == 'json')
 				that._citydbKmlTilingManager.clearCaching();				
 	    });
+		
+		return deferred.promise;
 	}
 
 	CitydbKmlLayer.prototype.removeFromCesium = function(cesiumViewer){
@@ -681,10 +681,6 @@
 			this._mouseInEvent.removeEventListener(callback, this);
 		}else if(event == "MOUSEOUT"){
 			this._mouseOutEvent.removeEventListener(callback, this);
-		}else if(event == "STARTLOADING"){
-			this._startLoadingEvent.removeEventListener(callback, this);
-		}else if(event == "FINISHLOADING"){
-			this._finishLoadingEvent.removeEventListener(callback, this);
 		}else if(event == "VIEWCHANGED"){
 			this._viewChangedEvent.removeEventListener(callback, this);
 		}
@@ -705,10 +701,6 @@
 			this._mouseInEvent.addEventListener(callback, this);
 		}else if(event == "MOUSEOUT"){
 			this._mouseOutEvent.addEventListener(callback, this);
-		}else if(event == "STARTLOADING"){
-			this._startLoadingEvent.addEventListener(callback, this);
-		}else if(event == "FINISHLOADING"){
-			this._finishLoadingEvent.addEventListener(callback, this);
 		}else if(event == "VIEWCHANGED"){
 			this._viewChangedEvent.addEventListener(callback, this);
 		}
@@ -749,9 +741,7 @@
 			else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
 				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
 			}	
-			else {
-
-			}
+			else {}
 		}	
 		var deferred = Cesium.when.defer();
 		var that = this;
@@ -769,21 +759,20 @@
 				camera: this._cesiumViewer.scene.camera,
 			    canvas: this._cesiumViewer.scene.canvas
 			});	
-			this._startLoadingEvent.raiseEvent(this);			
+		
 			this._citydbKmlDataSource.load(this._url).then(function(dataSource) {
 				assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
 				that._cesiumViewer.dataSources.add(dataSource);
-				that._finishLoadingEvent.raiseEvent(that);
-				deferred.resolve();
+				deferred.resolve(that);
 		    }).otherwise(function(error) {
 				deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
-	        	that._finishLoadingEvent.raiseEvent(that);
-			});
-			return deferred.promise;
+			});			
 		}
 		else {
-			
+			deferred.reject(new Cesium.DeveloperError('Unsupported Datasource from: ' + that._url));
 		}
+		
+		return deferred.promise;
 	}
 	
 	CitydbKmlLayer.prototype.getObjectById = function(objectId){		

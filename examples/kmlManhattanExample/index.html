@@ -116,14 +116,14 @@
 			url : './data/subway/new_york_subway.kml'
 		});
 		
+		webMap.addLayer(subwayLayer);
 		webMap.addLayer(buildingLayer);
 		webMap.addLayer(lotLayer);
-		webMap.addLayer(streetLayer);
-		webMap.addLayer(subwayLayer);
-		
-		streetLayer.registerEventHandler("FINISHLOADING", function(loadedcitydbLayer) {
+		var promise = webMap.addLayer(streetLayer);
+				
+		Cesium.when(promise, function(loadedcitydbLayer){
 			loadedcitydbLayer.zoomToStartPosition();
-		});		
+		});	
 	};
 	
 	var removeLayers = function() {

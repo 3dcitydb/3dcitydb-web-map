@@ -108,9 +108,8 @@
 				return;
 			}
 		}
-		layer.addToCesium(this._cesiumViewerInstance);
 		this._layers.push(layer);
-		return;
+		return layer.addToCesium(this._cesiumViewerInstance);;
 	};
 
 	/**

@@ -111,11 +111,9 @@
 			url : './Railway_Scene_LoD3/Railway_Scene_LoD3_collada_MasterJSON.json'
 		});
 
-		webMap.addLayer(dataLayer);
-
-		dataLayer.registerEventHandler("FINISHLOADING", function(loadedcitydbLayer) {
+		Cesium.when(webMap.addLayer(dataLayer), function(loadedcitydbLayer){
 			loadedcitydbLayer.zoomToStartPosition();
-		});		
+		});	
 	};
 	
 	var removeLayers = function() {

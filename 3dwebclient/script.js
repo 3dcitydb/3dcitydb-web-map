@@ -363,37 +363,26 @@
 		if (_layers.length == 0)
 			return;
 		
-		var k = 0;		
-		registerLayerEventHandler(_layers[k]);
+		document.getElementById('loadingIndicator').style.display = 'block';
+		_loadLayer(0);		
 		
-		function registerLayerEventHandler(_layer) {
-			var tempMenuOption;
-			var startLoadingHandler = function(thisLayer) {
-				document.getElementById('loadingIndicator').style.display = 'block';				
-			}
-			_layer.registerEventHandler("STARTLOADING", startLoadingHandler);
-			var finishLoadingHandler = function(thisLayer) {
-				console.log(thisLayer);
-				addEventListeners(thisLayer);			
-				document.getElementById('loadingIndicator').style.display = 'none';
-				addLayerToList(thisLayer);
-				thisLayer.removeEventHandler("STARTLOADING", startLoadingHandler);
-				thisLayer.removeEventHandler("FINISHLOADING", finishLoadingHandler);
-				k++;
-				if (k < _layers.length) {
-					var currentLayer = _layers[k];
-					registerLayerEventHandler(currentLayer);
-					webMap.addLayer(currentLayer);
+		function _loadLayer(index) {
+			var promise = webMap.addLayer(_layers[index]);
+			Cesium.when(promise, function(addedLayer){
+				addLayerToList(addedLayer);
+				if (index < (_layers.length - 1)) {
+					index++;
+					_loadLayer(index);
 				}
 				else {
-					webMap.activeLayer = _layers[0];
-				}
-			}
-			_layer.registerEventHandler("FINISHLOADING", finishLoadingHandler);
-		}
-		
-		// adding layer to Cesium Map          	          	
-    	webMap.addLayer(_layers[0]); 
+					document.getElementById('loadingIndicator').style.display = 'none';
+				}		
+			}).otherwise(function(error) {
+				CitydbUtil.showAlertWindow("OK", "Error", error.message);
+				console.log(error.stack);
+				document.getElementById('loadingIndicator').style.display = 'none';
+			});	
+		}		
 	}
 	
   	function addLayerToList(layer) {
