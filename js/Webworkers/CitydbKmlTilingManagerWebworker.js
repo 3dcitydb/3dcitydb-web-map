@@ -46,7 +46,7 @@
 			eventlisteners["checkDataPool"].apply(self, [ frame ]);
 		},
 	
-		checkDataPool : function(frame, batchSize) {
+		checkDataPool : function(frame) {
 			if (shouldRun == false) 
 				return;
 			
@@ -69,10 +69,8 @@
 			// Tiles within the view frame are sorted to make sure that the tiles near to the camera will be loaded with higher priority
 			stack = eventlisteners["sortDatapool"].apply(self, [ dataPool, frame ]);
 
-			for (var i = 0; i < batchSize; i++) {
-				var matrixItem = stack.shift();
-				reply("checkMasterPool", matrixItem, stack);
-			}
+			var matrixItem = stack.shift();
+			reply("checkMasterPool", matrixItem, stack);
 		},
 	
 		updateDataPoolRecord : function() {
