@@ -251,7 +251,7 @@
 		var timer = null;
 		this._tileset.tileVisible.addEventListener(function(tile) {
 			if (tile._content instanceof Cesium.PointCloud3DTileContent) {
-				tile._content._pointSize = 2;
+				tile._content._pointSize = 3;
 			}
 			if (!(tile._content instanceof Cesium.Batched3DModel3DTileContent))
 				return;
