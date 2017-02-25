@@ -189,6 +189,7 @@
 	  				}
 	  				if (layer instanceof Cesium3DTilesDataLayer) {
 	  					numberOfshowedTiles = numberOfshowedTiles + layer._tileset._selectedTiles.length;
+	  					numberOfCachedTiles = numberOfCachedTiles + layer._tileset._statistics.numberContentReady;
 	  					tilesLoaded = layer._tileset._tilesLoaded;
 	  				}	  				
 	  			} 	
