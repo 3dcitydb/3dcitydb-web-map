@@ -168,9 +168,9 @@
 		});
 		
 		// jump to a timepoint
-		var timestampStr = CitydbUtil.parse_query_string('timestamp', window.location.href);
-		if (timestampStr) {
-			var julianDate = Cesium.queryToObject(Object.keys(Cesium.queryToObject(timestampStr))[0]);
+		var dayTimeStr = CitydbUtil.parse_query_string('dayTime', window.location.href);
+		if (dayTimeStr) {
+			var julianDate = Cesium.JulianDate.fromIso8601(decodeURIComponent(dayTimeStr));
 			var clock = cesiumViewer.cesiumWidget.clock; 
 			clock.currentTime = julianDate; 
 			clock.shouldAnimate = false;
@@ -586,10 +586,11 @@
 		if (gltf_version)
 			projectLink = projectLink + 'gltf_version=' + gltf_version + "&";
 		
+		console.log(isNaN(cesiumViewer.terrainShadows));
 		projectLink = projectLink +			
 			'title=' + document.title +
 			'&shadows=' + cesiumViewer.shadows +
-			'&terrainShadows=' + cesiumViewer.terrainShadows +
+			'&terrainShadows=' + (isNaN(cesiumViewer.terrainShadows)?0:cesiumViewer.terrainShadows) +
 			'&latitude=' + cameraPosition.latitude +
 			'&longitude=' + cameraPosition.longitude +
 			'&height=' + cameraPosition.height +
@@ -610,7 +611,7 @@
 		var clock = cesiumViewer.cesiumWidget.clock; 
 		if (!clock.shouldAnimate) {
 			var currentJulianDate = clock.currentTime; 
-			projectLink = projectLink + '&' + Cesium.objectToQuery({"timestamp": Cesium.objectToQuery(currentJulianDate)});
+			projectLink = projectLink + '&' + Cesium.objectToQuery({"dayTime": Cesium.JulianDate.toIso8601(currentJulianDate, 0)});
 		}
 	
 		return projectLink;
