@@ -137,7 +137,7 @@
 			}											
 	  	});
 		
-		//	inspect the status of the showed and cached tiles	
+		// inspect the status of the showed and cached tiles	
 		inspectTileStatus();
 		
 		// bind view and model of the highlighted and hidden Objects...
@@ -165,7 +165,16 @@
 				}
 				addTerrainProvider();
 			}
-		})			
+		});
+		
+		// jump to a timepoint
+		var timestampStr = CitydbUtil.parse_query_string('timestamp', window.location.href);
+		if (timestampStr) {
+			var julianDate = Cesium.queryToObject(Object.keys(Cesium.queryToObject(timestampStr))[0]);
+			var clock = cesiumViewer.cesiumWidget.clock; 
+			clock.currentTime = julianDate; 
+			clock.shouldAnimate = false;
+		}	
 	}
 	    
     /*---------------------------------  methods and functions  ----------------------------------------*/ 
@@ -597,7 +606,13 @@
 		if (terrain != null) {
 			projectLink = projectLink + '&' + terrain;
 		}
-		
+				
+		var clock = cesiumViewer.cesiumWidget.clock; 
+		if (!clock.shouldAnimate) {
+			var currentJulianDate = clock.currentTime; 
+			projectLink = projectLink + '&' + Cesium.objectToQuery({"timestamp": Cesium.objectToQuery(currentJulianDate)});
+		}
+	
 		return projectLink;
   	};
   	
