@@ -585,8 +585,13 @@
 
 		if (gltf_version)
 			projectLink = projectLink + 'gltf_version=' + gltf_version + "&";
+
+		var clock = cesiumViewer.cesiumWidget.clock; 
+		if (!clock.shouldAnimate) {
+			var currentJulianDate = clock.currentTime; 
+			projectLink = projectLink + Cesium.objectToQuery({"dayTime": Cesium.JulianDate.toIso8601(currentJulianDate, 0)}) + '&';
+		}
 		
-		console.log(isNaN(cesiumViewer.terrainShadows));
 		projectLink = projectLink +			
 			'title=' + document.title +
 			'&shadows=' + cesiumViewer.shadows +
@@ -608,12 +613,6 @@
 			projectLink = projectLink + '&' + terrain;
 		}
 				
-		var clock = cesiumViewer.cesiumWidget.clock; 
-		if (!clock.shouldAnimate) {
-			var currentJulianDate = clock.currentTime; 
-			projectLink = projectLink + '&' + Cesium.objectToQuery({"dayTime": Cesium.JulianDate.toIso8601(currentJulianDate, 0)});
-		}
-	
 		return projectLink;
   	};
   	
