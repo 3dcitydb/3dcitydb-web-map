@@ -38,7 +38,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition, showError);
             } else {
-                showPopupInfoBoxWithTextContent("Error", "Geolocation is not supported by this browser.");
+                alert("Geolocation is not supported by this browser.");
             }
         } else {
             button.value = "OFF";
