@@ -79,9 +79,9 @@
                 }
                 // alpha is in [0,360) degrees, while heading is [-pi,pi), where positive points eastward
                 if (oriAlpha < 180) {
-                    oriAlpha = Cesium.Math.toRadians(-ori.alpha);
+                    oriAlpha = Cesium.Math.toRadians(-oriAlpha);
                 } else {
-                    oriAlpha = Cesium.Math.toRadians(180 - (ori.alpha - 180));
+                    oriAlpha = Cesium.Math.toRadians(180 - (oriAlpha - 180));
                 }
 
                 // BETA
