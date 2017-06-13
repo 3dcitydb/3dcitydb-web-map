@@ -55,7 +55,7 @@
                         if (button.value === "ON") {
                             // alpha is the device angle around Oz axis
                             aux(position, event);
-                        }else{
+                        } else {
                             clearInterval(repeat);
                         }
                     }, false);
@@ -66,15 +66,36 @@
         }
 
         function aux(position, ori) {
+            var oriAlpha = 0;
+            var oriBeta = 0;
+            var oriGamma = 0;
+
+            if (Cesium.defined(ori)) {
+                // ALPHA
+                if (ori.webkitCompassHeading) {
+                    oriAlpha = ori.webkitCompassHeading;
+                } else if (Cesium.defined(ori.alpha)) {
+                    oriAlpha = ori.alpha;
+                }
+                // alpha is in [0,360) degrees, while heading is [-pi,pi), where positive points eastward
+                if (oriAlpha < 180) {
+                    oriAlpha = Cesium.Math.toRadians(-ori.alpha);
+                } else {
+                    oriAlpha = Cesium.Math.toRadians(180 - (ori.alpha - 180));
+                }
+
+                // BETA
+                if (Cesium.defined(ori.beta)) {
+                    oriBeta = Cesium.Math.toRadians(ori.beta - 90);
+                }
+            }
+
             cesiumCamera.flyTo({
                 destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, 2),
                 orientation: {
-                    // alpha is in [0,360) degrees, while heading is [-pi,pi), where positive points eastward
-                    heading: (Cesium.defined(ori) && Cesium.defined(ori.alpha)) ?
-                            (ori.alpha < 180 ? Cesium.Math.toRadians(-ori.alpha) : Cesium.Math.toRadians(180 - (ori.alpha - 180))) : Cesium.Math.toRadians(0),
-                    pitch: (Cesium.defined(ori) && Cesium.defined(ori.beta)) ?
-                            Cesium.Math.toRadians(ori.beta-90) : Cesium.Math.toRadians(0),
-                    roll: Cesium.Math.toRadians(0)
+                    heading: oriAlpha,
+                    pitch: oriBeta,
+                    roll: oriGamma
                 }
             });
         }
