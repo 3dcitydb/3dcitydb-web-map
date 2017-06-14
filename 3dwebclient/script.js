@@ -1051,6 +1051,19 @@ function showInExternalMaps() {
 
 // Geolocation with device orientation
 var gpsController = new GPSController();
-function auxOnclickGPSButton() {
-    gpsController.getLocation();
+function auxOnclickGPSButton(object) {
+    // distinguish between double-click and single-click
+    // https://stackoverflow.com/questions/5497073/how-to-differentiate-single-click-event-and-double-click-event#answer-16033129
+    if (object.getAttribute("data-dblclick") == null) {
+        object.setAttribute("data-dblclick", 1);
+        setTimeout(function () {
+            if (object.getAttribute("data-dblclick") == 1) {
+                gpsController.handleClick();
+            }
+            object.removeAttribute("data-dblclick");
+        }, 300);
+    } else {
+        object.removeAttribute("data-dblclick");
+        gpsController.handleDclick();
+    }
 }

@@ -1,0 +1,10 @@
+.tracking-activated,
+.tracking-activated:hover{
+    background: #0074D9 url(../images/GPS_on.png) no-repeat;
+}
+
+.tracking-deactivated,
+.tracking-deactivated:hover {
+    background-image: url(../images/GPS_off.png);
+    background-repeat: no-repeat;
+}
