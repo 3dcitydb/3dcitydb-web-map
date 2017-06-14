@@ -105,7 +105,7 @@ function intiClient() {
         creditDisplay.addDefaultCredit(citydbCreditLogo);
         var tumCreditLogo = new Cesium.Credit('© 2016 Chair of Geoinformatics TU München', undefined, "https://www.gis.bgu.tum.de/en/home/");
         creditDisplay.addDefaultCredit(tumCreditLogo);
-    } else{
+    } else {
         hideCreditTexts();
     }
 
