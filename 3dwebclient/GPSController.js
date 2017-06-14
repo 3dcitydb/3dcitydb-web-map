@@ -16,15 +16,22 @@
         var scope = this;
 
         var button = document.getElementById("gpsButton");
-        button.style.display = "block";
-        button.style.width = "32px";
-        button.style.height = "32px";
-        button.style.position = "absolute";
-        button.style.top = "45px";
-        button.style.right = "5px";
+        button.className = "cesium-button cesium-toolbar-button";
+        button.title = "GPS";
+//        button.style.display = "block";
+//        button.style.width = "32px";
+//        button.style.height = "32px";
+//        button.style.position = "absolute";
+//        button.style.top = "45px";
+//        button.style.right = "5px";
         button.style.backgroundImage = "url(images/GPS_off.png)";
         button.style.backgroundRepeat = "no-repeat";
         button.value = "OFF";
+
+        //replace the 3D/2D button with this GPS button
+        var customCesiumViewerToolbar = document.getElementsByClassName("cesium-viewer-toolbar")[0];
+        var customGlobeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-sceneModePicker-wrapper cesium-toolbar-button")[0];
+        customCesiumViewerToolbar.replaceChild(button, customGlobeButton);
     }
 
     GPSController.prototype.getLocation = function () {
