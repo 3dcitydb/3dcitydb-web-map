@@ -142,7 +142,9 @@ function intiClient() {
     });
 
     // inspect the status of the showed and cached tiles	
-    inspectTileStatus();
+    if (!window.mobilecheck()) {
+        inspectTileStatus();
+    }
 
     // bind view and model of the highlighted and hidden Objects...
     observeObjectList();
@@ -944,6 +946,15 @@ function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
     }).otherwise(function (error) {
         cesiumEntity.description = 'No feature information found';
     });
+
+    if (window.mobilecheck()) {
+        document.getElementsByClassName('cesium-infoBox')[0].classList.add("full");
+        document.getElementsByClassName('cesium-infoBox')[0].style.zIndex = "999999";
+        document.getElementById("uiMenu").style.display = "none";
+        document.getElementsByClassName('cesium-infoBox-close')[0].onclick = function () {
+            document.getElementById("uiMenu").style.display = "block";
+        };
+    }
 }
 
 function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {

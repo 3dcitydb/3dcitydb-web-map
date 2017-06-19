@@ -1,0 +1,11 @@
+.full {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    z-index: 999999;
+}
+
