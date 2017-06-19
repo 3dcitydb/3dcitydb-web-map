@@ -156,22 +156,20 @@
         function showError(error) {
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    showPopupInfoBoxWithTextContent("Error", "Geolocation denied by user.");
+                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation denied by user.");
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    showPopupInfoBoxWithTextContent("Error", "Location information is unavailable.");
+                    CitydbUtil.showAlertWindow("OK", "Error", "Location information is unavailable.");
                     break;
                 case error.TIMEOUT:
-                    showPopupInfoBoxWithTextContent("Error", "Location request has timed out.");
+                    CitydbUtil.showAlertWindow("OK", "Error", "Location request has timed out.");
                     break;
                 case error.UNKNOWN_ERROR:
-                    showPopupInfoBoxWithTextContent("Error", "An unknown error has occurred while requesting location information.");
+                    CitydbUtil.showAlertWindow("OK", "Error", "An unknown error has occurred while requesting location information.");
                     break;
             }
         }
     }
-
-
 
     GPSController.prototype.stopTracking = function () {
         var scope = this;
