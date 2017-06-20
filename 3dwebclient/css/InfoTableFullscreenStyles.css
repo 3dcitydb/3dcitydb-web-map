@@ -5,6 +5,7 @@
     right: 0;
     width: 100%;
     max-width: none;
+    max-height: none;
     height: 100%;
     z-index: 999999;
 }

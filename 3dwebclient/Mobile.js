@@ -6,3 +6,8 @@ function hideCreditTexts() {
     var textViewer = document.getElementsByClassName("cesium-widget-credits")[0];
     textViewer.parentNode.removeChild(textViewer);
 }
+
+function hideInspector() {
+    document.getElementById("citydb_cachedTilesInspector").style.display = "none";
+    document.getElementById("citydb_showedTilesInspector").style.display = "none";
+}

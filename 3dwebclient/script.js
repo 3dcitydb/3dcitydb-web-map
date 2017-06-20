@@ -144,6 +144,8 @@ function intiClient() {
     // inspect the status of the showed and cached tiles	
     if (!window.mobilecheck()) {
         inspectTileStatus();
+    }else{
+        hideInspector();
     }
 
     // bind view and model of the highlighted and hidden Objects...
