@@ -135,7 +135,7 @@
                     destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, 2),
                     orientation: {
                         heading: oriAlpha,
-                        pitch: oriBeta,
+                        pitch: 0,
                         roll: oriGamma
                     },
                     complete: function () {

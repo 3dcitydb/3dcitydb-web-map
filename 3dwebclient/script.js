@@ -144,7 +144,7 @@ function intiClient() {
     // inspect the status of the showed and cached tiles	
     if (!window.mobilecheck()) {
         inspectTileStatus();
-    }else{
+    } else {
         hideInspector();
     }
 
