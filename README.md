@@ -46,7 +46,7 @@ The latest stable release of the 3DCityDB-Web-Map-Client is `1.1.0`.
 
 All releases are available from the [releases section](https://github.com/3dcitydb/3dcitydb-web-map/releases).
 
-For convenient use, there is an official [web link](http://www.3dcitydb.org/3dcitydb-web-map/1.1/3dwebclient/index.html) available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. 
+For convenient use, there is an official [web link](https://3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.0473109629219&heading=328.74761976161506&pitch=-79.22129067410187&roll=359.4611498135091&layer_0=url%3D..%252Fdata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200) available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. 
 
 
 System requirements
