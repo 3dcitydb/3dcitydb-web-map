@@ -135,16 +135,16 @@
                     }
 
                     // BETA
-                    if (Cesium.defined(ori.beta)) {
-                        oriBeta = Cesium.Math.toRadians(ori.beta - 90);
-                    }
+//                    if (Cesium.defined(ori.beta)) {
+//                        oriBeta = Cesium.Math.toRadians(ori.beta - 90);
+//                    }
                 }
 
                 cesiumCamera.flyTo({
                     destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, 2),
                     orientation: {
                         heading: oriAlpha,
-                        pitch: 0,
+                        pitch: oriBeta,
                         roll: oriGamma
                     },
                     complete: function () {

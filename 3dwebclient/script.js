@@ -952,6 +952,7 @@ function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
     if (window.mobilecheck()) {
         document.getElementsByClassName('cesium-infoBox')[0].classList.add("full");
         document.getElementsByClassName('cesium-infoBox')[0].style.zIndex = "999999";
+        document.getElementsByClassName('cesium-infoBox-iframe')[0].style.maxHeight = "100%";
         document.getElementById("uiMenu").style.display = "none";
         document.getElementsByClassName('cesium-infoBox-close')[0].onclick = function () {
             document.getElementById("uiMenu").style.display = "block";
