@@ -9,6 +9,7 @@
         this._liveTrackingActivated = false;
         this._timer = undefined;
         this._timerMiliseconds = 1000;
+        this._savedAlpha = undefined;
         this.createGPSButton();
     }
 
@@ -35,6 +36,14 @@
             },
             set: function (value) {
                 this._timerMiliseconds = value;
+            }
+        },
+        savedAlpha: {
+            get: function () {
+                return this._savedAlpha;
+            },
+            set: function (value) {
+                this._savedAlpha = value;
             }
         }
     });
@@ -140,11 +149,24 @@
 ////                    }
 //                }
 
+                var angle = 0;
                 if (ori.webkitCompassHeading) {
-                    oriAlpha = Cesium.Math.toRadians(ori.webkitCompassHeading);
+                    angle = ori.webkitCompassHeading;
                 } else {
-                    oriAlpha = Cesium.Math.toRadians(-ori.alpha);
+                    angle = 360 - ori.alpha;
                 }
+
+                if (typeof scope._savedAlpha !== "undefined") {
+                    var diffAngle = angle - scope._savedAlpha;
+                    if (diffAngle > 180) {
+                        angle -= 360;
+                    } else if (diffAngle < -180) {
+                        angle += 360;
+                    }
+                }
+
+                oriAlpha = Cesium.Math.toRadians(angle);
+                scope._savedAlpha = oriAlpha;
 
                 cesiumCamera.flyTo({
                     destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, 2),
