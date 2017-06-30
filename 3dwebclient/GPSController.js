@@ -8,7 +8,7 @@
     function GPSController() {
         this._liveTrackingActivated = false;
         this._timer = undefined;
-        this._timerMiliseconds = 1000;
+        this._timerMiliseconds = 500;
         this._savedAlpha = undefined;
         this.createGPSButton();
     }
@@ -96,7 +96,7 @@
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition, showError);
         } else {
-            alert("Geolocation is not supported by this browser.");
+            CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
         }
 
         function showPosition(position) {
@@ -105,12 +105,14 @@
             function getLocation() {
                 if (window.DeviceOrientationEvent) {
                     window.addEventListener('deviceorientation', function auxOrientation(event) {
-                        // one-time event
-                        window.removeEventListener('deviceorientation', auxOrientation, false);
                         flyToLocationWithOrientation(position, event);
+                        setTimeout(function () {
+                            // one-time event
+                            window.removeEventListener('deviceorientation', auxOrientation, false);
+                        }, scope._timerMiliseconds);
                     }, false);
                 } else {
-                    alert("Exact geolocation is not supported by this device.");
+                    CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
                     flyToLocationWithOrientation(position, event);
                 }
             }
@@ -169,10 +171,10 @@
                 scope._savedAlpha = oriAlpha;
 
                 cesiumCamera.flyTo({
-                    destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, 2),
+                    destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, 150),
                     orientation: {
                         heading: oriAlpha,
-                        pitch: oriBeta,
+                        pitch: Cesium.Math.toRadians(-90),
                         roll: oriGamma
                     },
                     complete: function () {

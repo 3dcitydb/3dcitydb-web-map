@@ -4,3 +4,4 @@
 .gitignore
 data
 *.gitignore
+/nbproject/private/
