@@ -8,7 +8,7 @@
     function GPSController() {
         this._liveTrackingActivated = false;
         this._timer = undefined;
-        this._timerMiliseconds = 500;
+        this._timerMiliseconds = 350;
         this._savedAlpha = undefined;
         this.createGPSButton();
     }
