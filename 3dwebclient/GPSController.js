@@ -59,6 +59,24 @@
         var customCesiumViewerToolbar = document.getElementsByClassName("cesium-viewer-toolbar")[0];
         var customGlobeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-sceneModePicker-wrapper cesium-toolbar-button")[0];
         customCesiumViewerToolbar.replaceChild(button, customGlobeButton);
+
+        button.onclick = function () {
+            var object = document.getElementById("gpsButton");
+            // distinguish between double-click and single-click
+            // https://stackoverflow.com/questions/5497073/how-to-differentiate-single-click-event-and-double-click-event#answer-16033129
+            if (object.getAttribute("data-dblclick") == null) {
+                object.setAttribute("data-dblclick", 1);
+                setTimeout(function () {
+                    if (object.getAttribute("data-dblclick") == 1) {
+                        scope.handleClick();
+                    }
+                    object.removeAttribute("data-dblclick");
+                }, 300);
+            } else {
+                object.removeAttribute("data-dblclick");
+                scope.handleDclick();
+            }
+        }
     }
 
     GPSController.prototype.handleDclick = function () {
