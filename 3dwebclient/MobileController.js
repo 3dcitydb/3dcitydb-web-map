@@ -6,7 +6,7 @@
 (function () {
     /**constructor function**/
     function MobileController() {
-        this._isMobile = true;
+        this._isMobile = this.isMobile();
 
         // GPS functionalities, including geolocation and device orientation
         this._gpsController = new GPSController();
