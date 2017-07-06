@@ -10,6 +10,7 @@
         this._timer = undefined;
         this._timerMiliseconds = 350;
         this._savedAlpha = undefined;
+        this._firstActivated = false;
         this.createGPSButton();
     }
 
@@ -44,6 +45,14 @@
             },
             set: function (value) {
                 this._savedAlpha = value;
+            }
+        },
+        firstActivated: {
+            get: function () {
+                return this._firstActivated;
+            },
+            set: function (value) {
+                this._firstActivated = value;
             }
         }
     });
@@ -139,6 +148,7 @@
                 var oriAlpha = 0;
                 var oriBeta = 0;
                 var oriGamma = 0;
+                var oriHeight = 2;
 
 //                if (Cesium.defined(ori)) {
 //                    var mobileOS = getMobileOperatingSystem();
@@ -188,14 +198,52 @@
                 oriAlpha = Cesium.Math.toRadians(angle);
                 scope._savedAlpha = oriAlpha;
 
+                // change view if specified in URL
+                var paraUrl = CitydbUtil.parse_query_string("viewMode", window.location.href);
+                if (paraUrl) {
+                    switch (paraUrl.toLowerCase()) {
+                        case "fpv":
+                            // first person view
+                            setFirstPersonView();
+                            break;
+                        case "debug":
+                            // debug view
+                            setDebugView();
+                            break;
+                        default:
+                            // default view = first person view
+                            setFirstPersonView();
+                    }
+                } else {
+                    // default view = first person view
+                    setFirstPersonView();
+                }
+
+                function setFirstPersonView() {
+                    if (!scope._firstActivated) {
+                        oriBeta = 0;
+                    } else {
+                        oriBeta = cesiumCamera.pitch;
+                    }
+                    oriGamma = 0;
+                    oriHeight = 2;
+                }
+
+                function setDebugView() {
+                    oriBeta = Cesium.Math.toRadians(-90);
+                    oriGamma = 0;
+                    oriHeight = 150;
+                }
+
                 cesiumCamera.flyTo({
-                    destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, 150),
+                    destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, oriHeight),
                     orientation: {
                         heading: oriAlpha,
-                        pitch: Cesium.Math.toRadians(-90),
+                        pitch: oriBeta,
                         roll: oriGamma
                     },
                     complete: function () {
+                        scope._firstActivated = true;
                         if (scope._liveTrackingActivated) {
                             // real-time tracking
                             scope._timer = setTimeout(function () {
