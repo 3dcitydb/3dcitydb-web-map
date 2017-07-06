@@ -21,7 +21,6 @@
  * See https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md for full licensing details.
  */
 (function () {
-/*global define*/
 define('Core/defined',[],function() {
     'use strict';
 
@@ -45,7 +44,6 @@ define('Core/defined',[],function() {
     return defined;
 });
 
-/*global define*/
 define('Core/DeveloperError',[
         './defined'
     ], function(
@@ -126,7 +124,6 @@ define('Core/DeveloperError',[
     return DeveloperError;
 });
 
-/*global define*/
 define('Core/Check',[
         './defined',
         './DeveloperError'
@@ -293,10 +290,26 @@ define('Core/Check',[
         }
     };
 
+    /**
+     * Throws if test1 and test2 is not typeof 'number' and not equal in value
+     *
+     * @param {String} name1 The name of the first variable being tested
+     * @param {String} name2 The name of the second variable being tested against
+     * @param {*} test1 The value to test
+     * @param {*} test2 The value to test against
+     * @exception {DeveloperError} test1 and test2 should be type of 'number' and be equal in value
+     */
+    Check.typeOf.number.equals = function (name1, name2, test1, test2) {
+        Check.typeOf.number(name1, test1);
+        Check.typeOf.number(name2, test2);
+        if (test1 !== test2) {
+            throw new DeveloperError(name1 + ' must be equal to ' + name2 + ', the actual values are ' + test1 + ' and ' + test2);
+        }
+    };
+
     return Check;
 });
 
-/*global define*/
 define('Core/freezeObject',[
         './defined'
     ], function(
@@ -322,7 +335,6 @@ define('Core/freezeObject',[
     return freezeObject;
 });
 
-/*global define*/
 define('Core/defaultValue',[
         './freezeObject'
     ], function(
@@ -343,7 +355,7 @@ define('Core/defaultValue',[
      * param = Cesium.defaultValue(param, 'default');
      */
     function defaultValue(a, b) {
-        if (a !== undefined) {
+        if (a !== undefined && a !== null) {
             return a;
         }
         return b;
@@ -562,7 +574,6 @@ MersenneTwister.prototype.random = function() {
 return MersenneTwister;
 });
 
-/*global define*/
 define('Core/Math',[
         '../ThirdParty/mersenne-twister',
         './defaultValue',
@@ -1276,7 +1287,7 @@ define('Core/Math',[
     };
 
     /**
-     * Generates a random number in the range of [0.0, 1.0)
+     * Generates a random floating point number in the range of [0.0, 1.0)
      * using a Mersenne twister.
      *
      * @returns {Number} A random number in the range of [0.0, 1.0).
@@ -1286,6 +1297,18 @@ define('Core/Math',[
      */
     CesiumMath.nextRandomNumber = function() {
         return randomNumberGenerator.random();
+    };
+
+
+    /**
+     * Generates a random number between two numbers.
+     *
+     * @param {Number} min The minimum value.
+     * @param {Number} max The maximum value.
+     * @returns {Number} A random number between the min and max.
+     */
+    CesiumMath.randomBetween = function(min, max) {
+        return CesiumMath.nextRandomNumber() * (max - min) + min;
     };
 
     /**
@@ -1363,14 +1386,13 @@ define('Core/Math',[
     return CesiumMath;
 });
 
-/*global define*/
 define('Core/Cartesian3',[
-    './Check',
-    './defaultValue',
-    './defined',
-    './DeveloperError',
-    './freezeObject',
-    './Math'
+        './Check',
+        './defaultValue',
+        './defined',
+        './DeveloperError',
+        './freezeObject',
+        './Math'
     ], function(
         Check,
         defaultValue,
@@ -1805,15 +1827,9 @@ define('Core/Cartesian3',[
      * @returns {Cartesian3} The modified result parameter.
      */
     Cartesian3.divideComponents = function(left, right, result) {
-                if (!defined(left)) {
-            throw new DeveloperError('left is required');
-        }
-        if (!defined(right)) {
-            throw new DeveloperError('right is required');
-        }
-        if (!defined(result)) {
-            throw new DeveloperError('result is required');
-        }
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
+        Check.typeOf.object('result', result);
         
         result.x = left.x / right.x;
         result.y = left.y / right.y;
@@ -1993,12 +2009,10 @@ define('Core/Cartesian3',[
             } else {
                 result = Cartesian3.clone(Cartesian3.UNIT_Z, result);
             }
+        } else if (f.y <= f.z) {
+            result = Cartesian3.clone(Cartesian3.UNIT_Y, result);
         } else {
-            if (f.y <= f.z) {
-                result = Cartesian3.clone(Cartesian3.UNIT_Y, result);
-            } else {
-                result = Cartesian3.clone(Cartesian3.UNIT_Z, result);
-            }
+            result = Cartesian3.clone(Cartesian3.UNIT_Z, result);
         }
 
         return result;
@@ -2360,7 +2374,6 @@ define('Core/Cartesian3',[
     return Cartesian3;
 });
 
-/*global define*/
 define('Core/scaleToGeodeticSurface',[
         './Cartesian3',
         './defined',
@@ -2495,20 +2508,19 @@ define('Core/scaleToGeodeticSurface',[
     return scaleToGeodeticSurface;
 });
 
-/*global define*/
 define('Core/Cartographic',[
         './Cartesian3',
+        './Check',
         './defaultValue',
         './defined',
-        './DeveloperError',
         './freezeObject',
         './Math',
         './scaleToGeodeticSurface'
     ], function(
         Cartesian3,
+        Check,
         defaultValue,
         defined,
-        DeveloperError,
         freezeObject,
         CesiumMath,
         scaleToGeodeticSurface) {
@@ -2559,12 +2571,8 @@ define('Core/Cartographic',[
      * @returns {Cartographic} The modified result parameter or a new Cartographic instance if one was not provided.
      */
     Cartographic.fromRadians = function(longitude, latitude, height, result) {
-                if (!defined(longitude)) {
-            throw new DeveloperError('longitude is required.');
-        }
-        if (!defined(latitude)) {
-            throw new DeveloperError('latitude is required.');
-        }
+                Check.typeOf.number('longitude', longitude);
+        Check.typeOf.number('latitude', latitude);
         
         height = defaultValue(height, 0.0);
 
@@ -2590,12 +2598,8 @@ define('Core/Cartographic',[
      * @returns {Cartographic} The modified result parameter or a new Cartographic instance if one was not provided.
      */
     Cartographic.fromDegrees = function(longitude, latitude, height, result) {
-                if (!defined(longitude)) {
-            throw new DeveloperError('longitude is required.');
-        }
-        if (!defined(latitude)) {
-            throw new DeveloperError('latitude is required.');
-        }
+                Check.typeOf.number('longitude', longitude);
+        Check.typeOf.number('latitude', latitude);
                 longitude = CesiumMath.toRadians(longitude);
         latitude = CesiumMath.toRadians(latitude);
 
@@ -2696,9 +2700,7 @@ define('Core/Cartographic',[
      * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
      */
     Cartographic.equalsEpsilon = function(left, right, epsilon) {
-                if (typeof epsilon !== 'number') {
-            throw new DeveloperError('epsilon is required and must be a number.');
-        }
+                Check.typeOf.number('epsilon', epsilon);
         
         return (left === right) ||
                ((defined(left)) &&
@@ -2762,7 +2764,6 @@ define('Core/Cartographic',[
     return Cartographic;
 });
 
-/*global define*/
 define('Core/defineProperties',[
         './defined'
     ], function(
@@ -2797,10 +2798,10 @@ define('Core/defineProperties',[
     return defineProperties;
 });
 
-/*global define*/
 define('Core/Ellipsoid',[
         './Cartesian3',
         './Cartographic',
+        './Check',
         './defaultValue',
         './defined',
         './defineProperties',
@@ -2811,6 +2812,7 @@ define('Core/Ellipsoid',[
     ], function(
         Cartesian3,
         Cartographic,
+        Check,
         defaultValue,
         defined,
         defineProperties,
@@ -2825,9 +2827,9 @@ define('Core/Ellipsoid',[
         y = defaultValue(y, 0.0);
         z = defaultValue(z, 0.0);
 
-                if (x < 0.0 || y < 0.0 || z < 0.0) {
-            throw new DeveloperError('All radii components must be greater than or equal to zero.');
-        }
+                Check.typeOf.number.greaterThanOrEquals('x', x, 0.0);
+        Check.typeOf.number.greaterThanOrEquals('y', y, 0.0);
+        Check.typeOf.number.greaterThanOrEquals('z', z, 0.0);
         
         ellipsoid._radii = new Cartesian3(x, y, z);
 
@@ -3079,12 +3081,8 @@ define('Core/Ellipsoid',[
      * @returns {Number[]} The array that was packed into
      */
     Ellipsoid.pack = function(value, array, startingIndex) {
-                if (!defined(value)) {
-            throw new DeveloperError('value is required');
-        }
-        if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
+                Check.typeOf.object('value', value);
+        Check.defined('array', array);
         
         startingIndex = defaultValue(startingIndex, 0);
 
@@ -3102,9 +3100,7 @@ define('Core/Ellipsoid',[
      * @returns {Ellipsoid} The modified result parameter or a new Ellipsoid instance if one was not provided.
      */
     Ellipsoid.unpack = function(array, startingIndex, result) {
-                if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
+                Check.defined('array', array);
         
         startingIndex = defaultValue(startingIndex, 0);
 
@@ -3130,9 +3126,7 @@ define('Core/Ellipsoid',[
      * @returns {Cartesian3} The modified result parameter or a new Cartesian3 instance if none was provided.
      */
     Ellipsoid.prototype.geodeticSurfaceNormalCartographic = function(cartographic, result) {
-                if (!defined(cartographic)) {
-            throw new DeveloperError('cartographic is required.');
-        }
+                Check.typeOf.object('cartographic', cartographic);
         
         var longitude = cartographic.longitude;
         var latitude = cartographic.latitude;
@@ -3212,9 +3206,7 @@ define('Core/Ellipsoid',[
      * var cartesianPositions = Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(positions);
      */
     Ellipsoid.prototype.cartographicArrayToCartesianArray = function(cartographics, result) {
-                if (!defined(cartographics)) {
-            throw new DeveloperError('cartographics is required.');
-        }
+                Check.defined('cartographics', cartographics);
         
         var length = cartographics.length;
         if (!defined(result)) {
@@ -3284,9 +3276,7 @@ define('Core/Ellipsoid',[
      * var cartographicPositions = Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
      */
     Ellipsoid.prototype.cartesianArrayToCartographicArray = function(cartesians, result) {
-                if (!defined(cartesians)) {
-            throw new DeveloperError('cartesians is required.');
-        }
+                Check.defined('cartesians', cartesians);
         
         var length = cartesians.length;
         if (!defined(result)) {
@@ -3322,9 +3312,7 @@ define('Core/Ellipsoid',[
      * @returns {Cartesian3} The modified result parameter or a new Cartesian3 instance if none was provided.
      */
     Ellipsoid.prototype.scaleToGeocentricSurface = function(cartesian, result) {
-                if (!defined(cartesian)) {
-            throw new DeveloperError('cartesian is required.');
-        }
+                Check.typeOf.object('cartesian', cartesian);
         
         if (!defined(result)) {
             result = new Cartesian3();
@@ -3417,15 +3405,13 @@ define('Core/Ellipsoid',[
      * @exception {DeveloperError} Ellipsoid.radii.z must be greater than 0.
      */
     Ellipsoid.prototype.getSurfaceNormalIntersectionWithZAxis = function(position, buffer, result) {
-                if (!defined(position)) {
-            throw new DeveloperError('position is required.');
-        }
+                Check.typeOf.object('position', position);
+
         if (!CesiumMath.equalsEpsilon(this._radii.x, this._radii.y, CesiumMath.EPSILON15)) {
             throw new DeveloperError('Ellipsoid must be an ellipsoid of revolution (radii.x == radii.y)');
         }
-        if (this._radii.z === 0) {
-            throw new DeveloperError('Ellipsoid.radii.z must be greater than 0');
-        }
+
+        Check.typeOf.number.greaterThan('Ellipsoid.radii.z', this._radii.z, 0);
         
         buffer = defaultValue(buffer, 0.0);
 
@@ -3449,14 +3435,12 @@ define('Core/Ellipsoid',[
     return Ellipsoid;
 });
 
-/*global define*/
 define('Core/Rectangle',[
         './Cartographic',
         './Check',
         './defaultValue',
         './defined',
         './defineProperties',
-        './DeveloperError',
         './Ellipsoid',
         './freezeObject',
         './Math'
@@ -3466,7 +3450,6 @@ define('Core/Rectangle',[
         defaultValue,
         defined,
         defineProperties,
-        DeveloperError,
         Ellipsoid,
         freezeObject,
         CesiumMath) {
@@ -3653,7 +3636,7 @@ define('Core/Rectangle',[
     };
 
     /**
-     * Creates an rectangle given the boundary longitude and latitude in radians.
+     * Creates a rectangle given the boundary longitude and latitude in radians.
      *
      * @param {Number} [west=0.0] The westernmost longitude in radians in the range [-Math.PI, Math.PI].
      * @param {Number} [south=0.0] The southernmost latitude in radians in the range [-Math.PI/2, Math.PI/2].
@@ -3740,7 +3723,8 @@ define('Core/Rectangle',[
      */
     Rectangle.fromCartesianArray = function(cartesians, ellipsoid, result) {
                 Check.defined('cartesians', cartesians);
-        
+                ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
+
         var west = Number.MAX_VALUE;
         var east = -Number.MAX_VALUE;
         var westOverIDL = Number.MAX_VALUE;
@@ -4278,7 +4262,6 @@ define('Core/Rectangle',[
     return Rectangle;
 });
 
-/*global define*/
 define('Core/GeographicProjection',[
         './Cartesian3',
         './Cartographic',
@@ -4396,7 +4379,6 @@ define('Core/GeographicProjection',[
     return GeographicProjection;
 });
 
-/*global define*/
 define('Core/Intersect',[
         './freezeObject'
     ], function(
@@ -4440,7 +4422,6 @@ define('Core/Intersect',[
     return freezeObject(Intersect);
 });
 
-/*global define*/
 define('Core/Interval',[
         './defaultValue'
     ], function(
@@ -4473,7 +4454,6 @@ define('Core/Interval',[
     return Interval;
 });
 
-/*global define*/
 define('Core/Matrix3',[
         './Cartesian3',
         './Check',
@@ -4779,7 +4759,7 @@ define('Core/Matrix3',[
 
         var m10 = cosTheta * sinPsi;
         var m11 = cosPhi * cosPsi + sinPhi * sinTheta * sinPsi;
-        var m12 = -sinTheta * cosPhi + cosPhi * sinTheta * sinPsi;
+        var m12 = -sinPhi * cosPsi + cosPhi * sinTheta * sinPsi;
 
         var m20 = -sinTheta;
         var m21 = sinPhi * cosTheta;
@@ -5904,7 +5884,6 @@ define('Core/Matrix3',[
     return Matrix3;
 });
 
-/*global define*/
 define('Core/Cartesian4',[
         './Check',
         './defaultValue',
@@ -6678,7 +6657,6 @@ define('Core/Cartesian4',[
     return Cartesian4;
 });
 
-/*global define*/
 define('Core/RuntimeError',[
         './defined'
     ], function(
@@ -6751,7 +6729,6 @@ define('Core/RuntimeError',[
     return RuntimeError;
 });
 
-/*global define*/
 define('Core/Matrix4',[
         './Cartesian3',
         './Cartesian4',
@@ -6759,7 +6736,6 @@ define('Core/Matrix4',[
         './defaultValue',
         './defined',
         './defineProperties',
-        './DeveloperError',
         './freezeObject',
         './Math',
         './Matrix3',
@@ -6771,7 +6747,6 @@ define('Core/Matrix4',[
         defaultValue,
         defined,
         defineProperties,
-        DeveloperError,
         freezeObject,
         CesiumMath,
         Matrix3,
@@ -9275,7 +9250,6 @@ define('Core/Matrix4',[
     return Matrix4;
 });
 
-/*global define*/
 define('Core/BoundingSphere',[
         './Cartesian3',
         './Cartographic',
@@ -9378,7 +9352,8 @@ define('Core/BoundingSphere',[
         var zMax = Cartesian3.clone(currentPos, fromPointsZMax);
 
         var numPositions = positions.length;
-        for (var i = 1; i < numPositions; i++) {
+        var i;
+        for (i = 1; i < numPositions; i++) {
             Cartesian3.clone(positions[i], currentPos);
 
             var x = currentPos.x;
@@ -9498,7 +9473,7 @@ define('Core/BoundingSphere',[
     var fromRectangle2DNortheast = new Cartographic();
 
     /**
-     * Computes a bounding sphere from an rectangle projected in 2D.
+     * Computes a bounding sphere from a rectangle projected in 2D.
      *
      * @param {Rectangle} rectangle The rectangle around which to create a bounding sphere.
      * @param {Object} [projection=GeographicProjection] The projection used to project the rectangle into 2D.
@@ -9640,7 +9615,8 @@ define('Core/BoundingSphere',[
         var zMax = Cartesian3.clone(currentPos, fromPointsZMax);
 
         var numElements = positions.length;
-        for (var i = 0; i < numElements; i += stride) {
+        var i;
+        for (i = 0; i < numElements; i += stride) {
             var x = positions[i] + center.x;
             var y = positions[i + 1] + center.y;
             var z = positions[i + 2] + center.z;
@@ -9797,7 +9773,8 @@ define('Core/BoundingSphere',[
         var zMax = Cartesian3.clone(currentPos, fromPointsZMax);
 
         var numElements = positionsHigh.length;
-        for (var i = 0; i < numElements; i += 3) {
+        var i;
+        for (i = 0; i < numElements; i += 3) {
             var x = positionsHigh[i] + positionsLow[i];
             var y = positionsHigh[i + 1] + positionsLow[i + 1];
             var z = positionsHigh[i + 2] + positionsLow[i + 2];
@@ -9994,7 +9971,8 @@ define('Core/BoundingSphere',[
         }
 
         var positions = [];
-        for (var i = 0; i < length; i++) {
+        var i;
+        for (i = 0; i < length; i++) {
             positions.push(boundingSpheres[i].center);
         }
 
@@ -10023,6 +10001,8 @@ define('Core/BoundingSphere',[
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if none was provided.
      */
     BoundingSphere.fromOrientedBoundingBox = function(orientedBoundingBox, result) {
+                Check.defined('orientedBoundingBox', orientedBoundingBox);
+        
         if (!defined(result)) {
             result = new BoundingSphere();
         }
@@ -10032,12 +10012,11 @@ define('Core/BoundingSphere',[
         var v = Matrix3.getColumn(halfAxes, 1, fromOrientedBoundingBoxScratchV);
         var w = Matrix3.getColumn(halfAxes, 2, fromOrientedBoundingBoxScratchW);
 
-        var uHalf = Cartesian3.magnitude(u);
-        var vHalf = Cartesian3.magnitude(v);
-        var wHalf = Cartesian3.magnitude(w);
+        Cartesian3.add(u, v, u);
+        Cartesian3.add(u, w, u);
 
         result.center = Cartesian3.clone(orientedBoundingBox.center, result.center);
-        result.radius = Math.max(uHalf, vHalf, wHalf);
+        result.radius = Cartesian3.magnitude(u);
 
         return result;
     };
@@ -10542,7 +10521,6 @@ define('Core/BoundingSphere',[
     return BoundingSphere;
 });
 
-/*global define*/
 define('Core/Cartesian2',[
         './Check',
         './defaultValue',
@@ -10860,9 +10838,8 @@ define('Core/Cartesian2',[
      * var d = Cesium.Cartesian2.distance(new Cesium.Cartesian2(1.0, 0.0), new Cesium.Cartesian2(2.0, 0.0));
      */
     Cartesian2.distance = function(left, right) {
-                if (!defined(left) || !defined(right)) {
-            throw new DeveloperError('left and right are required.');
-        }
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
         
         Cartesian2.subtract(left, right, distanceScratch);
         return Cartesian2.magnitude(distanceScratch);
@@ -10881,9 +10858,8 @@ define('Core/Cartesian2',[
      * var d = Cesium.Cartesian2.distance(new Cesium.Cartesian2(1.0, 0.0), new Cesium.Cartesian2(3.0, 0.0));
      */
     Cartesian2.distanceSquared = function(left, right) {
-                if (!defined(left) || !defined(right)) {
-            throw new DeveloperError('left and right are required.');
-        }
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
         
         Cartesian2.subtract(left, right, distanceScratch);
         return Cartesian2.magnitudeSquared(distanceScratch);
@@ -11243,7 +11219,6 @@ define('Core/Cartesian2',[
     return Cartesian2;
 });
 
-/*global define*/
 define('Core/Fullscreen',[
         './defined',
         './defineProperties'
@@ -11499,7 +11474,6 @@ define('Core/Fullscreen',[
     return Fullscreen;
 });
 
-/*global define*/
 define('Core/FeatureDetection',[
         './defaultValue',
         './defined',
@@ -11762,7 +11736,6 @@ define('Core/FeatureDetection',[
     return FeatureDetection;
 });
 
-/*global define*/
 define('Core/WebGLConstants',[
         './freezeObject'
     ], function(
@@ -12377,7 +12350,6 @@ define('Core/WebGLConstants',[
     return freezeObject(WebGLConstants);
 });
 
-/*global define*/
 define('Core/ComponentDatatype',[
         './defaultValue',
         './defined',
@@ -12704,7 +12676,6 @@ define('Core/ComponentDatatype',[
     return freezeObject(ComponentDatatype);
 });
 
-/*global define*/
 define('Core/GeometryType',[
         './freezeObject'
     ], function(
@@ -12724,7 +12695,6 @@ define('Core/GeometryType',[
     return freezeObject(GeometryType);
 });
 
-/*global define*/
 define('Core/PrimitiveType',[
         './freezeObject',
         './WebGLConstants'
@@ -12816,14 +12786,15 @@ define('Core/PrimitiveType',[
     return freezeObject(PrimitiveType);
 });
 
-/*global define*/
 define('Core/Geometry',[
+        './Check',
         './defaultValue',
         './defined',
         './DeveloperError',
         './GeometryType',
         './PrimitiveType'
     ], function(
+        Check,
         defaultValue,
         defined,
         DeveloperError,
@@ -12884,9 +12855,7 @@ define('Core/Geometry',[
     function Geometry(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
-                if (!defined(options.attributes)) {
-            throw new DeveloperError('options.attributes is required.');
-        }
+                Check.typeOf.object('options.attributes', options.attributes);
         
         /**
          * Attributes, which make up the geometry's vertices.  Each property in this object corresponds to a
@@ -12988,9 +12957,7 @@ define('Core/Geometry',[
      * var numVertices = Cesium.Geometry.computeNumberOfVertices(geometry);
      */
     Geometry.computeNumberOfVertices = function(geometry) {
-                if (!defined(geometry)) {
-            throw new DeveloperError('geometry is required.');
-        }
+                Check.typeOf.object('geometry', geometry);
         
         var numberOfVertices = -1;
         for ( var property in geometry.attributes) {
@@ -13013,7 +12980,6 @@ define('Core/Geometry',[
     return Geometry;
 });
 
-/*global define*/
 define('Core/GeometryAttribute',[
         './defaultValue',
         './defined',
@@ -13056,7 +13022,7 @@ define('Core/GeometryAttribute',[
      *   },
      *   primitiveType : Cesium.PrimitiveType.LINE_LOOP
      * });
-     * 
+     *
      * @see Geometry
      */
     function GeometryAttribute(options) {
@@ -13154,7 +13120,6 @@ define('Core/GeometryAttribute',[
     return GeometryAttribute;
 });
 
-/*global define*/
 define('Core/GeometryAttributes',[
         './defaultValue'
     ], function(
@@ -13250,7 +13215,6 @@ define('Core/GeometryAttributes',[
     return GeometryAttributes;
 });
 
-/*global define*/
 define('Core/GeometryInstance',[
         './defaultValue',
         './defined',
@@ -13305,7 +13269,7 @@ define('Core/GeometryInstance',[
      *   },
      *   id : 'top'
      * });
-     * 
+     *
      * @see Geometry
      */
     function GeometryInstance(options) {
@@ -13378,16 +13342,17 @@ define('Core/GeometryInstance',[
     return GeometryInstance;
 });
 
-/*global define*/
 define('Core/AttributeCompression',[
         './Cartesian2',
         './Cartesian3',
+        './Check',
         './defined',
         './DeveloperError',
         './Math'
     ], function(
         Cartesian2,
         Cartesian3,
+        Check,
         defined,
         DeveloperError,
         CesiumMath) {
@@ -13419,12 +13384,8 @@ define('Core/AttributeCompression',[
      * @see AttributeCompression.octDecodeInRange
      */
     AttributeCompression.octEncodeInRange = function(vector, rangeMax, result) {
-                if (!defined(vector)) {
-            throw new DeveloperError('vector is required.');
-        }
-        if (!defined(result)) {
-            throw new DeveloperError('result is required.');
-        }
+                Check.defined('vector', vector);
+        Check.defined('result', result);
         var magSquared = Cartesian3.magnitudeSquared(vector);
         if (Math.abs(magSquared - 1.0) > CesiumMath.EPSILON6) {
             throw new DeveloperError('vector must be normalized.');
@@ -13475,9 +13436,7 @@ define('Core/AttributeCompression',[
      * @see AttributeCompression.octEncodeInRange
      */
     AttributeCompression.octDecodeInRange = function(x, y, rangeMax, result) {
-                if (!defined(result)) {
-            throw new DeveloperError('result is required.');
-        }
+                Check.defined('result', result);
         if (x < 0 || x > rangeMax || y < 0 || y > rangeMax) {
             throw new DeveloperError('x and y must be a signed normalized integer between 0 and ' + rangeMax);
         }
@@ -13520,9 +13479,7 @@ define('Core/AttributeCompression',[
      *
      */
     AttributeCompression.octPackFloat = function(encoded) {
-                if (!defined(encoded)) {
-            throw new DeveloperError('encoded is required.');
-        }
+                Check.defined('encoded', encoded);
                 return 256.0 * encoded.x + encoded.y;
     };
 
@@ -13551,9 +13508,7 @@ define('Core/AttributeCompression',[
      *
      */
     AttributeCompression.octDecodeFloat = function(value, result) {
-                if (!defined(value)) {
-            throw new DeveloperError('value is required.');
-        }
+                Check.defined('value', value);
         
         var temp = value / 256.0;
         var x = Math.floor(temp);
@@ -13574,18 +13529,10 @@ define('Core/AttributeCompression',[
      *
      */
     AttributeCompression.octPack = function(v1, v2, v3, result) {
-                if (!defined(v1)) {
-            throw new DeveloperError('v1 is required.');
-        }
-        if (!defined(v2)) {
-            throw new DeveloperError('v2 is required.');
-        }
-        if (!defined(v3)) {
-            throw new DeveloperError('v3 is required.');
-        }
-        if (!defined(result)) {
-            throw new DeveloperError('result is required.');
-        }
+                Check.defined('v1', v1);
+        Check.defined('v2', v2);
+        Check.defined('v3', v3);
+        Check.defined('result', result);
         
         var encoded1 = AttributeCompression.octEncodeFloat(v1);
         var encoded2 = AttributeCompression.octEncodeFloat(v2);
@@ -13605,18 +13552,10 @@ define('Core/AttributeCompression',[
      * @param {Cartesian3} v3 One decoded and normalized vector.
      */
     AttributeCompression.octUnpack = function(packed, v1, v2, v3) {
-                if (!defined(packed)) {
-            throw new DeveloperError('packed is required.');
-        }
-        if (!defined(v1)) {
-            throw new DeveloperError('v1 is required.');
-        }
-        if (!defined(v2)) {
-            throw new DeveloperError('v2 is required.');
-        }
-        if (!defined(v3)) {
-            throw new DeveloperError('v3 is required.');
-        }
+                Check.defined('packed', packed);
+        Check.defined('v1', v1);
+        Check.defined('v2', v2);
+        Check.defined('v3', v3);
         
         var temp = packed.x / 65536.0;
         var x = Math.floor(temp);
@@ -13639,9 +13578,7 @@ define('Core/AttributeCompression',[
      *
      */
     AttributeCompression.compressTextureCoordinates = function(textureCoordinates) {
-                if (!defined(textureCoordinates)) {
-            throw new DeveloperError('textureCoordinates is required.');
-        }
+                Check.defined('textureCoordinates', textureCoordinates);
         
         // Move x and y to the range 0-4095;
         var x = (textureCoordinates.x * 4095.0) | 0;
@@ -13658,12 +13595,8 @@ define('Core/AttributeCompression',[
      *
      */
     AttributeCompression.decompressTextureCoordinates = function(compressed, result) {
-                if (!defined(compressed)) {
-            throw new DeveloperError('compressed is required.');
-        }
-        if (!defined(result)) {
-            throw new DeveloperError('result is required.');
-        }
+                Check.defined('compressed', compressed);
+        Check.defined('result', result);
         
         var temp = compressed / 4096.0;
         var xZeroTo4095 = Math.floor(temp);
@@ -13675,17 +13608,16 @@ define('Core/AttributeCompression',[
     return AttributeCompression;
 });
 
-/*global define*/
 define('Core/barycentricCoordinates',[
         './Cartesian2',
         './Cartesian3',
-        './defined',
-        './DeveloperError'
+        './Check',
+        './defined'
     ], function(
         Cartesian2,
         Cartesian3,
-        defined,
-        DeveloperError) {
+        Check,
+        defined) {
     'use strict';
 
     var scratchCartesian1 = new Cartesian3();
@@ -13713,9 +13645,10 @@ define('Core/barycentricCoordinates',[
      *   new Cesium.Cartesian3( 0.0, 1.0, 1.0));
      */
     function barycentricCoordinates(point, p0, p1, p2, result) {
-                if (!defined(point) || !defined(p0) || !defined(p1) || !defined(p2)) {
-            throw new DeveloperError('point, p0, p1, and p2 are required.');
-        }
+                Check.defined('point', point);
+        Check.defined('p0', p0);
+        Check.defined('p1', p1);
+        Check.defined('p2', p2);
         
 
         if (!defined(result)) {
@@ -13758,127 +13691,14 @@ define('Core/barycentricCoordinates',[
     return barycentricCoordinates;
 });
 
-/*global define*/
-define('Core/oneTimeWarning',[
-        './defaultValue',
-        './defined',
-        './DeveloperError'
-    ], function(
-        defaultValue,
-        defined,
-        DeveloperError) {
-    "use strict";
-
-    var warnings = {};
-
-    /**
-     * Logs a one time message to the console.  Use this function instead of
-     * <code>console.log</code> directly since this does not log duplicate messages
-     * unless it is called from multiple workers.
-     *
-     * @exports oneTimeWarning
-     *
-     * @param {String} identifier The unique identifier for this warning.
-     * @param {String} [message=identifier] The message to log to the console.
-     *
-     * @example
-     * for(var i=0;i<foo.length;++i) {
-     *    if (!defined(foo[i].bar)) {
-     *       // Something that can be recovered from but may happen a lot
-     *       oneTimeWarning('foo.bar undefined', 'foo.bar is undefined. Setting to 0.');
-     *       foo[i].bar = 0;
-     *       // ...
-     *    }
-     * }
-     *
-     * @private
-     */
-    function oneTimeWarning(identifier, message) {
-                if (!defined(identifier)) {
-            throw new DeveloperError('identifier is required.');
-        }
-        
-        if (!defined(warnings[identifier])) {
-            warnings[identifier] = true;
-            console.warn(defaultValue(message, identifier));
-        }
-    }
-
-    oneTimeWarning.geometryOutlines = 'Entity geometry outlines are unsupported on terrain. Outlines will be disabled. To enable outlines, disable geometry terrain clamping by explicitly setting height to 0.';
-
-    return oneTimeWarning;
-});
-
-/*global define*/
-define('Core/deprecationWarning',[
-        './defined',
-        './DeveloperError',
-        './oneTimeWarning'
-    ], function(
-        defined,
-        DeveloperError,
-        oneTimeWarning) {
-    'use strict';
-    
-    /**
-     * Logs a deprecation message to the console.  Use this function instead of
-     * <code>console.log</code> directly since this does not log duplicate messages
-     * unless it is called from multiple workers.
-     *
-     * @exports deprecationWarning
-     *
-     * @param {String} identifier The unique identifier for this deprecated API.
-     * @param {String} message The message to log to the console.
-     *
-     * @example
-     * // Deprecated function or class
-     * function Foo() {
-     *    deprecationWarning('Foo', 'Foo was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use newFoo instead.');
-     *    // ...
-     * }
-     *
-     * // Deprecated function
-     * Bar.prototype.func = function() {
-     *    deprecationWarning('Bar.func', 'Bar.func() was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newFunc() instead.');
-     *    // ...
-     * };
-     *
-     * // Deprecated property
-     * defineProperties(Bar.prototype, {
-     *     prop : {
-     *         get : function() {
-     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
-     *             // ...
-     *         },
-     *         set : function(value) {
-     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
-     *             // ...
-     *         }
-     *     }
-     * });
-     *
-     * @private
-     */
-    function deprecationWarning(identifier, message) {
-                if (!defined(identifier) || !defined(message)) {
-            throw new DeveloperError('identifier and message are required.');
-        }
-        
-        oneTimeWarning(identifier, message);
-    }
-
-    return deprecationWarning;
-});
-
-/*global define*/
 define('Core/EncodedCartesian3',[
         './Cartesian3',
-        './defined',
-        './DeveloperError'
+        './Check',
+        './defined'
     ], function(
         Cartesian3,
-        defined,
-        DeveloperError) {
+        Check,
+        defined) {
     'use strict';
 
     /**
@@ -13929,9 +13749,7 @@ define('Core/EncodedCartesian3',[
      * var splitValue = Cesium.EncodedCartesian3.encode(value);
      */
     EncodedCartesian3.encode = function(value, result) {
-                if (!defined(value)) {
-            throw new DeveloperError('value is required');
-        }
+                Check.typeOf.number('value', value);
         
         if (!defined(result)) {
             result = {
@@ -13975,9 +13793,7 @@ define('Core/EncodedCartesian3',[
      * var encoded = Cesium.EncodedCartesian3.fromCartesian(cart);
      */
     EncodedCartesian3.fromCartesian = function(cartesian, result) {
-                if (!defined(cartesian)) {
-            throw new DeveloperError('cartesian is required');
-        }
+                Check.typeOf.object('cartesian', cartesian);
         
         if (!defined(result)) {
             result = new EncodedCartesian3();
@@ -14029,15 +13845,9 @@ define('Core/EncodedCartesian3',[
      * }
      */
     EncodedCartesian3.writeElements = function(cartesian, cartesianArray, index) {
-                if (!defined(cartesian)) {
-            throw new DeveloperError('cartesian is required');
-        }
-        if (!defined(cartesianArray)) {
-            throw new DeveloperError('cartesianArray is required');
-        }
-        if (typeof index !== 'number' || index < 0) {
-            throw new DeveloperError('index must be a number greater than or equal to 0.');
-        }
+                Check.defined('cartesianArray', cartesianArray);
+        Check.typeOf.number('index', index);
+        Check.typeOf.number.greaterThanOrEquals('index', index, 0);
         
         EncodedCartesian3.fromCartesian(cartesian, encodedP);
         var high = encodedP.high;
@@ -14054,7 +13864,6 @@ define('Core/EncodedCartesian3',[
     return EncodedCartesian3;
 });
 
-/*global define*/
 define('Core/IndexDatatype',[
         './defined',
         './DeveloperError',
@@ -14200,7 +14009,6 @@ define('Core/IndexDatatype',[
     return freezeObject(IndexDatatype);
 });
 
-/*global define*/
 define('Core/QuadraticRealPolynomial',[
         './DeveloperError',
         './Math'
@@ -14336,7 +14144,6 @@ define('Core/QuadraticRealPolynomial',[
     return QuadraticRealPolynomial;
 });
 
-/*global define*/
 define('Core/CubicRealPolynomial',[
         './DeveloperError',
         './QuadraticRealPolynomial'
@@ -14573,7 +14380,6 @@ define('Core/CubicRealPolynomial',[
     return CubicRealPolynomial;
 });
 
-/*global define*/
 define('Core/QuarticRealPolynomial',[
         './CubicRealPolynomial',
         './DeveloperError',
@@ -14804,9 +14610,8 @@ define('Core/QuarticRealPolynomial',[
                         return [roots1[0], roots2[0], roots2[1], roots1[1]];
                     } else if (roots1[0] > roots2[0] && roots1[0] < roots2[1]) {
                         return [roots2[0], roots1[0], roots2[1], roots1[1]];
-                    } else {
-                        return [roots1[0], roots2[0], roots1[1], roots2[1]];
                     }
+                    return [roots1[0], roots2[0], roots1[1], roots2[1]];
                 }
                 return roots1;
             }
@@ -14898,7 +14703,6 @@ define('Core/QuarticRealPolynomial',[
     return QuarticRealPolynomial;
 });
 
-/*global define*/
 define('Core/Ray',[
         './Cartesian3',
         './defaultValue',
@@ -14972,7 +14776,6 @@ define('Core/Ray',[
     return Ray;
 });
 
-/*global define*/
 define('Core/IntersectionTests',[
         './Cartesian3',
         './Cartographic',
@@ -15411,11 +15214,10 @@ define('Core/IntersectionTests',[
                     start : root1,
                     stop : root0
                 };
-            } else {
-                // qw2 == product.  Repeated roots (2 intersections).
-                var root = Math.sqrt(difference / w2);
-                return new Interval(root, root);
             }
+            // qw2 == product.  Repeated roots (2 intersections).
+            var root = Math.sqrt(difference / w2);
+            return new Interval(root, root);
         } else if (q2 < 1.0) {
             // Inside ellipsoid (2 intersections).
             difference = q2 - 1.0; // Negatively valued.
@@ -15425,17 +15227,16 @@ define('Core/IntersectionTests',[
             discriminant = qw * qw - product;
             temp = -qw + Math.sqrt(discriminant); // Positively valued.
             return new Interval(0.0, temp / w2);
-        } else {
-            // q2 == 1.0. On ellipsoid.
-            if (qw < 0.0) {
-                // Looking inward.
-                w2 = Cartesian3.magnitudeSquared(w);
-                return new Interval(0.0, -qw / w2);
-            }
-
-            // qw >= 0.0.  Looking outward or tangent.
-            return undefined;
         }
+        // q2 == 1.0. On ellipsoid.
+        if (qw < 0.0) {
+            // Looking inward.
+            w2 = Cartesian3.magnitudeSquared(w);
+            return new Interval(0.0, -qw / w2);
+        }
+
+        // qw >= 0.0.  Looking outward or tangent.
+        return undefined;
     };
 
     function addWithCancellationCheck(left, right, tolerance) {
@@ -15865,17 +15666,18 @@ define('Core/IntersectionTests',[
     return IntersectionTests;
 });
 
-/*global define*/
 define('Core/Plane',[
         './Cartesian3',
         './defined',
         './DeveloperError',
-        './freezeObject'
+        './freezeObject',
+        './Math'
     ], function(
         Cartesian3,
         defined,
         DeveloperError,
-        freezeObject) {
+        freezeObject,
+        CesiumMath) {
     'use strict';
 
     /**
@@ -15900,10 +15702,15 @@ define('Core/Plane',[
      * @example
      * // The plane x=0
      * var plane = new Cesium.Plane(Cesium.Cartesian3.UNIT_X, 0.0);
+     *
+     * @exception {DeveloperError} Normal must be normalized
      */
     function Plane(normal, distance) {
                 if (!defined(normal))  {
             throw new DeveloperError('normal is required.');
+        }
+        if (!CesiumMath.equalsEpsilon(Cartesian3.magnitude(normal), 1.0, CesiumMath.EPSILON6)) {
+            throw new DeveloperError('normal must be normalized.');
         }
         if (!defined(distance)) {
             throw new DeveloperError('distance is required.');
@@ -15940,6 +15747,8 @@ define('Core/Plane',[
      * var point = Cesium.Cartesian3.fromDegrees(-72.0, 40.0);
      * var normal = ellipsoid.geodeticSurfaceNormal(point);
      * var tangentPlane = Cesium.Plane.fromPointNormal(point, normal);
+     *
+     * @exception {DeveloperError} Normal must be normalized
      */
     Plane.fromPointNormal = function(point, normal, result) {
                 if (!defined(point)) {
@@ -15947,6 +15756,9 @@ define('Core/Plane',[
         }
         if (!defined(normal)) {
             throw new DeveloperError('normal is required.');
+        }
+        if (!CesiumMath.equalsEpsilon(Cartesian3.magnitude(normal), 1.0, CesiumMath.EPSILON6)) {
+            throw new DeveloperError('normal must be normalized.');
         }
         
         var distance = -Cartesian3.dot(normal, point);
@@ -15967,6 +15779,8 @@ define('Core/Plane',[
      * @param {Cartesian4} coefficients The plane's normal (normalized).
      * @param {Plane} [result] The object onto which to store the result.
      * @returns {Plane} A new plane instance or the modified result parameter.
+     *
+     * @exception {DeveloperError} Normal must be normalized
      */
     Plane.fromCartesian4 = function(coefficients, result) {
                 if (!defined(coefficients)) {
@@ -15976,13 +15790,16 @@ define('Core/Plane',[
         var normal = Cartesian3.fromCartesian4(coefficients, scratchNormal);
         var distance = coefficients.w;
 
+                if (!CesiumMath.equalsEpsilon(Cartesian3.magnitude(normal), 1.0, CesiumMath.EPSILON6)) {
+            throw new DeveloperError('normal must be normalized.');
+        }
+        
         if (!defined(result)) {
             return new Plane(normal, distance);
-        } else {
-            Cartesian3.clone(normal, result.normal);
-            result.distance = distance;
-            return result;
         }
+        Cartesian3.clone(normal, result.normal);
+        result.distance = distance;
+        return result;
     };
 
     /**
@@ -16034,7 +15851,6 @@ define('Core/Plane',[
     return Plane;
 });
 
-/*global define*/
 define('Core/Tipsify',[
         './defaultValue',
         './defined',
@@ -16247,7 +16063,8 @@ define('Core/Tipsify',[
 
         // Vertices
         var vertices = [];
-        for ( var i = 0; i < maximumIndexPlusOne; i++) {
+        var i;
+        for (i = 0; i < maximumIndexPlusOne; i++) {
             vertices[i] = {
                 numLiveTriangles : 0,
                 timeStamp : 0,
@@ -16327,7 +16144,6 @@ define('Core/Tipsify',[
     return Tipsify;
 });
 
-/*global define*/
 define('Core/GeometryPipeline',[
         './AttributeCompression',
         './barycentricCoordinates',
@@ -16339,7 +16155,6 @@ define('Core/GeometryPipeline',[
         './ComponentDatatype',
         './defaultValue',
         './defined',
-        './deprecationWarning',
         './DeveloperError',
         './EncodedCartesian3',
         './GeographicProjection',
@@ -16366,7 +16181,6 @@ define('Core/GeometryPipeline',[
         ComponentDatatype,
         defaultValue,
         defined,
-        deprecationWarning,
         DeveloperError,
         EncodedCartesian3,
         GeographicProjection,
@@ -16705,8 +16519,8 @@ define('Core/GeometryPipeline',[
                     while (intoElementsIn < numVertices) {
                         var temp = indexCrossReferenceOldToNew[intoElementsIn];
                         if (temp !== -1) {
-                            for (i = 0; i < numComponents; i++) {
-                                elementsOut[numComponents * temp + i] = elementsIn[numComponents * intoElementsIn + i];
+                            for (var j = 0; j < numComponents; j++) {
+                                elementsOut[numComponents * temp + j] = elementsIn[numComponents * intoElementsIn + j];
                             }
                         }
                         ++intoElementsIn;
@@ -17405,8 +17219,8 @@ define('Core/GeometryPipeline',[
         var normalsPerVertex = new Array(numVertices);
         var normalsPerTriangle = new Array(numIndices / 3);
         var normalIndices = new Array(numIndices);
-
-        for ( var i = 0; i < numVertices; i++) {
+        var i;
+        for ( i = 0; i < numVertices; i++) {
             normalsPerVertex[i] = {
                 indexOffset : 0,
                 count : 0,
@@ -17474,20 +17288,28 @@ define('Core/GeometryPipeline',[
         for (i = 0; i < numVertices; i++) {
             var i3 = i * 3;
             vertexNormalData = normalsPerVertex[i];
+            Cartesian3.clone(Cartesian3.ZERO, normal);
             if (vertexNormalData.count > 0) {
-                Cartesian3.clone(Cartesian3.ZERO, normal);
                 for (j = 0; j < vertexNormalData.count; j++) {
                     Cartesian3.add(normal, normalsPerTriangle[normalIndices[vertexNormalData.indexOffset + j]], normal);
                 }
-                Cartesian3.normalize(normal, normal);
-                normalValues[i3] = normal.x;
-                normalValues[i3 + 1] = normal.y;
-                normalValues[i3 + 2] = normal.z;
-            } else {
-                normalValues[i3] = 0.0;
-                normalValues[i3 + 1] = 0.0;
-                normalValues[i3 + 2] = 1.0;
+
+                // We can run into an issue where a vertex is used with 2 primitives that have opposite winding order.
+                if (Cartesian3.equalsEpsilon(Cartesian3.ZERO, normal, CesiumMath.EPSILON10)) {
+                    Cartesian3.clone(normalsPerTriangle[normalIndices[vertexNormalData.indexOffset]], normal);
+                }
             }
+
+            // We end up with a zero vector probably because of a degenerate triangle
+            if (Cartesian3.equalsEpsilon(Cartesian3.ZERO, normal, CesiumMath.EPSILON10)) {
+                // Default to (0,0,1)
+                normal.z = 1.0;
+            }
+
+            Cartesian3.normalize(normal, normal);
+            normalValues[i3] = normal.x;
+            normalValues[i3 + 1] = normal.y;
+            normalValues[i3 + 2] = normal.z;
         }
 
         geometry.attributes.normal = new GeometryAttribute({
@@ -17556,7 +17378,8 @@ define('Core/GeometryPipeline',[
         var numIndices = indices.length;
         var tan1 = new Array(numVertices * 3);
 
-        for ( var i = 0; i < tan1.length; i++) {
+        var i;
+        for ( i = 0; i < tan1.length; i++) {
             tan1[i] = 0;
         }
 
@@ -17637,34 +17460,6 @@ define('Core/GeometryPipeline',[
             componentsPerAttribute : 3,
             values : bitangentValues
         });
-
-        return geometry;
-    };
-
-    /**
-     * Computes per-vertex binormal and tangents for a geometry containing <code>TRIANGLES</code>.
-     * The result is new <code>binormal</code> and <code>tangent</code> attributes added to the geometry.
-     * This assumes a counter-clockwise winding order.
-     * <p>
-     * Based on <a href="http://www.terathon.com/code/tangent.html">Computing Tangent Space Basis Vectors
-     * for an Arbitrary Mesh</a> by Eric Lengyel.
-     * </p>
-     *
-     * @param {Geometry} geometry The geometry to modify.
-     * @returns {Geometry} The modified <code>geometry</code> argument with the computed <code>binormal</code> and <code>tangent</code> attributes.
-     *
-     * @exception {DeveloperError} geometry.indices length must be greater than 0 and be a multiple of 3.
-     * @exception {DeveloperError} geometry.primitiveType must be {@link PrimitiveType.TRIANGLES}.
-     *
-     * @example
-     * Cesium.GeometryPipeline.computeBinormalAndTangent(geometry);
-     *
-     * @see GeometryPipeline.computeTangentAndBitangent
-     */
-    GeometryPipeline.computeBinormalAndTangent = function(geometry) {
-        deprecationWarning('computeBinormalAndTangent', 'computeBinormalAndTangent was deprecated in 1.30.  It will be removed in 1.31.  Use a computeTangentAndBitangent.');
-        GeometryPipeline.computeTangentAndBitangent(geometry);
-        geometry.attributes.binormal = geometry.attributes.bitangent;
 
         return geometry;
     };
@@ -18865,14 +18660,2284 @@ define('Core/GeometryPipeline',[
     return GeometryPipeline;
 });
 
-/*global define*/
+define('ThirdParty/earcut-2.1.1',[], function() {
+    'use strict';
+
+function earcut(data, holeIndices, dim) {
+
+    dim = dim || 2;
+
+    var hasHoles = holeIndices && holeIndices.length,
+        outerLen = hasHoles ? holeIndices[0] * dim : data.length,
+        outerNode = linkedList(data, 0, outerLen, dim, true),
+        triangles = [];
+
+    if (!outerNode) return triangles;
+
+    var minX, minY, maxX, maxY, x, y, size;
+
+    if (hasHoles) outerNode = eliminateHoles(data, holeIndices, outerNode, dim);
+
+    // if the shape is not too simple, we'll use z-order curve hash later; calculate polygon bbox
+    if (data.length > 80 * dim) {
+        minX = maxX = data[0];
+        minY = maxY = data[1];
+
+        for (var i = dim; i < outerLen; i += dim) {
+            x = data[i];
+            y = data[i + 1];
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+        }
+
+        // minX, minY and size are later used to transform coords into integers for z-order calculation
+        size = Math.max(maxX - minX, maxY - minY);
+    }
+
+    earcutLinked(outerNode, triangles, dim, minX, minY, size);
+
+    return triangles;
+}
+
+// create a circular doubly linked list from polygon points in the specified winding order
+function linkedList(data, start, end, dim, clockwise) {
+    var i, last;
+
+    if (clockwise === (signedArea(data, start, end, dim) > 0)) {
+        for (i = start; i < end; i += dim) last = insertNode(i, data[i], data[i + 1], last);
+    } else {
+        for (i = end - dim; i >= start; i -= dim) last = insertNode(i, data[i], data[i + 1], last);
+    }
+
+    if (last && equals(last, last.next)) {
+        removeNode(last);
+        last = last.next;
+    }
+
+    return last;
+}
+
+// eliminate colinear or duplicate points
+function filterPoints(start, end) {
+    if (!start) return start;
+    if (!end) end = start;
+
+    var p = start,
+        again;
+    do {
+        again = false;
+
+        if (!p.steiner && (equals(p, p.next) || area(p.prev, p, p.next) === 0)) {
+            removeNode(p);
+            p = end = p.prev;
+            if (p === p.next) return null;
+            again = true;
+
+        } else {
+            p = p.next;
+        }
+    } while (again || p !== end);
+
+    return end;
+}
+
+// main ear slicing loop which triangulates a polygon (given as a linked list)
+function earcutLinked(ear, triangles, dim, minX, minY, size, pass) {
+    if (!ear) return;
+
+    // interlink polygon nodes in z-order
+    if (!pass && size) indexCurve(ear, minX, minY, size);
+
+    var stop = ear,
+        prev, next;
+
+    // iterate through ears, slicing them one by one
+    while (ear.prev !== ear.next) {
+        prev = ear.prev;
+        next = ear.next;
+
+        if (size ? isEarHashed(ear, minX, minY, size) : isEar(ear)) {
+            // cut off the triangle
+            triangles.push(prev.i / dim);
+            triangles.push(ear.i / dim);
+            triangles.push(next.i / dim);
+
+            removeNode(ear);
+
+            // skipping the next vertice leads to less sliver triangles
+            ear = next.next;
+            stop = next.next;
+
+            continue;
+        }
+
+        ear = next;
+
+        // if we looped through the whole remaining polygon and can't find any more ears
+        if (ear === stop) {
+            // try filtering points and slicing again
+            if (!pass) {
+                earcutLinked(filterPoints(ear), triangles, dim, minX, minY, size, 1);
+
+            // if this didn't work, try curing all small self-intersections locally
+            } else if (pass === 1) {
+                ear = cureLocalIntersections(ear, triangles, dim);
+                earcutLinked(ear, triangles, dim, minX, minY, size, 2);
+
+            // as a last resort, try splitting the remaining polygon into two
+            } else if (pass === 2) {
+                splitEarcut(ear, triangles, dim, minX, minY, size);
+            }
+
+            break;
+        }
+    }
+}
+
+// check whether a polygon node forms a valid ear with adjacent nodes
+function isEar(ear) {
+    var a = ear.prev,
+        b = ear,
+        c = ear.next;
+
+    if (area(a, b, c) >= 0) return false; // reflex, can't be an ear
+
+    // now make sure we don't have other points inside the potential ear
+    var p = ear.next.next;
+
+    while (p !== ear.prev) {
+        if (pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
+            area(p.prev, p, p.next) >= 0) return false;
+        p = p.next;
+    }
+
+    return true;
+}
+
+function isEarHashed(ear, minX, minY, size) {
+    var a = ear.prev,
+        b = ear,
+        c = ear.next;
+
+    if (area(a, b, c) >= 0) return false; // reflex, can't be an ear
+
+    // triangle bbox; min & max are calculated like this for speed
+    var minTX = a.x < b.x ? (a.x < c.x ? a.x : c.x) : (b.x < c.x ? b.x : c.x),
+        minTY = a.y < b.y ? (a.y < c.y ? a.y : c.y) : (b.y < c.y ? b.y : c.y),
+        maxTX = a.x > b.x ? (a.x > c.x ? a.x : c.x) : (b.x > c.x ? b.x : c.x),
+        maxTY = a.y > b.y ? (a.y > c.y ? a.y : c.y) : (b.y > c.y ? b.y : c.y);
+
+    // z-order range for the current triangle bbox;
+    var minZ = zOrder(minTX, minTY, minX, minY, size),
+        maxZ = zOrder(maxTX, maxTY, minX, minY, size);
+
+    // first look for points inside the triangle in increasing z-order
+    var p = ear.nextZ;
+
+    while (p && p.z <= maxZ) {
+        if (p !== ear.prev && p !== ear.next &&
+            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
+            area(p.prev, p, p.next) >= 0) return false;
+        p = p.nextZ;
+    }
+
+    // then look for points in decreasing z-order
+    p = ear.prevZ;
+
+    while (p && p.z >= minZ) {
+        if (p !== ear.prev && p !== ear.next &&
+            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
+            area(p.prev, p, p.next) >= 0) return false;
+        p = p.prevZ;
+    }
+
+    return true;
+}
+
+// go through all polygon nodes and cure small local self-intersections
+function cureLocalIntersections(start, triangles, dim) {
+    var p = start;
+    do {
+        var a = p.prev,
+            b = p.next.next;
+
+        if (!equals(a, b) && intersects(a, p, p.next, b) && locallyInside(a, b) && locallyInside(b, a)) {
+
+            triangles.push(a.i / dim);
+            triangles.push(p.i / dim);
+            triangles.push(b.i / dim);
+
+            // remove two nodes involved
+            removeNode(p);
+            removeNode(p.next);
+
+            p = start = b;
+        }
+        p = p.next;
+    } while (p !== start);
+
+    return p;
+}
+
+// try splitting polygon into two and triangulate them independently
+function splitEarcut(start, triangles, dim, minX, minY, size) {
+    // look for a valid diagonal that divides the polygon into two
+    var a = start;
+    do {
+        var b = a.next.next;
+        while (b !== a.prev) {
+            if (a.i !== b.i && isValidDiagonal(a, b)) {
+                // split the polygon in two by the diagonal
+                var c = splitPolygon(a, b);
+
+                // filter colinear points around the cuts
+                a = filterPoints(a, a.next);
+                c = filterPoints(c, c.next);
+
+                // run earcut on each half
+                earcutLinked(a, triangles, dim, minX, minY, size);
+                earcutLinked(c, triangles, dim, minX, minY, size);
+                return;
+            }
+            b = b.next;
+        }
+        a = a.next;
+    } while (a !== start);
+}
+
+// link every hole into the outer loop, producing a single-ring polygon without holes
+function eliminateHoles(data, holeIndices, outerNode, dim) {
+    var queue = [],
+        i, len, start, end, list;
+
+    for (i = 0, len = holeIndices.length; i < len; i++) {
+        start = holeIndices[i] * dim;
+        end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
+        list = linkedList(data, start, end, dim, false);
+        if (list === list.next) list.steiner = true;
+        queue.push(getLeftmost(list));
+    }
+
+    queue.sort(compareX);
+
+    // process holes from left to right
+    for (i = 0; i < queue.length; i++) {
+        eliminateHole(queue[i], outerNode);
+        outerNode = filterPoints(outerNode, outerNode.next);
+    }
+
+    return outerNode;
+}
+
+function compareX(a, b) {
+    return a.x - b.x;
+}
+
+// find a bridge between vertices that connects hole with an outer ring and and link it
+function eliminateHole(hole, outerNode) {
+    outerNode = findHoleBridge(hole, outerNode);
+    if (outerNode) {
+        var b = splitPolygon(outerNode, hole);
+        filterPoints(b, b.next);
+    }
+}
+
+// David Eberly's algorithm for finding a bridge between hole and outer polygon
+function findHoleBridge(hole, outerNode) {
+    var p = outerNode,
+        hx = hole.x,
+        hy = hole.y,
+        qx = -Infinity,
+        m;
+
+    // find a segment intersected by a ray from the hole's leftmost point to the left;
+    // segment's endpoint with lesser x will be potential connection point
+    do {
+        if (hy <= p.y && hy >= p.next.y) {
+            var x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
+            if (x <= hx && x > qx) {
+                qx = x;
+                if (x === hx) {
+                    if (hy === p.y) return p;
+                    if (hy === p.next.y) return p.next;
+                }
+                m = p.x < p.next.x ? p : p.next;
+            }
+        }
+        p = p.next;
+    } while (p !== outerNode);
+
+    if (!m) return null;
+
+    if (hx === qx) return m.prev; // hole touches outer segment; pick lower endpoint
+
+    // look for points inside the triangle of hole point, segment intersection and endpoint;
+    // if there are no points found, we have a valid connection;
+    // otherwise choose the point of the minimum angle with the ray as connection point
+
+    var stop = m,
+        mx = m.x,
+        my = m.y,
+        tanMin = Infinity,
+        tan;
+
+    p = m.next;
+
+    while (p !== stop) {
+        if (hx >= p.x && p.x >= mx &&
+                pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
+
+            tan = Math.abs(hy - p.y) / (hx - p.x); // tangential
+
+            if ((tan < tanMin || (tan === tanMin && p.x > m.x)) && locallyInside(p, hole)) {
+                m = p;
+                tanMin = tan;
+            }
+        }
+
+        p = p.next;
+    }
+
+    return m;
+}
+
+// interlink polygon nodes in z-order
+function indexCurve(start, minX, minY, size) {
+    var p = start;
+    do {
+        if (p.z === null) p.z = zOrder(p.x, p.y, minX, minY, size);
+        p.prevZ = p.prev;
+        p.nextZ = p.next;
+        p = p.next;
+    } while (p !== start);
+
+    p.prevZ.nextZ = null;
+    p.prevZ = null;
+
+    sortLinked(p);
+}
+
+// Simon Tatham's linked list merge sort algorithm
+// http://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html
+function sortLinked(list) {
+    var i, p, q, e, tail, numMerges, pSize, qSize,
+        inSize = 1;
+
+    do {
+        p = list;
+        list = null;
+        tail = null;
+        numMerges = 0;
+
+        while (p) {
+            numMerges++;
+            q = p;
+            pSize = 0;
+            for (i = 0; i < inSize; i++) {
+                pSize++;
+                q = q.nextZ;
+                if (!q) break;
+            }
+
+            qSize = inSize;
+
+            while (pSize > 0 || (qSize > 0 && q)) {
+
+                if (pSize === 0) {
+                    e = q;
+                    q = q.nextZ;
+                    qSize--;
+                } else if (qSize === 0 || !q) {
+                    e = p;
+                    p = p.nextZ;
+                    pSize--;
+                } else if (p.z <= q.z) {
+                    e = p;
+                    p = p.nextZ;
+                    pSize--;
+                } else {
+                    e = q;
+                    q = q.nextZ;
+                    qSize--;
+                }
+
+                if (tail) tail.nextZ = e;
+                else list = e;
+
+                e.prevZ = tail;
+                tail = e;
+            }
+
+            p = q;
+        }
+
+        tail.nextZ = null;
+        inSize *= 2;
+
+    } while (numMerges > 1);
+
+    return list;
+}
+
+// z-order of a point given coords and size of the data bounding box
+function zOrder(x, y, minX, minY, size) {
+    // coords are transformed into non-negative 15-bit integer range
+    x = 32767 * (x - minX) / size;
+    y = 32767 * (y - minY) / size;
+
+    x = (x | (x << 8)) & 0x00FF00FF;
+    x = (x | (x << 4)) & 0x0F0F0F0F;
+    x = (x | (x << 2)) & 0x33333333;
+    x = (x | (x << 1)) & 0x55555555;
+
+    y = (y | (y << 8)) & 0x00FF00FF;
+    y = (y | (y << 4)) & 0x0F0F0F0F;
+    y = (y | (y << 2)) & 0x33333333;
+    y = (y | (y << 1)) & 0x55555555;
+
+    return x | (y << 1);
+}
+
+// find the leftmost node of a polygon ring
+function getLeftmost(start) {
+    var p = start,
+        leftmost = start;
+    do {
+        if (p.x < leftmost.x) leftmost = p;
+        p = p.next;
+    } while (p !== start);
+
+    return leftmost;
+}
+
+// check if a point lies within a convex triangle
+function pointInTriangle(ax, ay, bx, by, cx, cy, px, py) {
+    return (cx - px) * (ay - py) - (ax - px) * (cy - py) >= 0 &&
+           (ax - px) * (by - py) - (bx - px) * (ay - py) >= 0 &&
+           (bx - px) * (cy - py) - (cx - px) * (by - py) >= 0;
+}
+
+// check if a diagonal between two polygon nodes is valid (lies in polygon interior)
+function isValidDiagonal(a, b) {
+    return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) &&
+           locallyInside(a, b) && locallyInside(b, a) && middleInside(a, b);
+}
+
+// signed area of a triangle
+function area(p, q, r) {
+    return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+}
+
+// check if two points are equal
+function equals(p1, p2) {
+    return p1.x === p2.x && p1.y === p2.y;
+}
+
+// check if two segments intersect
+function intersects(p1, q1, p2, q2) {
+    if ((equals(p1, q1) && equals(p2, q2)) ||
+        (equals(p1, q2) && equals(p2, q1))) return true;
+    return area(p1, q1, p2) > 0 !== area(p1, q1, q2) > 0 &&
+           area(p2, q2, p1) > 0 !== area(p2, q2, q1) > 0;
+}
+
+// check if a polygon diagonal intersects any polygon segments
+function intersectsPolygon(a, b) {
+    var p = a;
+    do {
+        if (p.i !== a.i && p.next.i !== a.i && p.i !== b.i && p.next.i !== b.i &&
+                intersects(p, p.next, a, b)) return true;
+        p = p.next;
+    } while (p !== a);
+
+    return false;
+}
+
+// check if a polygon diagonal is locally inside the polygon
+function locallyInside(a, b) {
+    return area(a.prev, a, a.next) < 0 ?
+        area(a, b, a.next) >= 0 && area(a, a.prev, b) >= 0 :
+        area(a, b, a.prev) < 0 || area(a, a.next, b) < 0;
+}
+
+// check if the middle point of a polygon diagonal is inside the polygon
+function middleInside(a, b) {
+    var p = a,
+        inside = false,
+        px = (a.x + b.x) / 2,
+        py = (a.y + b.y) / 2;
+    do {
+        if (((p.y > py) !== (p.next.y > py)) && (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
+            inside = !inside;
+        p = p.next;
+    } while (p !== a);
+
+    return inside;
+}
+
+// link two polygon vertices with a bridge; if the vertices belong to the same ring, it splits polygon into two;
+// if one belongs to the outer ring and another to a hole, it merges it into a single ring
+function splitPolygon(a, b) {
+    var a2 = new Node(a.i, a.x, a.y),
+        b2 = new Node(b.i, b.x, b.y),
+        an = a.next,
+        bp = b.prev;
+
+    a.next = b;
+    b.prev = a;
+
+    a2.next = an;
+    an.prev = a2;
+
+    b2.next = a2;
+    a2.prev = b2;
+
+    bp.next = b2;
+    b2.prev = bp;
+
+    return b2;
+}
+
+// create a node and optionally link it with previous one (in a circular doubly linked list)
+function insertNode(i, x, y, last) {
+    var p = new Node(i, x, y);
+
+    if (!last) {
+        p.prev = p;
+        p.next = p;
+
+    } else {
+        p.next = last.next;
+        p.prev = last;
+        last.next.prev = p;
+        last.next = p;
+    }
+    return p;
+}
+
+function removeNode(p) {
+    p.next.prev = p.prev;
+    p.prev.next = p.next;
+
+    if (p.prevZ) p.prevZ.nextZ = p.nextZ;
+    if (p.nextZ) p.nextZ.prevZ = p.prevZ;
+}
+
+function Node(i, x, y) {
+    // vertice index in coordinates array
+    this.i = i;
+
+    // vertex coordinates
+    this.x = x;
+    this.y = y;
+
+    // previous and next vertice nodes in a polygon ring
+    this.prev = null;
+    this.next = null;
+
+    // z-order curve value
+    this.z = null;
+
+    // previous and next nodes in z-order
+    this.prevZ = null;
+    this.nextZ = null;
+
+    // indicates whether this is a steiner point
+    this.steiner = false;
+}
+
+// return a percentage difference between the polygon area and its triangulation area;
+// used to verify correctness of triangulation
+earcut.deviation = function (data, holeIndices, dim, triangles) {
+    var hasHoles = holeIndices && holeIndices.length;
+    var outerLen = hasHoles ? holeIndices[0] * dim : data.length;
+
+    var polygonArea = Math.abs(signedArea(data, 0, outerLen, dim));
+    if (hasHoles) {
+        for (var i = 0, len = holeIndices.length; i < len; i++) {
+            var start = holeIndices[i] * dim;
+            var end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
+            polygonArea -= Math.abs(signedArea(data, start, end, dim));
+        }
+    }
+
+    var trianglesArea = 0;
+    for (i = 0; i < triangles.length; i += 3) {
+        var a = triangles[i] * dim;
+        var b = triangles[i + 1] * dim;
+        var c = triangles[i + 2] * dim;
+        trianglesArea += Math.abs(
+            (data[a] - data[c]) * (data[b + 1] - data[a + 1]) -
+            (data[a] - data[b]) * (data[c + 1] - data[a + 1]));
+    }
+
+    return polygonArea === 0 && trianglesArea === 0 ? 0 :
+        Math.abs((trianglesArea - polygonArea) / polygonArea);
+};
+
+function signedArea(data, start, end, dim) {
+    var sum = 0;
+    for (var i = start, j = end - dim; i < end; i += dim) {
+        sum += (data[j] - data[i]) * (data[i + 1] + data[j + 1]);
+        j = i;
+    }
+    return sum;
+}
+
+// turn a polygon in a multi-dimensional array form (e.g. as in GeoJSON) into a form Earcut accepts
+earcut.flatten = function (data) {
+    var dim = data[0][0].length,
+        result = {vertices: [], holes: [], dimensions: dim},
+        holeIndex = 0;
+
+    for (var i = 0; i < data.length; i++) {
+        for (var j = 0; j < data[i].length; j++) {
+            for (var d = 0; d < dim; d++) result.vertices.push(data[i][j][d]);
+        }
+        if (i > 0) {
+            holeIndex += data[i - 1].length;
+            result.holes.push(holeIndex);
+        }
+    }
+    return result;
+};
+
+return earcut;
+});
+
+define('Core/WindingOrder',[
+        './freezeObject',
+        './WebGLConstants'
+    ], function(
+        freezeObject,
+        WebGLConstants) {
+    'use strict';
+
+    /**
+     * Winding order defines the order of vertices for a triangle to be considered front-facing.
+     *
+     * @exports WindingOrder
+     */
+    var WindingOrder = {
+        /**
+         * Vertices are in clockwise order.
+         *
+         * @type {Number}
+         * @constant
+         */
+        CLOCKWISE : WebGLConstants.CW,
+
+        /**
+         * Vertices are in counter-clockwise order.
+         *
+         * @type {Number}
+         * @constant
+         */
+        COUNTER_CLOCKWISE : WebGLConstants.CCW,
+
+        /**
+         * @private
+         */
+        validate : function(windingOrder) {
+            return windingOrder === WindingOrder.CLOCKWISE ||
+                   windingOrder === WindingOrder.COUNTER_CLOCKWISE;
+        }
+    };
+
+    return freezeObject(WindingOrder);
+});
+
+define('Core/PolygonPipeline',[
+        '../ThirdParty/earcut-2.1.1',
+        './Cartesian2',
+        './Cartesian3',
+        './ComponentDatatype',
+        './defaultValue',
+        './defined',
+        './DeveloperError',
+        './Ellipsoid',
+        './Geometry',
+        './GeometryAttribute',
+        './Math',
+        './PrimitiveType',
+        './WindingOrder'
+    ], function(
+        earcut,
+        Cartesian2,
+        Cartesian3,
+        ComponentDatatype,
+        defaultValue,
+        defined,
+        DeveloperError,
+        Ellipsoid,
+        Geometry,
+        GeometryAttribute,
+        CesiumMath,
+        PrimitiveType,
+        WindingOrder) {
+    'use strict';
+
+    var scaleToGeodeticHeightN = new Cartesian3();
+    var scaleToGeodeticHeightP = new Cartesian3();
+
+    /**
+     * @private
+     */
+    var PolygonPipeline = {};
+
+    /**
+     * @exception {DeveloperError} At least three positions are required.
+     */
+    PolygonPipeline.computeArea2D = function(positions) {
+                if (!defined(positions)) {
+            throw new DeveloperError('positions is required.');
+        }
+        if (positions.length < 3) {
+            throw new DeveloperError('At least three positions are required.');
+        }
+        
+        var length = positions.length;
+        var area = 0.0;
+
+        for ( var i0 = length - 1, i1 = 0; i1 < length; i0 = i1++) {
+            var v0 = positions[i0];
+            var v1 = positions[i1];
+
+            area += (v0.x * v1.y) - (v1.x * v0.y);
+        }
+
+        return area * 0.5;
+    };
+
+    /**
+     * @returns {WindingOrder} The winding order.
+     *
+     * @exception {DeveloperError} At least three positions are required.
+     */
+    PolygonPipeline.computeWindingOrder2D = function(positions) {
+        var area = PolygonPipeline.computeArea2D(positions);
+        return (area > 0.0) ? WindingOrder.COUNTER_CLOCKWISE : WindingOrder.CLOCKWISE;
+    };
+
+    /**
+     * Triangulate a polygon.
+     *
+     * @param {Cartesian2[]} positions Cartesian2 array containing the vertices of the polygon
+     * @param {Number[]} [holes] An array of the staring indices of the holes.
+     * @returns {Number[]} Index array representing triangles that fill the polygon
+     */
+    PolygonPipeline.triangulate = function(positions, holes) {
+                if (!defined(positions)) {
+            throw new DeveloperError('positions is required.');
+        }
+        
+        var flattenedPositions = Cartesian2.packArray(positions);
+        return earcut(flattenedPositions, holes, 2);
+    };
+
+    var subdivisionV0Scratch = new Cartesian3();
+    var subdivisionV1Scratch = new Cartesian3();
+    var subdivisionV2Scratch = new Cartesian3();
+    var subdivisionS0Scratch = new Cartesian3();
+    var subdivisionS1Scratch = new Cartesian3();
+    var subdivisionS2Scratch = new Cartesian3();
+    var subdivisionMidScratch = new Cartesian3();
+
+    /**
+     * Subdivides positions and raises points to the surface of the ellipsoid.
+     *
+     * @param {Ellipsoid} ellipsoid The ellipsoid the polygon in on.
+     * @param {Cartesian3[]} positions An array of {@link Cartesian3} positions of the polygon.
+     * @param {Number[]} indices An array of indices that determines the triangles in the polygon.
+     * @param {Number} [granularity=CesiumMath.RADIANS_PER_DEGREE] The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
+     *
+     * @exception {DeveloperError} At least three indices are required.
+     * @exception {DeveloperError} The number of indices must be divisable by three.
+     * @exception {DeveloperError} Granularity must be greater than zero.
+     */
+    PolygonPipeline.computeSubdivision = function(ellipsoid, positions, indices, granularity) {
+        granularity = defaultValue(granularity, CesiumMath.RADIANS_PER_DEGREE);
+
+                if (!defined(ellipsoid)) {
+            throw new DeveloperError('ellipsoid is required.');
+        }
+        if (!defined(positions)) {
+            throw new DeveloperError('positions is required.');
+        }
+        if (!defined(indices)) {
+            throw new DeveloperError('indices is required.');
+        }
+        if (indices.length < 3) {
+            throw new DeveloperError('At least three indices are required.');
+        }
+        if (indices.length % 3 !== 0) {
+            throw new DeveloperError('The number of indices must be divisable by three.');
+        }
+        if (granularity <= 0.0) {
+            throw new DeveloperError('granularity must be greater than zero.');
+        }
+        
+        // triangles that need (or might need) to be subdivided.
+        var triangles = indices.slice(0);
+
+        // New positions due to edge splits are appended to the positions list.
+        var i;
+        var length = positions.length;
+        var subdividedPositions = new Array(length * 3);
+        var q = 0;
+        for (i = 0; i < length; i++) {
+            var item = positions[i];
+            subdividedPositions[q++] = item.x;
+            subdividedPositions[q++] = item.y;
+            subdividedPositions[q++] = item.z;
+        }
+
+        var subdividedIndices = [];
+
+        // Used to make sure shared edges are not split more than once.
+        var edges = {};
+
+        var radius = ellipsoid.maximumRadius;
+        var minDistance = CesiumMath.chordLength(granularity, radius);
+        var minDistanceSqrd = minDistance * minDistance;
+
+        while (triangles.length > 0) {
+            var i2 = triangles.pop();
+            var i1 = triangles.pop();
+            var i0 = triangles.pop();
+
+            var v0 = Cartesian3.fromArray(subdividedPositions, i0 * 3, subdivisionV0Scratch);
+            var v1 = Cartesian3.fromArray(subdividedPositions, i1 * 3, subdivisionV1Scratch);
+            var v2 = Cartesian3.fromArray(subdividedPositions, i2 * 3, subdivisionV2Scratch);
+
+            var s0 = Cartesian3.multiplyByScalar(Cartesian3.normalize(v0, subdivisionS0Scratch), radius, subdivisionS0Scratch);
+            var s1 = Cartesian3.multiplyByScalar(Cartesian3.normalize(v1, subdivisionS1Scratch), radius, subdivisionS1Scratch);
+            var s2 = Cartesian3.multiplyByScalar(Cartesian3.normalize(v2, subdivisionS2Scratch), radius, subdivisionS2Scratch);
+
+            var g0 = Cartesian3.magnitudeSquared(Cartesian3.subtract(s0, s1, subdivisionMidScratch));
+            var g1 = Cartesian3.magnitudeSquared(Cartesian3.subtract(s1, s2, subdivisionMidScratch));
+            var g2 = Cartesian3.magnitudeSquared(Cartesian3.subtract(s2, s0, subdivisionMidScratch));
+
+            var max = Math.max(g0, g1, g2);
+            var edge;
+            var mid;
+
+            // if the max length squared of a triangle edge is greater than the chord length of squared
+            // of the granularity, subdivide the triangle
+            if (max > minDistanceSqrd) {
+                if (g0 === max) {
+                    edge = Math.min(i0, i1) + ' ' + Math.max(i0, i1);
+
+                    i = edges[edge];
+                    if (!defined(i)) {
+                        mid = Cartesian3.add(v0, v1, subdivisionMidScratch);
+                        Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                        subdividedPositions.push(mid.x, mid.y, mid.z);
+                        i = subdividedPositions.length / 3 - 1;
+                        edges[edge] = i;
+                    }
+
+                    triangles.push(i0, i, i2);
+                    triangles.push(i, i1, i2);
+                } else if (g1 === max) {
+                    edge = Math.min(i1, i2) + ' ' + Math.max(i1, i2);
+
+                    i = edges[edge];
+                    if (!defined(i)) {
+                        mid = Cartesian3.add(v1, v2, subdivisionMidScratch);
+                        Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                        subdividedPositions.push(mid.x, mid.y, mid.z);
+                        i = subdividedPositions.length / 3 - 1;
+                        edges[edge] = i;
+                    }
+
+                    triangles.push(i1, i, i0);
+                    triangles.push(i, i2, i0);
+                } else if (g2 === max) {
+                    edge = Math.min(i2, i0) + ' ' + Math.max(i2, i0);
+
+                    i = edges[edge];
+                    if (!defined(i)) {
+                        mid = Cartesian3.add(v2, v0, subdivisionMidScratch);
+                        Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                        subdividedPositions.push(mid.x, mid.y, mid.z);
+                        i = subdividedPositions.length / 3 - 1;
+                        edges[edge] = i;
+                    }
+
+                    triangles.push(i2, i, i1);
+                    triangles.push(i, i0, i1);
+                }
+            } else {
+                subdividedIndices.push(i0);
+                subdividedIndices.push(i1);
+                subdividedIndices.push(i2);
+            }
+        }
+
+        return new Geometry({
+            attributes : {
+                position : new GeometryAttribute({
+                    componentDatatype : ComponentDatatype.DOUBLE,
+                    componentsPerAttribute : 3,
+                    values : subdividedPositions
+                })
+            },
+            indices : subdividedIndices,
+            primitiveType : PrimitiveType.TRIANGLES
+        });
+    };
+
+    /**
+     * Scales each position of a geometry's position attribute to a height, in place.
+     *
+     * @param {Number[]} positions The array of numbers representing the positions to be scaled
+     * @param {Number} [height=0.0] The desired height to add to the positions
+     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the positions lie.
+     * @param {Boolean} [scaleToSurface=true] <code>true</code> if the positions need to be scaled to the surface before the height is added.
+     * @returns {Number[]} The input array of positions, scaled to height
+     */
+    PolygonPipeline.scaleToGeodeticHeight = function(positions, height, ellipsoid, scaleToSurface) {
+        ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
+
+        var n = scaleToGeodeticHeightN;
+        var p = scaleToGeodeticHeightP;
+
+        height = defaultValue(height, 0.0);
+        scaleToSurface = defaultValue(scaleToSurface, true);
+
+        if (defined(positions)) {
+            var length = positions.length;
+
+            for ( var i = 0; i < length; i += 3) {
+                Cartesian3.fromArray(positions, i, p);
+
+                if (scaleToSurface) {
+                    p = ellipsoid.scaleToGeodeticSurface(p, p);
+                }
+
+                if (height !== 0) {
+                    n = ellipsoid.geodeticSurfaceNormal(p, n);
+
+                    Cartesian3.multiplyByScalar(n, height, n);
+                    Cartesian3.add(p, n, p);
+                }
+
+                positions[i] = p.x;
+                positions[i + 1] = p.y;
+                positions[i + 2] = p.z;
+            }
+        }
+
+        return positions;
+    };
+
+    return PolygonPipeline;
+});
+
+define('Core/oneTimeWarning',[
+        './defaultValue',
+        './defined',
+        './DeveloperError'
+    ], function(
+        defaultValue,
+        defined,
+        DeveloperError) {
+    'use strict';
+
+    var warnings = {};
+
+    /**
+     * Logs a one time message to the console.  Use this function instead of
+     * <code>console.log</code> directly since this does not log duplicate messages
+     * unless it is called from multiple workers.
+     *
+     * @exports oneTimeWarning
+     *
+     * @param {String} identifier The unique identifier for this warning.
+     * @param {String} [message=identifier] The message to log to the console.
+     *
+     * @example
+     * for(var i=0;i<foo.length;++i) {
+     *    if (!defined(foo[i].bar)) {
+     *       // Something that can be recovered from but may happen a lot
+     *       oneTimeWarning('foo.bar undefined', 'foo.bar is undefined. Setting to 0.');
+     *       foo[i].bar = 0;
+     *       // ...
+     *    }
+     * }
+     *
+     * @private
+     */
+    function oneTimeWarning(identifier, message) {
+                if (!defined(identifier)) {
+            throw new DeveloperError('identifier is required.');
+        }
+        
+        if (!defined(warnings[identifier])) {
+            warnings[identifier] = true;
+            console.warn(defaultValue(message, identifier));
+        }
+    }
+
+    oneTimeWarning.geometryOutlines = 'Entity geometry outlines are unsupported on terrain. Outlines will be disabled. To enable outlines, disable geometry terrain clamping by explicitly setting height to 0.';
+
+    return oneTimeWarning;
+});
+
+define('Core/deprecationWarning',[
+        './defined',
+        './DeveloperError',
+        './oneTimeWarning'
+    ], function(
+        defined,
+        DeveloperError,
+        oneTimeWarning) {
+    'use strict';
+
+    /**
+     * Logs a deprecation message to the console.  Use this function instead of
+     * <code>console.log</code> directly since this does not log duplicate messages
+     * unless it is called from multiple workers.
+     *
+     * @exports deprecationWarning
+     *
+     * @param {String} identifier The unique identifier for this deprecated API.
+     * @param {String} message The message to log to the console.
+     *
+     * @example
+     * // Deprecated function or class
+     * function Foo() {
+     *    deprecationWarning('Foo', 'Foo was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use newFoo instead.');
+     *    // ...
+     * }
+     *
+     * // Deprecated function
+     * Bar.prototype.func = function() {
+     *    deprecationWarning('Bar.func', 'Bar.func() was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newFunc() instead.');
+     *    // ...
+     * };
+     *
+     * // Deprecated property
+     * defineProperties(Bar.prototype, {
+     *     prop : {
+     *         get : function() {
+     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
+     *             // ...
+     *         },
+     *         set : function(value) {
+     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
+     *             // ...
+     *         }
+     *     }
+     * });
+     *
+     * @private
+     */
+    function deprecationWarning(identifier, message) {
+                if (!defined(identifier) || !defined(message)) {
+            throw new DeveloperError('identifier and message are required.');
+        }
+        
+        oneTimeWarning(identifier, message);
+    }
+
+    return deprecationWarning;
+});
+
+define('Core/HeadingPitchRoll',[
+        './defaultValue',
+        './defined',
+        './DeveloperError',
+        './Math'
+    ], function(
+        defaultValue,
+        defined,
+        DeveloperError,
+        CesiumMath) {
+    'use strict';
+
+    /**
+     * A rotation expressed as a heading, pitch, and roll. Heading is the rotation about the
+     * negative z axis. Pitch is the rotation about the negative y axis. Roll is the rotation about
+     * the positive x axis.
+     * @alias HeadingPitchRoll
+     * @constructor
+     *
+     * @param {Number} [heading=0.0] The heading component in radians.
+     * @param {Number} [pitch=0.0] The pitch component in radians.
+     * @param {Number} [roll=0.0] The roll component in radians.
+     */
+    function HeadingPitchRoll(heading, pitch, roll) {
+        this.heading = defaultValue(heading, 0.0);
+        this.pitch = defaultValue(pitch, 0.0);
+        this.roll = defaultValue(roll, 0.0);
+    }
+
+    /**
+     * Computes the heading, pitch and roll from a quaternion (see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles )
+     *
+     * @param {Quaternion} quaternion The quaternion from which to retrieve heading, pitch, and roll, all expressed in radians.
+     * @param {HeadingPitchRoll} [result] The object in which to store the result. If not provided, a new instance is created and returned.
+     * @returns {HeadingPitchRoll} The modified result parameter or a new HeadingPitchRoll instance if one was not provided.
+     */
+    HeadingPitchRoll.fromQuaternion = function(quaternion, result) {
+                if (!defined(quaternion)) {
+            throw new DeveloperError('quaternion is required');
+        }
+                if (!defined(result)) {
+            result = new HeadingPitchRoll();
+        }
+        var test = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x);
+        var denominatorRoll = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y);
+        var numeratorRoll = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z);
+        var denominatorHeading = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z);
+        var numeratorHeading = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y);
+        result.heading = -Math.atan2(numeratorHeading, denominatorHeading);
+        result.roll = Math.atan2(numeratorRoll, denominatorRoll);
+        result.pitch = -Math.asin(test);
+        return result;
+    };
+
+    /**
+     * Returns a new HeadingPitchRoll instance from angles given in degrees.
+     *
+     * @param {Number} heading the heading in degrees
+     * @param {Number} pitch the pitch in degrees
+     * @param {Number} roll the heading in degrees
+     * @param {HeadingPitchRoll} [result] The object in which to store the result. If not provided, a new instance is created and returned.
+     * @returns {HeadingPitchRoll} A new HeadingPitchRoll instance
+     */
+    HeadingPitchRoll.fromDegrees = function(heading, pitch, roll, result) {
+                if (!defined(heading)) {
+            throw new DeveloperError('heading is required');
+        }
+        if (!defined(pitch)) {
+            throw new DeveloperError('pitch is required');
+        }
+        if (!defined(roll)) {
+            throw new DeveloperError('roll is required');
+        }
+                if (!defined(result)) {
+            result = new HeadingPitchRoll();
+        }
+        result.heading = heading * CesiumMath.RADIANS_PER_DEGREE;
+        result.pitch = pitch * CesiumMath.RADIANS_PER_DEGREE;
+        result.roll = roll * CesiumMath.RADIANS_PER_DEGREE;
+        return result;
+    };
+
+    /**
+     * Duplicates a HeadingPitchRoll instance.
+     *
+     * @param {HeadingPitchRoll} headingPitchRoll The HeadingPitchRoll to duplicate.
+     * @param {HeadingPitchRoll} [result] The object onto which to store the result.
+     * @returns {HeadingPitchRoll} The modified result parameter or a new HeadingPitchRoll instance if one was not provided. (Returns undefined if headingPitchRoll is undefined)
+     */
+    HeadingPitchRoll.clone = function(headingPitchRoll, result) {
+        if (!defined(headingPitchRoll)) {
+            return undefined;
+        }
+        if (!defined(result)) {
+            return new HeadingPitchRoll(headingPitchRoll.heading, headingPitchRoll.pitch, headingPitchRoll.roll);
+        }
+        result.heading = headingPitchRoll.heading;
+        result.pitch = headingPitchRoll.pitch;
+        result.roll = headingPitchRoll.roll;
+        return result;
+    };
+
+    /**
+     * Compares the provided HeadingPitchRolls componentwise and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     *
+     * @param {HeadingPitchRoll} [left] The first HeadingPitchRoll.
+     * @param {HeadingPitchRoll} [right] The second HeadingPitchRoll.
+     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
+     */
+    HeadingPitchRoll.equals = function(left, right) {
+        return (left === right) ||
+            ((defined(left)) &&
+                (defined(right)) &&
+                (left.heading === right.heading) &&
+                (left.pitch === right.pitch) &&
+                (left.roll === right.roll));
+    };
+
+    /**
+     * Compares the provided HeadingPitchRolls componentwise and returns
+     * <code>true</code> if they pass an absolute or relative tolerance test,
+     * <code>false</code> otherwise.
+     *
+     * @param {HeadingPitchRoll} [left] The first HeadingPitchRoll.
+     * @param {HeadingPitchRoll} [right] The second HeadingPitchRoll.
+     * @param {Number} relativeEpsilon The relative epsilon tolerance to use for equality testing.
+     * @param {Number} [absoluteEpsilon=relativeEpsilon] The absolute epsilon tolerance to use for equality testing.
+     * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
+     */
+    HeadingPitchRoll.equalsEpsilon = function(left, right, relativeEpsilon, absoluteEpsilon) {
+        return (left === right) ||
+            (defined(left) &&
+                defined(right) &&
+                CesiumMath.equalsEpsilon(left.heading, right.heading, relativeEpsilon, absoluteEpsilon) &&
+                CesiumMath.equalsEpsilon(left.pitch, right.pitch, relativeEpsilon, absoluteEpsilon) &&
+                CesiumMath.equalsEpsilon(left.roll, right.roll, relativeEpsilon, absoluteEpsilon));
+    };
+
+    /**
+     * Duplicates this HeadingPitchRoll instance.
+     *
+     * @param {HeadingPitchRoll} [result] The object onto which to store the result.
+     * @returns {HeadingPitchRoll} The modified result parameter or a new HeadingPitchRoll instance if one was not provided.
+     */
+    HeadingPitchRoll.prototype.clone = function(result) {
+        return HeadingPitchRoll.clone(this, result);
+    };
+
+    /**
+     * Compares this HeadingPitchRoll against the provided HeadingPitchRoll componentwise and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     *
+     * @param {HeadingPitchRoll} [right] The right hand side HeadingPitchRoll.
+     * @returns {Boolean} <code>true</code> if they are equal, <code>false</code> otherwise.
+     */
+    HeadingPitchRoll.prototype.equals = function(right) {
+        return HeadingPitchRoll.equals(this, right);
+    };
+
+    /**
+     * Compares this HeadingPitchRoll against the provided HeadingPitchRoll componentwise and returns
+     * <code>true</code> if they pass an absolute or relative tolerance test,
+     * <code>false</code> otherwise.
+     *
+     * @param {HeadingPitchRoll} [right] The right hand side HeadingPitchRoll.
+     * @param {Number} relativeEpsilon The relative epsilon tolerance to use for equality testing.
+     * @param {Number} [absoluteEpsilon=relativeEpsilon] The absolute epsilon tolerance to use for equality testing.
+     * @returns {Boolean} <code>true</code> if they are within the provided epsilon, <code>false</code> otherwise.
+     */
+    HeadingPitchRoll.prototype.equalsEpsilon = function(right, relativeEpsilon, absoluteEpsilon) {
+        return HeadingPitchRoll.equalsEpsilon(this, right, relativeEpsilon, absoluteEpsilon);
+    };
+
+    /**
+     * Creates a string representing this HeadingPitchRoll in the format '(heading, pitch, roll)' in radians.
+     *
+     * @returns {String} A string representing the provided HeadingPitchRoll in the format '(heading, pitch, roll)'.
+     */
+    HeadingPitchRoll.prototype.toString = function() {
+        return '(' + this.heading + ', ' + this.pitch + ', ' + this.roll + ')';
+    };
+
+    return HeadingPitchRoll;
+});
+
+define('Core/Quaternion',[
+        './Cartesian3',
+        './Check',
+        './defaultValue',
+        './defined',
+        './deprecationWarning',
+        './FeatureDetection',
+        './freezeObject',
+        './HeadingPitchRoll',
+        './Math',
+        './Matrix3'
+    ], function(
+        Cartesian3,
+        Check,
+        defaultValue,
+        defined,
+        deprecationWarning,
+        FeatureDetection,
+        freezeObject,
+        HeadingPitchRoll,
+        CesiumMath,
+        Matrix3) {
+    'use strict';
+
+    /**
+     * A set of 4-dimensional coordinates used to represent rotation in 3-dimensional space.
+     * @alias Quaternion
+     * @constructor
+     *
+     * @param {Number} [x=0.0] The X component.
+     * @param {Number} [y=0.0] The Y component.
+     * @param {Number} [z=0.0] The Z component.
+     * @param {Number} [w=0.0] The W component.
+     *
+     * @see PackableForInterpolation
+     */
+    function Quaternion(x, y, z, w) {
+        /**
+         * The X component.
+         * @type {Number}
+         * @default 0.0
+         */
+        this.x = defaultValue(x, 0.0);
+
+        /**
+         * The Y component.
+         * @type {Number}
+         * @default 0.0
+         */
+        this.y = defaultValue(y, 0.0);
+
+        /**
+         * The Z component.
+         * @type {Number}
+         * @default 0.0
+         */
+        this.z = defaultValue(z, 0.0);
+
+        /**
+         * The W component.
+         * @type {Number}
+         * @default 0.0
+         */
+        this.w = defaultValue(w, 0.0);
+    }
+
+    var fromAxisAngleScratch = new Cartesian3();
+
+    /**
+     * Computes a quaternion representing a rotation around an axis.
+     *
+     * @param {Cartesian3} axis The axis of rotation.
+     * @param {Number} angle The angle in radians to rotate around the axis.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
+     */
+    Quaternion.fromAxisAngle = function(axis, angle, result) {
+                Check.typeOf.object('axis', axis);
+        Check.typeOf.number('angle', angle);
+        
+        var halfAngle = angle / 2.0;
+        var s = Math.sin(halfAngle);
+        fromAxisAngleScratch = Cartesian3.normalize(axis, fromAxisAngleScratch);
+
+        var x = fromAxisAngleScratch.x * s;
+        var y = fromAxisAngleScratch.y * s;
+        var z = fromAxisAngleScratch.z * s;
+        var w = Math.cos(halfAngle);
+        if (!defined(result)) {
+            return new Quaternion(x, y, z, w);
+        }
+        result.x = x;
+        result.y = y;
+        result.z = z;
+        result.w = w;
+        return result;
+    };
+
+    var fromRotationMatrixNext = [1, 2, 0];
+    var fromRotationMatrixQuat = new Array(3);
+    /**
+     * Computes a Quaternion from the provided Matrix3 instance.
+     *
+     * @param {Matrix3} matrix The rotation matrix.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
+     *
+     * @see Matrix3.fromQuaternion
+     */
+    Quaternion.fromRotationMatrix = function(matrix, result) {
+                Check.typeOf.object('matrix', matrix);
+        
+        var root;
+        var x;
+        var y;
+        var z;
+        var w;
+
+        var m00 = matrix[Matrix3.COLUMN0ROW0];
+        var m11 = matrix[Matrix3.COLUMN1ROW1];
+        var m22 = matrix[Matrix3.COLUMN2ROW2];
+        var trace = m00 + m11 + m22;
+
+        if (trace > 0.0) {
+            // |w| > 1/2, may as well choose w > 1/2
+            root = Math.sqrt(trace + 1.0); // 2w
+            w = 0.5 * root;
+            root = 0.5 / root; // 1/(4w)
+
+            x = (matrix[Matrix3.COLUMN1ROW2] - matrix[Matrix3.COLUMN2ROW1]) * root;
+            y = (matrix[Matrix3.COLUMN2ROW0] - matrix[Matrix3.COLUMN0ROW2]) * root;
+            z = (matrix[Matrix3.COLUMN0ROW1] - matrix[Matrix3.COLUMN1ROW0]) * root;
+        } else {
+            // |w| <= 1/2
+            var next = fromRotationMatrixNext;
+
+            var i = 0;
+            if (m11 > m00) {
+                i = 1;
+            }
+            if (m22 > m00 && m22 > m11) {
+                i = 2;
+            }
+            var j = next[i];
+            var k = next[j];
+
+            root = Math.sqrt(matrix[Matrix3.getElementIndex(i, i)] - matrix[Matrix3.getElementIndex(j, j)] - matrix[Matrix3.getElementIndex(k, k)] + 1.0);
+
+            var quat = fromRotationMatrixQuat;
+            quat[i] = 0.5 * root;
+            root = 0.5 / root;
+            w = (matrix[Matrix3.getElementIndex(k, j)] - matrix[Matrix3.getElementIndex(j, k)]) * root;
+            quat[j] = (matrix[Matrix3.getElementIndex(j, i)] + matrix[Matrix3.getElementIndex(i, j)]) * root;
+            quat[k] = (matrix[Matrix3.getElementIndex(k, i)] + matrix[Matrix3.getElementIndex(i, k)]) * root;
+
+            x = -quat[0];
+            y = -quat[1];
+            z = -quat[2];
+        }
+
+        if (!defined(result)) {
+            return new Quaternion(x, y, z, w);
+        }
+        result.x = x;
+        result.y = y;
+        result.z = z;
+        result.w = w;
+        return result;
+    };
+
+    var scratchHPRQuaternion = new Quaternion();
+    var scratchHeadingQuaternion = new Quaternion();
+    var scratchPitchQuaternion = new Quaternion();
+    var scratchRollQuaternion = new Quaternion();
+
+    /**
+     * Computes a rotation from the given heading, pitch and roll angles. Heading is the rotation about the
+     * negative z axis. Pitch is the rotation about the negative y axis. Roll is the rotation about
+     * the positive x axis.
+     *
+     * @param {HeadingPitchRoll} headingPitchRoll The rotation expressed as a heading, pitch and roll.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if none was provided.
+     */
+    Quaternion.fromHeadingPitchRoll = function(headingOrHeadingPitchRoll, pitchOrResult, roll, result) {
+                if (headingOrHeadingPitchRoll instanceof HeadingPitchRoll) {
+            Check.typeOf.object('headingPitchRoll', headingOrHeadingPitchRoll);
+        } else {
+            Check.typeOf.number('heading', headingOrHeadingPitchRoll);
+            Check.typeOf.number('pitch', pitchOrResult);
+            Check.typeOf.number('roll', roll);
+        }
+                var hpr;
+        if (headingOrHeadingPitchRoll instanceof HeadingPitchRoll) {
+            hpr = headingOrHeadingPitchRoll;
+            result = pitchOrResult;
+        } else {
+            deprecationWarning('Quaternion.fromHeadingPitchRoll(heading, pitch, roll,result)', 'The method was deprecated in Cesium 1.32 and will be removed in version 1.33. ' + 'Use Quaternion.fromHeadingPitchRoll(hpr,result) where hpr is a HeadingPitchRoll');
+            hpr = new HeadingPitchRoll(headingOrHeadingPitchRoll, pitchOrResult, roll);
+        }
+        scratchRollQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_X, hpr.roll, scratchHPRQuaternion);
+        scratchPitchQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Y, -hpr.pitch, result);
+        result = Quaternion.multiply(scratchPitchQuaternion, scratchRollQuaternion, scratchPitchQuaternion);
+        scratchHeadingQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Z, -hpr.heading, scratchHPRQuaternion);
+        return Quaternion.multiply(scratchHeadingQuaternion, result, result);
+    };
+
+    var sampledQuaternionAxis = new Cartesian3();
+    var sampledQuaternionRotation = new Cartesian3();
+    var sampledQuaternionTempQuaternion = new Quaternion();
+    var sampledQuaternionQuaternion0 = new Quaternion();
+    var sampledQuaternionQuaternion0Conjugate = new Quaternion();
+
+    /**
+     * The number of elements used to pack the object into an array.
+     * @type {Number}
+     */
+    Quaternion.packedLength = 4;
+
+    /**
+     * Stores the provided instance into the provided array.
+     *
+     * @param {Quaternion} value The value to pack.
+     * @param {Number[]} array The array to pack into.
+     * @param {Number} [startingIndex=0] The index into the array at which to start packing the elements.
+     *
+     * @returns {Number[]} The array that was packed into
+     */
+    Quaternion.pack = function(value, array, startingIndex) {
+                Check.typeOf.object('value', value);
+        Check.defined('array', array);
+        
+        startingIndex = defaultValue(startingIndex, 0);
+
+        array[startingIndex++] = value.x;
+        array[startingIndex++] = value.y;
+        array[startingIndex++] = value.z;
+        array[startingIndex] = value.w;
+
+        return array;
+    };
+
+    /**
+     * Retrieves an instance from a packed array.
+     *
+     * @param {Number[]} array The packed array.
+     * @param {Number} [startingIndex=0] The starting index of the element to be unpacked.
+     * @param {Quaternion} [result] The object into which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
+     */
+    Quaternion.unpack = function(array, startingIndex, result) {
+                Check.defined('array', array);
+        
+        startingIndex = defaultValue(startingIndex, 0);
+
+        if (!defined(result)) {
+            result = new Quaternion();
+        }
+        result.x = array[startingIndex];
+        result.y = array[startingIndex + 1];
+        result.z = array[startingIndex + 2];
+        result.w = array[startingIndex + 3];
+        return result;
+    };
+
+    /**
+     * The number of elements used to store the object into an array in its interpolatable form.
+     * @type {Number}
+     */
+    Quaternion.packedInterpolationLength = 3;
+
+    /**
+     * Converts a packed array into a form suitable for interpolation.
+     *
+     * @param {Number[]} packedArray The packed array.
+     * @param {Number} [startingIndex=0] The index of the first element to be converted.
+     * @param {Number} [lastIndex=packedArray.length] The index of the last element to be converted.
+     * @param {Number[]} result The object into which to store the result.
+     */
+    Quaternion.convertPackedArrayForInterpolation = function(packedArray, startingIndex, lastIndex, result) {
+        Quaternion.unpack(packedArray, lastIndex * 4, sampledQuaternionQuaternion0Conjugate);
+        Quaternion.conjugate(sampledQuaternionQuaternion0Conjugate, sampledQuaternionQuaternion0Conjugate);
+
+        for (var i = 0, len = lastIndex - startingIndex + 1; i < len; i++) {
+            var offset = i * 3;
+            Quaternion.unpack(packedArray, (startingIndex + i) * 4, sampledQuaternionTempQuaternion);
+
+            Quaternion.multiply(sampledQuaternionTempQuaternion, sampledQuaternionQuaternion0Conjugate, sampledQuaternionTempQuaternion);
+
+            if (sampledQuaternionTempQuaternion.w < 0) {
+                Quaternion.negate(sampledQuaternionTempQuaternion, sampledQuaternionTempQuaternion);
+            }
+
+            Quaternion.computeAxis(sampledQuaternionTempQuaternion, sampledQuaternionAxis);
+            var angle = Quaternion.computeAngle(sampledQuaternionTempQuaternion);
+            result[offset] = sampledQuaternionAxis.x * angle;
+            result[offset + 1] = sampledQuaternionAxis.y * angle;
+            result[offset + 2] = sampledQuaternionAxis.z * angle;
+        }
+    };
+
+    /**
+     * Retrieves an instance from a packed array converted with {@link convertPackedArrayForInterpolation}.
+     *
+     * @param {Number[]} array The array previously packed for interpolation.
+     * @param {Number[]} sourceArray The original packed array.
+     * @param {Number} [firstIndex=0] The firstIndex used to convert the array.
+     * @param {Number} [lastIndex=packedArray.length] The lastIndex used to convert the array.
+     * @param {Quaternion} [result] The object into which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
+     */
+    Quaternion.unpackInterpolationResult = function(array, sourceArray, firstIndex, lastIndex, result) {
+        if (!defined(result)) {
+            result = new Quaternion();
+        }
+        Cartesian3.fromArray(array, 0, sampledQuaternionRotation);
+        var magnitude = Cartesian3.magnitude(sampledQuaternionRotation);
+
+        Quaternion.unpack(sourceArray, lastIndex * 4, sampledQuaternionQuaternion0);
+
+        if (magnitude === 0) {
+            Quaternion.clone(Quaternion.IDENTITY, sampledQuaternionTempQuaternion);
+        } else {
+            Quaternion.fromAxisAngle(sampledQuaternionRotation, magnitude, sampledQuaternionTempQuaternion);
+        }
+
+        return Quaternion.multiply(sampledQuaternionTempQuaternion, sampledQuaternionQuaternion0, result);
+    };
+
+    /**
+     * Duplicates a Quaternion instance.
+     *
+     * @param {Quaternion} quaternion The quaternion to duplicate.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided. (Returns undefined if quaternion is undefined)
+     */
+    Quaternion.clone = function(quaternion, result) {
+        if (!defined(quaternion)) {
+            return undefined;
+        }
+
+        if (!defined(result)) {
+            return new Quaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+        }
+
+        result.x = quaternion.x;
+        result.y = quaternion.y;
+        result.z = quaternion.z;
+        result.w = quaternion.w;
+        return result;
+    };
+
+    /**
+     * Computes the conjugate of the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to conjugate.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.conjugate = function(quaternion, result) {
+                Check.typeOf.object('quaternion', quaternion);
+        Check.typeOf.object('result', result);
+        
+        result.x = -quaternion.x;
+        result.y = -quaternion.y;
+        result.z = -quaternion.z;
+        result.w = quaternion.w;
+        return result;
+    };
+
+    /**
+     * Computes magnitude squared for the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to conjugate.
+     * @returns {Number} The magnitude squared.
+     */
+    Quaternion.magnitudeSquared = function(quaternion) {
+                Check.typeOf.object('quaternion', quaternion);
+        
+        return quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w;
+    };
+
+    /**
+     * Computes magnitude for the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to conjugate.
+     * @returns {Number} The magnitude.
+     */
+    Quaternion.magnitude = function(quaternion) {
+        return Math.sqrt(Quaternion.magnitudeSquared(quaternion));
+    };
+
+    /**
+     * Computes the normalized form of the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to normalize.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.normalize = function(quaternion, result) {
+                Check.typeOf.object('result', result);
+        
+        var inverseMagnitude = 1.0 / Quaternion.magnitude(quaternion);
+        var x = quaternion.x * inverseMagnitude;
+        var y = quaternion.y * inverseMagnitude;
+        var z = quaternion.z * inverseMagnitude;
+        var w = quaternion.w * inverseMagnitude;
+
+        result.x = x;
+        result.y = y;
+        result.z = z;
+        result.w = w;
+        return result;
+    };
+
+    /**
+     * Computes the inverse of the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to normalize.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.inverse = function(quaternion, result) {
+                Check.typeOf.object('result', result);
+        
+        var magnitudeSquared = Quaternion.magnitudeSquared(quaternion);
+        result = Quaternion.conjugate(quaternion, result);
+        return Quaternion.multiplyByScalar(result, 1.0 / magnitudeSquared, result);
+    };
+
+    /**
+     * Computes the componentwise sum of two quaternions.
+     *
+     * @param {Quaternion} left The first quaternion.
+     * @param {Quaternion} right The second quaternion.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.add = function(left, right, result) {
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
+        Check.typeOf.object('result', result);
+        
+        result.x = left.x + right.x;
+        result.y = left.y + right.y;
+        result.z = left.z + right.z;
+        result.w = left.w + right.w;
+        return result;
+    };
+
+    /**
+     * Computes the componentwise difference of two quaternions.
+     *
+     * @param {Quaternion} left The first quaternion.
+     * @param {Quaternion} right The second quaternion.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.subtract = function(left, right, result) {
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
+        Check.typeOf.object('result', result);
+        
+        result.x = left.x - right.x;
+        result.y = left.y - right.y;
+        result.z = left.z - right.z;
+        result.w = left.w - right.w;
+        return result;
+    };
+
+    /**
+     * Negates the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to be negated.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.negate = function(quaternion, result) {
+                Check.typeOf.object('quaternion', quaternion);
+        Check.typeOf.object('result', result);
+        
+        result.x = -quaternion.x;
+        result.y = -quaternion.y;
+        result.z = -quaternion.z;
+        result.w = -quaternion.w;
+        return result;
+    };
+
+    /**
+     * Computes the dot (scalar) product of two quaternions.
+     *
+     * @param {Quaternion} left The first quaternion.
+     * @param {Quaternion} right The second quaternion.
+     * @returns {Number} The dot product.
+     */
+    Quaternion.dot = function(left, right) {
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
+        
+        return left.x * right.x + left.y * right.y + left.z * right.z + left.w * right.w;
+    };
+
+    /**
+     * Computes the product of two quaternions.
+     *
+     * @param {Quaternion} left The first quaternion.
+     * @param {Quaternion} right The second quaternion.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.multiply = function(left, right, result) {
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
+        Check.typeOf.object('result', result);
+        
+        var leftX = left.x;
+        var leftY = left.y;
+        var leftZ = left.z;
+        var leftW = left.w;
+
+        var rightX = right.x;
+        var rightY = right.y;
+        var rightZ = right.z;
+        var rightW = right.w;
+
+        var x = leftW * rightX + leftX * rightW + leftY * rightZ - leftZ * rightY;
+        var y = leftW * rightY - leftX * rightZ + leftY * rightW + leftZ * rightX;
+        var z = leftW * rightZ + leftX * rightY - leftY * rightX + leftZ * rightW;
+        var w = leftW * rightW - leftX * rightX - leftY * rightY - leftZ * rightZ;
+
+        result.x = x;
+        result.y = y;
+        result.z = z;
+        result.w = w;
+        return result;
+    };
+
+    /**
+     * Multiplies the provided quaternion componentwise by the provided scalar.
+     *
+     * @param {Quaternion} quaternion The quaternion to be scaled.
+     * @param {Number} scalar The scalar to multiply with.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.multiplyByScalar = function(quaternion, scalar, result) {
+                Check.typeOf.object('quaternion', quaternion);
+        Check.typeOf.number('scalar', scalar);
+        Check.typeOf.object('result', result);
+        
+        result.x = quaternion.x * scalar;
+        result.y = quaternion.y * scalar;
+        result.z = quaternion.z * scalar;
+        result.w = quaternion.w * scalar;
+        return result;
+    };
+
+    /**
+     * Divides the provided quaternion componentwise by the provided scalar.
+     *
+     * @param {Quaternion} quaternion The quaternion to be divided.
+     * @param {Number} scalar The scalar to divide by.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.divideByScalar = function(quaternion, scalar, result) {
+                Check.typeOf.object('quaternion', quaternion);
+        Check.typeOf.number('scalar', scalar);
+        Check.typeOf.object('result', result);
+        
+        result.x = quaternion.x / scalar;
+        result.y = quaternion.y / scalar;
+        result.z = quaternion.z / scalar;
+        result.w = quaternion.w / scalar;
+        return result;
+    };
+
+    /**
+     * Computes the axis of rotation of the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to use.
+     * @param {Cartesian3} result The object onto which to store the result.
+     * @returns {Cartesian3} The modified result parameter.
+     */
+    Quaternion.computeAxis = function(quaternion, result) {
+                Check.typeOf.object('quaternion', quaternion);
+        Check.typeOf.object('result', result);
+        
+        var w = quaternion.w;
+        if (Math.abs(w - 1.0) < CesiumMath.EPSILON6) {
+            result.x = result.y = result.z = 0;
+            return result;
+        }
+
+        var scalar = 1.0 / Math.sqrt(1.0 - (w * w));
+
+        result.x = quaternion.x * scalar;
+        result.y = quaternion.y * scalar;
+        result.z = quaternion.z * scalar;
+        return result;
+    };
+
+    /**
+     * Computes the angle of rotation of the provided quaternion.
+     *
+     * @param {Quaternion} quaternion The quaternion to use.
+     * @returns {Number} The angle of rotation.
+     */
+    Quaternion.computeAngle = function(quaternion) {
+                Check.typeOf.object('quaternion', quaternion);
+        
+        if (Math.abs(quaternion.w - 1.0) < CesiumMath.EPSILON6) {
+            return 0.0;
+        }
+        return 2.0 * Math.acos(quaternion.w);
+    };
+
+    var lerpScratch = new Quaternion();
+    /**
+     * Computes the linear interpolation or extrapolation at t using the provided quaternions.
+     *
+     * @param {Quaternion} start The value corresponding to t at 0.0.
+     * @param {Quaternion} end The value corresponding to t at 1.0.
+     * @param {Number} t The point along t at which to interpolate.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.lerp = function(start, end, t, result) {
+                Check.typeOf.object('start', start);
+        Check.typeOf.object('end', end);
+        Check.typeOf.number('t', t);
+        Check.typeOf.object('result', result);
+        
+        lerpScratch = Quaternion.multiplyByScalar(end, t, lerpScratch);
+        result = Quaternion.multiplyByScalar(start, 1.0 - t, result);
+        return Quaternion.add(lerpScratch, result, result);
+    };
+
+    var slerpEndNegated = new Quaternion();
+    var slerpScaledP = new Quaternion();
+    var slerpScaledR = new Quaternion();
+    /**
+     * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
+     *
+     * @param {Quaternion} start The value corresponding to t at 0.0.
+     * @param {Quaternion} end The value corresponding to t at 1.0.
+     * @param {Number} t The point along t at which to interpolate.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     *
+     * @see Quaternion#fastSlerp
+     */
+    Quaternion.slerp = function(start, end, t, result) {
+                Check.typeOf.object('start', start);
+        Check.typeOf.object('end', end);
+        Check.typeOf.number('t', t);
+        Check.typeOf.object('result', result);
+        
+        var dot = Quaternion.dot(start, end);
+
+        // The angle between start must be acute. Since q and -q represent
+        // the same rotation, negate q to get the acute angle.
+        var r = end;
+        if (dot < 0.0) {
+            dot = -dot;
+            r = slerpEndNegated = Quaternion.negate(end, slerpEndNegated);
+        }
+
+        // dot > 0, as the dot product approaches 1, the angle between the
+        // quaternions vanishes. use linear interpolation.
+        if (1.0 - dot < CesiumMath.EPSILON6) {
+            return Quaternion.lerp(start, r, t, result);
+        }
+
+        var theta = Math.acos(dot);
+        slerpScaledP = Quaternion.multiplyByScalar(start, Math.sin((1 - t) * theta), slerpScaledP);
+        slerpScaledR = Quaternion.multiplyByScalar(r, Math.sin(t * theta), slerpScaledR);
+        result = Quaternion.add(slerpScaledP, slerpScaledR, result);
+        return Quaternion.multiplyByScalar(result, 1.0 / Math.sin(theta), result);
+    };
+
+    /**
+     * The logarithmic quaternion function.
+     *
+     * @param {Quaternion} quaternion The unit quaternion.
+     * @param {Cartesian3} result The object onto which to store the result.
+     * @returns {Cartesian3} The modified result parameter.
+     */
+    Quaternion.log = function(quaternion, result) {
+                Check.typeOf.object('quaternion', quaternion);
+        Check.typeOf.object('result', result);
+        
+        var theta = CesiumMath.acosClamped(quaternion.w);
+        var thetaOverSinTheta = 0.0;
+
+        if (theta !== 0.0) {
+            thetaOverSinTheta = theta / Math.sin(theta);
+        }
+
+        return Cartesian3.multiplyByScalar(quaternion, thetaOverSinTheta, result);
+    };
+
+    /**
+     * The exponential quaternion function.
+     *
+     * @param {Cartesian3} cartesian The cartesian.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     */
+    Quaternion.exp = function(cartesian, result) {
+                Check.typeOf.object('cartesian', cartesian);
+        Check.typeOf.object('result', result);
+        
+        var theta = Cartesian3.magnitude(cartesian);
+        var sinThetaOverTheta = 0.0;
+
+        if (theta !== 0.0) {
+            sinThetaOverTheta = Math.sin(theta) / theta;
+        }
+
+        result.x = cartesian.x * sinThetaOverTheta;
+        result.y = cartesian.y * sinThetaOverTheta;
+        result.z = cartesian.z * sinThetaOverTheta;
+        result.w = Math.cos(theta);
+
+        return result;
+    };
+
+    var squadScratchCartesian0 = new Cartesian3();
+    var squadScratchCartesian1 = new Cartesian3();
+    var squadScratchQuaternion0 = new Quaternion();
+    var squadScratchQuaternion1 = new Quaternion();
+
+    /**
+     * Computes an inner quadrangle point.
+     * <p>This will compute quaternions that ensure a squad curve is C<sup>1</sup>.</p>
+     *
+     * @param {Quaternion} q0 The first quaternion.
+     * @param {Quaternion} q1 The second quaternion.
+     * @param {Quaternion} q2 The third quaternion.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     *
+     * @see Quaternion#squad
+     */
+    Quaternion.computeInnerQuadrangle = function(q0, q1, q2, result) {
+                Check.typeOf.object('q0', q0);
+        Check.typeOf.object('q1', q1);
+        Check.typeOf.object('q2', q2);
+        Check.typeOf.object('result', result);
+        
+        var qInv = Quaternion.conjugate(q1, squadScratchQuaternion0);
+        Quaternion.multiply(qInv, q2, squadScratchQuaternion1);
+        var cart0 = Quaternion.log(squadScratchQuaternion1, squadScratchCartesian0);
+
+        Quaternion.multiply(qInv, q0, squadScratchQuaternion1);
+        var cart1 = Quaternion.log(squadScratchQuaternion1, squadScratchCartesian1);
+
+        Cartesian3.add(cart0, cart1, cart0);
+        Cartesian3.multiplyByScalar(cart0, 0.25, cart0);
+        Cartesian3.negate(cart0, cart0);
+        Quaternion.exp(cart0, squadScratchQuaternion0);
+
+        return Quaternion.multiply(q1, squadScratchQuaternion0, result);
+    };
+
+    /**
+     * Computes the spherical quadrangle interpolation between quaternions.
+     *
+     * @param {Quaternion} q0 The first quaternion.
+     * @param {Quaternion} q1 The second quaternion.
+     * @param {Quaternion} s0 The first inner quadrangle.
+     * @param {Quaternion} s1 The second inner quadrangle.
+     * @param {Number} t The time in [0,1] used to interpolate.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     *
+     *
+     * @example
+     * // 1. compute the squad interpolation between two quaternions on a curve
+     * var s0 = Cesium.Quaternion.computeInnerQuadrangle(quaternions[i - 1], quaternions[i], quaternions[i + 1], new Cesium.Quaternion());
+     * var s1 = Cesium.Quaternion.computeInnerQuadrangle(quaternions[i], quaternions[i + 1], quaternions[i + 2], new Cesium.Quaternion());
+     * var q = Cesium.Quaternion.squad(quaternions[i], quaternions[i + 1], s0, s1, t, new Cesium.Quaternion());
+     *
+     * // 2. compute the squad interpolation as above but where the first quaternion is a end point.
+     * var s1 = Cesium.Quaternion.computeInnerQuadrangle(quaternions[0], quaternions[1], quaternions[2], new Cesium.Quaternion());
+     * var q = Cesium.Quaternion.squad(quaternions[0], quaternions[1], quaternions[0], s1, t, new Cesium.Quaternion());
+     *
+     * @see Quaternion#computeInnerQuadrangle
+     */
+    Quaternion.squad = function(q0, q1, s0, s1, t, result) {
+                Check.typeOf.object('q0', q0);
+        Check.typeOf.object('q1', q1);
+        Check.typeOf.object('s0', s0);
+        Check.typeOf.object('s1', s1);
+        Check.typeOf.number('t', t);
+        Check.typeOf.object('result', result);
+        
+        var slerp0 = Quaternion.slerp(q0, q1, t, squadScratchQuaternion0);
+        var slerp1 = Quaternion.slerp(s0, s1, t, squadScratchQuaternion1);
+        return Quaternion.slerp(slerp0, slerp1, 2.0 * t * (1.0 - t), result);
+    };
+
+    var fastSlerpScratchQuaternion = new Quaternion();
+    var opmu = 1.90110745351730037;
+    var u = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+    var v = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+    var bT = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+    var bD = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+
+    for (var i = 0; i < 7; ++i) {
+        var s = i + 1.0;
+        var t = 2.0 * s + 1.0;
+        u[i] = 1.0 / (s * t);
+        v[i] = s / t;
+    }
+
+    u[7] = opmu / (8.0 * 17.0);
+    v[7] = opmu * 8.0 / 17.0;
+
+    /**
+     * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
+     * This implementation is faster than {@link Quaternion#slerp}, but is only accurate up to 10<sup>-6</sup>.
+     *
+     * @param {Quaternion} start The value corresponding to t at 0.0.
+     * @param {Quaternion} end The value corresponding to t at 1.0.
+     * @param {Number} t The point along t at which to interpolate.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter.
+     *
+     * @see Quaternion#slerp
+     */
+    Quaternion.fastSlerp = function(start, end, t, result) {
+                Check.typeOf.object('start', start);
+        Check.typeOf.object('end', end);
+        Check.typeOf.number('t', t);
+        Check.typeOf.object('result', result);
+        
+        var x = Quaternion.dot(start, end);
+
+        var sign;
+        if (x >= 0) {
+            sign = 1.0;
+        } else {
+            sign = -1.0;
+            x = -x;
+        }
+
+        var xm1 = x - 1.0;
+        var d = 1.0 - t;
+        var sqrT = t * t;
+        var sqrD = d * d;
+
+        for (var i = 7; i >= 0; --i) {
+            bT[i] = (u[i] * sqrT - v[i]) * xm1;
+            bD[i] = (u[i] * sqrD - v[i]) * xm1;
+        }
+
+        var cT = sign * t * (
+            1.0 + bT[0] * (1.0 + bT[1] * (1.0 + bT[2] * (1.0 + bT[3] * (
+            1.0 + bT[4] * (1.0 + bT[5] * (1.0 + bT[6] * (1.0 + bT[7]))))))));
+        var cD = d * (
+            1.0 + bD[0] * (1.0 + bD[1] * (1.0 + bD[2] * (1.0 + bD[3] * (
+            1.0 + bD[4] * (1.0 + bD[5] * (1.0 + bD[6] * (1.0 + bD[7]))))))));
+
+        var temp = Quaternion.multiplyByScalar(start, cD, fastSlerpScratchQuaternion);
+        Quaternion.multiplyByScalar(end, cT, result);
+        return Quaternion.add(temp, result, result);
+    };
+
+    /**
+     * Computes the spherical quadrangle interpolation between quaternions.
+     * An implementation that is faster than {@link Quaternion#squad}, but less accurate.
+     *
+     * @param {Quaternion} q0 The first quaternion.
+     * @param {Quaternion} q1 The second quaternion.
+     * @param {Quaternion} s0 The first inner quadrangle.
+     * @param {Quaternion} s1 The second inner quadrangle.
+     * @param {Number} t The time in [0,1] used to interpolate.
+     * @param {Quaternion} result The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new instance if none was provided.
+     *
+     * @see Quaternion#squad
+     */
+    Quaternion.fastSquad = function(q0, q1, s0, s1, t, result) {
+                Check.typeOf.object('q0', q0);
+        Check.typeOf.object('q1', q1);
+        Check.typeOf.object('s0', s0);
+        Check.typeOf.object('s1', s1);
+        Check.typeOf.number('t', t);
+        Check.typeOf.object('result', result);
+        
+        var slerp0 = Quaternion.fastSlerp(q0, q1, t, squadScratchQuaternion0);
+        var slerp1 = Quaternion.fastSlerp(s0, s1, t, squadScratchQuaternion1);
+        return Quaternion.fastSlerp(slerp0, slerp1, 2.0 * t * (1.0 - t), result);
+    };
+
+    /**
+     * Compares the provided quaternions componentwise and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     *
+     * @param {Quaternion} [left] The first quaternion.
+     * @param {Quaternion} [right] The second quaternion.
+     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
+     */
+    Quaternion.equals = function(left, right) {
+        return (left === right) ||
+               ((defined(left)) &&
+                (defined(right)) &&
+                (left.x === right.x) &&
+                (left.y === right.y) &&
+                (left.z === right.z) &&
+                (left.w === right.w));
+    };
+
+    /**
+     * Compares the provided quaternions componentwise and returns
+     * <code>true</code> if they are within the provided epsilon,
+     * <code>false</code> otherwise.
+     *
+     * @param {Quaternion} [left] The first quaternion.
+     * @param {Quaternion} [right] The second quaternion.
+     * @param {Number} epsilon The epsilon to use for equality testing.
+     * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
+     */
+    Quaternion.equalsEpsilon = function(left, right, epsilon) {
+                Check.typeOf.number('epsilon', epsilon);
+        
+        return (left === right) ||
+               ((defined(left)) &&
+                (defined(right)) &&
+                (Math.abs(left.x - right.x) <= epsilon) &&
+                (Math.abs(left.y - right.y) <= epsilon) &&
+                (Math.abs(left.z - right.z) <= epsilon) &&
+                (Math.abs(left.w - right.w) <= epsilon));
+    };
+
+    /**
+     * An immutable Quaternion instance initialized to (0.0, 0.0, 0.0, 0.0).
+     *
+     * @type {Quaternion}
+     * @constant
+     */
+    Quaternion.ZERO = freezeObject(new Quaternion(0.0, 0.0, 0.0, 0.0));
+
+    /**
+     * An immutable Quaternion instance initialized to (0.0, 0.0, 0.0, 1.0).
+     *
+     * @type {Quaternion}
+     * @constant
+     */
+    Quaternion.IDENTITY = freezeObject(new Quaternion(0.0, 0.0, 0.0, 1.0));
+
+    /**
+     * Duplicates this Quaternion instance.
+     *
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
+     */
+    Quaternion.prototype.clone = function(result) {
+        return Quaternion.clone(this, result);
+    };
+
+    /**
+     * Compares this and the provided quaternion componentwise and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     *
+     * @param {Quaternion} [right] The right hand side quaternion.
+     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
+     */
+    Quaternion.prototype.equals = function(right) {
+        return Quaternion.equals(this, right);
+    };
+
+    /**
+     * Compares this and the provided quaternion componentwise and returns
+     * <code>true</code> if they are within the provided epsilon,
+     * <code>false</code> otherwise.
+     *
+     * @param {Quaternion} [right] The right hand side quaternion.
+     * @param {Number} epsilon The epsilon to use for equality testing.
+     * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
+     */
+    Quaternion.prototype.equalsEpsilon = function(right, epsilon) {
+        return Quaternion.equalsEpsilon(this, right, epsilon);
+    };
+
+    /**
+     * Returns a string representing this quaternion in the format (x, y, z, w).
+     *
+     * @returns {String} A string representing this Quaternion.
+     */
+    Quaternion.prototype.toString = function() {
+        return '(' + this.x + ', ' + this.y + ', ' + this.z + ', ' + this.w + ')';
+    };
+
+    return Quaternion;
+});
+
 define('Core/Matrix2',[
         './Cartesian2',
         './Check',
         './defaultValue',
         './defined',
         './defineProperties',
-        './DeveloperError',
         './freezeObject'
     ], function(
         Cartesian2,
@@ -18880,7 +20945,6 @@ define('Core/Matrix2',[
         defaultValue,
         defined,
         defineProperties,
-        DeveloperError,
         freezeObject) {
     'use strict';
 
@@ -19701,1991 +21765,24 @@ define('Core/Matrix2',[
     return Matrix2;
 });
 
-/*global define*/
-define('ThirdParty/earcut-2.1.1',[], function() {
-    'use strict';
-
-function earcut(data, holeIndices, dim) {
-
-    dim = dim || 2;
-
-    var hasHoles = holeIndices && holeIndices.length,
-        outerLen = hasHoles ? holeIndices[0] * dim : data.length,
-        outerNode = linkedList(data, 0, outerLen, dim, true),
-        triangles = [];
-
-    if (!outerNode) return triangles;
-
-    var minX, minY, maxX, maxY, x, y, size;
-
-    if (hasHoles) outerNode = eliminateHoles(data, holeIndices, outerNode, dim);
-
-    // if the shape is not too simple, we'll use z-order curve hash later; calculate polygon bbox
-    if (data.length > 80 * dim) {
-        minX = maxX = data[0];
-        minY = maxY = data[1];
-
-        for (var i = dim; i < outerLen; i += dim) {
-            x = data[i];
-            y = data[i + 1];
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-            if (x > maxX) maxX = x;
-            if (y > maxY) maxY = y;
-        }
-
-        // minX, minY and size are later used to transform coords into integers for z-order calculation
-        size = Math.max(maxX - minX, maxY - minY);
-    }
-
-    earcutLinked(outerNode, triangles, dim, minX, minY, size);
-
-    return triangles;
-}
-
-// create a circular doubly linked list from polygon points in the specified winding order
-function linkedList(data, start, end, dim, clockwise) {
-    var i, last;
-
-    if (clockwise === (signedArea(data, start, end, dim) > 0)) {
-        for (i = start; i < end; i += dim) last = insertNode(i, data[i], data[i + 1], last);
-    } else {
-        for (i = end - dim; i >= start; i -= dim) last = insertNode(i, data[i], data[i + 1], last);
-    }
-
-    if (last && equals(last, last.next)) {
-        removeNode(last);
-        last = last.next;
-    }
-
-    return last;
-}
-
-// eliminate colinear or duplicate points
-function filterPoints(start, end) {
-    if (!start) return start;
-    if (!end) end = start;
-
-    var p = start,
-        again;
-    do {
-        again = false;
-
-        if (!p.steiner && (equals(p, p.next) || area(p.prev, p, p.next) === 0)) {
-            removeNode(p);
-            p = end = p.prev;
-            if (p === p.next) return null;
-            again = true;
-
-        } else {
-            p = p.next;
-        }
-    } while (again || p !== end);
-
-    return end;
-}
-
-// main ear slicing loop which triangulates a polygon (given as a linked list)
-function earcutLinked(ear, triangles, dim, minX, minY, size, pass) {
-    if (!ear) return;
-
-    // interlink polygon nodes in z-order
-    if (!pass && size) indexCurve(ear, minX, minY, size);
-
-    var stop = ear,
-        prev, next;
-
-    // iterate through ears, slicing them one by one
-    while (ear.prev !== ear.next) {
-        prev = ear.prev;
-        next = ear.next;
-
-        if (size ? isEarHashed(ear, minX, minY, size) : isEar(ear)) {
-            // cut off the triangle
-            triangles.push(prev.i / dim);
-            triangles.push(ear.i / dim);
-            triangles.push(next.i / dim);
-
-            removeNode(ear);
-
-            // skipping the next vertice leads to less sliver triangles
-            ear = next.next;
-            stop = next.next;
-
-            continue;
-        }
-
-        ear = next;
-
-        // if we looped through the whole remaining polygon and can't find any more ears
-        if (ear === stop) {
-            // try filtering points and slicing again
-            if (!pass) {
-                earcutLinked(filterPoints(ear), triangles, dim, minX, minY, size, 1);
-
-            // if this didn't work, try curing all small self-intersections locally
-            } else if (pass === 1) {
-                ear = cureLocalIntersections(ear, triangles, dim);
-                earcutLinked(ear, triangles, dim, minX, minY, size, 2);
-
-            // as a last resort, try splitting the remaining polygon into two
-            } else if (pass === 2) {
-                splitEarcut(ear, triangles, dim, minX, minY, size);
-            }
-
-            break;
-        }
-    }
-}
-
-// check whether a polygon node forms a valid ear with adjacent nodes
-function isEar(ear) {
-    var a = ear.prev,
-        b = ear,
-        c = ear.next;
-
-    if (area(a, b, c) >= 0) return false; // reflex, can't be an ear
-
-    // now make sure we don't have other points inside the potential ear
-    var p = ear.next.next;
-
-    while (p !== ear.prev) {
-        if (pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
-            area(p.prev, p, p.next) >= 0) return false;
-        p = p.next;
-    }
-
-    return true;
-}
-
-function isEarHashed(ear, minX, minY, size) {
-    var a = ear.prev,
-        b = ear,
-        c = ear.next;
-
-    if (area(a, b, c) >= 0) return false; // reflex, can't be an ear
-
-    // triangle bbox; min & max are calculated like this for speed
-    var minTX = a.x < b.x ? (a.x < c.x ? a.x : c.x) : (b.x < c.x ? b.x : c.x),
-        minTY = a.y < b.y ? (a.y < c.y ? a.y : c.y) : (b.y < c.y ? b.y : c.y),
-        maxTX = a.x > b.x ? (a.x > c.x ? a.x : c.x) : (b.x > c.x ? b.x : c.x),
-        maxTY = a.y > b.y ? (a.y > c.y ? a.y : c.y) : (b.y > c.y ? b.y : c.y);
-
-    // z-order range for the current triangle bbox;
-    var minZ = zOrder(minTX, minTY, minX, minY, size),
-        maxZ = zOrder(maxTX, maxTY, minX, minY, size);
-
-    // first look for points inside the triangle in increasing z-order
-    var p = ear.nextZ;
-
-    while (p && p.z <= maxZ) {
-        if (p !== ear.prev && p !== ear.next &&
-            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
-            area(p.prev, p, p.next) >= 0) return false;
-        p = p.nextZ;
-    }
-
-    // then look for points in decreasing z-order
-    p = ear.prevZ;
-
-    while (p && p.z >= minZ) {
-        if (p !== ear.prev && p !== ear.next &&
-            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
-            area(p.prev, p, p.next) >= 0) return false;
-        p = p.prevZ;
-    }
-
-    return true;
-}
-
-// go through all polygon nodes and cure small local self-intersections
-function cureLocalIntersections(start, triangles, dim) {
-    var p = start;
-    do {
-        var a = p.prev,
-            b = p.next.next;
-
-        if (!equals(a, b) && intersects(a, p, p.next, b) && locallyInside(a, b) && locallyInside(b, a)) {
-
-            triangles.push(a.i / dim);
-            triangles.push(p.i / dim);
-            triangles.push(b.i / dim);
-
-            // remove two nodes involved
-            removeNode(p);
-            removeNode(p.next);
-
-            p = start = b;
-        }
-        p = p.next;
-    } while (p !== start);
-
-    return p;
-}
-
-// try splitting polygon into two and triangulate them independently
-function splitEarcut(start, triangles, dim, minX, minY, size) {
-    // look for a valid diagonal that divides the polygon into two
-    var a = start;
-    do {
-        var b = a.next.next;
-        while (b !== a.prev) {
-            if (a.i !== b.i && isValidDiagonal(a, b)) {
-                // split the polygon in two by the diagonal
-                var c = splitPolygon(a, b);
-
-                // filter colinear points around the cuts
-                a = filterPoints(a, a.next);
-                c = filterPoints(c, c.next);
-
-                // run earcut on each half
-                earcutLinked(a, triangles, dim, minX, minY, size);
-                earcutLinked(c, triangles, dim, minX, minY, size);
-                return;
-            }
-            b = b.next;
-        }
-        a = a.next;
-    } while (a !== start);
-}
-
-// link every hole into the outer loop, producing a single-ring polygon without holes
-function eliminateHoles(data, holeIndices, outerNode, dim) {
-    var queue = [],
-        i, len, start, end, list;
-
-    for (i = 0, len = holeIndices.length; i < len; i++) {
-        start = holeIndices[i] * dim;
-        end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
-        list = linkedList(data, start, end, dim, false);
-        if (list === list.next) list.steiner = true;
-        queue.push(getLeftmost(list));
-    }
-
-    queue.sort(compareX);
-
-    // process holes from left to right
-    for (i = 0; i < queue.length; i++) {
-        eliminateHole(queue[i], outerNode);
-        outerNode = filterPoints(outerNode, outerNode.next);
-    }
-
-    return outerNode;
-}
-
-function compareX(a, b) {
-    return a.x - b.x;
-}
-
-// find a bridge between vertices that connects hole with an outer ring and and link it
-function eliminateHole(hole, outerNode) {
-    outerNode = findHoleBridge(hole, outerNode);
-    if (outerNode) {
-        var b = splitPolygon(outerNode, hole);
-        filterPoints(b, b.next);
-    }
-}
-
-// David Eberly's algorithm for finding a bridge between hole and outer polygon
-function findHoleBridge(hole, outerNode) {
-    var p = outerNode,
-        hx = hole.x,
-        hy = hole.y,
-        qx = -Infinity,
-        m;
-
-    // find a segment intersected by a ray from the hole's leftmost point to the left;
-    // segment's endpoint with lesser x will be potential connection point
-    do {
-        if (hy <= p.y && hy >= p.next.y) {
-            var x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
-            if (x <= hx && x > qx) {
-                qx = x;
-                if (x === hx) {
-                    if (hy === p.y) return p;
-                    if (hy === p.next.y) return p.next;
-                }
-                m = p.x < p.next.x ? p : p.next;
-            }
-        }
-        p = p.next;
-    } while (p !== outerNode);
-
-    if (!m) return null;
-
-    if (hx === qx) return m.prev; // hole touches outer segment; pick lower endpoint
-
-    // look for points inside the triangle of hole point, segment intersection and endpoint;
-    // if there are no points found, we have a valid connection;
-    // otherwise choose the point of the minimum angle with the ray as connection point
-
-    var stop = m,
-        mx = m.x,
-        my = m.y,
-        tanMin = Infinity,
-        tan;
-
-    p = m.next;
-
-    while (p !== stop) {
-        if (hx >= p.x && p.x >= mx &&
-                pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
-
-            tan = Math.abs(hy - p.y) / (hx - p.x); // tangential
-
-            if ((tan < tanMin || (tan === tanMin && p.x > m.x)) && locallyInside(p, hole)) {
-                m = p;
-                tanMin = tan;
-            }
-        }
-
-        p = p.next;
-    }
-
-    return m;
-}
-
-// interlink polygon nodes in z-order
-function indexCurve(start, minX, minY, size) {
-    var p = start;
-    do {
-        if (p.z === null) p.z = zOrder(p.x, p.y, minX, minY, size);
-        p.prevZ = p.prev;
-        p.nextZ = p.next;
-        p = p.next;
-    } while (p !== start);
-
-    p.prevZ.nextZ = null;
-    p.prevZ = null;
-
-    sortLinked(p);
-}
-
-// Simon Tatham's linked list merge sort algorithm
-// http://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html
-function sortLinked(list) {
-    var i, p, q, e, tail, numMerges, pSize, qSize,
-        inSize = 1;
-
-    do {
-        p = list;
-        list = null;
-        tail = null;
-        numMerges = 0;
-
-        while (p) {
-            numMerges++;
-            q = p;
-            pSize = 0;
-            for (i = 0; i < inSize; i++) {
-                pSize++;
-                q = q.nextZ;
-                if (!q) break;
-            }
-
-            qSize = inSize;
-
-            while (pSize > 0 || (qSize > 0 && q)) {
-
-                if (pSize === 0) {
-                    e = q;
-                    q = q.nextZ;
-                    qSize--;
-                } else if (qSize === 0 || !q) {
-                    e = p;
-                    p = p.nextZ;
-                    pSize--;
-                } else if (p.z <= q.z) {
-                    e = p;
-                    p = p.nextZ;
-                    pSize--;
-                } else {
-                    e = q;
-                    q = q.nextZ;
-                    qSize--;
-                }
-
-                if (tail) tail.nextZ = e;
-                else list = e;
-
-                e.prevZ = tail;
-                tail = e;
-            }
-
-            p = q;
-        }
-
-        tail.nextZ = null;
-        inSize *= 2;
-
-    } while (numMerges > 1);
-
-    return list;
-}
-
-// z-order of a point given coords and size of the data bounding box
-function zOrder(x, y, minX, minY, size) {
-    // coords are transformed into non-negative 15-bit integer range
-    x = 32767 * (x - minX) / size;
-    y = 32767 * (y - minY) / size;
-
-    x = (x | (x << 8)) & 0x00FF00FF;
-    x = (x | (x << 4)) & 0x0F0F0F0F;
-    x = (x | (x << 2)) & 0x33333333;
-    x = (x | (x << 1)) & 0x55555555;
-
-    y = (y | (y << 8)) & 0x00FF00FF;
-    y = (y | (y << 4)) & 0x0F0F0F0F;
-    y = (y | (y << 2)) & 0x33333333;
-    y = (y | (y << 1)) & 0x55555555;
-
-    return x | (y << 1);
-}
-
-// find the leftmost node of a polygon ring
-function getLeftmost(start) {
-    var p = start,
-        leftmost = start;
-    do {
-        if (p.x < leftmost.x) leftmost = p;
-        p = p.next;
-    } while (p !== start);
-
-    return leftmost;
-}
-
-// check if a point lies within a convex triangle
-function pointInTriangle(ax, ay, bx, by, cx, cy, px, py) {
-    return (cx - px) * (ay - py) - (ax - px) * (cy - py) >= 0 &&
-           (ax - px) * (by - py) - (bx - px) * (ay - py) >= 0 &&
-           (bx - px) * (cy - py) - (cx - px) * (by - py) >= 0;
-}
-
-// check if a diagonal between two polygon nodes is valid (lies in polygon interior)
-function isValidDiagonal(a, b) {
-    return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) &&
-           locallyInside(a, b) && locallyInside(b, a) && middleInside(a, b);
-}
-
-// signed area of a triangle
-function area(p, q, r) {
-    return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-}
-
-// check if two points are equal
-function equals(p1, p2) {
-    return p1.x === p2.x && p1.y === p2.y;
-}
-
-// check if two segments intersect
-function intersects(p1, q1, p2, q2) {
-    if ((equals(p1, q1) && equals(p2, q2)) ||
-        (equals(p1, q2) && equals(p2, q1))) return true;
-    return area(p1, q1, p2) > 0 !== area(p1, q1, q2) > 0 &&
-           area(p2, q2, p1) > 0 !== area(p2, q2, q1) > 0;
-}
-
-// check if a polygon diagonal intersects any polygon segments
-function intersectsPolygon(a, b) {
-    var p = a;
-    do {
-        if (p.i !== a.i && p.next.i !== a.i && p.i !== b.i && p.next.i !== b.i &&
-                intersects(p, p.next, a, b)) return true;
-        p = p.next;
-    } while (p !== a);
-
-    return false;
-}
-
-// check if a polygon diagonal is locally inside the polygon
-function locallyInside(a, b) {
-    return area(a.prev, a, a.next) < 0 ?
-        area(a, b, a.next) >= 0 && area(a, a.prev, b) >= 0 :
-        area(a, b, a.prev) < 0 || area(a, a.next, b) < 0;
-}
-
-// check if the middle point of a polygon diagonal is inside the polygon
-function middleInside(a, b) {
-    var p = a,
-        inside = false,
-        px = (a.x + b.x) / 2,
-        py = (a.y + b.y) / 2;
-    do {
-        if (((p.y > py) !== (p.next.y > py)) && (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
-            inside = !inside;
-        p = p.next;
-    } while (p !== a);
-
-    return inside;
-}
-
-// link two polygon vertices with a bridge; if the vertices belong to the same ring, it splits polygon into two;
-// if one belongs to the outer ring and another to a hole, it merges it into a single ring
-function splitPolygon(a, b) {
-    var a2 = new Node(a.i, a.x, a.y),
-        b2 = new Node(b.i, b.x, b.y),
-        an = a.next,
-        bp = b.prev;
-
-    a.next = b;
-    b.prev = a;
-
-    a2.next = an;
-    an.prev = a2;
-
-    b2.next = a2;
-    a2.prev = b2;
-
-    bp.next = b2;
-    b2.prev = bp;
-
-    return b2;
-}
-
-// create a node and optionally link it with previous one (in a circular doubly linked list)
-function insertNode(i, x, y, last) {
-    var p = new Node(i, x, y);
-
-    if (!last) {
-        p.prev = p;
-        p.next = p;
-
-    } else {
-        p.next = last.next;
-        p.prev = last;
-        last.next.prev = p;
-        last.next = p;
-    }
-    return p;
-}
-
-function removeNode(p) {
-    p.next.prev = p.prev;
-    p.prev.next = p.next;
-
-    if (p.prevZ) p.prevZ.nextZ = p.nextZ;
-    if (p.nextZ) p.nextZ.prevZ = p.prevZ;
-}
-
-function Node(i, x, y) {
-    // vertice index in coordinates array
-    this.i = i;
-
-    // vertex coordinates
-    this.x = x;
-    this.y = y;
-
-    // previous and next vertice nodes in a polygon ring
-    this.prev = null;
-    this.next = null;
-
-    // z-order curve value
-    this.z = null;
-
-    // previous and next nodes in z-order
-    this.prevZ = null;
-    this.nextZ = null;
-
-    // indicates whether this is a steiner point
-    this.steiner = false;
-}
-
-// return a percentage difference between the polygon area and its triangulation area;
-// used to verify correctness of triangulation
-earcut.deviation = function (data, holeIndices, dim, triangles) {
-    var hasHoles = holeIndices && holeIndices.length;
-    var outerLen = hasHoles ? holeIndices[0] * dim : data.length;
-
-    var polygonArea = Math.abs(signedArea(data, 0, outerLen, dim));
-    if (hasHoles) {
-        for (var i = 0, len = holeIndices.length; i < len; i++) {
-            var start = holeIndices[i] * dim;
-            var end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
-            polygonArea -= Math.abs(signedArea(data, start, end, dim));
-        }
-    }
-
-    var trianglesArea = 0;
-    for (i = 0; i < triangles.length; i += 3) {
-        var a = triangles[i] * dim;
-        var b = triangles[i + 1] * dim;
-        var c = triangles[i + 2] * dim;
-        trianglesArea += Math.abs(
-            (data[a] - data[c]) * (data[b + 1] - data[a + 1]) -
-            (data[a] - data[b]) * (data[c + 1] - data[a + 1]));
-    }
-
-    return polygonArea === 0 && trianglesArea === 0 ? 0 :
-        Math.abs((trianglesArea - polygonArea) / polygonArea);
-};
-
-function signedArea(data, start, end, dim) {
-    var sum = 0;
-    for (var i = start, j = end - dim; i < end; i += dim) {
-        sum += (data[j] - data[i]) * (data[i + 1] + data[j + 1]);
-        j = i;
-    }
-    return sum;
-}
-
-// turn a polygon in a multi-dimensional array form (e.g. as in GeoJSON) into a form Earcut accepts
-earcut.flatten = function (data) {
-    var dim = data[0][0].length,
-        result = {vertices: [], holes: [], dimensions: dim},
-        holeIndex = 0;
-
-    for (var i = 0; i < data.length; i++) {
-        for (var j = 0; j < data[i].length; j++) {
-            for (var d = 0; d < dim; d++) result.vertices.push(data[i][j][d]);
-        }
-        if (i > 0) {
-            holeIndex += data[i - 1].length;
-            result.holes.push(holeIndex);
-        }
-    }
-    return result;
-};
-
-return earcut;
-});
-
-/*global define*/
-define('Core/WindingOrder',[
-        './freezeObject',
-        './WebGLConstants'
-    ], function(
-        freezeObject,
-        WebGLConstants) {
-    'use strict';
-
-    /**
-     * Winding order defines the order of vertices for a triangle to be considered front-facing.
-     *
-     * @exports WindingOrder
-     */
-    var WindingOrder = {
-        /**
-         * Vertices are in clockwise order.
-         *
-         * @type {Number}
-         * @constant
-         */
-        CLOCKWISE : WebGLConstants.CW,
-
-        /**
-         * Vertices are in counter-clockwise order.
-         *
-         * @type {Number}
-         * @constant
-         */
-        COUNTER_CLOCKWISE : WebGLConstants.CCW,
-
-        /**
-         * @private
-         */
-        validate : function(windingOrder) {
-            return windingOrder === WindingOrder.CLOCKWISE ||
-                   windingOrder === WindingOrder.COUNTER_CLOCKWISE;
-        }
-    };
-
-    return freezeObject(WindingOrder);
-});
-
-/*global define*/
-define('Core/PolygonPipeline',[
-        '../ThirdParty/earcut-2.1.1',
-        './Cartesian2',
-        './Cartesian3',
-        './ComponentDatatype',
-        './defaultValue',
-        './defined',
-        './DeveloperError',
-        './Ellipsoid',
-        './Geometry',
-        './GeometryAttribute',
-        './Math',
-        './PrimitiveType',
-        './WindingOrder'
-    ], function(
-        earcut,
-        Cartesian2,
-        Cartesian3,
-        ComponentDatatype,
-        defaultValue,
-        defined,
-        DeveloperError,
-        Ellipsoid,
-        Geometry,
-        GeometryAttribute,
-        CesiumMath,
-        PrimitiveType,
-        WindingOrder) {
-    'use strict';
-
-    var scaleToGeodeticHeightN = new Cartesian3();
-    var scaleToGeodeticHeightP = new Cartesian3();
-
-    /**
-     * @private
-     */
-    var PolygonPipeline = {};
-
-    /**
-     * @exception {DeveloperError} At least three positions are required.
-     */
-    PolygonPipeline.computeArea2D = function(positions) {
-                if (!defined(positions)) {
-            throw new DeveloperError('positions is required.');
-        }
-        if (positions.length < 3) {
-            throw new DeveloperError('At least three positions are required.');
-        }
-        
-        var length = positions.length;
-        var area = 0.0;
-
-        for ( var i0 = length - 1, i1 = 0; i1 < length; i0 = i1++) {
-            var v0 = positions[i0];
-            var v1 = positions[i1];
-
-            area += (v0.x * v1.y) - (v1.x * v0.y);
-        }
-
-        return area * 0.5;
-    };
-
-    /**
-     * @returns {WindingOrder} The winding order.
-     *
-     * @exception {DeveloperError} At least three positions are required.
-     */
-    PolygonPipeline.computeWindingOrder2D = function(positions) {
-        var area = PolygonPipeline.computeArea2D(positions);
-        return (area > 0.0) ? WindingOrder.COUNTER_CLOCKWISE : WindingOrder.CLOCKWISE;
-    };
-
-    /**
-     * Triangulate a polygon.
-     *
-     * @param {Cartesian2[]} positions Cartesian2 array containing the vertices of the polygon
-     * @param {Number[]} [holes] An array of the staring indices of the holes.
-     * @returns {Number[]} Index array representing triangles that fill the polygon
-     */
-    PolygonPipeline.triangulate = function(positions, holes) {
-                if (!defined(positions)) {
-            throw new DeveloperError('positions is required.');
-        }
-        
-        var flattenedPositions = Cartesian2.packArray(positions);
-        return earcut(flattenedPositions, holes, 2);
-    };
-
-    var subdivisionV0Scratch = new Cartesian3();
-    var subdivisionV1Scratch = new Cartesian3();
-    var subdivisionV2Scratch = new Cartesian3();
-    var subdivisionS0Scratch = new Cartesian3();
-    var subdivisionS1Scratch = new Cartesian3();
-    var subdivisionS2Scratch = new Cartesian3();
-    var subdivisionMidScratch = new Cartesian3();
-
-    /**
-     * Subdivides positions and raises points to the surface of the ellipsoid.
-     *
-     * @param {Ellipsoid} ellipsoid The ellipsoid the polygon in on.
-     * @param {Cartesian3[]} positions An array of {@link Cartesian3} positions of the polygon.
-     * @param {Number[]} indices An array of indices that determines the triangles in the polygon.
-     * @param {Number} [granularity=CesiumMath.RADIANS_PER_DEGREE] The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
-     *
-     * @exception {DeveloperError} At least three indices are required.
-     * @exception {DeveloperError} The number of indices must be divisable by three.
-     * @exception {DeveloperError} Granularity must be greater than zero.
-     */
-    PolygonPipeline.computeSubdivision = function(ellipsoid, positions, indices, granularity) {
-        granularity = defaultValue(granularity, CesiumMath.RADIANS_PER_DEGREE);
-
-                if (!defined(ellipsoid)) {
-            throw new DeveloperError('ellipsoid is required.');
-        }
-        if (!defined(positions)) {
-            throw new DeveloperError('positions is required.');
-        }
-        if (!defined(indices)) {
-            throw new DeveloperError('indices is required.');
-        }
-        if (indices.length < 3) {
-            throw new DeveloperError('At least three indices are required.');
-        }
-        if (indices.length % 3 !== 0) {
-            throw new DeveloperError('The number of indices must be divisable by three.');
-        }
-        if (granularity <= 0.0) {
-            throw new DeveloperError('granularity must be greater than zero.');
-        }
-        
-        // triangles that need (or might need) to be subdivided.
-        var triangles = indices.slice(0);
-
-        // New positions due to edge splits are appended to the positions list.
-        var i;
-        var length = positions.length;
-        var subdividedPositions = new Array(length * 3);
-        var q = 0;
-        for (i = 0; i < length; i++) {
-            var item = positions[i];
-            subdividedPositions[q++] = item.x;
-            subdividedPositions[q++] = item.y;
-            subdividedPositions[q++] = item.z;
-        }
-
-        var subdividedIndices = [];
-
-        // Used to make sure shared edges are not split more than once.
-        var edges = {};
-
-        var radius = ellipsoid.maximumRadius;
-        var minDistance = CesiumMath.chordLength(granularity, radius);
-        var minDistanceSqrd = minDistance * minDistance;
-
-        while (triangles.length > 0) {
-            var i2 = triangles.pop();
-            var i1 = triangles.pop();
-            var i0 = triangles.pop();
-
-            var v0 = Cartesian3.fromArray(subdividedPositions, i0 * 3, subdivisionV0Scratch);
-            var v1 = Cartesian3.fromArray(subdividedPositions, i1 * 3, subdivisionV1Scratch);
-            var v2 = Cartesian3.fromArray(subdividedPositions, i2 * 3, subdivisionV2Scratch);
-
-            var s0 = Cartesian3.multiplyByScalar(Cartesian3.normalize(v0, subdivisionS0Scratch), radius, subdivisionS0Scratch);
-            var s1 = Cartesian3.multiplyByScalar(Cartesian3.normalize(v1, subdivisionS1Scratch), radius, subdivisionS1Scratch);
-            var s2 = Cartesian3.multiplyByScalar(Cartesian3.normalize(v2, subdivisionS2Scratch), radius, subdivisionS2Scratch);
-
-            var g0 = Cartesian3.magnitudeSquared(Cartesian3.subtract(s0, s1, subdivisionMidScratch));
-            var g1 = Cartesian3.magnitudeSquared(Cartesian3.subtract(s1, s2, subdivisionMidScratch));
-            var g2 = Cartesian3.magnitudeSquared(Cartesian3.subtract(s2, s0, subdivisionMidScratch));
-
-            var max = Math.max(g0, g1, g2);
-            var edge;
-            var mid;
-
-            // if the max length squared of a triangle edge is greater than the chord length of squared
-            // of the granularity, subdivide the triangle
-            if (max > minDistanceSqrd) {
-                if (g0 === max) {
-                    edge = Math.min(i0, i1) + ' ' + Math.max(i0, i1);
-
-                    i = edges[edge];
-                    if (!defined(i)) {
-                        mid = Cartesian3.add(v0, v1, subdivisionMidScratch);
-                        Cartesian3.multiplyByScalar(mid, 0.5, mid);
-                        subdividedPositions.push(mid.x, mid.y, mid.z);
-                        i = subdividedPositions.length / 3 - 1;
-                        edges[edge] = i;
-                    }
-
-                    triangles.push(i0, i, i2);
-                    triangles.push(i, i1, i2);
-                } else if (g1 === max) {
-                    edge = Math.min(i1, i2) + ' ' + Math.max(i1, i2);
-
-                    i = edges[edge];
-                    if (!defined(i)) {
-                        mid = Cartesian3.add(v1, v2, subdivisionMidScratch);
-                        Cartesian3.multiplyByScalar(mid, 0.5, mid);
-                        subdividedPositions.push(mid.x, mid.y, mid.z);
-                        i = subdividedPositions.length / 3 - 1;
-                        edges[edge] = i;
-                    }
-
-                    triangles.push(i1, i, i0);
-                    triangles.push(i, i2, i0);
-                } else if (g2 === max) {
-                    edge = Math.min(i2, i0) + ' ' + Math.max(i2, i0);
-
-                    i = edges[edge];
-                    if (!defined(i)) {
-                        mid = Cartesian3.add(v2, v0, subdivisionMidScratch);
-                        Cartesian3.multiplyByScalar(mid, 0.5, mid);
-                        subdividedPositions.push(mid.x, mid.y, mid.z);
-                        i = subdividedPositions.length / 3 - 1;
-                        edges[edge] = i;
-                    }
-
-                    triangles.push(i2, i, i1);
-                    triangles.push(i, i0, i1);
-                }
-            } else {
-                subdividedIndices.push(i0);
-                subdividedIndices.push(i1);
-                subdividedIndices.push(i2);
-            }
-        }
-
-        return new Geometry({
-            attributes : {
-                position : new GeometryAttribute({
-                    componentDatatype : ComponentDatatype.DOUBLE,
-                    componentsPerAttribute : 3,
-                    values : subdividedPositions
-                })
-            },
-            indices : subdividedIndices,
-            primitiveType : PrimitiveType.TRIANGLES
-        });
-    };
-
-    /**
-     * Scales each position of a geometry's position attribute to a height, in place.
-     *
-     * @param {Number[]} positions The array of numbers representing the positions to be scaled
-     * @param {Number} [height=0.0] The desired height to add to the positions
-     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the positions lie.
-     * @param {Boolean} [scaleToSurface=true] <code>true</code> if the positions need to be scaled to the surface before the height is added.
-     * @returns {Number[]} The input array of positions, scaled to height
-     */
-    PolygonPipeline.scaleToGeodeticHeight = function(positions, height, ellipsoid, scaleToSurface) {
-        ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
-
-        var n = scaleToGeodeticHeightN;
-        var p = scaleToGeodeticHeightP;
-
-        height = defaultValue(height, 0.0);
-        scaleToSurface = defaultValue(scaleToSurface, true);
-
-        if (defined(positions)) {
-            var length = positions.length;
-
-            for ( var i = 0; i < length; i += 3) {
-                Cartesian3.fromArray(positions, i, p);
-
-                if (scaleToSurface) {
-                    p = ellipsoid.scaleToGeodeticSurface(p, p);
-                }
-
-                if (height !== 0) {
-                    n = ellipsoid.geodeticSurfaceNormal(p, n);
-
-                    Cartesian3.multiplyByScalar(n, height, n);
-                    Cartesian3.add(p, n, p);
-                }
-
-                positions[i] = p.x;
-                positions[i + 1] = p.y;
-                positions[i + 2] = p.z;
-            }
-        }
-
-        return positions;
-    };
-
-    return PolygonPipeline;
-});
-
-/*global define*/
-define('Core/Quaternion',[
-        './Cartesian3',
-        './Check',
-        './defaultValue',
-        './defined',
-        './DeveloperError',
-        './FeatureDetection',
-        './freezeObject',
-        './Math',
-        './Matrix3'
-    ], function(
-        Cartesian3,
-        Check,
-        defaultValue,
-        defined,
-        DeveloperError,
-        FeatureDetection,
-        freezeObject,
-        CesiumMath,
-        Matrix3) {
-    'use strict';
-
-    /**
-     * A set of 4-dimensional coordinates used to represent rotation in 3-dimensional space.
-     * @alias Quaternion
-     * @constructor
-     *
-     * @param {Number} [x=0.0] The X component.
-     * @param {Number} [y=0.0] The Y component.
-     * @param {Number} [z=0.0] The Z component.
-     * @param {Number} [w=0.0] The W component.
-     *
-     * @see PackableForInterpolation
-     */
-    function Quaternion(x, y, z, w) {
-        /**
-         * The X component.
-         * @type {Number}
-         * @default 0.0
-         */
-        this.x = defaultValue(x, 0.0);
-
-        /**
-         * The Y component.
-         * @type {Number}
-         * @default 0.0
-         */
-        this.y = defaultValue(y, 0.0);
-
-        /**
-         * The Z component.
-         * @type {Number}
-         * @default 0.0
-         */
-        this.z = defaultValue(z, 0.0);
-
-        /**
-         * The W component.
-         * @type {Number}
-         * @default 0.0
-         */
-        this.w = defaultValue(w, 0.0);
-    }
-
-    var fromAxisAngleScratch = new Cartesian3();
-
-    /**
-     * Computes a quaternion representing a rotation around an axis.
-     *
-     * @param {Cartesian3} axis The axis of rotation.
-     * @param {Number} angle The angle in radians to rotate around the axis.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.fromAxisAngle = function(axis, angle, result) {
-                Check.typeOf.object('axis', axis);
-        Check.typeOf.number('angle', angle);
-        
-        var halfAngle = angle / 2.0;
-        var s = Math.sin(halfAngle);
-        fromAxisAngleScratch = Cartesian3.normalize(axis, fromAxisAngleScratch);
-
-        var x = fromAxisAngleScratch.x * s;
-        var y = fromAxisAngleScratch.y * s;
-        var z = fromAxisAngleScratch.z * s;
-        var w = Math.cos(halfAngle);
-        if (!defined(result)) {
-            return new Quaternion(x, y, z, w);
-        }
-        result.x = x;
-        result.y = y;
-        result.z = z;
-        result.w = w;
-        return result;
-    };
-
-    var fromRotationMatrixNext = [1, 2, 0];
-    var fromRotationMatrixQuat = new Array(3);
-    /**
-     * Computes a Quaternion from the provided Matrix3 instance.
-     *
-     * @param {Matrix3} matrix The rotation matrix.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @see Matrix3.fromQuaternion
-     */
-    Quaternion.fromRotationMatrix = function(matrix, result) {
-                Check.typeOf.object('matrix', matrix);
-        
-        var root;
-        var x;
-        var y;
-        var z;
-        var w;
-
-        var m00 = matrix[Matrix3.COLUMN0ROW0];
-        var m11 = matrix[Matrix3.COLUMN1ROW1];
-        var m22 = matrix[Matrix3.COLUMN2ROW2];
-        var trace = m00 + m11 + m22;
-
-        if (trace > 0.0) {
-            // |w| > 1/2, may as well choose w > 1/2
-            root = Math.sqrt(trace + 1.0); // 2w
-            w = 0.5 * root;
-            root = 0.5 / root; // 1/(4w)
-
-            x = (matrix[Matrix3.COLUMN1ROW2] - matrix[Matrix3.COLUMN2ROW1]) * root;
-            y = (matrix[Matrix3.COLUMN2ROW0] - matrix[Matrix3.COLUMN0ROW2]) * root;
-            z = (matrix[Matrix3.COLUMN0ROW1] - matrix[Matrix3.COLUMN1ROW0]) * root;
-        } else {
-            // |w| <= 1/2
-            var next = fromRotationMatrixNext;
-
-            var i = 0;
-            if (m11 > m00) {
-                i = 1;
-            }
-            if (m22 > m00 && m22 > m11) {
-                i = 2;
-            }
-            var j = next[i];
-            var k = next[j];
-
-            root = Math.sqrt(matrix[Matrix3.getElementIndex(i, i)] - matrix[Matrix3.getElementIndex(j, j)] - matrix[Matrix3.getElementIndex(k, k)] + 1.0);
-
-            var quat = fromRotationMatrixQuat;
-            quat[i] = 0.5 * root;
-            root = 0.5 / root;
-            w = (matrix[Matrix3.getElementIndex(k, j)] - matrix[Matrix3.getElementIndex(j, k)]) * root;
-            quat[j] = (matrix[Matrix3.getElementIndex(j, i)] + matrix[Matrix3.getElementIndex(i, j)]) * root;
-            quat[k] = (matrix[Matrix3.getElementIndex(k, i)] + matrix[Matrix3.getElementIndex(i, k)]) * root;
-
-            x = -quat[0];
-            y = -quat[1];
-            z = -quat[2];
-        }
-
-        if (!defined(result)) {
-            return new Quaternion(x, y, z, w);
-        }
-        result.x = x;
-        result.y = y;
-        result.z = z;
-        result.w = w;
-        return result;
-    };
-
-    var scratchHPRQuaternion = new Quaternion();
-
-    /**
-     * Computes a rotation from the given heading, pitch and roll angles. Heading is the rotation about the
-     * negative z axis. Pitch is the rotation about the negative y axis. Roll is the rotation about
-     * the positive x axis.
-     *
-     * @param {Number} heading The heading angle in radians.
-     * @param {Number} pitch The pitch angle in radians.
-     * @param {Number} roll The roll angle in radians.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if none was provided.
-     */
-    Quaternion.fromHeadingPitchRoll = function(heading, pitch, roll, result) {
-                Check.typeOf.number('heading', heading);
-        Check.typeOf.number('pitch', pitch);
-        Check.typeOf.number('roll', roll);
-        
-        var rollQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_X, roll, scratchHPRQuaternion);
-        var pitchQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Y, -pitch, result);
-        result = Quaternion.multiply(pitchQuaternion, rollQuaternion, pitchQuaternion);
-        var headingQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Z, -heading, scratchHPRQuaternion);
-        return Quaternion.multiply(headingQuaternion, result, result);
-    };
-
-    var sampledQuaternionAxis = new Cartesian3();
-    var sampledQuaternionRotation = new Cartesian3();
-    var sampledQuaternionTempQuaternion = new Quaternion();
-    var sampledQuaternionQuaternion0 = new Quaternion();
-    var sampledQuaternionQuaternion0Conjugate = new Quaternion();
-
-    /**
-     * The number of elements used to pack the object into an array.
-     * @type {Number}
-     */
-    Quaternion.packedLength = 4;
-
-    /**
-     * Stores the provided instance into the provided array.
-     *
-     * @param {Quaternion} value The value to pack.
-     * @param {Number[]} array The array to pack into.
-     * @param {Number} [startingIndex=0] The index into the array at which to start packing the elements.
-     *
-     * @returns {Number[]} The array that was packed into
-     */
-    Quaternion.pack = function(value, array, startingIndex) {
-                Check.typeOf.object('value', value);
-        Check.defined('array', array);
-        
-        startingIndex = defaultValue(startingIndex, 0);
-
-        array[startingIndex++] = value.x;
-        array[startingIndex++] = value.y;
-        array[startingIndex++] = value.z;
-        array[startingIndex] = value.w;
-
-        return array;
-    };
-
-    /**
-     * Retrieves an instance from a packed array.
-     *
-     * @param {Number[]} array The packed array.
-     * @param {Number} [startingIndex=0] The starting index of the element to be unpacked.
-     * @param {Quaternion} [result] The object into which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.unpack = function(array, startingIndex, result) {
-                Check.defined('array', array);
-        
-        startingIndex = defaultValue(startingIndex, 0);
-
-        if (!defined(result)) {
-            result = new Quaternion();
-        }
-        result.x = array[startingIndex];
-        result.y = array[startingIndex + 1];
-        result.z = array[startingIndex + 2];
-        result.w = array[startingIndex + 3];
-        return result;
-    };
-
-    /**
-     * The number of elements used to store the object into an array in its interpolatable form.
-     * @type {Number}
-     */
-    Quaternion.packedInterpolationLength = 3;
-
-    /**
-     * Converts a packed array into a form suitable for interpolation.
-     *
-     * @param {Number[]} packedArray The packed array.
-     * @param {Number} [startingIndex=0] The index of the first element to be converted.
-     * @param {Number} [lastIndex=packedArray.length] The index of the last element to be converted.
-     * @param {Number[]} result The object into which to store the result.
-     */
-    Quaternion.convertPackedArrayForInterpolation = function(packedArray, startingIndex, lastIndex, result) {
-        Quaternion.unpack(packedArray, lastIndex * 4, sampledQuaternionQuaternion0Conjugate);
-        Quaternion.conjugate(sampledQuaternionQuaternion0Conjugate, sampledQuaternionQuaternion0Conjugate);
-
-        for (var i = 0, len = lastIndex - startingIndex + 1; i < len; i++) {
-            var offset = i * 3;
-            Quaternion.unpack(packedArray, (startingIndex + i) * 4, sampledQuaternionTempQuaternion);
-
-            Quaternion.multiply(sampledQuaternionTempQuaternion, sampledQuaternionQuaternion0Conjugate, sampledQuaternionTempQuaternion);
-
-            if (sampledQuaternionTempQuaternion.w < 0) {
-                Quaternion.negate(sampledQuaternionTempQuaternion, sampledQuaternionTempQuaternion);
-            }
-
-            Quaternion.computeAxis(sampledQuaternionTempQuaternion, sampledQuaternionAxis);
-            var angle = Quaternion.computeAngle(sampledQuaternionTempQuaternion);
-            result[offset] = sampledQuaternionAxis.x * angle;
-            result[offset + 1] = sampledQuaternionAxis.y * angle;
-            result[offset + 2] = sampledQuaternionAxis.z * angle;
-        }
-    };
-
-    /**
-     * Retrieves an instance from a packed array converted with {@link convertPackedArrayForInterpolation}.
-     *
-     * @param {Number[]} array The array previously packed for interpolation.
-     * @param {Number[]} sourceArray The original packed array.
-     * @param {Number} [firstIndex=0] The firstIndex used to convert the array.
-     * @param {Number} [lastIndex=packedArray.length] The lastIndex used to convert the array.
-     * @param {Quaternion} [result] The object into which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.unpackInterpolationResult = function(array, sourceArray, firstIndex, lastIndex, result) {
-        if (!defined(result)) {
-            result = new Quaternion();
-        }
-        Cartesian3.fromArray(array, 0, sampledQuaternionRotation);
-        var magnitude = Cartesian3.magnitude(sampledQuaternionRotation);
-
-        Quaternion.unpack(sourceArray, lastIndex * 4, sampledQuaternionQuaternion0);
-
-        if (magnitude === 0) {
-            Quaternion.clone(Quaternion.IDENTITY, sampledQuaternionTempQuaternion);
-        } else {
-            Quaternion.fromAxisAngle(sampledQuaternionRotation, magnitude, sampledQuaternionTempQuaternion);
-        }
-
-        return Quaternion.multiply(sampledQuaternionTempQuaternion, sampledQuaternionQuaternion0, result);
-    };
-
-    /**
-     * Duplicates a Quaternion instance.
-     *
-     * @param {Quaternion} quaternion The quaternion to duplicate.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided. (Returns undefined if quaternion is undefined)
-     */
-    Quaternion.clone = function(quaternion, result) {
-        if (!defined(quaternion)) {
-            return undefined;
-        }
-
-        if (!defined(result)) {
-            return new Quaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
-        }
-
-        result.x = quaternion.x;
-        result.y = quaternion.y;
-        result.z = quaternion.z;
-        result.w = quaternion.w;
-        return result;
-    };
-
-    /**
-     * Computes the conjugate of the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to conjugate.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.conjugate = function(quaternion, result) {
-                Check.typeOf.object('quaternion', quaternion);
-        Check.typeOf.object('result', result);
-        
-        result.x = -quaternion.x;
-        result.y = -quaternion.y;
-        result.z = -quaternion.z;
-        result.w = quaternion.w;
-        return result;
-    };
-
-    /**
-     * Computes magnitude squared for the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to conjugate.
-     * @returns {Number} The magnitude squared.
-     */
-    Quaternion.magnitudeSquared = function(quaternion) {
-                Check.typeOf.object('quaternion', quaternion);
-        
-        return quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w;
-    };
-
-    /**
-     * Computes magnitude for the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to conjugate.
-     * @returns {Number} The magnitude.
-     */
-    Quaternion.magnitude = function(quaternion) {
-        return Math.sqrt(Quaternion.magnitudeSquared(quaternion));
-    };
-
-    /**
-     * Computes the normalized form of the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to normalize.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.normalize = function(quaternion, result) {
-                Check.typeOf.object('result', result);
-        
-        var inverseMagnitude = 1.0 / Quaternion.magnitude(quaternion);
-        var x = quaternion.x * inverseMagnitude;
-        var y = quaternion.y * inverseMagnitude;
-        var z = quaternion.z * inverseMagnitude;
-        var w = quaternion.w * inverseMagnitude;
-
-        result.x = x;
-        result.y = y;
-        result.z = z;
-        result.w = w;
-        return result;
-    };
-
-    /**
-     * Computes the inverse of the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to normalize.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.inverse = function(quaternion, result) {
-                Check.typeOf.object('result', result);
-        
-        var magnitudeSquared = Quaternion.magnitudeSquared(quaternion);
-        result = Quaternion.conjugate(quaternion, result);
-        return Quaternion.multiplyByScalar(result, 1.0 / magnitudeSquared, result);
-    };
-
-    /**
-     * Computes the componentwise sum of two quaternions.
-     *
-     * @param {Quaternion} left The first quaternion.
-     * @param {Quaternion} right The second quaternion.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.add = function(left, right, result) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        Check.typeOf.object('result', result);
-        
-        result.x = left.x + right.x;
-        result.y = left.y + right.y;
-        result.z = left.z + right.z;
-        result.w = left.w + right.w;
-        return result;
-    };
-
-    /**
-     * Computes the componentwise difference of two quaternions.
-     *
-     * @param {Quaternion} left The first quaternion.
-     * @param {Quaternion} right The second quaternion.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.subtract = function(left, right, result) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        Check.typeOf.object('result', result);
-        
-        result.x = left.x - right.x;
-        result.y = left.y - right.y;
-        result.z = left.z - right.z;
-        result.w = left.w - right.w;
-        return result;
-    };
-
-    /**
-     * Negates the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to be negated.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.negate = function(quaternion, result) {
-                Check.typeOf.object('quaternion', quaternion);
-        Check.typeOf.object('result', result);
-        
-        result.x = -quaternion.x;
-        result.y = -quaternion.y;
-        result.z = -quaternion.z;
-        result.w = -quaternion.w;
-        return result;
-    };
-
-    /**
-     * Computes the dot (scalar) product of two quaternions.
-     *
-     * @param {Quaternion} left The first quaternion.
-     * @param {Quaternion} right The second quaternion.
-     * @returns {Number} The dot product.
-     */
-    Quaternion.dot = function(left, right) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        
-        return left.x * right.x + left.y * right.y + left.z * right.z + left.w * right.w;
-    };
-
-    /**
-     * Computes the product of two quaternions.
-     *
-     * @param {Quaternion} left The first quaternion.
-     * @param {Quaternion} right The second quaternion.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.multiply = function(left, right, result) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        Check.typeOf.object('result', result);
-        
-        var leftX = left.x;
-        var leftY = left.y;
-        var leftZ = left.z;
-        var leftW = left.w;
-
-        var rightX = right.x;
-        var rightY = right.y;
-        var rightZ = right.z;
-        var rightW = right.w;
-
-        var x = leftW * rightX + leftX * rightW + leftY * rightZ - leftZ * rightY;
-        var y = leftW * rightY - leftX * rightZ + leftY * rightW + leftZ * rightX;
-        var z = leftW * rightZ + leftX * rightY - leftY * rightX + leftZ * rightW;
-        var w = leftW * rightW - leftX * rightX - leftY * rightY - leftZ * rightZ;
-
-        result.x = x;
-        result.y = y;
-        result.z = z;
-        result.w = w;
-        return result;
-    };
-
-    /**
-     * Multiplies the provided quaternion componentwise by the provided scalar.
-     *
-     * @param {Quaternion} quaternion The quaternion to be scaled.
-     * @param {Number} scalar The scalar to multiply with.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.multiplyByScalar = function(quaternion, scalar, result) {
-                Check.typeOf.object('quaternion', quaternion);
-        Check.typeOf.number('scalar', scalar);
-        Check.typeOf.object('result', result);
-        
-        result.x = quaternion.x * scalar;
-        result.y = quaternion.y * scalar;
-        result.z = quaternion.z * scalar;
-        result.w = quaternion.w * scalar;
-        return result;
-    };
-
-    /**
-     * Divides the provided quaternion componentwise by the provided scalar.
-     *
-     * @param {Quaternion} quaternion The quaternion to be divided.
-     * @param {Number} scalar The scalar to divide by.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.divideByScalar = function(quaternion, scalar, result) {
-                Check.typeOf.object('quaternion', quaternion);
-        Check.typeOf.number('scalar', scalar);
-        Check.typeOf.object('result', result);
-        
-        result.x = quaternion.x / scalar;
-        result.y = quaternion.y / scalar;
-        result.z = quaternion.z / scalar;
-        result.w = quaternion.w / scalar;
-        return result;
-    };
-
-    /**
-     * Computes the axis of rotation of the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to use.
-     * @param {Cartesian3} result The object onto which to store the result.
-     * @returns {Cartesian3} The modified result parameter.
-     */
-    Quaternion.computeAxis = function(quaternion, result) {
-                Check.typeOf.object('quaternion', quaternion);
-        Check.typeOf.object('result', result);
-        
-        var w = quaternion.w;
-        if (Math.abs(w - 1.0) < CesiumMath.EPSILON6) {
-            result.x = result.y = result.z = 0;
-            return result;
-        }
-
-        var scalar = 1.0 / Math.sqrt(1.0 - (w * w));
-
-        result.x = quaternion.x * scalar;
-        result.y = quaternion.y * scalar;
-        result.z = quaternion.z * scalar;
-        return result;
-    };
-
-    /**
-     * Computes the angle of rotation of the provided quaternion.
-     *
-     * @param {Quaternion} quaternion The quaternion to use.
-     * @returns {Number} The angle of rotation.
-     */
-    Quaternion.computeAngle = function(quaternion) {
-                Check.typeOf.object('quaternion', quaternion);
-        
-        if (Math.abs(quaternion.w - 1.0) < CesiumMath.EPSILON6) {
-            return 0.0;
-        }
-        return 2.0 * Math.acos(quaternion.w);
-    };
-
-    var lerpScratch = new Quaternion();
-    /**
-     * Computes the linear interpolation or extrapolation at t using the provided quaternions.
-     *
-     * @param {Quaternion} start The value corresponding to t at 0.0.
-     * @param {Quaternion} end The value corresponding to t at 1.0.
-     * @param {Number} t The point along t at which to interpolate.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.lerp = function(start, end, t, result) {
-                Check.typeOf.object('start', start);
-        Check.typeOf.object('end', end);
-        Check.typeOf.number('t', t);
-        Check.typeOf.object('result', result);
-        
-        lerpScratch = Quaternion.multiplyByScalar(end, t, lerpScratch);
-        result = Quaternion.multiplyByScalar(start, 1.0 - t, result);
-        return Quaternion.add(lerpScratch, result, result);
-    };
-
-    var slerpEndNegated = new Quaternion();
-    var slerpScaledP = new Quaternion();
-    var slerpScaledR = new Quaternion();
-    /**
-     * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
-     *
-     * @param {Quaternion} start The value corresponding to t at 0.0.
-     * @param {Quaternion} end The value corresponding to t at 1.0.
-     * @param {Number} t The point along t at which to interpolate.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     *
-     * @see Quaternion#fastSlerp
-     */
-    Quaternion.slerp = function(start, end, t, result) {
-                Check.typeOf.object('start', start);
-        Check.typeOf.object('end', end);
-        Check.typeOf.number('t', t);
-        Check.typeOf.object('result', result);
-        
-        var dot = Quaternion.dot(start, end);
-
-        // The angle between start must be acute. Since q and -q represent
-        // the same rotation, negate q to get the acute angle.
-        var r = end;
-        if (dot < 0.0) {
-            dot = -dot;
-            r = slerpEndNegated = Quaternion.negate(end, slerpEndNegated);
-        }
-
-        // dot > 0, as the dot product approaches 1, the angle between the
-        // quaternions vanishes. use linear interpolation.
-        if (1.0 - dot < CesiumMath.EPSILON6) {
-            return Quaternion.lerp(start, r, t, result);
-        }
-
-        var theta = Math.acos(dot);
-        slerpScaledP = Quaternion.multiplyByScalar(start, Math.sin((1 - t) * theta), slerpScaledP);
-        slerpScaledR = Quaternion.multiplyByScalar(r, Math.sin(t * theta), slerpScaledR);
-        result = Quaternion.add(slerpScaledP, slerpScaledR, result);
-        return Quaternion.multiplyByScalar(result, 1.0 / Math.sin(theta), result);
-    };
-
-    /**
-     * The logarithmic quaternion function.
-     *
-     * @param {Quaternion} quaternion The unit quaternion.
-     * @param {Cartesian3} result The object onto which to store the result.
-     * @returns {Cartesian3} The modified result parameter.
-     */
-    Quaternion.log = function(quaternion, result) {
-                Check.typeOf.object('quaternion', quaternion);
-        Check.typeOf.object('result', result);
-        
-        var theta = CesiumMath.acosClamped(quaternion.w);
-        var thetaOverSinTheta = 0.0;
-
-        if (theta !== 0.0) {
-            thetaOverSinTheta = theta / Math.sin(theta);
-        }
-
-        return Cartesian3.multiplyByScalar(quaternion, thetaOverSinTheta, result);
-    };
-
-    /**
-     * The exponential quaternion function.
-     *
-     * @param {Cartesian3} cartesian The cartesian.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     */
-    Quaternion.exp = function(cartesian, result) {
-                Check.typeOf.object('cartesian', cartesian);
-        Check.typeOf.object('result', result);
-        
-        var theta = Cartesian3.magnitude(cartesian);
-        var sinThetaOverTheta = 0.0;
-
-        if (theta !== 0.0) {
-            sinThetaOverTheta = Math.sin(theta) / theta;
-        }
-
-        result.x = cartesian.x * sinThetaOverTheta;
-        result.y = cartesian.y * sinThetaOverTheta;
-        result.z = cartesian.z * sinThetaOverTheta;
-        result.w = Math.cos(theta);
-
-        return result;
-    };
-
-    var squadScratchCartesian0 = new Cartesian3();
-    var squadScratchCartesian1 = new Cartesian3();
-    var squadScratchQuaternion0 = new Quaternion();
-    var squadScratchQuaternion1 = new Quaternion();
-
-    /**
-     * Computes an inner quadrangle point.
-     * <p>This will compute quaternions that ensure a squad curve is C<sup>1</sup>.</p>
-     *
-     * @param {Quaternion} q0 The first quaternion.
-     * @param {Quaternion} q1 The second quaternion.
-     * @param {Quaternion} q2 The third quaternion.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     *
-     * @see Quaternion#squad
-     */
-    Quaternion.computeInnerQuadrangle = function(q0, q1, q2, result) {
-                Check.typeOf.object('q0', q0);
-        Check.typeOf.object('q1', q1);
-        Check.typeOf.object('q2', q2);
-        Check.typeOf.object('result', result);
-        
-        var qInv = Quaternion.conjugate(q1, squadScratchQuaternion0);
-        Quaternion.multiply(qInv, q2, squadScratchQuaternion1);
-        var cart0 = Quaternion.log(squadScratchQuaternion1, squadScratchCartesian0);
-
-        Quaternion.multiply(qInv, q0, squadScratchQuaternion1);
-        var cart1 = Quaternion.log(squadScratchQuaternion1, squadScratchCartesian1);
-
-        Cartesian3.add(cart0, cart1, cart0);
-        Cartesian3.multiplyByScalar(cart0, 0.25, cart0);
-        Cartesian3.negate(cart0, cart0);
-        Quaternion.exp(cart0, squadScratchQuaternion0);
-
-        return Quaternion.multiply(q1, squadScratchQuaternion0, result);
-    };
-
-    /**
-     * Computes the spherical quadrangle interpolation between quaternions.
-     *
-     * @param {Quaternion} q0 The first quaternion.
-     * @param {Quaternion} q1 The second quaternion.
-     * @param {Quaternion} s0 The first inner quadrangle.
-     * @param {Quaternion} s1 The second inner quadrangle.
-     * @param {Number} t The time in [0,1] used to interpolate.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     *
-     *
-     * @example
-     * // 1. compute the squad interpolation between two quaternions on a curve
-     * var s0 = Cesium.Quaternion.computeInnerQuadrangle(quaternions[i - 1], quaternions[i], quaternions[i + 1], new Cesium.Quaternion());
-     * var s1 = Cesium.Quaternion.computeInnerQuadrangle(quaternions[i], quaternions[i + 1], quaternions[i + 2], new Cesium.Quaternion());
-     * var q = Cesium.Quaternion.squad(quaternions[i], quaternions[i + 1], s0, s1, t, new Cesium.Quaternion());
-     *
-     * // 2. compute the squad interpolation as above but where the first quaternion is a end point.
-     * var s1 = Cesium.Quaternion.computeInnerQuadrangle(quaternions[0], quaternions[1], quaternions[2], new Cesium.Quaternion());
-     * var q = Cesium.Quaternion.squad(quaternions[0], quaternions[1], quaternions[0], s1, t, new Cesium.Quaternion());
-     *
-     * @see Quaternion#computeInnerQuadrangle
-     */
-    Quaternion.squad = function(q0, q1, s0, s1, t, result) {
-                Check.typeOf.object('q0', q0);
-        Check.typeOf.object('q1', q1);
-        Check.typeOf.object('s0', s0);
-        Check.typeOf.object('s1', s1);
-        Check.typeOf.number('t', t);
-        Check.typeOf.object('result', result);
-        
-        var slerp0 = Quaternion.slerp(q0, q1, t, squadScratchQuaternion0);
-        var slerp1 = Quaternion.slerp(s0, s1, t, squadScratchQuaternion1);
-        return Quaternion.slerp(slerp0, slerp1, 2.0 * t * (1.0 - t), result);
-    };
-
-    var fastSlerpScratchQuaternion = new Quaternion();
-    var opmu = 1.90110745351730037;
-    var u = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
-    var v = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
-    var bT = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
-    var bD = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
-
-    for (var i = 0; i < 7; ++i) {
-        var s = i + 1.0;
-        var t = 2.0 * s + 1.0;
-        u[i] = 1.0 / (s * t);
-        v[i] = s / t;
-    }
-
-    u[7] = opmu / (8.0 * 17.0);
-    v[7] = opmu * 8.0 / 17.0;
-
-    /**
-     * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
-     * This implementation is faster than {@link Quaternion#slerp}, but is only accurate up to 10<sup>-6</sup>.
-     *
-     * @param {Quaternion} start The value corresponding to t at 0.0.
-     * @param {Quaternion} end The value corresponding to t at 1.0.
-     * @param {Number} t The point along t at which to interpolate.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter.
-     *
-     * @see Quaternion#slerp
-     */
-    Quaternion.fastSlerp = function(start, end, t, result) {
-                Check.typeOf.object('start', start);
-        Check.typeOf.object('end', end);
-        Check.typeOf.number('t', t);
-        Check.typeOf.object('result', result);
-        
-        var x = Quaternion.dot(start, end);
-
-        var sign;
-        if (x >= 0) {
-            sign = 1.0;
-        } else {
-            sign = -1.0;
-            x = -x;
-        }
-
-        var xm1 = x - 1.0;
-        var d = 1.0 - t;
-        var sqrT = t * t;
-        var sqrD = d * d;
-
-        for (var i = 7; i >= 0; --i) {
-            bT[i] = (u[i] * sqrT - v[i]) * xm1;
-            bD[i] = (u[i] * sqrD - v[i]) * xm1;
-        }
-
-        var cT = sign * t * (
-            1.0 + bT[0] * (1.0 + bT[1] * (1.0 + bT[2] * (1.0 + bT[3] * (
-            1.0 + bT[4] * (1.0 + bT[5] * (1.0 + bT[6] * (1.0 + bT[7]))))))));
-        var cD = d * (
-            1.0 + bD[0] * (1.0 + bD[1] * (1.0 + bD[2] * (1.0 + bD[3] * (
-            1.0 + bD[4] * (1.0 + bD[5] * (1.0 + bD[6] * (1.0 + bD[7]))))))));
-
-        var temp = Quaternion.multiplyByScalar(start, cD, fastSlerpScratchQuaternion);
-        Quaternion.multiplyByScalar(end, cT, result);
-        return Quaternion.add(temp, result, result);
-    };
-
-    /**
-     * Computes the spherical quadrangle interpolation between quaternions.
-     * An implementation that is faster than {@link Quaternion#squad}, but less accurate.
-     *
-     * @param {Quaternion} q0 The first quaternion.
-     * @param {Quaternion} q1 The second quaternion.
-     * @param {Quaternion} s0 The first inner quadrangle.
-     * @param {Quaternion} s1 The second inner quadrangle.
-     * @param {Number} t The time in [0,1] used to interpolate.
-     * @param {Quaternion} result The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new instance if none was provided.
-     *
-     * @see Quaternion#squad
-     */
-    Quaternion.fastSquad = function(q0, q1, s0, s1, t, result) {
-                Check.typeOf.object('q0', q0);
-        Check.typeOf.object('q1', q1);
-        Check.typeOf.object('s0', s0);
-        Check.typeOf.object('s1', s1);
-        Check.typeOf.number('t', t);
-        Check.typeOf.object('result', result);
-        
-        var slerp0 = Quaternion.fastSlerp(q0, q1, t, squadScratchQuaternion0);
-        var slerp1 = Quaternion.fastSlerp(s0, s1, t, squadScratchQuaternion1);
-        return Quaternion.fastSlerp(slerp0, slerp1, 2.0 * t * (1.0 - t), result);
-    };
-
-    /**
-     * Compares the provided quaternions componentwise and returns
-     * <code>true</code> if they are equal, <code>false</code> otherwise.
-     *
-     * @param {Quaternion} [left] The first quaternion.
-     * @param {Quaternion} [right] The second quaternion.
-     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
-     */
-    Quaternion.equals = function(left, right) {
-        return (left === right) ||
-               ((defined(left)) &&
-                (defined(right)) &&
-                (left.x === right.x) &&
-                (left.y === right.y) &&
-                (left.z === right.z) &&
-                (left.w === right.w));
-    };
-
-    /**
-     * Compares the provided quaternions componentwise and returns
-     * <code>true</code> if they are within the provided epsilon,
-     * <code>false</code> otherwise.
-     *
-     * @param {Quaternion} [left] The first quaternion.
-     * @param {Quaternion} [right] The second quaternion.
-     * @param {Number} epsilon The epsilon to use for equality testing.
-     * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
-     */
-    Quaternion.equalsEpsilon = function(left, right, epsilon) {
-                Check.typeOf.number('epsilon', epsilon);
-        
-        return (left === right) ||
-               ((defined(left)) &&
-                (defined(right)) &&
-                (Math.abs(left.x - right.x) <= epsilon) &&
-                (Math.abs(left.y - right.y) <= epsilon) &&
-                (Math.abs(left.z - right.z) <= epsilon) &&
-                (Math.abs(left.w - right.w) <= epsilon));
-    };
-
-    /**
-     * An immutable Quaternion instance initialized to (0.0, 0.0, 0.0, 0.0).
-     *
-     * @type {Quaternion}
-     * @constant
-     */
-    Quaternion.ZERO = freezeObject(new Quaternion(0.0, 0.0, 0.0, 0.0));
-
-    /**
-     * An immutable Quaternion instance initialized to (0.0, 0.0, 0.0, 1.0).
-     *
-     * @type {Quaternion}
-     * @constant
-     */
-    Quaternion.IDENTITY = freezeObject(new Quaternion(0.0, 0.0, 0.0, 1.0));
-
-    /**
-     * Duplicates this Quaternion instance.
-     *
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.prototype.clone = function(result) {
-        return Quaternion.clone(this, result);
-    };
-
-    /**
-     * Compares this and the provided quaternion componentwise and returns
-     * <code>true</code> if they are equal, <code>false</code> otherwise.
-     *
-     * @param {Quaternion} [right] The right hand side quaternion.
-     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
-     */
-    Quaternion.prototype.equals = function(right) {
-        return Quaternion.equals(this, right);
-    };
-
-    /**
-     * Compares this and the provided quaternion componentwise and returns
-     * <code>true</code> if they are within the provided epsilon,
-     * <code>false</code> otherwise.
-     *
-     * @param {Quaternion} [right] The right hand side quaternion.
-     * @param {Number} epsilon The epsilon to use for equality testing.
-     * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
-     */
-    Quaternion.prototype.equalsEpsilon = function(right, epsilon) {
-        return Quaternion.equalsEpsilon(this, right, epsilon);
-    };
-
-    /**
-     * Returns a string representing this quaternion in the format (x, y, z, w).
-     *
-     * @returns {String} A string representing this Quaternion.
-     */
-    Quaternion.prototype.toString = function() {
-        return '(' + this.x + ', ' + this.y + ', ' + this.z + ', ' + this.w + ')';
-    };
-
-    return Quaternion;
-});
-
-/*global define*/
 define('Core/RectangleGeometryLibrary',[
-    './Cartesian3',
-    './Cartographic',
-    './defined',
-    './DeveloperError',
-    './GeographicProjection',
-    './Math',
-    './Matrix2',
-    './Rectangle'
-], function(
-    Cartesian3,
-    Cartographic,
-    defined,
-    DeveloperError,
-    GeographicProjection,
-    CesiumMath,
-    Matrix2,
-    Rectangle) {
+        './Cartesian3',
+        './Cartographic',
+        './defined',
+        './DeveloperError',
+        './GeographicProjection',
+        './Math',
+        './Matrix2',
+        './Rectangle'
+    ], function(
+        Cartesian3,
+        Cartographic,
+        defined,
+        DeveloperError,
+        GeographicProjection,
+        CesiumMath,
+        Matrix2,
+        Rectangle) {
     'use strict';
 
     var cos = Math.cos;
@@ -21900,7 +21997,6 @@ define('Core/RectangleGeometryLibrary',[
     return RectangleGeometryLibrary;
 });
 
-/*global define*/
 define('Core/VertexFormat',[
         './defaultValue',
         './defined',
@@ -22207,7 +22303,6 @@ define('Core/VertexFormat',[
     return VertexFormat;
 });
 
-/*global define*/
 define('Core/RectangleGeometry',[
         './BoundingSphere',
         './Cartesian2',
@@ -22227,7 +22322,6 @@ define('Core/RectangleGeometry',[
         './GeometryPipeline',
         './IndexDatatype',
         './Math',
-        './Matrix2',
         './Matrix3',
         './PolygonPipeline',
         './PrimitiveType',
@@ -22254,7 +22348,6 @@ define('Core/RectangleGeometry',[
         GeometryPipeline,
         IndexDatatype,
         CesiumMath,
-        Matrix2,
         Matrix3,
         PolygonPipeline,
         PrimitiveType,
@@ -22319,12 +22412,12 @@ define('Core/RectangleGeometry',[
         var bitangent = bitangentScratch;
         var tangent = tangentScratch;
         var normal = normalScratch;
-        for (var i = 0; i < length; i += 3) {
-            var p = Cartesian3.fromArray(positions, i, positionScratch);
-            var attrIndex1 = attrIndex + 1;
-            var attrIndex2 = attrIndex + 2;
+        if (vertexFormat.normal || vertexFormat.tangent || vertexFormat.bitangent) {
+            for (var i = 0; i < length; i += 3) {
+                var p = Cartesian3.fromArray(positions, i, positionScratch);
+                var attrIndex1 = attrIndex + 1;
+                var attrIndex2 = attrIndex + 2;
 
-            if (vertexFormat.normal || vertexFormat.tangent || vertexFormat.bitangent) {
                 normal = ellipsoid.geodeticSurfaceNormal(p, normal);
                 if (vertexFormat.tangent || vertexFormat.bitangent) {
                     Cartesian3.cross(Cartesian3.UNIT_Z, normal, tangent);
@@ -22351,8 +22444,8 @@ define('Core/RectangleGeometry',[
                     bitangents[attrIndex1] = bitangent.y;
                     bitangents[attrIndex2] = bitangent.z;
                 }
+                attrIndex += 3;
             }
-            attrIndex += 3;
         }
         return createAttributes(vertexFormat, {
             positions : positions,
@@ -22364,6 +22457,7 @@ define('Core/RectangleGeometry',[
 
     var v1Scratch = new Cartesian3();
     var v2Scratch = new Cartesian3();
+
     function calculateAttributesWall(positions, vertexFormat, ellipsoid) {
         var length = positions.length;
 
@@ -22379,10 +22473,9 @@ define('Core/RectangleGeometry',[
         var bitangent = bitangentScratch;
         var tangent = tangentScratch;
         var normal = normalScratch;
-        for (var i = 0; i < length; i += 6) {
-            var p = Cartesian3.fromArray(positions, i, positionScratch);
-
-            if (vertexFormat.normal || vertexFormat.tangent || vertexFormat.bitangent) {
+        if (vertexFormat.normal || vertexFormat.tangent || vertexFormat.bitangent) {
+            for (var i = 0; i < length; i += 6) {
+                var p = Cartesian3.fromArray(positions, i, positionScratch);
                 var p1 = Cartesian3.fromArray(positions, (i + 6) % length, v1Scratch);
                 if (recomputeNormal) {
                     var p2 = Cartesian3.fromArray(positions, (i + 3) % length, v2Scratch);
@@ -22542,6 +22635,7 @@ define('Core/RectangleGeometry',[
     }
 
     var scratchVertexFormat = new VertexFormat();
+
     function constructExtrudedRectangle(options) {
         var shadowVolume = options.shadowVolume;
         var vertexFormat = options.vertexFormat;
@@ -22567,7 +22661,7 @@ define('Core/RectangleGeometry',[
         var topPositions = PolygonPipeline.scaleToGeodeticHeight(topBottomGeo.attributes.position.values, maxHeight, ellipsoid, false);
         topPositions = new Float64Array(topPositions);
         var length = topPositions.length;
-        var newLength = length*2;
+        var newLength = length * 2;
         var positions = new Float64Array(newLength);
         positions.set(topPositions);
         var bottomPositions = PolygonPipeline.scaleToGeodeticHeight(topBottomGeo.attributes.position.values, minHeight, ellipsoid);
@@ -22577,13 +22671,13 @@ define('Core/RectangleGeometry',[
         var normals = (vertexFormat.normal) ? new Float32Array(newLength) : undefined;
         var tangents = (vertexFormat.tangent) ? new Float32Array(newLength) : undefined;
         var bitangents = (vertexFormat.bitangent) ? new Float32Array(newLength) : undefined;
-        var textures = (vertexFormat.st) ? new Float32Array(newLength/3*2) : undefined;
+        var textures = (vertexFormat.st) ? new Float32Array(newLength / 3 * 2) : undefined;
         var topSt;
         var topNormals;
         if (vertexFormat.normal) {
             topNormals = topBottomGeo.attributes.normal.values;
             normals.set(topNormals);
-            for (i = 0; i < length; i ++) {
+            for (i = 0; i < length; i++) {
                 topNormals[i] = -topNormals[i];
             }
             normals.set(topNormals, length);
@@ -22595,7 +22689,7 @@ define('Core/RectangleGeometry',[
                 topBottomGeo.attributes.normal = undefined;
             }
             var extrudeNormals = new Float32Array(newLength);
-            for (i = 0; i < length; i ++) {
+            for (i = 0; i < length; i++) {
                 topNormals[i] = -topNormals[i];
             }
             extrudeNormals.set(topNormals, length); //only get normals for bottom layer that's going to be pushed down
@@ -22609,7 +22703,7 @@ define('Core/RectangleGeometry',[
         if (vertexFormat.tangent) {
             var topTangents = topBottomGeo.attributes.tangent.values;
             tangents.set(topTangents);
-            for (i = 0; i < length; i ++) {
+            for (i = 0; i < length; i++) {
                 topTangents[i] = -topTangents[i];
             }
             tangents.set(topTangents, length);
@@ -22624,14 +22718,14 @@ define('Core/RectangleGeometry',[
         if (vertexFormat.st) {
             topSt = topBottomGeo.attributes.st.values;
             textures.set(topSt);
-            textures.set(topSt, length/3*2);
+            textures.set(topSt, length / 3 * 2);
             topBottomGeo.attributes.st.values = textures;
         }
 
         var indices = topBottomGeo.indices;
         var indicesLength = indices.length;
         var posLength = length / 3;
-        var newIndices = IndexDatatype.createTypedArray(newLength/3, indicesLength*2);
+        var newIndices = IndexDatatype.createTypedArray(newLength / 3, indicesLength * 2);
         newIndices.set(indices);
         for (i = 0; i < indicesLength; i += 3) {
             newIndices[i + indicesLength] = indices[i + 2] + posLength;
@@ -22652,12 +22746,12 @@ define('Core/RectangleGeometry',[
         var extrudeNormalIndex = 0;
         var area = width * height;
         var threeI;
-        for (i = 0; i < area; i+=width) {
+        for (i = 0; i < area; i += width) {
             threeI = i * 3;
             wallPositions = addWallPositions(wallPositions, posIndex, threeI, topPositions, bottomPositions);
             posIndex += 6;
             if (vertexFormat.st) {
-                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i*2, topSt);
+                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i * 2, topSt);
                 stIndex += 4;
             }
             if (shadowVolume) {
@@ -22668,12 +22762,12 @@ define('Core/RectangleGeometry',[
             }
         }
 
-        for (i = area-width; i < area; i++) {
+        for (i = area - width; i < area; i++) {
             threeI = i * 3;
             wallPositions = addWallPositions(wallPositions, posIndex, threeI, topPositions, bottomPositions);
             posIndex += 6;
             if (vertexFormat.st) {
-                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i*2, topSt);
+                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i * 2, topSt);
                 stIndex += 4;
             }
             if (shadowVolume) {
@@ -22684,12 +22778,12 @@ define('Core/RectangleGeometry',[
             }
         }
 
-        for (i = area-1; i > 0; i-=width) {
+        for (i = area - 1; i > 0; i -= width) {
             threeI = i * 3;
             wallPositions = addWallPositions(wallPositions, posIndex, threeI, topPositions, bottomPositions);
             posIndex += 6;
             if (vertexFormat.st) {
-                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i*2, topSt);
+                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i * 2, topSt);
                 stIndex += 4;
             }
             if (shadowVolume) {
@@ -22700,12 +22794,12 @@ define('Core/RectangleGeometry',[
             }
         }
 
-        for (i = width-1; i >= 0; i--) {
+        for (i = width - 1; i >= 0; i--) {
             threeI = i * 3;
             wallPositions = addWallPositions(wallPositions, posIndex, threeI, topPositions, bottomPositions);
             posIndex += 6;
             if (vertexFormat.st) {
-                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i*2, topSt);
+                wallTextures = addWallTextureCoordinates(wallTextures, stIndex, i * 2, topSt);
                 stIndex += 4;
             }
             if (shadowVolume) {
@@ -22741,7 +22835,7 @@ define('Core/RectangleGeometry',[
         var upperRight;
         length = wallPositions.length / 3;
         var index = 0;
-        for (i = 0; i < length - 1; i+=2) {
+        for (i = 0; i < length - 1; i += 2) {
             upperLeft = i;
             upperRight = (upperLeft + 2) % length;
             var p1 = Cartesian3.fromArray(wallPositions, upperLeft * 3, v1Scratch);
@@ -22834,7 +22928,7 @@ define('Core/RectangleGeometry',[
      * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Rectangle.html|Cesium Sandcastle Rectangle Demo}
      *
      * @example
-     * // 1. create an rectangle
+     * // 1. create a rectangle
      * var rectangle = new Cesium.RectangleGeometry({
      *   ellipsoid : Cesium.Ellipsoid.WGS84,
      *   rectangle : Cesium.Rectangle.fromDegrees(-80.0, 39.0, -74.0, 42.0),
@@ -22940,7 +23034,7 @@ define('Core/RectangleGeometry',[
         extrudedHeight : undefined,
         closeTop : undefined,
         closeBottom : undefined,
-        shadowVolume: undefined
+        shadowVolume : undefined
     };
 
     /**
@@ -23013,7 +23107,7 @@ define('Core/RectangleGeometry',[
     var quaternionScratch = new Quaternion();
     var centerScratch = new Cartographic();
     /**
-     * Computes the geometric representation of an rectangle, including its vertices, indices, and a bounding sphere.
+     * Computes the geometric representation of a rectangle, including its vertices, indices, and a bounding sphere.
      *
      * @param {RectangleGeometry} rectangleGeometry A description of the rectangle.
      * @returns {Geometry|undefined} The computed vertices and indices.
@@ -23104,7 +23198,7 @@ define('Core/RectangleGeometry',[
             closeTop : true,
             closeBottom : true,
             vertexFormat : VertexFormat.POSITION_ONLY,
-            shadowVolume: true
+            shadowVolume : true
         });
     };
 
@@ -23122,7 +23216,6 @@ define('Core/RectangleGeometry',[
     return RectangleGeometry;
 });
 
-/*global define*/
 define('Workers/createRectangleGeometry',[
         '../Core/defined',
         '../Core/Ellipsoid',
