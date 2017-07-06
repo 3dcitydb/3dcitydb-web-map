@@ -685,13 +685,8 @@
   	
   	// Clear Highlighting effect of all highlighted objects
   	function clearhighlight(){   		
-  		var layers = webMap._layers;
-  		for (var i = 0; i < layers.length; i++) {
-  			if (layers[i].active) {
-  				layers[i].unHighlightAllObjects();
-  			} 			
-  		} 
-  		cesiumViewer.selectedEntity = undefined;
+  		webMap.clearHighlight();
+  		webMap._cesiumViewerInstance.selectedEntity = undefined;
   	};
   	
     // hide the selected objects
