@@ -70,55 +70,97 @@
         customCesiumViewerToolbar.replaceChild(button, customGlobeButton);
 
         button.onclick = function () {
+            if (scope._liveTrackingActivated) {
+                scope._liveTrackingActivated = false;
+                scope.stopTracking();
+            }
+
             var object = document.getElementById("gpsButton");
             // distinguish between double-click and single-click
             // https://stackoverflow.com/questions/5497073/how-to-differentiate-single-click-event-and-double-click-event#answer-16033129
-            if (object.getAttribute("data-dblclick") == null) {
-                object.setAttribute("data-dblclick", 1);
+            if (object.getAttribute("data-double-click") == null) {
+                object.setAttribute("data-double-click", 1);
                 setTimeout(function () {
-                    if (object.getAttribute("data-dblclick") == 1) {
+                    if (object.getAttribute("data-double-click") == 1) {
                         scope.handleClick();
                     }
-                    object.removeAttribute("data-dblclick");
-                }, 300);
+                    object.removeAttribute("data-double-click");
+                }, 500);
+            } else if (object.getAttribute("data-triple-click") == null) {
+                object.setAttribute("data-triple-click", 1);
+                setTimeout(function () {
+                    if (object.getAttribute("data-triple-click") == 1) {
+                        scope.handleDclick();
+                    }
+                    object.removeAttribute("data-double-click");
+                    object.removeAttribute("data-triple-click");
+                }, 500);
             } else {
-                object.removeAttribute("data-dblclick");
-                scope.handleDclick();
+                object.removeAttribute("data-double-click");
+                object.removeAttribute("data-triple-click");
+                scope.handleTclick();
             }
         }
     }
 
-    GPSController.prototype.handleDclick = function () {
-        var scope = this;
-        if (scope._liveTrackingActivated) {
-            scope._liveTrackingActivated = false;
-            scope.stopTracking();
-        } else {
-            scope._liveTrackingActivated = true;
-            // tracking in intervals of miliseconds
-            scope.startTracking();
-        }
-    }
-
+    // Handle single-click
     GPSController.prototype.handleClick = function () {
         var scope = this;
         if (scope._liveTrackingActivated) {
             scope._liveTrackingActivated = false;
             scope.stopTracking();
         } else {
+            var button = document.getElementById("gpsButton");
+            button.classList.remove("tracking-ori-activated");
+            button.classList.remove("tracking-pos-ori-activated");
+            button.classList.add("tracking-deactivated");
+
             // one time tracking
+            scope.startTracking();
+        }
+    }
+
+    // Handle double-click
+    GPSController.prototype.handleDclick = function () {
+        var scope = this;
+
+        if (scope._liveTrackingActivated) {
+            scope._liveTrackingActivated = false;
+            scope.stopTracking();
+        } else {
+            scope._liveTrackingActivated = true;
+
+            var button = document.getElementById("gpsButton");
+            button.classList.remove("tracking-deactivated");
+            button.classList.remove("tracking-ori-deactivated");
+            button.classList.add("tracking-ori-activated");
+
+            // tracking in intervals of miliseconds
+            scope.startTracking();
+        }
+    }
+
+    // Handle triple-click
+    GPSController.prototype.handleTclick = function () {
+        var scope = this;
+        if (scope._liveTrackingActivated) {
+            scope._liveTrackingActivated = false;
+            scope.stopTracking();
+        } else {
+            scope._liveTrackingActivated = true;
+
+            var button = document.getElementById("gpsButton");
+            button.classList.remove("tracking-deactivated");
+            button.classList.remove("tracking-pos-ori-deactivated");
+            button.classList.add("tracking-pos-ori-activated");
+
+            // tracking in intervals of miliseconds
             scope.startTracking();
         }
     }
 
     GPSController.prototype.startTracking = function () {
         var scope = this;
-
-        if (scope._liveTrackingActivated) {
-            var button = document.getElementById("gpsButton");
-            button.classList.remove("tracking-deactivated");
-            button.classList.add("tracking-activated");
-        }
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition, showError);
