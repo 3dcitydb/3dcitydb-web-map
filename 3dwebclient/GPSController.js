@@ -11,6 +11,7 @@
         this._timerMiliseconds = 350;
         this._savedAlpha = undefined;
         this._firstActivated = false;
+        this._watchPos = false;
         this.createGPSButton();
     }
 
@@ -106,6 +107,7 @@
     // Handle single-click
     GPSController.prototype.handleClick = function () {
         var scope = this;
+
         if (scope._liveTrackingActivated) {
             scope._liveTrackingActivated = false;
             scope.stopTracking();
@@ -129,6 +131,7 @@
             scope.stopTracking();
         } else {
             scope._liveTrackingActivated = true;
+            scope._watchPos = false;
 
             var button = document.getElementById("gpsButton");
             button.classList.remove("tracking-deactivated");
@@ -143,11 +146,13 @@
     // Handle triple-click
     GPSController.prototype.handleTclick = function () {
         var scope = this;
+
         if (scope._liveTrackingActivated) {
             scope._liveTrackingActivated = false;
             scope.stopTracking();
         } else {
             scope._liveTrackingActivated = true;
+            scope._watchPos = true;
 
             var button = document.getElementById("gpsButton");
             button.classList.remove("tracking-deactivated");
@@ -289,10 +294,13 @@
                         if (scope._liveTrackingActivated) {
                             // real-time tracking
                             scope._timer = setTimeout(function () {
-                                // only check orientation in real-time
-                                showPosition(position);
-                                // also check position in real-time 
-                                // scope.startTracking();
+                                if (scope._watchPos) {
+                                    // also check position in real-time 
+                                    scope.startTracking();
+                                } else {
+                                    // only check orientation in real-time
+                                    showPosition(position);
+                                }
                             }, scope._timerMiliseconds);
                         }
                     }
@@ -320,6 +328,8 @@
 
     GPSController.prototype.stopTracking = function () {
         var scope = this;
+
+        scope._watchPos = false;
 
         var button = document.getElementById("gpsButton");
         button.classList.remove("tracking-activated");
