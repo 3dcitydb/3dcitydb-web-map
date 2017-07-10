@@ -366,7 +366,7 @@
 	}
 		
 	Cesium3DTilesDataLayer.prototype.zoomToStartPosition = function(){
-		this._cesiumViewer.scene.camera.flyToBoundingSphere(this._tileset.boundingVolume._boundingSphere);
+		this._cesiumViewer.scene.camera.flyToBoundingSphere(this._tileset.boundingSphere);
 	}
 
 	/**
