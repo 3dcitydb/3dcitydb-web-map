@@ -9,7 +9,7 @@
         this._isMobile = this.isMobile();
 
         // GPS functionalities, including geolocation and device orientation
-        this._gpsController = new GPSController();
+        this._gpsController = new GPSController(this._isMobile);
 
         this.hideCredits();
         this.hideInspector();

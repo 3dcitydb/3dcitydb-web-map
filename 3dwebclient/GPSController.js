@@ -5,13 +5,16 @@
 
 (function () {
     /**constructor function**/
-    function GPSController() {
+    function GPSController(isMobilePara) {
         this._liveTrackingActivated = false;
         this._timer = undefined;
-        this._timerMiliseconds = 350;
+        this._timerMiliseconds = 350; // duration between clicks in ms
         this._savedAlpha = undefined;
         this._firstActivated = false;
         this._watchPos = false;
+        this._touchHoldDuration = 500; // touch press duration in ms
+        this._longPress = false;
+        this._isMobile = isMobilePara;
         this.createGPSButton();
     }
 
@@ -55,6 +58,38 @@
             set: function (value) {
                 this._firstActivated = value;
             }
+        },
+        watchPos: {
+            get: function () {
+                return this._watchPos;
+            },
+            set: function (value) {
+                this._watchPos = value;
+            }
+        },
+        touchHoldDuration: {
+            get: function () {
+                return this._touchHoldDuration;
+            },
+            set: function (value) {
+                this._touchHoldDuration = value;
+            }
+        },
+        longPress: {
+            get: function () {
+                return this._longPress;
+            },
+            set: function (value) {
+                this._longPress = value;
+            }
+        },
+        isMobile: {
+            get: function () {
+                return this._isMobile;
+            },
+            set: function (value) {
+                this._isMobile = value;
+            }
         }
     });
 
@@ -70,36 +105,80 @@
         var customGlobeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-sceneModePicker-wrapper cesium-toolbar-button")[0];
         customCesiumViewerToolbar.replaceChild(button, customGlobeButton);
 
+        // --------------------------MOUSE HELD EVENT--------------------------
+        var holdStart = 0;
+        var holdTime = 0;
+        if (scope._isMobile) {
+            button.addEventListener("touchstart", function (evt) {
+                holdStart = Date.now();
+            }, false);
+            button.addEventListener("touchend", function (evt) {
+                holdTime = Date.now() - holdStart;
+                scope._longPress = holdTime >= scope._touchHoldDuration;
+            }, false);
+        } else {
+            button.addEventListener("mousedown", function (evt) {
+                holdStart = Date.now();
+            }, false);
+            window.addEventListener("mouseup", function (evt) {
+                holdTime = Date.now() - holdStart;
+                scope._longPress = holdTime >= scope._touchHoldDuration;
+            }, false);
+        }
+
+        // --------------------------MOUSE CLICK EVENT-------------------------
         button.onclick = function () {
             if (scope._liveTrackingActivated) {
                 scope._liveTrackingActivated = false;
                 scope.stopTracking();
             }
 
-            var object = document.getElementById("gpsButton");
-            // distinguish between double-click and single-click
-            // https://stackoverflow.com/questions/5497073/how-to-differentiate-single-click-event-and-double-click-event#answer-16033129
-            if (object.getAttribute("data-double-click") == null) {
-                object.setAttribute("data-double-click", 1);
-                setTimeout(function () {
-                    if (object.getAttribute("data-double-click") == 1) {
-                        scope.handleClick();
-                    }
-                    object.removeAttribute("data-double-click");
-                }, 500);
-            } else if (object.getAttribute("data-triple-click") == null) {
-                object.setAttribute("data-triple-click", 1);
-                setTimeout(function () {
-                    if (object.getAttribute("data-triple-click") == 1) {
-                        scope.handleDclick();
-                    }
+            if (!scope._longPress) {
+                var object = document.getElementById("gpsButton");
+                // distinguish between double-click and single-click
+                // https://stackoverflow.com/questions/5497073/how-to-differentiate-single-click-event-and-double-click-event#answer-16033129
+                if (object.getAttribute("data-double-click") == null) {
+                    object.setAttribute("data-double-click", 1);
+                    setTimeout(function () {
+                        if (object.getAttribute("data-double-click") == 1) {
+                            scope.handleClick();
+                        }
+                        object.removeAttribute("data-double-click");
+                    }, 500);
+                } else if (object.getAttribute("data-triple-click") == null) {
+                    object.setAttribute("data-triple-click", 1);
+                    setTimeout(function () {
+                        if (object.getAttribute("data-triple-click") == 1) {
+                            scope.handleDclick();
+                        }
+                        object.removeAttribute("data-double-click");
+                        object.removeAttribute("data-triple-click");
+                    }, 500);
+                } else {
                     object.removeAttribute("data-double-click");
                     object.removeAttribute("data-triple-click");
-                }, 500);
+                    scope.handleTclick();
+                }
             } else {
-                object.removeAttribute("data-double-click");
-                object.removeAttribute("data-triple-click");
-                scope.handleTclick();
+                var restartView = function (_callback) {
+                    scope._firstActivated = false;
+                    cesiumCamera.cancelFlight();
+                    _callback();
+                };
+
+                restartView(function () {
+                    cesiumCamera.flyTo({
+                        destination: Cesium.Cartesian3.fromRadians(
+                                cesiumCamera.positionCartographic.longitude,
+                                cesiumCamera.positionCartographic.latitude,
+                                250),
+                        orientation: {
+                            heading: cesiumCamera.heading,
+                            pitch: Cesium.Math.toRadians(-75),
+                            roll: 0
+                        }
+                    });
+                });
             }
         }
     }
@@ -197,35 +276,6 @@
                 var oriGamma = 0;
                 var oriHeight = 2;
 
-//                if (Cesium.defined(ori)) {
-//                    var mobileOS = getMobileOperatingSystem();
-//                    // ALPHA
-//                    if (mobileOS === "iOS" && ori.webkitCompassHeading) {
-//                        oriAlpha = ori.webkitCompassHeading;
-//                        // webkitCompassHeading is in [0, 360] degrees positive clockwise (non negative)
-//                        // while heading is [-pi,pi), where positive points eastward
-//                        if (oriAlpha < 180) {
-//                            oriAlpha = Cesium.Math.toRadians(oriAlpha);
-//                        } else {
-//                            oriAlpha = Cesium.Math.toRadians(oriAlpha - 360);
-//                        }
-//                    } else if (Cesium.defined(ori.alpha)) {
-//                        oriAlpha = ori.alpha;
-//                        // alpha is in [0,360) degrees positive counterclockwise (non negative)
-//                        // while heading is [-pi,pi), where positive points eastward
-//                        if (oriAlpha < 180) {
-//                            oriAlpha = Cesium.Math.toRadians(-oriAlpha);
-//                        } else {
-//                            oriAlpha = Cesium.Math.toRadians(180 - (oriAlpha - 180));
-//                        }
-//                    }
-//
-//                    // BETA
-////                    if (Cesium.defined(ori.beta)) {
-////                        oriBeta = Cesium.Math.toRadians(ori.beta - 90);
-////                    }
-//                }
-
                 var angle = 0;
                 if (ori.webkitCompassHeading) {
                     angle = ori.webkitCompassHeading;
@@ -292,16 +342,18 @@
                     complete: function () {
                         scope._firstActivated = true;
                         if (scope._liveTrackingActivated) {
-                            // real-time tracking
-                            scope._timer = setTimeout(function () {
-                                if (scope._watchPos) {
-                                    // also check position in real-time 
-                                    scope.startTracking();
-                                } else {
-                                    // only check orientation in real-time
-                                    showPosition(position);
-                                }
-                            }, scope._timerMiliseconds);
+                            if (!scope._longPress) {
+                                // real-time tracking
+                                scope._timer = setTimeout(function () {
+                                    if (scope._watchPos) {
+                                        // also check position in real-time 
+                                        scope.startTracking();
+                                    } else {
+                                        // only check orientation in real-time
+                                        showPosition(position);
+                                    }
+                                }, scope._timerMiliseconds);
+                            }
                         }
                     }
                 });
