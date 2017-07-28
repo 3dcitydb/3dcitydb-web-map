@@ -148,6 +148,15 @@
 		}
 		return;
 	};
+	
+	WebMap3DCityDB.prototype.clearHighlight = function(){   		
+  		var layers = this._layers;
+  		for (var i = 0; i < layers.length; i++) {
+  			if (layers[i].active) {
+  				layers[i].unHighlightAllObjects();
+  			} 			
+  		} 
+  	};
 
 	/**
 	 * activates viewchanged Event
@@ -211,6 +220,7 @@
 			var that = this;
 			this._eventHandler.setInputAction(function(event){
 				var object = that._cesiumViewerInstance.scene.pick(event.position);
+				that.clearHighlight();
 				that.passEventToLayer("CLICK", object);
 			}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 			this._eventHandler.setInputAction(function(event){

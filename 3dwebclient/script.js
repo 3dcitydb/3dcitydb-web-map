@@ -61,7 +61,7 @@ var addLayerViewModel = {
 };
 Cesium.knockout.track(addLayerViewModel);
 Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
-
+		
 var addWmsViewModel = {
     name: '',
     iconUrl: '',
@@ -84,7 +84,7 @@ Cesium.knockout.track(addTerrainViewModel);
 Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('citydb_addterrainpanel'));
 
 /*---------------------------------  Load Configurations and Layers  ----------------------------------------*/
-
+	
 intiClient();
 
 function intiClient() {
@@ -131,25 +131,25 @@ function intiClient() {
                 cesiumViewer.geocoder.viewModel.search.call(this, true);
             });
         }
-    });
-
+  			});
+  	
     // inspect the status of the showed and cached tiles	
     inspectTileStatus();
-
+  	
     // bind view and model of the highlighted and hidden Objects...
     observeObjectList();
-
+  	
     // Zoom to desired camera position and load layers if encoded in the url...	
     zoomToDefaultCameraPosition().then(function (info) {
         var layers = getLayersFromUrl();
         loadLayerGroup(layers);
-
+  	
         var basemapConfigString = CitydbUtil.parse_query_string('basemap', window.location.href);
         if (basemapConfigString) {
             var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(basemapConfigString))[0]);
             for (key in viewMoModel) {
                 addWmsViewModel[key] = viewMoModel[key];
-            }
+  			} 	  			
             addWebMapServiceProvider();
         }
 
