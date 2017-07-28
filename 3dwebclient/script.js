@@ -44,7 +44,6 @@ var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
 });
 
 navigationInitialization('cesiumContainer', cesiumViewer);
-document.getElementsByClassName('cesium-infoBox')[0].style.zIndex = '300';
 
 var cesiumCamera = cesiumViewer.scene.camera;
 var webMap = new WebMap3DCityDB(cesiumViewer);
@@ -110,9 +109,6 @@ function intiClient() {
     if (debugStr == "true") {
         cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
         cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
-        var cesiumInfoBoxElement = document.getElementsByClassName('cesium-infoBox')[0];
-        cesiumInfoBoxElement.style.top = '90px';
-        cesiumInfoBoxElement.style.zIndex = '300';
     }
 
     // set title of the web page

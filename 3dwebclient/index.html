@@ -57,7 +57,7 @@
         <style>
             @import url(../ThirdParty/Cesium/Widgets/widgets.css);
             @import url(css/GPSButtonStyles.css);
-            @import url(css/InfoTableFullscreenStyles.css);
+            @import url(css/MobileFullscreenStyles.css);
 
             html, body, #cesiumContainer {
                 top: 0px;
@@ -180,246 +180,248 @@
                     <option>Show / Hide Toolbox</option>
                 </select>
                 <div class="citydb_overSelect"></div>
-            </div>	
-            <div id="citydb_toolbox">
-                <div class = "citydb_long_container">
-                    <div id="citydb_layerlistpanel" class="citydb_dynamic_box" style="display: block; "></div>
-                </div>
-                <div style="width: 100%;">
-                    <!-- add layer panel -->
-                    <div class="citydb_short_container" onclick="showAddLayerPanel()">
-                        <select style="width: 100%;" class="cesium-button" >
-                            <option>Add / Configure Layer</option>
-                        </select>	            
-                        <div class="citydb_overSelect"></div>
-                    </div>	
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="removeSelectedLayer()">Remove selected layer</button>
-                    </div>		        
-                    <div id="citydb_addlayerpanel" class="citydb_dynamic_box">		
-                        <table class="citydb_inputtable">
-                            <tbody>
-                                <tr>
-                                    <td WIDTH="25%">URL(*)</td>
-                                    <td WIDTH="75%">
-                                        <input type="text" data-bind="value: url">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Name(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: name">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>thematicDataUrl</td>
-                                    <td>
-                                        <input type="text" data-bind="value: thematicDataUrl">
-                                    </td>
-                                </tr>		
-                                <tr>
-                                    <td>cityobjectsJsonUrl</td>
-                                    <td>
-                                        <input type="text" data-bind="value: cityobjectsJsonUrl">
-                                    </td>
-                                </tr>							    				    
-                                <tr>
-                                    <td>minLodPixels</td>
-                                    <td>
-                                        <input type="text" data-bind="value: minLodPixels">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>maxLodPixels</td>
-                                    <td>
-                                        <input type="text" data-bind="value: maxLodPixels">
-                                    </td>
-                                </tr>	
-                                <tr>
-                                    <td>MaxCountOfVisibleTiles(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: maxCountOfVisibleTiles">
-                                    </td>
-                                </tr>							    						    
-                                <tr>
-                                    <td>MaxSizeOfCachedTiles(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: maxSizeOfCachedTiles">
-                                    </td>
-                                </tr>			    
-                            </tbody>
-                        </table>
-                        <div class="citydb_short_container">
-                            <button style="width: 100%;" type="button" class="cesium-button" onclick="addNewLayer()">Add layer</button>
+            </div>
+            <div id="uiMenu-content">
+                <div id="citydb_toolbox">
+                    <div class = "citydb_long_container">
+                        <div id="citydb_layerlistpanel" class="citydb_dynamic_box" style="display: block; "></div>
+                    </div>
+                    <div style="width: 100%;">
+                        <!-- add layer panel -->
+                        <div class="citydb_short_container" onclick="showAddLayerPanel()">
+                            <select style="width: 100%;" class="cesium-button" >
+                                <option>Add / Configure Layer</option>
+                            </select>	            
+                            <div class="citydb_overSelect"></div>
                         </div>	
                         <div class="citydb_short_container">
-                            <button style="width: 100%;" type="button" class="cesium-button" onclick="saveLayerSettings()">Save layer settings</button>
-                        </div>				        										
-                    </div>
-                </div>	
-
-                <div style="width: 100%;">
-                    <!-- add WMS panel -->
-                    <div class="citydb_short_container" onclick="showAddWMSPanel()">
-                        <select style="width: 100%;" class="cesium-button" >
-                            <option>Add WMS-Layer</option>
-                        </select>	            
-                        <div class="citydb_overSelect"></div>
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeSelectedLayer()">Remove selected layer</button>
+                        </div>		        
+                        <div id="citydb_addlayerpanel" class="citydb_dynamic_box">		
+                            <table class="citydb_inputtable">
+                                <tbody>
+                                    <tr>
+                                        <td WIDTH="25%">URL(*)</td>
+                                        <td WIDTH="75%">
+                                            <input type="text" data-bind="value: url">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Name(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: name">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>thematicDataUrl</td>
+                                        <td>
+                                            <input type="text" data-bind="value: thematicDataUrl">
+                                        </td>
+                                    </tr>		
+                                    <tr>
+                                        <td>cityobjectsJsonUrl</td>
+                                        <td>
+                                            <input type="text" data-bind="value: cityobjectsJsonUrl">
+                                        </td>
+                                    </tr>							    				    
+                                    <tr>
+                                        <td>minLodPixels</td>
+                                        <td>
+                                            <input type="text" data-bind="value: minLodPixels">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>maxLodPixels</td>
+                                        <td>
+                                            <input type="text" data-bind="value: maxLodPixels">
+                                        </td>
+                                    </tr>	
+                                    <tr>
+                                        <td>MaxCountOfVisibleTiles(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: maxCountOfVisibleTiles">
+                                        </td>
+                                    </tr>							    						    
+                                    <tr>
+                                        <td>MaxSizeOfCachedTiles(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: maxSizeOfCachedTiles">
+                                        </td>
+                                    </tr>			    
+                                </tbody>
+                            </table>
+                            <div class="citydb_short_container">
+                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addNewLayer()">Add layer</button>
+                            </div>	
+                            <div class="citydb_short_container">
+                                <button style="width: 100%;" type="button" class="cesium-button" onclick="saveLayerSettings()">Save layer settings</button>
+                            </div>				        										
+                        </div>
                     </div>	
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="removeImageryProvider()">Remove WMS layer</button>
-                    </div>		        
-                    <div id="citydb_addwmspanel" class="citydb_dynamic_box">		
-                        <table class="citydb_inputtable">
-                            <tbody>
-                                <tr>
-                                    <td WIDTH="25%">name(*)</td>
-                                    <td WIDTH="75%">
-                                        <input type="text" data-bind="value: name">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>iconUrl(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: iconUrl">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>tooltip(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: tooltip">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>url(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: url">
-                                    </td>
-                                </tr>	
-                                <tr>
-                                    <td>layers(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: layers">
-                                    </td>
-                                </tr>	
-                                <tr>
-                                    <td>additionalParameters</td>
-                                    <td>
-                                        <input type="text" data-bind="value: additionalParameters">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>proxyUrl</td>
-                                    <td>
-                                        <input type="text" data-bind="value: proxyUrl">
-                                    </td>
-                                </tr>							    							    							    						    			    
-                            </tbody>
-                        </table>
-                        <div class="citydb_long_container">
-                            <button style="width: 100%;" type="button" class="cesium-button" onclick="addWebMapServiceProvider()">Add WMS layer</button>
-                        </div>											
-                    </div>
-                </div>
 
-                <div style="width: 100%;">
-                    <!-- add Terrain panel -->
-                    <div class="citydb_short_container" onclick="showAddTerrainPanel()">
-                        <select style="width: 100%;" class="cesium-button" >
-                            <option>Add Terrain-Layer</option>
-                        </select>	            
-                        <div class="citydb_overSelect"></div>
+                    <div style="width: 100%;">
+                        <!-- add WMS panel -->
+                        <div class="citydb_short_container" onclick="showAddWMSPanel()">
+                            <select style="width: 100%;" class="cesium-button" >
+                                <option>Add WMS-Layer</option>
+                            </select>	            
+                            <div class="citydb_overSelect"></div>
+                        </div>	
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeImageryProvider()">Remove WMS layer</button>
+                        </div>		        
+                        <div id="citydb_addwmspanel" class="citydb_dynamic_box">		
+                            <table class="citydb_inputtable">
+                                <tbody>
+                                    <tr>
+                                        <td WIDTH="25%">name(*)</td>
+                                        <td WIDTH="75%">
+                                            <input type="text" data-bind="value: name">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>iconUrl(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: iconUrl">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>tooltip(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: tooltip">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>url(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: url">
+                                        </td>
+                                    </tr>	
+                                    <tr>
+                                        <td>layers(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: layers">
+                                        </td>
+                                    </tr>	
+                                    <tr>
+                                        <td>additionalParameters</td>
+                                        <td>
+                                            <input type="text" data-bind="value: additionalParameters">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>proxyUrl</td>
+                                        <td>
+                                            <input type="text" data-bind="value: proxyUrl">
+                                        </td>
+                                    </tr>							    							    							    						    			    
+                                </tbody>
+                            </table>
+                            <div class="citydb_long_container">
+                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addWebMapServiceProvider()">Add WMS layer</button>
+                            </div>											
+                        </div>
+                    </div>
+
+                    <div style="width: 100%;">
+                        <!-- add Terrain panel -->
+                        <div class="citydb_short_container" onclick="showAddTerrainPanel()">
+                            <select style="width: 100%;" class="cesium-button" >
+                                <option>Add Terrain-Layer</option>
+                            </select>	            
+                            <div class="citydb_overSelect"></div>
+                        </div>	
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeTerrainProvider()">Remove Terrain layer</button>
+                        </div>		        
+                        <div id="citydb_addterrainpanel" class="citydb_dynamic_box">		
+                            <table class="citydb_inputtable">
+                                <tbody>
+                                    <tr>
+                                        <td WIDTH="25%">name(*)</td>
+                                        <td WIDTH="75%">
+                                            <input type="text" data-bind="value: name">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>iconUrl(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: iconUrl">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>tooltip(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: tooltip">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>url(*)</td>
+                                        <td>
+                                            <input type="text" data-bind="value: url">
+                                        </td>
+                                    </tr>				    
+                                </tbody>
+                            </table>
+                            <div class="citydb_long_container">
+                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addTerrainProvider()">Add Terrain layer</button>
+                            </div>											
+                        </div>
+                    </div>			        		        
+
+                    <div class="citydb_long_container">
+                        <select id = "citydb_highlightinglist" style="width: 100%;" class="cesium-button">
+                            <option selected="selected" disabled="disabled">Choose highlighted Object</option>				
+                        </select>			
+                    </div>
+                    <div class="citydb_long_container">
+                        <select id = "citydb_hiddenlist" style="width: 100%;" class="cesium-button">
+                            <option selected="selected" disabled="disabled">Choose hidden Object</option>				
+                        </select>			
+                    </div>
+                    <div>
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="showSceneLink()">Generate Scene Link</button>		
+                        </div>			
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="hideSelectedObjects()">Hide selected Objects</button>		
+                        </div>					
+                    </div>
+                    <div>
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="clearhighlight()">Clear Highlighting</button>		
+                        </div>			
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="showHiddenObjects()">Show Hidden Objects</button>	
+                        </div>						
+                    </div>		
+                    <div>
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="createScreenshot()">Create Screenshot</button>		
+                        </div>			
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="printCurrentview()">Print current view</button>	
+                        </div>						
                     </div>	
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="removeTerrainProvider()">Remove Terrain layer</button>
-                    </div>		        
-                    <div id="citydb_addterrainpanel" class="citydb_dynamic_box">		
-                        <table class="citydb_inputtable">
-                            <tbody>
-                                <tr>
-                                    <td WIDTH="25%">name(*)</td>
-                                    <td WIDTH="75%">
-                                        <input type="text" data-bind="value: name">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>iconUrl(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: iconUrl">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>tooltip(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: tooltip">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>url(*)</td>
-                                    <td>
-                                        <input type="text" data-bind="value: url">
-                                    </td>
-                                </tr>				    
-                            </tbody>
-                        </table>
-                        <div class="citydb_long_container">
-                            <button style="width: 100%;" type="button" class="cesium-button" onclick="addTerrainProvider()">Add Terrain layer</button>
-                        </div>											
+                    <div>
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleShadows()">Toggle Shadows</button>		
+                        </div>			
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleTerrainShadows()">Toggle Terrain Shadows</button>	
+                        </div>						
                     </div>
-                </div>			        		        
-
-                <div class="citydb_long_container">
-                    <select id = "citydb_highlightinglist" style="width: 100%;" class="cesium-button">
-                        <option selected="selected" disabled="disabled">Choose highlighted Object</option>				
-                    </select>			
+                    <div class="citydb_long_container">	
+                        <select id = "citydb_showinexternalmaps" style="width: 100%;" onchange="showInExternalMaps()" class="cesium-button">
+                            <option selected="selected" disabled="disabled">Show the selected object in External Maps</option>	
+                            <option value = "google">Google StreetView</option>	
+                            <option value = "osm"> OpenStreetMap</option>	
+                            <option value = "bing">BingMaps ObliqueView</option>	
+                            <option value = "dual">DualMaps</option>				
+                        </select>					
+                    </div>						        				
                 </div>
-                <div class="citydb_long_container">
-                    <select id = "citydb_hiddenlist" style="width: 100%;" class="cesium-button">
-                        <option selected="selected" disabled="disabled">Choose hidden Object</option>				
-                    </select>			
-                </div>
-                <div>
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="showSceneLink()">Generate Scene Link</button>		
-                    </div>			
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="hideSelectedObjects()">Hide selected Objects</button>		
-                    </div>					
-                </div>
-                <div>
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="clearhighlight()">Clear Highlighting</button>		
-                    </div>			
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="showHiddenObjects()">Show Hidden Objects</button>	
-                    </div>						
-                </div>		
-                <div>
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="createScreenshot()">Create Screenshot</button>		
-                    </div>			
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="printCurrentview()">Print current view</button>	
-                    </div>						
-                </div>	
-                <div>
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleShadows()">Toggle Shadows</button>		
-                    </div>			
-                    <div class="citydb_short_container">
-                        <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleTerrainShadows()">Toggle Terrain Shadows</button>	
-                    </div>						
-                </div>
-                <div class="citydb_long_container">	
-                    <select id = "citydb_showinexternalmaps" style="width: 100%;" onchange="showInExternalMaps()" class="cesium-button">
-                        <option selected="selected" disabled="disabled">Show the selected object in External Maps</option>	
-                        <option value = "google">Google StreetView</option>	
-                        <option value = "osm"> OpenStreetMap</option>	
-                        <option value = "bing">BingMaps ObliqueView</option>	
-                        <option value = "dual">DualMaps</option>				
-                    </select>					
-                </div>						        				
-            </div>	               			
+            </div>
         </div>
 
         <!-- GPS button -->

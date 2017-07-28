@@ -6,15 +6,23 @@
 (function () {
     /**constructor function**/
     function MobileController() {
-        this._isMobile = this.isMobile();
+//        this._isMobile = this.isMobile();
+        this._isMobile = true;
 
         // GPS functionalities, including geolocation and device orientation
         this._gpsController = new GPSController(this._isMobile);
+
+        // Watch for changes in visibility of iframe to hide/show uiMenu
+        this._hiddenInfoboxClassName = "cesium-infoBox-bodyless";
+        this._visibleInfoboxClassName = "cesium-infoBox-visible";
+        this._oldIframeVisibility = this._visibleInfoboxClassName;
+        this.watchInfoboxVisibility();
 
         this.hideCredits();
         this.hideInspector();
 
         this.setInfoboxFullscreen();
+        this.setToolboxFullscreen();
     }
 
     Object.defineProperties(MobileController.prototype, {
@@ -24,6 +32,38 @@
             },
             set: function (value) {
                 this._isMobile = value;
+            }
+        },
+        gpsController: {
+            get: function () {
+                return this._gpsController;
+            },
+            set: function (value) {
+                this._gpsController = value;
+            }
+        },
+        oldIframeVisibility: {
+            get: function () {
+                return this._oldIframeVisibility;
+            },
+            set: function (value) {
+                this._oldIframeVisibility = value;
+            }
+        },
+        hiddenInfoboxClassName: {
+            get: function () {
+                return this._hiddenInfoboxClassName;
+            },
+            set: function (value) {
+                this._hiddenInfoboxClassName = value;
+            }
+        },
+        visibleInfoboxClassName: {
+            get: function () {
+                return this._visibleInfoboxClassName;
+            },
+            set: function (value) {
+                this._visibleInfoboxClassName = value;
             }
         }
     });
@@ -74,6 +114,38 @@
     }
 
     /**
+     * Automatically hide toolbox/uiMenu when an infox is shown in fullscreen.
+     * 
+     * @returns {undefined}
+     */
+    MobileController.prototype.watchInfoboxVisibility = function () {
+        var scope = this;
+
+        window.setInterval(function () {
+            var infobox = document.getElementsByClassName('infobox-full')[0];
+            var uiMenu = document.getElementById('uiMenu');
+
+            for (var i = 0; i < infobox.classList.length; i++) {
+                if (infobox.classList[i] === "cesium-infoBox-visible") {
+                    if (scope._oldIframeVisibility === "cesium-infoBox-bodyless") {
+                        uiMenu.style.display = "none";
+                        scope._oldIframeVisibility = "cesium-infoBox-visible";
+                        break;
+                    }
+                }
+
+                if (infobox.classList[i] === "cesium-infoBox-bodyless") {
+                    if (scope._oldIframeVisibility === "cesium-infoBox-visible") {
+                        uiMenu.style.display = "block";
+                        scope._oldIframeVisibility = "cesium-infoBox-bodyless";
+                        break;
+                    }
+                }
+            }
+        }, 200);
+    }
+
+    /**
      * Set infobox containing thematic values to fullscreen on mobile devices.
      * 
      * @returns {undefined}
@@ -83,15 +155,41 @@
 
         if (scope._isMobile) {
             var infobox = document.getElementsByClassName('cesium-infoBox')[0];
-            infobox.classList.add("full");
+            infobox.classList.add("infobox-full");
             if (scope.getMobileOS() === "iOS") {
-                infobox.classList.add("full-ios");
+                infobox.classList.add("infobox-full-ios");
+            }
+        }
+    }
+
+    /**
+     * Set toolbox to fullscreen on mobile devices.
+     * 
+     * @returns {undefined}
+     */
+    MobileController.prototype.setToolboxFullscreen = function () {
+        var scope = this;
+
+        if (scope._isMobile) {
+            var uiMenu = document.getElementById('uiMenu-content');
+            uiMenu.style.display = "block";
+            uiMenu.classList.add("uiMenu-full");
+            if (scope.getMobileOS() === "iOS") {
+                uiMenu.classList.add("uiMenu-full-ios");
             }
 
-            document.getElementById("uiMenu").style.display = "none";
-            document.getElementsByClassName('cesium-infoBox-close')[0].onclick = function () {
-                document.getElementById("uiMenu").style.display = "block";
-            };
+            var toolbox = document.getElementById('citydb_toolbox');
+            toolbox.classList.add("toolbox-full");
+
+//            var long_containers = document.getElementsByClassName('citydb_long_container');
+//            for (var i = 0; i < long_containers.length; i++) {
+//                long_containers[i].classList.add("citydb_long_container-full");
+//            }
+
+//            var short_containers = document.getElementsByClassName('citydb_short_container');
+//            for (var i = 0; i < short_containers.length; i++) {
+//                short_containers[i].classList.add("citydb_short_container-full");
+//            }
         }
     }
 
