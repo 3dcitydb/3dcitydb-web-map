@@ -32,6 +32,7 @@
     width: 95vw!important;
     overflow: hidden;
     position: absolute;
+    margin-top: 15px;
     z-index: 1!important;
 }
 

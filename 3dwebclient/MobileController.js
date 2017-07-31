@@ -18,6 +18,7 @@
         this.watchInfoboxVisibility();
 
         this.hideCredits();
+        this.hideNavigationDiv();
         this.hideInspector();
 
         this.setInfoboxFullscreen();
@@ -104,6 +105,23 @@
     }
 
     /**
+     * Hide navigation tools (compass + zooming).
+     * 
+     * @returns {undefined}
+     */
+    MobileController.prototype.hideNavigationDiv = function () {
+        var scope = this;
+
+        var loop = window.setInterval(function () {
+            var navDiv = document.getElementById("navigationDiv");
+            if (Cesium.defined(navDiv)) {
+                navDiv.parentNode.removeChild(navDiv);
+                clearInterval(loop);
+            }
+        }, 10);
+    }
+
+    /**
      * Hide inspector that shows number of cached and loaded tiles.
      * 
      * @returns {undefined}
@@ -112,8 +130,11 @@
         var scope = this;
 
         if (scope._isMobile) {
-            document.getElementById("citydb_cachedTilesInspector").style.display = "none";
-            document.getElementById("citydb_showedTilesInspector").style.display = "none";
+            var cachedTiles = document.getElementById("citydb_cachedTilesInspector");
+            cachedTiles.style.display = "none";
+
+            var showedTiles = document.getElementById("citydb_showedTilesInspector");
+            showedTiles.style.display = "none";
         }
     }
 
