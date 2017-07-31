@@ -17,6 +17,9 @@
         this._oldIframeVisibility = this._visibleInfoboxClassName;
         this.watchInfoboxVisibility();
 
+        this.setDistanceLegend();
+        this.setLoadingIndicator();
+
         this.hideCredits();
         this.hideNavigationDiv();
         this.hideInspector();
@@ -91,6 +94,47 @@
     }
 
     /**
+     * Set distance legend to display on the bottom right corner on mobile devices.
+     * 
+     * @returns {undefined}
+     */
+    MobileController.prototype.setDistanceLegend = function () {
+        var scope = this;
+
+        if (scope._isMobile) {
+            var loop = window.setInterval(function () {
+                var distanceLegend = document.getElementsByClassName('distance-legend')[0];
+                if (Cesium.defined(distanceLegend)) {
+                    distanceLegend.classList.remove("distance-legend");
+                    distanceLegend.classList.add("distance-legend-mobile");
+                    clearInterval(loop);
+                }
+            }, 10);
+        }
+    }
+
+    /**
+     * Set loading indicator on mobile devices.
+     * 
+     * @returns {undefined}
+     */
+    MobileController.prototype.setLoadingIndicator = function () {
+        var scope = this;
+
+        if (scope._isMobile) {
+            var loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.classList.remove("loadingIndicator");
+            loadingIndicator.classList.add("loadingIndicator-mobile");
+
+            for (var i = 1; i <= 4; i++) {
+                var rect = document.createElement("div");
+                rect.className = "rect" + i;
+                loadingIndicator.appendChild(rect);
+            }
+        }
+    }
+
+    /**
      * Hide credit logos and texts.
      * 
      * @returns {undefined}
@@ -112,13 +156,15 @@
     MobileController.prototype.hideNavigationDiv = function () {
         var scope = this;
 
-        var loop = window.setInterval(function () {
-            var navDiv = document.getElementById("navigationDiv");
-            if (Cesium.defined(navDiv)) {
-                navDiv.parentNode.removeChild(navDiv);
-                clearInterval(loop);
-            }
-        }, 10);
+        if (scope._isMobile) {
+            var loop = window.setInterval(function () {
+                var navDiv = document.getElementById("navigationDiv");
+                if (Cesium.defined(navDiv)) {
+                    navDiv.parentNode.removeChild(navDiv);
+                    clearInterval(loop);
+                }
+            }, 10);
+        }
     }
 
     /**
@@ -130,6 +176,14 @@
         var scope = this;
 
         if (scope._isMobile) {
+            var loadingImg = document.getElementById("citydb_loadingTilesInspector");
+            var parentNode = loadingImg.parentNode;
+            parentNode.removeChild(loadingImg);
+            var loadingTileIndicator = document.createElement("div");
+            loadingTileIndicator.id = "citydb_loadingTilesInspector";
+            loadingTileIndicator.className = "loadingIndicator-tile-mobile";
+            parentNode.appendChild(loadingTileIndicator);
+
             var cachedTiles = document.getElementById("citydb_cachedTilesInspector");
             cachedTiles.style.display = "none";
 
@@ -205,16 +259,6 @@
 
             var toolbox = document.getElementById('citydb_toolbox');
             toolbox.classList.add("toolbox-full");
-
-//            var long_containers = document.getElementsByClassName('citydb_long_container');
-//            for (var i = 0; i < long_containers.length; i++) {
-//                long_containers[i].classList.add("citydb_long_container-full");
-//            }
-
-//            var short_containers = document.getElementsByClassName('citydb_short_container');
-//            for (var i = 0; i < short_containers.length; i++) {
-//                short_containers[i].classList.add("citydb_short_container-full");
-//            }
         }
     }
 
