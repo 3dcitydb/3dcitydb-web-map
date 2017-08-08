@@ -1,11 +1,17 @@
 .tracking-ori-activated,
 .tracking-ori-activated:hover{
-    background: #0074D9 url(../images/GPS_on_ori.png) no-repeat;
+    background: #0074D9 url(../images/GPS_on_ori.png);
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat;
 }
 
 .tracking-pos-ori-activated,
 .tracking-pos-ori-activated:hover{
-    background: #0074D9 url(../images/GPS_on_pos_ori.png) no-repeat;
+    background: #0074D9 url(../images/GPS_on_pos_ori.png);
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat;
 }
 
 .tracking-deactivated,
@@ -15,5 +21,7 @@
 .tracking-pos-ori-deactivated,
 .tracking-pos-ori-deactivated:hover{
     background-image: url(../images/GPS_off.png);
+    background-size: cover; 
+    background-position: center center; 
     background-repeat: no-repeat;
 }
