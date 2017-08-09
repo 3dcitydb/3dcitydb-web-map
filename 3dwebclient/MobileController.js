@@ -201,26 +201,31 @@
         var scope = this;
 
         window.setInterval(function () {
-            var infobox = document.getElementsByClassName('infobox-full')[0];
-            var uiMenu = document.getElementById('uiMenu');
+            var loop = window.setInterval(function () {
+                var infobox = document.getElementsByClassName('infobox-full')[0];
+                var uiMenu = document.getElementById('uiMenu');
 
-            for (var i = 0; i < infobox.classList.length; i++) {
-                if (infobox.classList[i] === "cesium-infoBox-visible") {
-                    if (scope._oldIframeVisibility === "cesium-infoBox-bodyless") {
-                        uiMenu.style.display = "none";
-                        scope._oldIframeVisibility = "cesium-infoBox-visible";
-                        break;
-                    }
-                }
+                if (Cesium.defined(infobox) && Cesium.defined(uiMenu)) {
+                    for (var i = 0; i < infobox.classList.length; i++) {
+                        if (infobox.classList[i] === "cesium-infoBox-visible") {
+                            if (scope._oldIframeVisibility === "cesium-infoBox-bodyless") {
+                                uiMenu.style.display = "none";
+                                scope._oldIframeVisibility = "cesium-infoBox-visible";
+                                break;
+                            }
+                        }
 
-                if (infobox.classList[i] === "cesium-infoBox-bodyless") {
-                    if (scope._oldIframeVisibility === "cesium-infoBox-visible") {
-                        uiMenu.style.display = "block";
-                        scope._oldIframeVisibility = "cesium-infoBox-bodyless";
-                        break;
+                        if (infobox.classList[i] === "cesium-infoBox-bodyless") {
+                            if (scope._oldIframeVisibility === "cesium-infoBox-visible") {
+                                uiMenu.style.display = "block";
+                                scope._oldIframeVisibility = "cesium-infoBox-bodyless";
+                                break;
+                            }
+                        }
                     }
+                    clearInterval(loop);
                 }
-            }
+            }, 10);
         }, 200);
     }
 
