@@ -91,7 +91,7 @@
             }
         })(navigator.userAgent || navigator.vendor || window.opera);
         return check;
-    }
+    };
 
     /**
      * Set distance legend to display on the bottom right corner on mobile devices.
@@ -111,7 +111,7 @@
                 }
             }, 10);
         }
-    }
+    };
 
     /**
      * Set loading indicator on mobile devices.
@@ -132,7 +132,7 @@
                 loadingIndicator.appendChild(rect);
             }
         }
-    }
+    };
 
     /**
      * Hide credit logos and texts.
@@ -146,7 +146,7 @@
             var textViewer = document.getElementsByClassName("cesium-widget-credits")[0];
             textViewer.parentNode.removeChild(textViewer);
         }
-    }
+    };
 
     /**
      * Hide navigation tools (compass + zooming).
@@ -165,7 +165,7 @@
                 }
             }, 10);
         }
-    }
+    };
 
     /**
      * Hide inspector that shows number of cached and loaded tiles.
@@ -190,7 +190,7 @@
             var showedTiles = document.getElementById("citydb_showedTilesInspector");
             showedTiles.style.display = "none";
         }
-    }
+    };
 
     /**
      * Automatically hide toolbox/uiMenu when an infox is shown in fullscreen.
@@ -227,7 +227,7 @@
                 }
             }, 10);
         }, 200);
-    }
+    };
 
     /**
      * Set infobox containing thematic values to fullscreen on mobile devices.
@@ -244,7 +244,7 @@
                 infobox.classList.add("infobox-full-ios");
             }
         }
-    }
+    };
 
     /**
      * Set toolbox to fullscreen on mobile devices.
@@ -265,7 +265,7 @@
             var toolbox = document.getElementById('citydb_toolbox');
             toolbox.classList.add("toolbox-full");
         }
-    }
+    };
 
     /**
      * Determine the mobile operating system.
@@ -294,7 +294,7 @@
         }
 
         return "unknown";
-    }
+    };
 
     window.MobileController = MobileController;
 })();
