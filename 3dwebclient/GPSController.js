@@ -105,6 +105,16 @@
         var customGlobeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-sceneModePicker-wrapper cesium-toolbar-button")[0];
         customCesiumViewerToolbar.replaceChild(button, customGlobeButton);
 
+        if (scope._isMobile) {
+            // remove home button
+            var customHomeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-button cesium-toolbar-button cesium-home-button")[0];
+            customCesiumViewerToolbar.removeChild(customHomeButton);
+
+            // remove info button
+            var customInfoButton = customCesiumViewerToolbar.getElementsByClassName("cesium-navigationHelpButton-wrapper")[0];
+            customCesiumViewerToolbar.removeChild(customInfoButton);
+        }
+
         // --------------------------MOUSE HELD EVENT--------------------------
         var holdStart = 0;
         var holdTime = 0;
