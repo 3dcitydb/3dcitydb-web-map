@@ -1,19 +1,4 @@
-First-person View Extension
-==================================
-This extension enables the first-person view. It shows users' current location and orientation in real-time. The former information is acquired using the Geolocation API, while the latter is provided by the DeviceOrientation API in HTML5.
-
-NOTE: The Geolocation API only functions via HTTPS since Google Chrome 50. Therefore, make sure the client is called from an HTTPS page or your own localhost. For demo and testing purposes, this first-person view extension is also available under:
-[web link](https://3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.0473109629219&heading=328.74761976161506&pitch=-79.22129067410187&roll=359.4611498135091&layer_0=url%3D..%252Fdata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200).
-
-Additional important information:
-
-* If the browser informs you about the webpage not having a valid certificate, click "Advanced" -> "Continue" to proceed.
-* Test the client on devices equipped with GPS.
-* The GPS button is located in the top right hand corner. Select it to enable the first-person view.
-* The GPS button can be turned on (green) and off (gray).
-* If the Geolocation API asks for permission to retrieve your current location, select "Allow".
-
-3DCityDB-Web-Map-Client
+3DCityDB-Web-Map-Client with Mobile Support
 ==================================
 
 The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of **arbitrarily large semantic 3D city models in CityGML**. It utilizes the [Cesium Virtual Globe](http://cesiumjs.org/index.html) as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
@@ -120,6 +105,82 @@ Demos
 <p align="center">
 <img src="theme/img/vorarlberg_buildings_geometry_demo.jpg" width="800" />
 </p>
+
+
+# Mobile Support Extension
+
+
+### New features
+
+
+The current 3DCityDB-Web-Map-Client is equipped with an extension that provides better support while operating on mobile devices. 
+The extension comes with a built-in mobile detector, which can automatically detect and adjust the client's behaviors accordingly to whether the 3DCityDB-Web-Map-Client is operating on a mobile device. 
+Some of the most important mobile features enabled by this extension are listed as follows:
+ 
+* **A more lightweight graphical user interface:** 
+In order to make the best use of the limited screen real-estate available on mobile devices, some elements are removed or hidden from the web client, 
+such as credit texts and logos, as well as some of Cesium's built-in navigation controls that can easily be manipulated using touch gestures. 
+<p align="center">
+<img src="theme/img/mobile_homepage.png" />
+</p>
+
+* **Visual adjustments:**
+    * The main toolbox now scales to fit to the screen size. In case of excess lines/length, the toolbox becomes scrollable (see picture below).
+    <p align="center">
+    <img src="theme/img/mobile_toolbox.png" />
+    </p>
+
+    * The infobox displayed when a city object (e.g. building) is clicked is now displayed in fullscreen with scrollable contents, as illustrated below.
+    <p align="center">
+    <img src="theme/img/mobile_infobox.png" />
+    </p>
+
+    * The loading icon is now shown as a horizontal bar at the bottom of the screen (highlighted by the green box in the picture below).
+    <p align="center">
+    <img src="theme/img/mobile_loading.png" />
+    </p>
+
+* Most importantly: **The introduction of a GPS button** (located on the top right corner in the view toolbar) providing new functionalities involving user's current location and orientation. Namely: 
+    * GPS "snapshot" (single-click): shows the user's current position and orientation,
+    <p align="center">
+    <img src="theme/img/GPS_on.png" />
+    </p> 
+
+    * Real-time Compass Tracking  (double-click): periodically shows the user's current orientation with fixed location,
+    <p align="center">
+    <img src="theme/img/GPS_on_ori.png" />
+    </p> 
+
+    * Real-time Compass Tracking + Position (triple-click) or the "First-person View" mode: periodically shows the user's current orietation and position.
+    <p align="center">
+    <img src="theme/img/GPS_on_pos_ori.png" />
+    </p> 
+
+    * To disable real-time tracking, simply either click on the button again to return to "snapshot" mode 
+or hold the button for 1 second, the camera will then ascend to a higher altitude of the current location.
+
+### Demos
+
+
+For demo and testing purposes, this mobile extension is also available under:
+* [first-person view link](https://www.3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.04731096361564&heading=328.7476197616152&pitch=-79.2212906741018&roll=359.46114981350894&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200)
+* [debug-mode view link](https://www.3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.04731096361564&heading=328.7476197616152&pitch=-79.2212906741018&roll=359.46114981350894&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&viewMode=debug).
+
+
+# Notes
+
+
+The mobile extension makes use of the Geolocation API and the DeviceOrientation API in HTML5. 
+The Geolocation API only functions via HTTPS since Google Chrome 50. Therefore, make sure the client is called from an HTTPS page or your own localhost. 
+
+Additional important information:
+
+* If the browser informs you about the webpage not having a valid certificate, click "Advanced" -> "Continue" to proceed.
+* Test the client on devices equipped with GPS.
+* The GPS button is located in the top right hand corner. Select it to enable the first-person view.
+* The GPS button can be turned on (green) and off (gray).
+* If the Geolocation API asks for permission to retrieve your current location, select "Allow".
+
 
 More information
 ----------------
