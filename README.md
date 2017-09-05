@@ -162,7 +162,7 @@ or hold the button for 1 second, the camera will then ascend to a higher altitud
 ## Demos
 
 
-For demo and testing purposes, this mobile extension is also available under:
+To test the mobile extension 
 * [first-person view link](https://www.3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.04731096361564&heading=328.7476197616152&pitch=-79.2212906741018&roll=359.46114981350894&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200)
 * [debug-mode view link](https://www.3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.04731096361564&heading=328.7476197616152&pitch=-79.2212906741018&roll=359.46114981350894&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&viewMode=debug).
 
@@ -173,7 +173,7 @@ For demo and testing purposes, this mobile extension is also available under:
 The mobile extension makes use of the Geolocation API and the DeviceOrientation API in HTML5. 
 The Geolocation API only functions via HTTPS since Google Chrome 50. Therefore, make sure the client is called from an HTTPS page or your own localhost. 
 
-Additional important information:
+Additional important notes:
 
 * If the browser informs you about the webpage not having a valid certificate, click "Advanced" -> "Continue" to proceed.
 * Test the client on devices equipped with GPS.
