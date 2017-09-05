@@ -113,7 +113,7 @@ Demos
 ## New features
 
 
-The current 3DCityDB-Web-Map-Client is equipped with an extension that provides better support while operating on mobile devices. 
+The current 3DCityDB-Web-Map-Client is equipped with an extension that provides better support for mobile devices. 
 The extension comes with a built-in mobile detector, which can automatically detect and adjust the client's behaviors accordingly to whether the 3DCityDB-Web-Map-Client is operating on a mobile device. 
 Some of the most important mobile features enabled by this extension are listed as follows:
  
@@ -151,7 +151,7 @@ such as credit texts and logos, as well as some of Cesium's built-in navigation 
     <img src="theme/img/GPS_on_ori.png" width="25%" />
     </p> 
 
-    * Real-time Compass Tracking + Position (triple-click) or the "First-person View" mode: periodically shows the user's current orietation and position.
+    * Real-time Compass Tracking + Position (triple-click) or the "First-person View" mode: periodically shows the user's current orientation and position.
     <p align="center">
     <img src="theme/img/GPS_on_pos_ori.png" width="25%" />
     </p> 
@@ -177,8 +177,6 @@ Additional important information:
 
 * If the browser informs you about the webpage not having a valid certificate, click "Advanced" -> "Continue" to proceed.
 * Test the client on devices equipped with GPS.
-* The GPS button is located in the top right hand corner. Select it to enable the first-person view.
-* The GPS button can be turned on (green) and off (gray).
 * If the Geolocation API asks for permission to retrieve your current location, select "Allow".
 
 
