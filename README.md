@@ -1,5 +1,9 @@
-3DCityDB-Web-Map-Client with Mobile Support
+3DCityDB-Web-Map-Client
 ==================================
+
+
+### <b><i>Mobile support is now online.</i></b> <a href="https://github.com/3dcitydb/3dcitydb-web-map#mobile-support-extension">[Read more]</a>
+
 
 The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of **arbitrarily large semantic 3D city models in CityGML**. It utilizes the [Cesium Virtual Globe](http://cesiumjs.org/index.html) as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
 
@@ -65,7 +69,7 @@ Developers
 
 The 3DCityDB-Web-Map-Client has been developed by: 
 
-* Zhihang Yao, Kanishk Chaturvedi, and Thomas H. Kolbe
+* Zhihang Yao, Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
 <br>[Chair of Geoinformatics, Technical University of Munich](https://www.gis.bgu.tum.de/)
 
 and with the support from the following cooperation partners:
@@ -121,23 +125,23 @@ Some of the most important mobile features enabled by this extension are listed 
 In order to make the best use of the limited screen real-estate available on mobile devices, some elements are removed or hidden from the web client, 
 such as credit texts and logos, as well as some of Cesium's built-in navigation controls that can easily be manipulated using touch gestures. 
 <p align="center">
-<img src="theme/img/mobile_homepage.PNG" />
+<img src="theme/img/mobile_homepage.PNG" width="50%" />
 </p>
 
 * **Visual adjustments:**
     * The main toolbox now scales to fit to the screen size. In case of excess lines/length, the toolbox becomes scrollable (see picture below).
     <p align="center">
-    <img src="theme/img/mobile_toolbox.PNG" />
+    <img src="theme/img/mobile_toolbox.PNG" width="50%" />
     </p>
 
     * The infobox displayed when a city object (e.g. building) is clicked is now displayed in fullscreen with scrollable contents, as illustrated below.
     <p align="center">
-    <img src="theme/img/mobile_infobox.PNG" />
+    <img src="theme/img/mobile_infobox.PNG" width="50%" />
     </p>
 
     * The loading icon is now shown as a horizontal bar at the bottom of the screen (highlighted by the green box in the picture below).
     <p align="center">
-    <img src="theme/img/mobile_loading.PNG" />
+    <img src="theme/img/mobile_loading.PNG" width="50%" />
     </p>
 
 * Most importantly: **The introduction of a GPS button** (located on the top right corner in the view toolbar) providing new functionalities involving user's current location and orientation. Namely: 
@@ -172,6 +176,8 @@ To test the mobile extension
 
 The mobile extension makes use of the Geolocation API and the DeviceOrientation API in HTML5. 
 The Geolocation API only functions via HTTPS since Google Chrome 50. Therefore, make sure the client is called from an HTTPS page or your own localhost. 
+
+Since the 3DCityDB-Web-Map-Client may cause a large amount of data traffic, it is recommended to connect your mobile device to an available WLAN before starting the client.
 
 Additional important notes:
 
