@@ -1,6 +1,10 @@
 3DCityDB-Web-Map-Client
 ==================================
 
+
+### <b><i>Mobile support is now online.</i></b> <a href="https://github.com/3dcitydb/3dcitydb-web-map#mobile-support-extension">[Read more]</a>
+
+
 The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of **arbitrarily large semantic 3D city models in CityGML**. It utilizes the [Cesium Virtual Globe](http://cesiumjs.org/index.html) as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
 
 The key features and functionalities of the 3DCityDB-Web-Map-Client is summarized as follows: 
@@ -65,7 +69,7 @@ Developers
 
 The 3DCityDB-Web-Map-Client has been developed by: 
 
-* Zhihang Yao, Kanishk Chaturvedi, and Thomas H. Kolbe
+* Zhihang Yao, Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
 <br>[Chair of Geoinformatics, Technical University of Munich](https://www.gis.bgu.tum.de/)
 
 and with the support from the following cooperation partners:
@@ -94,7 +98,7 @@ Demos
 <img src="theme/img/berlin_buildings_geometry_demo.jpg" width="800" />
 </p>
 
-[Demo 4: Visualization of semantic 3D city model of New York City (NYC). This Demo shows all NYC buildings (> 1 million), roads (> 140,000), and lots (> 800,000) – all with 3D geometries (LoD1) and thematic attributes per object](http://www.3dcitydb.org/3dcitydb-web-map/1.1/3dwebclient/index.html?batchSize=3&gltf_version=0.8&title=NYC_Demo&latitude=40.74337478856652&longitude=-73.98774263868867&height=329.6833486632038&heading=212.94068327361515&pitch=-48.25628003176496&roll=359.9999849535639&layer_0=url%3Dhttp%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fmydata%252FCesium_NYC_Demo%252FNYK_Building_Extruded%252FNYK_Building_Extruded_MasterJSON_NoJSONP.json%26name%3DNYC_Buildings%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252FDataSource%253Fdocid%253D1ivFBfqsnkv5OlvkQUybgfOSjIz_u9_98_mmJVUss%2523rows%253Aid%253D1%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D50%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttp%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fmydata%252FCesium_NYC_Demo%252FNYK_Street_Footprint%252FNYK_Street_Footprint_MasterJSON_NoJSONP.json%26name%3DNYC_Streets%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252Fdata%253Fdocid%253D1qLk_S4yxma0MI1LmISc8DdLn_NdhrFb784Mwizas%2523rows%253Aid%253D1%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D50%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttp%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fmydata%252FCesium_NYC_Demo%252FNYK_Landuse_Footprint%252FNYK_Landuse_Footprint_MasterJSON_NoJSONP.json%26name%3DNYC_Lots%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252Fdata%253Fdocid%253D1cdvru7oiJIm0Us4Lgt-KYndNvGYcHjefYaTK_nK4%2523rows%253Aid%253D1%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D50%26maxCountOfVisibleTiles%3D200)
+[Demo 4: Visualization of semantic 3D city model of New York City (NYC). This Demo shows all NYC buildings (> 1 million), roads (> 140,000), and lots (> 800,000) ï¿½ all with 3D geometries (LoD1) and thematic attributes per object](http://www.3dcitydb.org/3dcitydb-web-map/1.1/3dwebclient/index.html?batchSize=3&gltf_version=0.8&title=NYC_Demo&latitude=40.74337478856652&longitude=-73.98774263868867&height=329.6833486632038&heading=212.94068327361515&pitch=-48.25628003176496&roll=359.9999849535639&layer_0=url%3Dhttp%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fmydata%252FCesium_NYC_Demo%252FNYK_Building_Extruded%252FNYK_Building_Extruded_MasterJSON_NoJSONP.json%26name%3DNYC_Buildings%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252FDataSource%253Fdocid%253D1ivFBfqsnkv5OlvkQUybgfOSjIz_u9_98_mmJVUss%2523rows%253Aid%253D1%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D50%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttp%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fmydata%252FCesium_NYC_Demo%252FNYK_Street_Footprint%252FNYK_Street_Footprint_MasterJSON_NoJSONP.json%26name%3DNYC_Streets%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252Fdata%253Fdocid%253D1qLk_S4yxma0MI1LmISc8DdLn_NdhrFb784Mwizas%2523rows%253Aid%253D1%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D50%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttp%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fmydata%252FCesium_NYC_Demo%252FNYK_Landuse_Footprint%252FNYK_Landuse_Footprint_MasterJSON_NoJSONP.json%26name%3DNYC_Lots%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252Fdata%253Fdocid%253D1cdvru7oiJIm0Us4Lgt-KYndNvGYcHjefYaTK_nK4%2523rows%253Aid%253D1%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D50%26maxCountOfVisibleTiles%3D200)
 
 <p align="center">
 <img src="theme/img/nyc_buildings_geometry_demo.jpg" width="800" />
@@ -105,6 +109,82 @@ Demos
 <p align="center">
 <img src="theme/img/vorarlberg_buildings_geometry_demo.jpg" width="800" />
 </p>
+
+
+# Mobile Support Extension
+
+
+## New features
+
+
+The current 3DCityDB-Web-Map-Client is equipped with an extension that provides better support for mobile devices. 
+The extension comes with a built-in mobile detector, which can automatically detect and adjust the client's behaviors accordingly to whether the 3DCityDB-Web-Map-Client is operating on a mobile device. 
+Some of the most important mobile features enabled by this extension are listed as follows:
+ 
+* **A more lightweight graphical user interface:** 
+In order to make the best use of the limited screen real-estate available on mobile devices, some elements are removed or hidden from the web client, 
+such as credit texts and logos, as well as some of Cesium's built-in navigation controls that can easily be manipulated using touch gestures. 
+<p align="center">
+<img src="theme/img/mobile_homepage.PNG" width="50%" />
+</p>
+
+* **Visual adjustments:**
+    * The main toolbox now scales to fit to the screen size. In case of excess lines/length, the toolbox becomes scrollable (see picture below).
+    <p align="center">
+    <img src="theme/img/mobile_toolbox.PNG" width="50%" />
+    </p>
+
+    * The infobox displayed when a city object (e.g. building) is clicked is now displayed in fullscreen with scrollable contents, as illustrated below.
+    <p align="center">
+    <img src="theme/img/mobile_infobox.PNG" width="50%" />
+    </p>
+
+    * The loading icon is now shown as a horizontal bar at the bottom of the screen (highlighted by the green box in the picture below).
+    <p align="center">
+    <img src="theme/img/mobile_loading.PNG" width="50%" />
+    </p>
+
+* Most importantly: **The introduction of a GPS button** (located on the top right corner in the view toolbar) providing new functionalities involving user's current location and orientation. Namely: 
+    * GPS "snapshot" (single-click): shows the user's current position and orientation,
+    <p align="center">
+    <img src="theme/img/GPS_off.png" width="25%" />
+    </p> 
+
+    * Real-time Compass Tracking  (double-click): periodically shows the user's current orientation with fixed location,
+    <p align="center">
+    <img src="theme/img/GPS_on_ori.png" width="25%" />
+    </p> 
+
+    * Real-time Compass Tracking + Position (triple-click) or the "First-person View" mode: periodically shows the user's current orientation and position.
+    <p align="center">
+    <img src="theme/img/GPS_on_pos_ori.png" width="25%" />
+    </p> 
+
+    * To disable real-time tracking, simply either click on the button again to return to "snapshot" mode 
+or hold the button for 1 second, the camera will then ascend to a higher altitude of the current location.
+
+## Demos
+
+
+To test the mobile extension 
+* [first-person view link](https://www.3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.04731096361564&heading=328.7476197616152&pitch=-79.2212906741018&roll=359.46114981350894&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200)
+* [debug-mode view link](https://www.3dcitydb.org/3dcitydb-web-map/first-person-view/3dwebclient/index.html?gltf_version=0.8&title=3DCityDB-Web-Map-Client&shadows=false&terrainShadows=0&latitude=48.14841421296063&longitude=11.567992899981103&height=288.04731096361564&heading=328.7476197616152&pitch=-79.2212906741018&roll=359.46114981350894&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FMunich_Demo%252FBuildings_glTF%252FBuildings_glTF_MasterJSON.json%26name%3DMUC%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252Fdata%253Fdocid%253D1KE3odY92wmpwdyUs6osYhNPgRtI9W3GOQyuyHfp3%2523rows%253Aid%253D1%26cityobjectsJsonUrl%3D%26minLodPixels%3D140%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&viewMode=debug).
+
+
+## Notes
+
+
+The mobile extension makes use of the Geolocation API and the DeviceOrientation API in HTML5. 
+The Geolocation API only functions via HTTPS since Google Chrome 50. Therefore, make sure the client is called from an HTTPS page or your own localhost. 
+
+Since the 3DCityDB-Web-Map-Client may cause a large amount of data traffic, it is recommended to connect your mobile device to an available WLAN before starting the client.
+
+Additional important notes:
+
+* If the browser informs you about the webpage not having a valid certificate, click "Advanced" -> "Continue" to proceed.
+* Test the client on devices equipped with GPS.
+* If the Geolocation API asks for permission to retrieve your current location, select "Allow".
+
 
 More information
 ----------------
