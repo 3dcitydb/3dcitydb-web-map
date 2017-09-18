@@ -149,10 +149,10 @@
 		return;
 	};
 	
-	WebMap3DCityDB.prototype.clearHighlight = function(){   		
+	WebMap3DCityDB.prototype.clearHighlight = function(object){   		
   		var layers = this._layers;
   		for (var i = 0; i < layers.length; i++) {
-  			if (layers[i].active) {
+  			if (layers[i].active && layers[i].id != object.id.layerId) {
   				layers[i].unHighlightAllObjects();
   			} 			
   		} 
@@ -220,7 +220,7 @@
 			var that = this;
 			this._eventHandler.setInputAction(function(event){
 				var object = that._cesiumViewerInstance.scene.pick(event.position);
-				that.clearHighlight();
+				that.clearHighlight(object);
 				that.passEventToLayer("CLICK", object);
 			}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 			this._eventHandler.setInputAction(function(event){
