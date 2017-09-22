@@ -771,22 +771,17 @@ function flyToMapLocation(lat, lon, callBackFunc) {
     camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(lon, lat, 2000),
         complete: function () {
-            var timer = setInterval(function () {
-                if (webMap._cesiumViewerInstance.scene.globe._surface._tileLoadQueue.length == 0) {
-                    var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth / 2, clientHeight / 2)), scene);
-                    var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;
-                    var center = Cesium.Cartesian3.fromDegrees(lon, lat, terrainHeight);
-                    var heading = Cesium.Math.toRadians(0);
-                    var pitch = Cesium.Math.toRadians(-50);
-                    var range = 200;
-                    camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
-                    camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-                    if (Cesium.defined(callBackFunc)) {
-                        callBackFunc.call(this);
-                    }
-                    clearInterval(timer);
-                }
-            }, 1000)
+        	var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
+        	var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;
+        	var center = Cesium.Cartesian3.fromDegrees(lon, lat, terrainHeight);
+            var heading = Cesium.Math.toRadians(0);
+            var pitch = Cesium.Math.toRadians(-50);
+        	var range = 100;   
+        	camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+        	camera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
+        	if (Cesium.defined(callBackFunc)) {
+        		callBackFunc.call(this);
+        	}  
         }
     })
 }
