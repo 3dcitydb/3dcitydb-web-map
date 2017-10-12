@@ -15,7 +15,7 @@
         this._hiddenInfoboxClassName = "cesium-infoBox-bodyless";
         this._visibleInfoboxClassName = "cesium-infoBox-visible";
         this._oldIframeVisibility = this._visibleInfoboxClassName;
-        this.watchInfoboxVisibility();
+        // this.watchInfoboxVisibility();
 
         this.setDistanceLegend();
         this.setLoadingIndicator();

@@ -1,14 +1,14 @@
 .infobox-full {
-    position: absolute;
-    top: 0;
+    position: fixed;
+    top: 45px;
     left: 0;
     right: 0;
     height: 100%;
     width: 100%;
     /*    max-height: none;
         max-width: none;*/
-    z-index: 999999;
     overflow: hidden;
+    z-index: 9999;
 }
 
 .infobox-full iframe {
@@ -33,7 +33,6 @@
     overflow: hidden;
     position: absolute;
     margin-top: 15px;
-    z-index: 1!important;
 }
 
 .uiMenu-full-ios {
