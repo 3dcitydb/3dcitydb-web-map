@@ -635,7 +635,7 @@
 				this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);	
 			}			
 		}
-		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
+		else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
 			if (active == false) {		
 				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
 			}
@@ -752,7 +752,7 @@
 				this._citydbKmlTilingManager.doTerminate();			
 				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
 			}
-			else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
+			else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
 				this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
 			}	
 			else {}
@@ -781,6 +781,17 @@
 		    }).otherwise(function(error) {
 				deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
 			});			
+		}
+		else if (this._urlSuffix == 'czml') {
+			this._citydbKmlDataSource = new Cesium.CzmlDataSource();	
+			
+			this._citydbKmlDataSource.load(this._url).then(function(dataSource) {
+				assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+				cesiumViewer.dataSources.add(dataSource);	
+				deferred.resolve(that);
+		    }).otherwise(function(error) {
+				deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+			});		
 		}
 		else {
 			deferred.reject(new Cesium.DeveloperError('Unsupported Datasource from: ' + that._url));
