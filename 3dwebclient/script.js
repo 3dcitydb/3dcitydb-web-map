@@ -230,7 +230,7 @@ function getLayersFromUrl() {
             maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
         }
 
-        if (['kml', 'kmz', 'json'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1) {
+        if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1) {
             nLayers.push(new CitydbKmlLayer(options));
         }
         else {
@@ -798,7 +798,7 @@ function addNewLayer() {
         maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
         maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles
     }
-    if (['kml', 'kmz', 'json'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
+    if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
         _layers.push(new CitydbKmlLayer(options));
     }
     else {
