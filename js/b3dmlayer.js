@@ -2,7 +2,7 @@
  * 3DCityDB-Web-Map
  * http://www.3dcitydb.org/
  * 
- * Copyright 2015 - 2016
+ * Copyright 2015 - 2017
  * Chair of Geoinformatics
  * Technical University of Munich, Germany
  * https://www.gis.bgu.tum.de/
