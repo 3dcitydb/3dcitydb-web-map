@@ -836,7 +836,7 @@ function addWebMapServiceProvider() {
                 url: addWmsViewModel.url.trim(),
                 layers: addWmsViewModel.layers.trim(),
                 parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim()),
-                proxy: new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null: new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
             });
         }
     });
