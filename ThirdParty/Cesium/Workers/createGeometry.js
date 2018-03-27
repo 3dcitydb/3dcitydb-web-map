@@ -1312,7 +1312,7 @@ define('Core/Math',[
     };
 
     /**
-     * Computes <code>Math.acos(value)</acode>, but first clamps <code>value</code> to the range [-1.0, 1.0]
+     * Computes <code>Math.acos(value)</code>, but first clamps <code>value</code> to the range [-1.0, 1.0]
      * so that the function will never return NaN.
      *
      * @param {Number} value The value for which to compute acos.
@@ -1327,7 +1327,7 @@ define('Core/Math',[
     };
 
     /**
-     * Computes <code>Math.asin(value)</acode>, but first clamps <code>value</code> to the range [-1.0, 1.0]
+     * Computes <code>Math.asin(value)</code>, but first clamps <code>value</code> to the range [-1.0, 1.0]
      * so that the function will never return NaN.
      *
      * @param {Number} value The value for which to compute asin.
@@ -2856,7 +2856,7 @@ define('Core/Ellipsoid',[
         ellipsoid._centerToleranceSquared = CesiumMath.EPSILON1;
 
         if (ellipsoid._radiiSquared.z !== 0) {
-            ellipsoid._sqauredXOverSquaredZ = ellipsoid._radiiSquared.x / ellipsoid._radiiSquared.z;
+            ellipsoid._squaredXOverSquaredZ = ellipsoid._radiiSquared.x / ellipsoid._radiiSquared.z;
         }
     }
 
@@ -2889,7 +2889,7 @@ define('Core/Ellipsoid',[
         this._minimumRadius = undefined;
         this._maximumRadius = undefined;
         this._centerToleranceSquared = undefined;
-        this._sqauredXOverSquaredZ = undefined;
+        this._squaredXOverSquaredZ = undefined;
 
         initialize(this, x, y, z);
     }
@@ -3396,9 +3396,9 @@ define('Core/Ellipsoid',[
      *                                In earth case, with common earth datums, there is no need for this buffer since the intersection point is always (relatively) very close to the center.
      *                                In WGS84 datum, intersection point is at max z = +-42841.31151331382 (0.673% of z-axis).
      *                                Intersection point could be outside the ellipsoid if the ratio of MajorAxis / AxisOfRotation is bigger than the square root of 2
-     * @param {Cartesian} [result] The cartesian to which to copy the result, or undefined to create and
+     * @param {Cartesian3} [result] The cartesian to which to copy the result, or undefined to create and
      *        return a new instance.
-     * @returns {Cartesian | undefined} the intersection point if it's inside the ellipsoid, undefined otherwise
+     * @returns {Cartesian3 | undefined} the intersection point if it's inside the ellipsoid, undefined otherwise
      *
      * @exception {DeveloperError} position is required.
      * @exception {DeveloperError} Ellipsoid must be an ellipsoid of revolution (radii.x == radii.y).
@@ -3415,7 +3415,7 @@ define('Core/Ellipsoid',[
         
         buffer = defaultValue(buffer, 0.0);
 
-        var sqauredXOverSquaredZ = this._sqauredXOverSquaredZ;
+        var squaredXOverSquaredZ = this._squaredXOverSquaredZ;
 
         if (!defined(result)) {
             result = new Cartesian3();
@@ -3423,7 +3423,7 @@ define('Core/Ellipsoid',[
 
         result.x = 0.0;
         result.y = 0.0;
-        result.z = position.z * (1 - sqauredXOverSquaredZ);
+        result.z = position.z * (1 - squaredXOverSquaredZ);
 
         if (Math.abs(result.z) >= this._radii.z - buffer) {
             return undefined;
@@ -8704,7 +8704,7 @@ define('Core/Rectangle',[
     /**
      * Creates the smallest possible Rectangle that encloses all positions in the provided array.
      *
-     * @param {Cartesian[]} cartesians The list of Cartesian instances.
+     * @param {Cartesian3[]} cartesians The list of Cartesian instances.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid the cartesians are on.
      * @param {Rectangle} [result] The object onto which to store the result, or undefined if a new instance should be created.
      * @returns {Rectangle} The modified result parameter or a new Rectangle instance if none was provided.
@@ -9324,7 +9324,7 @@ define('Core/BoundingSphere',[
      * The bounding sphere is computed by running two algorithms, a naive algorithm and
      * Ritter's algorithm. The smaller of the two spheres is used to ensure a tight fit.
      *
-     * @param {Cartesian3[]} positions An array of points that the bounding sphere will enclose.  Each point must have <code>x</code>, <code>y</code>, and <code>z</code> properties.
+     * @param {Cartesian3[]} [positions] An array of points that the bounding sphere will enclose.  Each point must have <code>x</code>, <code>y</code>, and <code>z</code> properties.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if one was not provided.
      *
@@ -9475,7 +9475,7 @@ define('Core/BoundingSphere',[
     /**
      * Computes a bounding sphere from a rectangle projected in 2D.
      *
-     * @param {Rectangle} rectangle The rectangle around which to create a bounding sphere.
+     * @param {Rectangle} [rectangle] The rectangle around which to create a bounding sphere.
      * @param {Object} [projection=GeographicProjection] The projection used to project the rectangle into 2D.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if none was provided.
@@ -9488,7 +9488,7 @@ define('Core/BoundingSphere',[
      * Computes a bounding sphere from a rectangle projected in 2D.  The bounding sphere accounts for the
      * object's minimum and maximum heights over the rectangle.
      *
-     * @param {Rectangle} rectangle The rectangle around which to create a bounding sphere.
+     * @param {Rectangle} [rectangle] The rectangle around which to create a bounding sphere.
      * @param {Object} [projection=GeographicProjection] The projection used to project the rectangle into 2D.
      * @param {Number} [minimumHeight=0.0] The minimum height over the rectangle.
      * @param {Number} [maximumHeight=0.0] The maximum height over the rectangle.
@@ -9534,7 +9534,7 @@ define('Core/BoundingSphere',[
      * Computes a bounding sphere from a rectangle in 3D. The bounding sphere is created using a subsample of points
      * on the ellipsoid and contained in the rectangle. It may not be accurate for all rectangles on all types of ellipsoids.
      *
-     * @param {Rectangle} rectangle The valid rectangle used to create a bounding sphere.
+     * @param {Rectangle} [rectangle] The valid rectangle used to create a bounding sphere.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid used to determine positions of the rectangle.
      * @param {Number} [surfaceHeight=0.0] The height above the surface of the ellipsoid.
      * @param {BoundingSphere} [result] The object onto which to store the result.
@@ -9544,11 +9544,17 @@ define('Core/BoundingSphere',[
         ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
         surfaceHeight = defaultValue(surfaceHeight, 0.0);
 
-        var positions;
-        if (defined(rectangle)) {
-            positions = Rectangle.subsample(rectangle, ellipsoid, surfaceHeight, fromRectangle3DScratch);
+        if (!defined(result)) {
+            result = new BoundingSphere();
         }
 
+        if (!defined(rectangle)) {
+            result.center = Cartesian3.clone(Cartesian3.ZERO, result.center);
+            result.radius = 0.0;
+            return result;
+        }
+
+        var positions = Rectangle.subsample(rectangle, ellipsoid, surfaceHeight, fromRectangle3DScratch);
         return BoundingSphere.fromPoints(positions, result);
     };
 
@@ -9558,7 +9564,7 @@ define('Core/BoundingSphere',[
      * algorithms, a naive algorithm and Ritter's algorithm. The smaller of the two spheres is used to
      * ensure a tight fit.
      *
-     * @param {Number[]} positions An array of points that the bounding sphere will enclose.  Each point
+     * @param {Number[]} [positions] An array of points that the bounding sphere will enclose.  Each point
      *        is formed from three elements in the array in the order X, Y, Z.
      * @param {Cartesian3} [center=Cartesian3.ZERO] The position to which the positions are relative, which need not be the
      *        origin of the coordinate system.  This is useful when the positions are to be used for
@@ -9739,9 +9745,9 @@ define('Core/BoundingSphere',[
      * algorithms, a naive algorithm and Ritter's algorithm. The smaller of the two spheres is used to
      * ensure a tight fit.
      *
-     * @param {Number[]} positionsHigh An array of high bits of the encoded cartesians that the bounding sphere will enclose.  Each point
+     * @param {Number[]} [positionsHigh] An array of high bits of the encoded cartesians that the bounding sphere will enclose.  Each point
      *        is formed from three elements in the array in the order X, Y, Z.
-     * @param {Number[]} positionsLow An array of low bits of the encoded cartesians that the bounding sphere will enclose.  Each point
+     * @param {Number[]} [positionsLow] An array of low bits of the encoded cartesians that the bounding sphere will enclose.  Each point
      *        is formed from three elements in the array in the order X, Y, Z.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if one was not provided.
@@ -9946,7 +9952,7 @@ define('Core/BoundingSphere',[
     /**
      * Computes a tight-fitting bounding sphere enclosing the provided array of bounding spheres.
      *
-     * @param {BoundingSphere[]} boundingSpheres The array of bounding spheres.
+     * @param {BoundingSphere[]} [boundingSpheres] The array of bounding spheres.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if none was provided.
      */
@@ -13219,14 +13225,12 @@ define('Core/AttributeCompression',[
         './Cartesian2',
         './Cartesian3',
         './Check',
-        './defined',
         './DeveloperError',
         './Math'
     ], function(
         Cartesian2,
         Cartesian3,
         Check,
-        defined,
         DeveloperError,
         CesiumMath) {
     'use strict';
@@ -15541,16 +15545,20 @@ define('Core/IntersectionTests',[
 
 define('Core/Plane',[
         './Cartesian3',
+        './Check',
         './defined',
         './DeveloperError',
         './freezeObject',
-        './Math'
+        './Math',
+        './Matrix4'
     ], function(
         Cartesian3,
+        Check,
         defined,
         DeveloperError,
         freezeObject,
-        CesiumMath) {
+        CesiumMath,
+        Matrix4) {
     'use strict';
 
     /**
@@ -15579,15 +15587,11 @@ define('Core/Plane',[
      * @exception {DeveloperError} Normal must be normalized
      */
     function Plane(normal, distance) {
-                if (!defined(normal))  {
-            throw new DeveloperError('normal is required.');
-        }
+                Check.typeOf.object('normal', normal);
         if (!CesiumMath.equalsEpsilon(Cartesian3.magnitude(normal), 1.0, CesiumMath.EPSILON6)) {
             throw new DeveloperError('normal must be normalized.');
         }
-        if (!defined(distance)) {
-            throw new DeveloperError('distance is required.');
-        }
+        Check.typeOf.number('distance', distance);
         
         /**
          * The plane's normal.
@@ -15624,12 +15628,8 @@ define('Core/Plane',[
      * @exception {DeveloperError} Normal must be normalized
      */
     Plane.fromPointNormal = function(point, normal, result) {
-                if (!defined(point)) {
-            throw new DeveloperError('point is required.');
-        }
-        if (!defined(normal)) {
-            throw new DeveloperError('normal is required.');
-        }
+                Check.typeOf.object('point', point);
+        Check.typeOf.object('normal', normal);
         if (!CesiumMath.equalsEpsilon(Cartesian3.magnitude(normal), 1.0, CesiumMath.EPSILON6)) {
             throw new DeveloperError('normal must be normalized.');
         }
@@ -15656,9 +15656,7 @@ define('Core/Plane',[
      * @exception {DeveloperError} Normal must be normalized
      */
     Plane.fromCartesian4 = function(coefficients, result) {
-                if (!defined(coefficients)) {
-            throw new DeveloperError('coefficients is required.');
-        }
+                Check.typeOf.object('coefficients', coefficients);
         
         var normal = Cartesian3.fromCartesian4(coefficients, scratchNormal);
         var distance = coefficients.w;
@@ -15687,14 +15685,67 @@ define('Core/Plane',[
      * @returns {Number} The signed shortest distance of the point to the plane.
      */
     Plane.getPointDistance = function(plane, point) {
-                if (!defined(plane)) {
-            throw new DeveloperError('plane is required.');
-        }
-        if (!defined(point)) {
-            throw new DeveloperError('point is required.');
-        }
+                Check.typeOf.object('plane', plane);
+        Check.typeOf.object('point', point);
         
         return Cartesian3.dot(plane.normal, point) + plane.distance;
+    };
+
+    var scratchPosition = new Cartesian3();
+    /**
+     * Transforms the plane by the given transformation matrix.
+     *
+     * @param {Plane} plane The plane.
+     * @param {Matrix4} transform The transformation matrix.
+     * @param {Plane} [result] The object into which to store the result.
+     * @returns {Plane} The plane transformed by the given transformation matrix.
+     */
+    Plane.transform = function(plane, transform, result) {
+                Check.typeOf.object('plane', plane);
+        Check.typeOf.object('transform', transform);
+        
+        Matrix4.multiplyByPointAsVector(transform, plane.normal, scratchNormal);
+        Cartesian3.normalize(scratchNormal, scratchNormal);
+
+        Cartesian3.multiplyByScalar(plane.normal, -plane.distance, scratchPosition);
+        Matrix4.multiplyByPoint(transform, scratchPosition, scratchPosition);
+
+        return Plane.fromPointNormal(scratchPosition, scratchNormal, result);
+    };
+
+    /**
+     * Duplicates a Plane instance.
+     *
+     * @param {Plane} plane The plane to duplicate.
+     * @param {Plane} [result] The object onto which to store the result.
+     * @returns {Plane} The modified result parameter or a new Plane instance if one was not provided.
+     */
+    Plane.clone = function(plane, result) {
+                Check.typeOf.object('plane', plane);
+        
+        if (!defined(result)) {
+            return new Plane(plane.normal, plane.distance);
+        }
+
+        Cartesian3.clone(plane.normal, result.normal);
+        result.distance = plane.distance;
+
+        return result;
+    };
+
+    /**
+     * Compares the provided Planes by normal and distance and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     *
+     * @param {Plane} left The first plane.
+     * @param {Plane} right The second plane.
+     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
+     */
+    Plane.equals = function(left, right) {
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
+        
+        return (left.distance === right.distance) && Cartesian3.equals(left.normal, right.normal);
     };
 
     /**
@@ -18963,17 +19014,16 @@ define('Scene/PrimitivePipeline',[
         var attributeLocations;
         var instances = parameters.instances;
         var length = instances.length;
+        var pickOffsets;
 
         if (length > 0) {
             geometries = geometryPipeline(parameters);
             if (geometries.length > 0) {
                 attributeLocations = GeometryPipeline.createAttributeLocations(geometries[0]);
+                if (parameters.createPickOffsets) {
+                    pickOffsets = createInstancePickOffsets(instances, geometries);
+                }
             }
-        }
-
-        var pickOffsets;
-        if (parameters.createPickOffsets && geometries.length > 0) {
-            pickOffsets = createInstancePickOffsets(instances, geometries);
         }
 
         var boundingSpheres = new Array(length);

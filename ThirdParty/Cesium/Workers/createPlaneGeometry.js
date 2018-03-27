@@ -10527,704 +10527,6 @@ define('Core/BoundingSphere',[
     return BoundingSphere;
 });
 
-define('Core/Cartesian2',[
-        './Check',
-        './defaultValue',
-        './defined',
-        './DeveloperError',
-        './freezeObject',
-        './Math'
-    ], function(
-        Check,
-        defaultValue,
-        defined,
-        DeveloperError,
-        freezeObject,
-        CesiumMath) {
-    'use strict';
-
-    /**
-     * A 2D Cartesian point.
-     * @alias Cartesian2
-     * @constructor
-     *
-     * @param {Number} [x=0.0] The X component.
-     * @param {Number} [y=0.0] The Y component.
-     *
-     * @see Cartesian3
-     * @see Cartesian4
-     * @see Packable
-     */
-    function Cartesian2(x, y) {
-        /**
-         * The X component.
-         * @type {Number}
-         * @default 0.0
-         */
-        this.x = defaultValue(x, 0.0);
-
-        /**
-         * The Y component.
-         * @type {Number}
-         * @default 0.0
-         */
-        this.y = defaultValue(y, 0.0);
-    }
-
-    /**
-     * Creates a Cartesian2 instance from x and y coordinates.
-     *
-     * @param {Number} x The x coordinate.
-     * @param {Number} y The y coordinate.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.fromElements = function(x, y, result) {
-        if (!defined(result)) {
-            return new Cartesian2(x, y);
-        }
-
-        result.x = x;
-        result.y = y;
-        return result;
-    };
-
-    /**
-     * Duplicates a Cartesian2 instance.
-     *
-     * @param {Cartesian2} cartesian The Cartesian to duplicate.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided. (Returns undefined if cartesian is undefined)
-     */
-    Cartesian2.clone = function(cartesian, result) {
-        if (!defined(cartesian)) {
-            return undefined;
-        }
-        if (!defined(result)) {
-            return new Cartesian2(cartesian.x, cartesian.y);
-        }
-
-        result.x = cartesian.x;
-        result.y = cartesian.y;
-        return result;
-    };
-
-    /**
-     * Creates a Cartesian2 instance from an existing Cartesian3.  This simply takes the
-     * x and y properties of the Cartesian3 and drops z.
-     * @function
-     *
-     * @param {Cartesian3} cartesian The Cartesian3 instance to create a Cartesian2 instance from.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.fromCartesian3 = Cartesian2.clone;
-
-    /**
-     * Creates a Cartesian2 instance from an existing Cartesian4.  This simply takes the
-     * x and y properties of the Cartesian4 and drops z and w.
-     * @function
-     *
-     * @param {Cartesian4} cartesian The Cartesian4 instance to create a Cartesian2 instance from.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.fromCartesian4 = Cartesian2.clone;
-
-    /**
-     * The number of elements used to pack the object into an array.
-     * @type {Number}
-     */
-    Cartesian2.packedLength = 2;
-
-    /**
-     * Stores the provided instance into the provided array.
-     *
-     * @param {Cartesian2} value The value to pack.
-     * @param {Number[]} array The array to pack into.
-     * @param {Number} [startingIndex=0] The index into the array at which to start packing the elements.
-     *
-     * @returns {Number[]} The array that was packed into
-     */
-    Cartesian2.pack = function(value, array, startingIndex) {
-                Check.typeOf.object('value', value);
-        Check.defined('array', array);
-        
-        startingIndex = defaultValue(startingIndex, 0);
-
-        array[startingIndex++] = value.x;
-        array[startingIndex] = value.y;
-
-        return array;
-    };
-
-    /**
-     * Retrieves an instance from a packed array.
-     *
-     * @param {Number[]} array The packed array.
-     * @param {Number} [startingIndex=0] The starting index of the element to be unpacked.
-     * @param {Cartesian2} [result] The object into which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.unpack = function(array, startingIndex, result) {
-                Check.defined('array', array);
-        
-        startingIndex = defaultValue(startingIndex, 0);
-
-        if (!defined(result)) {
-            result = new Cartesian2();
-        }
-        result.x = array[startingIndex++];
-        result.y = array[startingIndex];
-        return result;
-    };
-
-    /**
-     * Flattens an array of Cartesian2s into and array of components.
-     *
-     * @param {Cartesian2[]} array The array of cartesians to pack.
-     * @param {Number[]} result The array onto which to store the result.
-     * @returns {Number[]} The packed array.
-     */
-    Cartesian2.packArray = function(array, result) {
-                Check.defined('array', array);
-        
-        var length = array.length;
-        if (!defined(result)) {
-            result = new Array(length * 2);
-        } else {
-            result.length = length * 2;
-        }
-
-        for (var i = 0; i < length; ++i) {
-            Cartesian2.pack(array[i], result, i * 2);
-        }
-        return result;
-    };
-
-    /**
-     * Unpacks an array of cartesian components into and array of Cartesian2s.
-     *
-     * @param {Number[]} array The array of components to unpack.
-     * @param {Cartesian2[]} result The array onto which to store the result.
-     * @returns {Cartesian2[]} The unpacked array.
-     */
-    Cartesian2.unpackArray = function(array, result) {
-                Check.defined('array', array);
-        
-        var length = array.length;
-        if (!defined(result)) {
-            result = new Array(length / 2);
-        } else {
-            result.length = length / 2;
-        }
-
-        for (var i = 0; i < length; i += 2) {
-            var index = i / 2;
-            result[index] = Cartesian2.unpack(array, i, result[index]);
-        }
-        return result;
-    };
-
-    /**
-     * Creates a Cartesian2 from two consecutive elements in an array.
-     * @function
-     *
-     * @param {Number[]} array The array whose two consecutive elements correspond to the x and y components, respectively.
-     * @param {Number} [startingIndex=0] The offset into the array of the first element, which corresponds to the x component.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @example
-     * // Create a Cartesian2 with (1.0, 2.0)
-     * var v = [1.0, 2.0];
-     * var p = Cesium.Cartesian2.fromArray(v);
-     *
-     * // Create a Cartesian2 with (1.0, 2.0) using an offset into an array
-     * var v2 = [0.0, 0.0, 1.0, 2.0];
-     * var p2 = Cesium.Cartesian2.fromArray(v2, 2);
-     */
-    Cartesian2.fromArray = Cartesian2.unpack;
-
-    /**
-     * Computes the value of the maximum component for the supplied Cartesian.
-     *
-     * @param {Cartesian2} cartesian The cartesian to use.
-     * @returns {Number} The value of the maximum component.
-     */
-    Cartesian2.maximumComponent = function(cartesian) {
-                Check.typeOf.object('cartesian', cartesian);
-        
-        return Math.max(cartesian.x, cartesian.y);
-    };
-
-    /**
-     * Computes the value of the minimum component for the supplied Cartesian.
-     *
-     * @param {Cartesian2} cartesian The cartesian to use.
-     * @returns {Number} The value of the minimum component.
-     */
-    Cartesian2.minimumComponent = function(cartesian) {
-                Check.typeOf.object('cartesian', cartesian);
-        
-        return Math.min(cartesian.x, cartesian.y);
-    };
-
-    /**
-     * Compares two Cartesians and computes a Cartesian which contains the minimum components of the supplied Cartesians.
-     *
-     * @param {Cartesian2} first A cartesian to compare.
-     * @param {Cartesian2} second A cartesian to compare.
-     * @param {Cartesian2} result The object into which to store the result.
-     * @returns {Cartesian2} A cartesian with the minimum components.
-     */
-    Cartesian2.minimumByComponent = function(first, second, result) {
-                Check.typeOf.object('first', first);
-        Check.typeOf.object('second', second);
-        Check.typeOf.object('result', result);
-        
-
-        result.x = Math.min(first.x, second.x);
-        result.y = Math.min(first.y, second.y);
-
-        return result;
-    };
-
-    /**
-     * Compares two Cartesians and computes a Cartesian which contains the maximum components of the supplied Cartesians.
-     *
-     * @param {Cartesian2} first A cartesian to compare.
-     * @param {Cartesian2} second A cartesian to compare.
-     * @param {Cartesian2} result The object into which to store the result.
-     * @returns {Cartesian2} A cartesian with the maximum components.
-     */
-    Cartesian2.maximumByComponent = function(first, second, result) {
-                Check.typeOf.object('first', first);
-        Check.typeOf.object('second', second);
-        Check.typeOf.object('result', result);
-        
-        result.x = Math.max(first.x, second.x);
-        result.y = Math.max(first.y, second.y);
-        return result;
-    };
-
-    /**
-     * Computes the provided Cartesian's squared magnitude.
-     *
-     * @param {Cartesian2} cartesian The Cartesian instance whose squared magnitude is to be computed.
-     * @returns {Number} The squared magnitude.
-     */
-    Cartesian2.magnitudeSquared = function(cartesian) {
-                Check.typeOf.object('cartesian', cartesian);
-        
-        return cartesian.x * cartesian.x + cartesian.y * cartesian.y;
-    };
-
-    /**
-     * Computes the Cartesian's magnitude (length).
-     *
-     * @param {Cartesian2} cartesian The Cartesian instance whose magnitude is to be computed.
-     * @returns {Number} The magnitude.
-     */
-    Cartesian2.magnitude = function(cartesian) {
-        return Math.sqrt(Cartesian2.magnitudeSquared(cartesian));
-    };
-
-    var distanceScratch = new Cartesian2();
-
-    /**
-     * Computes the distance between two points.
-     *
-     * @param {Cartesian2} left The first point to compute the distance from.
-     * @param {Cartesian2} right The second point to compute the distance to.
-     * @returns {Number} The distance between two points.
-     *
-     * @example
-     * // Returns 1.0
-     * var d = Cesium.Cartesian2.distance(new Cesium.Cartesian2(1.0, 0.0), new Cesium.Cartesian2(2.0, 0.0));
-     */
-    Cartesian2.distance = function(left, right) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        
-        Cartesian2.subtract(left, right, distanceScratch);
-        return Cartesian2.magnitude(distanceScratch);
-    };
-
-    /**
-     * Computes the squared distance between two points.  Comparing squared distances
-     * using this function is more efficient than comparing distances using {@link Cartesian2#distance}.
-     *
-     * @param {Cartesian2} left The first point to compute the distance from.
-     * @param {Cartesian2} right The second point to compute the distance to.
-     * @returns {Number} The distance between two points.
-     *
-     * @example
-     * // Returns 4.0, not 2.0
-     * var d = Cesium.Cartesian2.distance(new Cesium.Cartesian2(1.0, 0.0), new Cesium.Cartesian2(3.0, 0.0));
-     */
-    Cartesian2.distanceSquared = function(left, right) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        
-        Cartesian2.subtract(left, right, distanceScratch);
-        return Cartesian2.magnitudeSquared(distanceScratch);
-    };
-
-    /**
-     * Computes the normalized form of the supplied Cartesian.
-     *
-     * @param {Cartesian2} cartesian The Cartesian to be normalized.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.normalize = function(cartesian, result) {
-                Check.typeOf.object('cartesian', cartesian);
-        Check.typeOf.object('result', result);
-        
-        var magnitude = Cartesian2.magnitude(cartesian);
-
-        result.x = cartesian.x / magnitude;
-        result.y = cartesian.y / magnitude;
-
-                if (isNaN(result.x) || isNaN(result.y)) {
-            throw new DeveloperError('normalized result is not a number');
-        }
-        
-        return result;
-    };
-
-    /**
-     * Computes the dot (scalar) product of two Cartesians.
-     *
-     * @param {Cartesian2} left The first Cartesian.
-     * @param {Cartesian2} right The second Cartesian.
-     * @returns {Number} The dot product.
-     */
-    Cartesian2.dot = function(left, right) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        
-        return left.x * right.x + left.y * right.y;
-    };
-
-    /**
-     * Computes the componentwise product of two Cartesians.
-     *
-     * @param {Cartesian2} left The first Cartesian.
-     * @param {Cartesian2} right The second Cartesian.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.multiplyComponents = function(left, right, result) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        Check.typeOf.object('result', result);
-        
-        result.x = left.x * right.x;
-        result.y = left.y * right.y;
-        return result;
-    };
-
-    /**
-     * Computes the componentwise quotient of two Cartesians.
-     *
-     * @param {Cartesian2} left The first Cartesian.
-     * @param {Cartesian2} right The second Cartesian.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.divideComponents = function(left, right, result) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        Check.typeOf.object('result', result);
-        
-        result.x = left.x / right.x;
-        result.y = left.y / right.y;
-        return result;
-    };
-
-    /**
-     * Computes the componentwise sum of two Cartesians.
-     *
-     * @param {Cartesian2} left The first Cartesian.
-     * @param {Cartesian2} right The second Cartesian.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.add = function(left, right, result) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        Check.typeOf.object('result', result);
-        
-        result.x = left.x + right.x;
-        result.y = left.y + right.y;
-        return result;
-    };
-
-    /**
-     * Computes the componentwise difference of two Cartesians.
-     *
-     * @param {Cartesian2} left The first Cartesian.
-     * @param {Cartesian2} right The second Cartesian.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.subtract = function(left, right, result) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        Check.typeOf.object('result', result);
-        
-        result.x = left.x - right.x;
-        result.y = left.y - right.y;
-        return result;
-    };
-
-    /**
-     * Multiplies the provided Cartesian componentwise by the provided scalar.
-     *
-     * @param {Cartesian2} cartesian The Cartesian to be scaled.
-     * @param {Number} scalar The scalar to multiply with.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.multiplyByScalar = function(cartesian, scalar, result) {
-                Check.typeOf.object('cartesian', cartesian);
-        Check.typeOf.number('scalar', scalar);
-        Check.typeOf.object('result', result);
-        
-        result.x = cartesian.x * scalar;
-        result.y = cartesian.y * scalar;
-        return result;
-    };
-
-    /**
-     * Divides the provided Cartesian componentwise by the provided scalar.
-     *
-     * @param {Cartesian2} cartesian The Cartesian to be divided.
-     * @param {Number} scalar The scalar to divide by.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.divideByScalar = function(cartesian, scalar, result) {
-                Check.typeOf.object('cartesian', cartesian);
-        Check.typeOf.number('scalar', scalar);
-        Check.typeOf.object('result', result);
-        
-        result.x = cartesian.x / scalar;
-        result.y = cartesian.y / scalar;
-        return result;
-    };
-
-    /**
-     * Negates the provided Cartesian.
-     *
-     * @param {Cartesian2} cartesian The Cartesian to be negated.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.negate = function(cartesian, result) {
-                Check.typeOf.object('cartesian', cartesian);
-        Check.typeOf.object('result', result);
-        
-        result.x = -cartesian.x;
-        result.y = -cartesian.y;
-        return result;
-    };
-
-    /**
-     * Computes the absolute value of the provided Cartesian.
-     *
-     * @param {Cartesian2} cartesian The Cartesian whose absolute value is to be computed.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.abs = function(cartesian, result) {
-                Check.typeOf.object('cartesian', cartesian);
-        Check.typeOf.object('result', result);
-        
-        result.x = Math.abs(cartesian.x);
-        result.y = Math.abs(cartesian.y);
-        return result;
-    };
-
-    var lerpScratch = new Cartesian2();
-    /**
-     * Computes the linear interpolation or extrapolation at t using the provided cartesians.
-     *
-     * @param {Cartesian2} start The value corresponding to t at 0.0.
-     * @param {Cartesian2} end The value corresponding to t at 1.0.
-     * @param {Number} t The point along t at which to interpolate.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter.
-     */
-    Cartesian2.lerp = function(start, end, t, result) {
-                Check.typeOf.object('start', start);
-        Check.typeOf.object('end', end);
-        Check.typeOf.number('t', t);
-        Check.typeOf.object('result', result);
-        
-        Cartesian2.multiplyByScalar(end, t, lerpScratch);
-        result = Cartesian2.multiplyByScalar(start, 1.0 - t, result);
-        return Cartesian2.add(lerpScratch, result, result);
-    };
-
-    var angleBetweenScratch = new Cartesian2();
-    var angleBetweenScratch2 = new Cartesian2();
-    /**
-     * Returns the angle, in radians, between the provided Cartesians.
-     *
-     * @param {Cartesian2} left The first Cartesian.
-     * @param {Cartesian2} right The second Cartesian.
-     * @returns {Number} The angle between the Cartesians.
-     */
-    Cartesian2.angleBetween = function(left, right) {
-                Check.typeOf.object('left', left);
-        Check.typeOf.object('right', right);
-        
-        Cartesian2.normalize(left, angleBetweenScratch);
-        Cartesian2.normalize(right, angleBetweenScratch2);
-        return CesiumMath.acosClamped(Cartesian2.dot(angleBetweenScratch, angleBetweenScratch2));
-    };
-
-    var mostOrthogonalAxisScratch = new Cartesian2();
-    /**
-     * Returns the axis that is most orthogonal to the provided Cartesian.
-     *
-     * @param {Cartesian2} cartesian The Cartesian on which to find the most orthogonal axis.
-     * @param {Cartesian2} result The object onto which to store the result.
-     * @returns {Cartesian2} The most orthogonal axis.
-     */
-    Cartesian2.mostOrthogonalAxis = function(cartesian, result) {
-                Check.typeOf.object('cartesian', cartesian);
-        Check.typeOf.object('result', result);
-        
-        var f = Cartesian2.normalize(cartesian, mostOrthogonalAxisScratch);
-        Cartesian2.abs(f, f);
-
-        if (f.x <= f.y) {
-            result = Cartesian2.clone(Cartesian2.UNIT_X, result);
-        } else {
-            result = Cartesian2.clone(Cartesian2.UNIT_Y, result);
-        }
-
-        return result;
-    };
-
-    /**
-     * Compares the provided Cartesians componentwise and returns
-     * <code>true</code> if they are equal, <code>false</code> otherwise.
-     *
-     * @param {Cartesian2} [left] The first Cartesian.
-     * @param {Cartesian2} [right] The second Cartesian.
-     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
-     */
-    Cartesian2.equals = function(left, right) {
-        return (left === right) ||
-               ((defined(left)) &&
-                (defined(right)) &&
-                (left.x === right.x) &&
-                (left.y === right.y));
-    };
-
-    /**
-     * @private
-     */
-    Cartesian2.equalsArray = function(cartesian, array, offset) {
-        return cartesian.x === array[offset] &&
-               cartesian.y === array[offset + 1];
-    };
-
-    /**
-     * Compares the provided Cartesians componentwise and returns
-     * <code>true</code> if they pass an absolute or relative tolerance test,
-     * <code>false</code> otherwise.
-     *
-     * @param {Cartesian2} [left] The first Cartesian.
-     * @param {Cartesian2} [right] The second Cartesian.
-     * @param {Number} relativeEpsilon The relative epsilon tolerance to use for equality testing.
-     * @param {Number} [absoluteEpsilon=relativeEpsilon] The absolute epsilon tolerance to use for equality testing.
-     * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
-     */
-    Cartesian2.equalsEpsilon = function(left, right, relativeEpsilon, absoluteEpsilon) {
-        return (left === right) ||
-               (defined(left) &&
-                defined(right) &&
-                CesiumMath.equalsEpsilon(left.x, right.x, relativeEpsilon, absoluteEpsilon) &&
-                CesiumMath.equalsEpsilon(left.y, right.y, relativeEpsilon, absoluteEpsilon));
-    };
-
-    /**
-     * An immutable Cartesian2 instance initialized to (0.0, 0.0).
-     *
-     * @type {Cartesian2}
-     * @constant
-     */
-    Cartesian2.ZERO = freezeObject(new Cartesian2(0.0, 0.0));
-
-    /**
-     * An immutable Cartesian2 instance initialized to (1.0, 0.0).
-     *
-     * @type {Cartesian2}
-     * @constant
-     */
-    Cartesian2.UNIT_X = freezeObject(new Cartesian2(1.0, 0.0));
-
-    /**
-     * An immutable Cartesian2 instance initialized to (0.0, 1.0).
-     *
-     * @type {Cartesian2}
-     * @constant
-     */
-    Cartesian2.UNIT_Y = freezeObject(new Cartesian2(0.0, 1.0));
-
-    /**
-     * Duplicates this Cartesian2 instance.
-     *
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.prototype.clone = function(result) {
-        return Cartesian2.clone(this, result);
-    };
-
-    /**
-     * Compares this Cartesian against the provided Cartesian componentwise and returns
-     * <code>true</code> if they are equal, <code>false</code> otherwise.
-     *
-     * @param {Cartesian2} [right] The right hand side Cartesian.
-     * @returns {Boolean} <code>true</code> if they are equal, <code>false</code> otherwise.
-     */
-    Cartesian2.prototype.equals = function(right) {
-        return Cartesian2.equals(this, right);
-    };
-
-    /**
-     * Compares this Cartesian against the provided Cartesian componentwise and returns
-     * <code>true</code> if they pass an absolute or relative tolerance test,
-     * <code>false</code> otherwise.
-     *
-     * @param {Cartesian2} [right] The right hand side Cartesian.
-     * @param {Number} relativeEpsilon The relative epsilon tolerance to use for equality testing.
-     * @param {Number} [absoluteEpsilon=relativeEpsilon] The absolute epsilon tolerance to use for equality testing.
-     * @returns {Boolean} <code>true</code> if they are within the provided epsilon, <code>false</code> otherwise.
-     */
-    Cartesian2.prototype.equalsEpsilon = function(right, relativeEpsilon, absoluteEpsilon) {
-        return Cartesian2.equalsEpsilon(this, right, relativeEpsilon, absoluteEpsilon);
-    };
-
-    /**
-     * Creates a string representing this Cartesian in the format '(x, y)'.
-     *
-     * @returns {String} A string representing the provided Cartesian in the format '(x, y)'.
-     */
-    Cartesian2.prototype.toString = function() {
-        return '(' + this.x + ', ' + this.y + ')';
-    };
-
-    return Cartesian2;
-});
-
 define('Core/Fullscreen',[
         './defined',
         './defineProperties'
@@ -13221,151 +12523,6 @@ define('Core/GeometryAttributes',[
     return GeometryAttributes;
 });
 
-define('Core/IndexDatatype',[
-        './defined',
-        './DeveloperError',
-        './freezeObject',
-        './Math',
-        './WebGLConstants'
-    ], function(
-        defined,
-        DeveloperError,
-        freezeObject,
-        CesiumMath,
-        WebGLConstants) {
-    'use strict';
-
-    /**
-     * Constants for WebGL index datatypes.  These corresponds to the
-     * <code>type</code> parameter of {@link http://www.khronos.org/opengles/sdk/docs/man/xhtml/glDrawElements.xml|drawElements}.
-     *
-     * @exports IndexDatatype
-     */
-    var IndexDatatype = {
-        /**
-         * 8-bit unsigned byte corresponding to <code>UNSIGNED_BYTE</code> and the type
-         * of an element in <code>Uint8Array</code>.
-         *
-         * @type {Number}
-         * @constant
-         */
-        UNSIGNED_BYTE : WebGLConstants.UNSIGNED_BYTE,
-
-        /**
-         * 16-bit unsigned short corresponding to <code>UNSIGNED_SHORT</code> and the type
-         * of an element in <code>Uint16Array</code>.
-         *
-         * @type {Number}
-         * @constant
-         */
-        UNSIGNED_SHORT : WebGLConstants.UNSIGNED_SHORT,
-
-        /**
-         * 32-bit unsigned int corresponding to <code>UNSIGNED_INT</code> and the type
-         * of an element in <code>Uint32Array</code>.
-         *
-         * @type {Number}
-         * @constant
-         */
-        UNSIGNED_INT : WebGLConstants.UNSIGNED_INT
-    };
-
-    /**
-     * Returns the size, in bytes, of the corresponding datatype.
-     *
-     * @param {IndexDatatype} indexDatatype The index datatype to get the size of.
-     * @returns {Number} The size in bytes.
-     *
-     * @example
-     * // Returns 2
-     * var size = Cesium.IndexDatatype.getSizeInBytes(Cesium.IndexDatatype.UNSIGNED_SHORT);
-     */
-    IndexDatatype.getSizeInBytes = function(indexDatatype) {
-        switch(indexDatatype) {
-            case IndexDatatype.UNSIGNED_BYTE:
-                return Uint8Array.BYTES_PER_ELEMENT;
-            case IndexDatatype.UNSIGNED_SHORT:
-                return Uint16Array.BYTES_PER_ELEMENT;
-            case IndexDatatype.UNSIGNED_INT:
-                return Uint32Array.BYTES_PER_ELEMENT;
-        }
-
-                throw new DeveloperError('indexDatatype is required and must be a valid IndexDatatype constant.');
-            };
-
-    /**
-     * Validates that the provided index datatype is a valid {@link IndexDatatype}.
-     *
-     * @param {IndexDatatype} indexDatatype The index datatype to validate.
-     * @returns {Boolean} <code>true</code> if the provided index datatype is a valid value; otherwise, <code>false</code>.
-     *
-     * @example
-     * if (!Cesium.IndexDatatype.validate(indexDatatype)) {
-     *   throw new Cesium.DeveloperError('indexDatatype must be a valid value.');
-     * }
-     */
-    IndexDatatype.validate = function(indexDatatype) {
-        return defined(indexDatatype) &&
-               (indexDatatype === IndexDatatype.UNSIGNED_BYTE ||
-                indexDatatype === IndexDatatype.UNSIGNED_SHORT ||
-                indexDatatype === IndexDatatype.UNSIGNED_INT);
-    };
-
-    /**
-     * Creates a typed array that will store indices, using either <code><Uint16Array</code>
-     * or <code>Uint32Array</code> depending on the number of vertices.
-     *
-     * @param {Number} numberOfVertices Number of vertices that the indices will reference.
-     * @param {*} indicesLengthOrArray Passed through to the typed array constructor.
-     * @returns {Uint16Array|Uint32Array} A <code>Uint16Array</code> or <code>Uint32Array</code> constructed with <code>indicesLengthOrArray</code>.
-     *
-     * @example
-     * this.indices = Cesium.IndexDatatype.createTypedArray(positions.length / 3, numberOfIndices);
-     */
-    IndexDatatype.createTypedArray = function(numberOfVertices, indicesLengthOrArray) {
-                if (!defined(numberOfVertices)) {
-            throw new DeveloperError('numberOfVertices is required.');
-        }
-        
-        if (numberOfVertices >= CesiumMath.SIXTY_FOUR_KILOBYTES) {
-            return new Uint32Array(indicesLengthOrArray);
-        }
-
-        return new Uint16Array(indicesLengthOrArray);
-    };
-
-    /**
-     * Creates a typed array from a source array buffer.  The resulting typed array will store indices, using either <code><Uint16Array</code>
-     * or <code>Uint32Array</code> depending on the number of vertices.
-     *
-     * @param {Number} numberOfVertices Number of vertices that the indices will reference.
-     * @param {ArrayBuffer} sourceArray Passed through to the typed array constructor.
-     * @param {Number} byteOffset Passed through to the typed array constructor.
-     * @param {Number} length Passed through to the typed array constructor.
-     * @returns {Uint16Array|Uint32Array} A <code>Uint16Array</code> or <code>Uint32Array</code> constructed with <code>sourceArray</code>, <code>byteOffset</code>, and <code>length</code>.
-     *
-     */
-    IndexDatatype.createTypedArrayFromArrayBuffer = function(numberOfVertices, sourceArray, byteOffset, length) {
-                if (!defined(numberOfVertices)) {
-            throw new DeveloperError('numberOfVertices is required.');
-        }
-        if (!defined(sourceArray)) {
-            throw new DeveloperError('sourceArray is required.');
-        }
-        if (!defined(byteOffset)) {
-            throw new DeveloperError('byteOffset is required.');
-        }
-        
-        if (numberOfVertices >= CesiumMath.SIXTY_FOUR_KILOBYTES) {
-            return new Uint32Array(sourceArray, byteOffset, length);
-        }
-
-        return new Uint16Array(sourceArray, byteOffset, length);
-    };
-
-    return freezeObject(IndexDatatype);
-});
-
 define('Core/VertexFormat',[
         './defaultValue',
         './defined',
@@ -13672,140 +12829,84 @@ define('Core/VertexFormat',[
     return VertexFormat;
 });
 
-define('Core/EllipsoidGeometry',[
+define('Core/PlaneGeometry',[
         './BoundingSphere',
-        './Cartesian2',
         './Cartesian3',
+        './Check',
         './ComponentDatatype',
         './defaultValue',
         './defined',
-        './DeveloperError',
-        './Ellipsoid',
         './Geometry',
         './GeometryAttribute',
         './GeometryAttributes',
-        './IndexDatatype',
-        './Math',
         './PrimitiveType',
         './VertexFormat'
     ], function(
         BoundingSphere,
-        Cartesian2,
         Cartesian3,
+        Check,
         ComponentDatatype,
         defaultValue,
         defined,
-        DeveloperError,
-        Ellipsoid,
         Geometry,
         GeometryAttribute,
         GeometryAttributes,
-        IndexDatatype,
-        CesiumMath,
         PrimitiveType,
         VertexFormat) {
     'use strict';
 
-    var scratchPosition = new Cartesian3();
-    var scratchNormal = new Cartesian3();
-    var scratchTangent = new Cartesian3();
-    var scratchBitangent = new Cartesian3();
-    var scratchNormalST = new Cartesian3();
-    var defaultRadii = new Cartesian3(1.0, 1.0, 1.0);
-
-    var cos = Math.cos;
-    var sin = Math.sin;
-
     /**
-     * A description of an ellipsoid centered at the origin.
+     * Describes geometry representing a plane centered at the origin, with a unit width and length.
      *
-     * @alias EllipsoidGeometry
+     * @alias PlaneGeometry
      * @constructor
      *
-     * @param {Object} [options] Object with the following properties:
-     * @param {Cartesian3} [options.radii=Cartesian3(1.0, 1.0, 1.0)] The radii of the ellipsoid in the x, y, and z directions.
-     * @param {Number} [options.stackPartitions=64] The number of times to partition the ellipsoid into stacks.
-     * @param {Number} [options.slicePartitions=64] The number of times to partition the ellipsoid into radial slices.
+     * @param {Object} options Object with the following properties:
      * @param {VertexFormat} [options.vertexFormat=VertexFormat.DEFAULT] The vertex attributes to be computed.
      *
-     * @exception {DeveloperError} options.slicePartitions cannot be less than three.
-     * @exception {DeveloperError} options.stackPartitions cannot be less than three.
-     *
-     * @see EllipsoidGeometry#createGeometry
-     *
      * @example
-     * var ellipsoid = new Cesium.EllipsoidGeometry({
-     *   vertexFormat : Cesium.VertexFormat.POSITION_ONLY,
-     *   radii : new Cesium.Cartesian3(1000000.0, 500000.0, 500000.0)
+     * var planeGeometry = new Cesium.PlaneGeometry({
+     *   vertexFormat : Cesium.VertexFormat.POSITION_ONLY
      * });
-     * var geometry = Cesium.EllipsoidGeometry.createGeometry(ellipsoid);
      */
-    function EllipsoidGeometry(options) {
+    function PlaneGeometry(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
-        var radii = defaultValue(options.radii, defaultRadii);
-        var stackPartitions = Math.round(defaultValue(options.stackPartitions, 64));
-        var slicePartitions = Math.round(defaultValue(options.slicePartitions, 64));
         var vertexFormat = defaultValue(options.vertexFormat, VertexFormat.DEFAULT);
 
-                if (slicePartitions < 3) {
-            throw new DeveloperError ('options.slicePartitions cannot be less than three.');
-        }
-        if (stackPartitions < 3) {
-            throw new DeveloperError('options.stackPartitions cannot be less than three.');
-        }
-        
-        this._radii = Cartesian3.clone(radii);
-        this._stackPartitions = stackPartitions;
-        this._slicePartitions = slicePartitions;
-        this._vertexFormat = VertexFormat.clone(vertexFormat);
-        this._workerName = 'createEllipsoidGeometry';
+        this._vertexFormat = vertexFormat;
+        this._workerName = 'createPlaneGeometry';
     }
 
     /**
      * The number of elements used to pack the object into an array.
      * @type {Number}
      */
-    EllipsoidGeometry.packedLength = Cartesian3.packedLength + VertexFormat.packedLength + 2;
+    PlaneGeometry.packedLength = VertexFormat.packedLength;
 
     /**
      * Stores the provided instance into the provided array.
      *
-     * @param {EllipsoidGeometry} value The value to pack.
+     * @param {PlaneGeometry} value The value to pack.
      * @param {Number[]} array The array to pack into.
      * @param {Number} [startingIndex=0] The index into the array at which to start packing the elements.
      *
      * @returns {Number[]} The array that was packed into
      */
-    EllipsoidGeometry.pack = function(value, array, startingIndex) {
-                if (!defined(value)) {
-            throw new DeveloperError('value is required');
-        }
-        if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
+    PlaneGeometry.pack = function(value, array, startingIndex) {
+                Check.typeOf.object('value', value);
+        Check.defined('array', array);
         
         startingIndex = defaultValue(startingIndex, 0);
 
-        Cartesian3.pack(value._radii, array, startingIndex);
-        startingIndex += Cartesian3.packedLength;
-
         VertexFormat.pack(value._vertexFormat, array, startingIndex);
-        startingIndex += VertexFormat.packedLength;
-
-        array[startingIndex++] = value._stackPartitions;
-        array[startingIndex]   = value._slicePartitions;
 
         return array;
     };
 
-    var scratchRadii = new Cartesian3();
     var scratchVertexFormat = new VertexFormat();
     var scratchOptions = {
-        radii : scratchRadii,
-        vertexFormat : scratchVertexFormat,
-        stackPartitions : undefined,
-        slicePartitions : undefined
+        vertexFormat: scratchVertexFormat
     };
 
     /**
@@ -13813,195 +12914,82 @@ define('Core/EllipsoidGeometry',[
      *
      * @param {Number[]} array The packed array.
      * @param {Number} [startingIndex=0] The starting index of the element to be unpacked.
-     * @param {EllipsoidGeometry} [result] The object into which to store the result.
-     * @returns {EllipsoidGeometry} The modified result parameter or a new EllipsoidGeometry instance if one was not provided.
+     * @param {PlaneGeometry} [result] The object into which to store the result.
+     * @returns {PlaneGeometry} The modified result parameter or a new PlaneGeometry instance if one was not provided.
      */
-    EllipsoidGeometry.unpack = function(array, startingIndex, result) {
-                if (!defined(array)) {
-            throw new DeveloperError('array is required');
-        }
+    PlaneGeometry.unpack = function(array, startingIndex, result) {
+                Check.defined('array', array);
         
         startingIndex = defaultValue(startingIndex, 0);
 
-        var radii = Cartesian3.unpack(array, startingIndex, scratchRadii);
-        startingIndex += Cartesian3.packedLength;
-
         var vertexFormat = VertexFormat.unpack(array, startingIndex, scratchVertexFormat);
-        startingIndex += VertexFormat.packedLength;
-
-        var stackPartitions = array[startingIndex++];
-        var slicePartitions = array[startingIndex];
 
         if (!defined(result)) {
-            scratchOptions.stackPartitions = stackPartitions;
-            scratchOptions.slicePartitions = slicePartitions;
-            return new EllipsoidGeometry(scratchOptions);
+            return new PlaneGeometry(scratchOptions);
         }
 
-        result._radii = Cartesian3.clone(radii, result._radii);
         result._vertexFormat = VertexFormat.clone(vertexFormat, result._vertexFormat);
-        result._stackPartitions = stackPartitions;
-        result._slicePartitions = slicePartitions;
 
         return result;
     };
 
+    var min = new Cartesian3(-0.5, -0.5, 0.0);
+    var max = new Cartesian3( 0.5,  0.5, 0.0);
+
     /**
-     * Computes the geometric representation of an ellipsoid, including its vertices, indices, and a bounding sphere.
+     * Computes the geometric representation of a plane, including its vertices, indices, and a bounding sphere.
      *
-     * @param {EllipsoidGeometry} ellipsoidGeometry A description of the ellipsoid.
+     * @param {PlaneGeometry} planeGeometry A description of the plane.
      * @returns {Geometry|undefined} The computed vertices and indices.
      */
-    EllipsoidGeometry.createGeometry = function(ellipsoidGeometry) {
-        var radii = ellipsoidGeometry._radii;
-
-        if ((radii.x <= 0) || (radii.y <= 0) || (radii.z <= 0)) {
-            return;
-        }
-
-        var ellipsoid = Ellipsoid.fromCartesian3(radii);
-        var vertexFormat = ellipsoidGeometry._vertexFormat;
-
-        // The extra slice and stack are for duplicating points at the x axis and poles.
-        // We need the texture coordinates to interpolate from (2 * pi - delta) to 2 * pi instead of
-        // (2 * pi - delta) to 0.
-        var slicePartitions = ellipsoidGeometry._slicePartitions + 1;
-        var stackPartitions = ellipsoidGeometry._stackPartitions + 1;
-
-        var vertexCount = stackPartitions * slicePartitions;
-        var positions = new Float64Array(vertexCount * 3);
-
-        var numIndices = 6 * (slicePartitions - 1) * (stackPartitions - 2);
-        var indices = IndexDatatype.createTypedArray(vertexCount, numIndices);
-
-        var normals = (vertexFormat.normal) ? new Float32Array(vertexCount * 3) : undefined;
-        var tangents = (vertexFormat.tangent) ? new Float32Array(vertexCount * 3) : undefined;
-        var bitangents = (vertexFormat.bitangent) ? new Float32Array(vertexCount * 3) : undefined;
-        var st = (vertexFormat.st) ? new Float32Array(vertexCount * 2) : undefined;
-
-        var cosTheta = new Array(slicePartitions);
-        var sinTheta = new Array(slicePartitions);
-
-        var i;
-        var j;
-        var index = 0;
-
-        for (i = 0; i < slicePartitions; i++) {
-            var theta = CesiumMath.TWO_PI * i / (slicePartitions - 1);
-            cosTheta[i] = cos(theta);
-            sinTheta[i] = sin(theta);
-
-            // duplicate first point for correct
-            // texture coordinates at the north pole.
-            positions[index++] = 0.0;
-            positions[index++] = 0.0;
-            positions[index++] = radii.z;
-        }
-
-        for (i = 1; i < stackPartitions - 1; i++) {
-            var phi = Math.PI * i / (stackPartitions - 1);
-            var sinPhi = sin(phi);
-
-            var xSinPhi = radii.x * sinPhi;
-            var ySinPhi = radii.y * sinPhi;
-            var zCosPhi = radii.z * cos(phi);
-
-            for (j = 0; j < slicePartitions; j++) {
-                positions[index++] = cosTheta[j] * xSinPhi;
-                positions[index++] = sinTheta[j] * ySinPhi;
-                positions[index++] = zCosPhi;
-            }
-        }
-
-        for (i = 0; i < slicePartitions; i++) {
-            // duplicate first point for correct
-            // texture coordinates at the south pole.
-            positions[index++] = 0.0;
-            positions[index++] = 0.0;
-            positions[index++] = -radii.z;
-        }
+    PlaneGeometry.createGeometry = function(planeGeometry) {
+        var vertexFormat = planeGeometry._vertexFormat;
 
         var attributes = new GeometryAttributes();
+        var indices;
+        var positions;
 
         if (vertexFormat.position) {
+            // 4 corner points.  Duplicated 3 times each for each incident edge/face.
+            positions = new Float64Array(4 * 3);
+
+            // +z face
+            positions[0]  = min.x;
+            positions[1]  = min.y;
+            positions[2]  = 0.0;
+            positions[3]  = max.x;
+            positions[4]  = min.y;
+            positions[5]  = 0.0;
+            positions[6]  = max.x;
+            positions[7]  = max.y;
+            positions[8]  = 0.0;
+            positions[9]  = min.x;
+            positions[10] = max.y;
+            positions[11] = 0.0;
+
             attributes.position = new GeometryAttribute({
                 componentDatatype : ComponentDatatype.DOUBLE,
                 componentsPerAttribute : 3,
                 values : positions
             });
-        }
-
-        var stIndex = 0;
-        var normalIndex = 0;
-        var tangentIndex = 0;
-        var bitangentIndex = 0;
-
-        if (vertexFormat.st || vertexFormat.normal || vertexFormat.tangent || vertexFormat.bitangent) {
-            for( i = 0; i < vertexCount; i++) {
-                var position = Cartesian3.fromArray(positions, i * 3, scratchPosition);
-                var normal = ellipsoid.geodeticSurfaceNormal(position, scratchNormal);
-
-                if (vertexFormat.st) {
-                    var normalST = Cartesian2.negate(normal, scratchNormalST);
-
-                    // if the point is at or close to the pole, find a point along the same longitude
-                    // close to the xy-plane for the s coordinate.
-                    if (Cartesian2.magnitude(normalST) < CesiumMath.EPSILON6) {
-                        index = (i + slicePartitions * Math.floor(stackPartitions * 0.5)) * 3;
-                        if (index > positions.length) {
-                            index = (i - slicePartitions * Math.floor(stackPartitions * 0.5)) * 3;
-                        }
-                        Cartesian3.fromArray(positions, index, normalST);
-                        ellipsoid.geodeticSurfaceNormal(normalST, normalST);
-                        Cartesian2.negate(normalST, normalST);
-                    }
-
-                    st[stIndex++] = (Math.atan2(normalST.y, normalST.x) / CesiumMath.TWO_PI) + 0.5;
-                    st[stIndex++] = (Math.asin(normal.z) / Math.PI) + 0.5;
-                }
-
-                if (vertexFormat.normal) {
-                    normals[normalIndex++] = normal.x;
-                    normals[normalIndex++] = normal.y;
-                    normals[normalIndex++] = normal.z;
-                }
-
-                if (vertexFormat.tangent || vertexFormat.bitangent) {
-                    var tangent = scratchTangent;
-                    if (i < slicePartitions || i > vertexCount - slicePartitions - 1) {
-                        Cartesian3.cross(Cartesian3.UNIT_X, normal, tangent);
-                        Cartesian3.normalize(tangent, tangent);
-                    } else {
-                        Cartesian3.cross(Cartesian3.UNIT_Z, normal, tangent);
-                        Cartesian3.normalize(tangent, tangent);
-                    }
-
-                    if (vertexFormat.tangent) {
-                        tangents[tangentIndex++] = tangent.x;
-                        tangents[tangentIndex++] = tangent.y;
-                        tangents[tangentIndex++] = tangent.z;
-                    }
-
-                    if (vertexFormat.bitangent) {
-                        var bitangent = Cartesian3.cross(normal, tangent, scratchBitangent);
-                        Cartesian3.normalize(bitangent, bitangent);
-
-                        bitangents[bitangentIndex++] = bitangent.x;
-                        bitangents[bitangentIndex++] = bitangent.y;
-                        bitangents[bitangentIndex++] = bitangent.z;
-                    }
-                }
-            }
-
-            if (vertexFormat.st) {
-                attributes.st = new GeometryAttribute({
-                    componentDatatype : ComponentDatatype.FLOAT,
-                    componentsPerAttribute : 2,
-                    values : st
-                });
-            }
 
             if (vertexFormat.normal) {
+                var normals = new Float32Array(4 * 3);
+
+                // +z face
+                normals[0]  = 0.0;
+                normals[1]  = 0.0;
+                normals[2]  = 1.0;
+                normals[3]  = 0.0;
+                normals[4]  = 0.0;
+                normals[5]  = 1.0;
+                normals[6]  = 0.0;
+                normals[7]  = 0.0;
+                normals[8]  = 1.0;
+                normals[9]  = 0.0;
+                normals[10] = 0.0;
+                normals[11] = 1.0;
+
                 attributes.normal = new GeometryAttribute({
                     componentDatatype : ComponentDatatype.FLOAT,
                     componentsPerAttribute : 3,
@@ -14009,7 +12997,43 @@ define('Core/EllipsoidGeometry',[
                 });
             }
 
+            if (vertexFormat.st) {
+                var texCoords = new Float32Array(4 * 2);
+
+                // +z face
+                texCoords[0]  = 0.0;
+                texCoords[1]  = 0.0;
+                texCoords[2]  = 1.0;
+                texCoords[3]  = 0.0;
+                texCoords[4]  = 1.0;
+                texCoords[5]  = 1.0;
+                texCoords[6]  = 0.0;
+                texCoords[7]  = 1.0;
+
+                attributes.st = new GeometryAttribute({
+                    componentDatatype : ComponentDatatype.FLOAT,
+                    componentsPerAttribute : 2,
+                    values : texCoords
+                });
+            }
+
             if (vertexFormat.tangent) {
+                var tangents = new Float32Array(4 * 3);
+
+                // +z face
+                tangents[0]  = 1.0;
+                tangents[1]  = 0.0;
+                tangents[2]  = 0.0;
+                tangents[3]  = 1.0;
+                tangents[4]  = 0.0;
+                tangents[5]  = 0.0;
+                tangents[6]  = 1.0;
+                tangents[7]  = 0.0;
+                tangents[8]  = 0.0;
+                tangents[9]  = 1.0;
+                tangents[10] = 0.0;
+                tangents[11] = 0.0;
+
                 attributes.tangent = new GeometryAttribute({
                     componentDatatype : ComponentDatatype.FLOAT,
                     componentsPerAttribute : 3,
@@ -14018,193 +13042,65 @@ define('Core/EllipsoidGeometry',[
             }
 
             if (vertexFormat.bitangent) {
+                var bitangents = new Float32Array(4 * 3);
+
+                // +z face
+                bitangents[0] = 0.0;
+                bitangents[1] = 1.0;
+                bitangents[2] = 0.0;
+                bitangents[3] = 0.0;
+                bitangents[4] = 1.0;
+                bitangents[5] = 0.0;
+                bitangents[6] = 0.0;
+                bitangents[7] = 1.0;
+                bitangents[8] = 0.0;
+                bitangents[9] = 0.0;
+                bitangents[10] = 1.0;
+                bitangents[11] = 0.0;
+
                 attributes.bitangent = new GeometryAttribute({
                     componentDatatype : ComponentDatatype.FLOAT,
                     componentsPerAttribute : 3,
                     values : bitangents
                 });
             }
-        }
 
-        index = 0;
-        for (j = 0; j < slicePartitions - 1; j++) {
-            indices[index++] = slicePartitions + j;
-            indices[index++] = slicePartitions + j + 1;
-            indices[index++] = j + 1;
-        }
+            // 2 triangles
+            indices = new Uint16Array(2 * 3);
 
-        var topOffset;
-        var bottomOffset;
-        for (i = 1; i < stackPartitions - 2; i++) {
-            topOffset = i * slicePartitions;
-            bottomOffset = (i + 1) * slicePartitions;
-
-            for (j = 0; j < slicePartitions - 1; j++) {
-                indices[index++] = bottomOffset + j;
-                indices[index++] = bottomOffset + j + 1;
-                indices[index++] = topOffset + j + 1;
-
-                indices[index++] = bottomOffset + j;
-                indices[index++] = topOffset + j + 1;
-                indices[index++] = topOffset + j;
-            }
-        }
-
-        i = stackPartitions - 2;
-        topOffset = i * slicePartitions;
-        bottomOffset = (i + 1) * slicePartitions;
-
-        for (j = 0; j < slicePartitions - 1; j++) {
-            indices[index++] = bottomOffset + j;
-            indices[index++] = topOffset + j + 1;
-            indices[index++] = topOffset + j;
+            // +z face
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
+            indices[3] = 0;
+            indices[4] = 2;
+            indices[5] = 3;
         }
 
         return new Geometry({
             attributes : attributes,
             indices : indices,
             primitiveType : PrimitiveType.TRIANGLES,
-            boundingSphere : BoundingSphere.fromEllipsoid(ellipsoid)
+            boundingSphere : new BoundingSphere(Cartesian3.ZERO, Math.sqrt(2.0))
         });
     };
 
-    return EllipsoidGeometry;
+    return PlaneGeometry;
 });
 
-define('Core/SphereGeometry',[
-        './Cartesian3',
-        './Check',
-        './defaultValue',
-        './defined',
-        './EllipsoidGeometry',
-        './VertexFormat'
+define('Workers/createPlaneGeometry',[
+        '../Core/PlaneGeometry',
+        '../Core/defined'
     ], function(
-        Cartesian3,
-        Check,
-        defaultValue,
-        defined,
-        EllipsoidGeometry,
-        VertexFormat) {
+        PlaneGeometry,
+        defined) {
     'use strict';
 
-    /**
-     * A description of a sphere centered at the origin.
-     *
-     * @alias SphereGeometry
-     * @constructor
-     *
-     * @param {Object} [options] Object with the following properties:
-     * @param {Number} [options.radius=1.0] The radius of the sphere.
-     * @param {Number} [options.stackPartitions=64] The number of times to partition the ellipsoid into stacks.
-     * @param {Number} [options.slicePartitions=64] The number of times to partition the ellipsoid into radial slices.
-     * @param {VertexFormat} [options.vertexFormat=VertexFormat.DEFAULT] The vertex attributes to be computed.
-     *
-     * @exception {DeveloperError} options.slicePartitions cannot be less than three.
-     * @exception {DeveloperError} options.stackPartitions cannot be less than three.
-     *
-     * @see SphereGeometry#createGeometry
-     *
-     * @example
-     * var sphere = new Cesium.SphereGeometry({
-     *   radius : 100.0,
-     *   vertexFormat : Cesium.VertexFormat.POSITION_ONLY
-     * });
-     * var geometry = Cesium.SphereGeometry.createGeometry(sphere);
-     */
-    function SphereGeometry(options) {
-        var radius = defaultValue(options.radius, 1.0);
-        var radii = new Cartesian3(radius, radius, radius);
-        var ellipsoidOptions = {
-                radii: radii,
-                stackPartitions: options.stackPartitions,
-                slicePartitions: options.slicePartitions,
-                vertexFormat: options.vertexFormat
-        };
-
-        this._ellipsoidGeometry = new EllipsoidGeometry(ellipsoidOptions);
-        this._workerName = 'createSphereGeometry';
-    }
-
-    /**
-     * The number of elements used to pack the object into an array.
-     * @type {Number}
-     */
-    SphereGeometry.packedLength = EllipsoidGeometry.packedLength;
-
-    /**
-     * Stores the provided instance into the provided array.
-     *
-     * @param {SphereGeometry} value The value to pack.
-     * @param {Number[]} array The array to pack into.
-     * @param {Number} [startingIndex=0] The index into the array at which to start packing the elements.
-     *
-     * @returns {Number[]} The array that was packed into
-     */
-    SphereGeometry.pack = function(value, array, startingIndex) {
-                Check.typeOf.object('value', value);
-        
-        return EllipsoidGeometry.pack(value._ellipsoidGeometry, array, startingIndex);
-    };
-
-    var scratchEllipsoidGeometry = new EllipsoidGeometry();
-    var scratchOptions = {
-        radius : undefined,
-        radii : new Cartesian3(),
-        vertexFormat : new VertexFormat(),
-        stackPartitions : undefined,
-        slicePartitions : undefined
-    };
-
-    /**
-     * Retrieves an instance from a packed array.
-     *
-     * @param {Number[]} array The packed array.
-     * @param {Number} [startingIndex=0] The starting index of the element to be unpacked.
-     * @param {SphereGeometry} [result] The object into which to store the result.
-     * @returns {SphereGeometry} The modified result parameter or a new SphereGeometry instance if one was not provided.
-     */
-    SphereGeometry.unpack = function(array, startingIndex, result) {
-        var ellipsoidGeometry = EllipsoidGeometry.unpack(array, startingIndex, scratchEllipsoidGeometry);
-        scratchOptions.vertexFormat = VertexFormat.clone(ellipsoidGeometry._vertexFormat, scratchOptions.vertexFormat);
-        scratchOptions.stackPartitions = ellipsoidGeometry._stackPartitions;
-        scratchOptions.slicePartitions = ellipsoidGeometry._slicePartitions;
-
-        if (!defined(result)) {
-            scratchOptions.radius = ellipsoidGeometry._radii.x;
-            return new SphereGeometry(scratchOptions);
-        }
-
-        Cartesian3.clone(ellipsoidGeometry._radii, scratchOptions.radii);
-        result._ellipsoidGeometry = new EllipsoidGeometry(scratchOptions);
-        return result;
-    };
-
-    /**
-     * Computes the geometric representation of a sphere, including its vertices, indices, and a bounding sphere.
-     *
-     * @param {SphereGeometry} sphereGeometry A description of the sphere.
-     * @returns {Geometry} The computed vertices and indices.
-     */
-    SphereGeometry.createGeometry = function(sphereGeometry) {
-        return EllipsoidGeometry.createGeometry(sphereGeometry._ellipsoidGeometry);
-    };
-
-    return SphereGeometry;
-});
-
-define('Workers/createSphereGeometry',[
-        '../Core/defined',
-        '../Core/SphereGeometry'
-    ], function(
-        defined,
-        SphereGeometry) {
-    'use strict';
-
-    return function(sphereGeometry, offset) {
+    return function(planeGeometry, offset) {
         if (defined(offset)) {
-            sphereGeometry = SphereGeometry.unpack(sphereGeometry, offset);
+            planeGeometry = PlaneGeometry.unpack(planeGeometry, offset);
         }
-        return SphereGeometry.createGeometry(sphereGeometry);
+        return PlaneGeometry.createGeometry(planeGeometry);
     };
 });
 
