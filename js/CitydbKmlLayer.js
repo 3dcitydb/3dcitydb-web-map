@@ -289,7 +289,7 @@
 	function loadMasterJSON(that, isFirstLoad) {
 		var deferred = Cesium.when.defer();
 		var jsonUrl = that._url;
-		Cesium.loadJson(jsonUrl).then(function(json) {        	
+		new Cesium.Resource({ url: jsonUrl }).fetch({ responseType: 'json' }).then(function(json) { 	
         	that._jsonLayerInfo = json;	
         	that._layerType = json.displayform;
             that._cameraPosition = {
@@ -316,7 +316,7 @@
             
             var cityobjectsJsonUrl = that._cityobjectsJsonUrl;
             if (Cesium.defined(cityobjectsJsonUrl)) {
-            	Cesium.loadJson(cityobjectsJsonUrl).then(function(data) {
+            	new Cesium.Resource({ url: cityobjectsJsonUrl }).fetch({ responseType: 'json' }).then(function(data) {
 					deferred.resolve(that);
 					that._cityobjectsJsonData = data;
 				}).otherwise(function() {

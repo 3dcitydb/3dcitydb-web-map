@@ -977,7 +977,7 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
     var queryLink = "https://www.googleapis.com/fusiontables/v2/query?" + sql + "&key=" + apiKey;
 
-    Cesium.loadJson(queryLink).then(function (data) {
+    new Cesium.Resource({ url: queryLink }).fetch({ responseType: 'json' }).then(function(data) {
         console.log(data);
         var columns = data.columns;
         var rows = data.rows;
