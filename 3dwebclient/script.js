@@ -973,11 +973,10 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var deferred = Cesium.when.defer();
 
     var tableID = CitydbUtil.parse_query_string('docid', thematicDataUrl);
-    var sql = "sql=SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
+    var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
     var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
-    var queryLink = "https://www.googleapis.com/fusiontables/v2/query?" + sql + "&key=" + apiKey;
-
-    new Cesium.Resource({ url: queryLink }).fetch({ responseType: 'json' }).then(function(data) {
+    var queryLink = "https://www.googleapis.com/fusiontables/v2/query";
+    new Cesium.Resource({ url: queryLink, queryParameters: {sql, key: apiKey} }).fetch({ responseType: 'json' }).then(function(data) {
         console.log(data);
         var columns = data.columns;
         var rows = data.rows;
