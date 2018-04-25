@@ -54,8 +54,6 @@
     var Iso8601 = Cesium.Iso8601;
     var joinUrls = Cesium.joinUrls;
     var JulianDate = Cesium.JulianDate;
-    var loadBlob= Cesium.loadBlob;
-    var loadXML = Cesium.loadXML;
     var CesiumMath = Cesium.CesiumMath;
     var NearFarScalar = Cesium.NearFarScalar;
     var PinBuilder = Cesium.PinBuilder;
@@ -856,7 +854,7 @@
 
     //Asynchronously processes an external style file.
     function processExternalStyles(dataSource, uri, styleCollection) {
-        return loadXML(proxyUrl(uri, dataSource._proxy)).then(function(styleKml) {
+        return new Cesium.Resource({ url: proxyUrl(uri, dataSource._proxy) }).fetchXml().then(function(styleKml) {
             return processStyles(dataSource, styleKml, styleCollection, uri, true);
         });
     }
@@ -2259,7 +2257,7 @@
 
         var promise = data;
         if (typeof data === 'string') {
-            promise = loadBlob(proxyUrl(data, dataSource._proxy));
+            promise = new Cesium.Resource({ url: proxyUrl(data, dataSource._proxy) }).fetch({ responseType: 'blob' });
             sourceUri = defaultValue(sourceUri, data);
         }
 
