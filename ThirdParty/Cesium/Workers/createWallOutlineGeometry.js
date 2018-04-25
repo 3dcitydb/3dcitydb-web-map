@@ -590,6 +590,7 @@ define('Core/Math',[
      * Math functions.
      *
      * @exports CesiumMath
+     * @alias Math
      */
     var CesiumMath = {};
 
@@ -1299,7 +1300,6 @@ define('Core/Math',[
         return randomNumberGenerator.random();
     };
 
-
     /**
      * Generates a random number between two numbers.
      *
@@ -1312,7 +1312,7 @@ define('Core/Math',[
     };
 
     /**
-     * Computes <code>Math.acos(value)</acode>, but first clamps <code>value</code> to the range [-1.0, 1.0]
+     * Computes <code>Math.acos(value)</code>, but first clamps <code>value</code> to the range [-1.0, 1.0]
      * so that the function will never return NaN.
      *
      * @param {Number} value The value for which to compute acos.
@@ -1327,7 +1327,7 @@ define('Core/Math',[
     };
 
     /**
-     * Computes <code>Math.asin(value)</acode>, but first clamps <code>value</code> to the range [-1.0, 1.0]
+     * Computes <code>Math.asin(value)</code>, but first clamps <code>value</code> to the range [-1.0, 1.0]
      * so that the function will never return NaN.
      *
      * @param {Number} value The value for which to compute asin.
@@ -1374,6 +1374,20 @@ define('Core/Math',[
         }
                 return Math.log(number) / Math.log(base);
     };
+
+    function cbrt(number) {
+        var result = Math.pow(Math.abs(number), 1.0 / 3.0);
+        return number < 0.0 ? -result : result;
+    }
+
+    /**
+     * Finds the cube root of a number.
+     * Returns NaN if <code>number</code> is not provided.
+     *
+     * @param {Number} [number] The number.
+     * @returns {Number} The result.
+     */
+    CesiumMath.cbrt = defined(Math.cbrt) ? Math.cbrt : cbrt;
 
     /**
      * @private
@@ -2019,6 +2033,22 @@ define('Core/Cartesian3',[
     };
 
     /**
+     * Projects vector a onto vector b
+     * @param {Cartesian3} a The vector that needs projecting
+     * @param {Cartesian3} b The vector to project onto
+     * @param {Cartesian3} result The result cartesian
+     * @returns {Cartesian3} The modified result parameter
+     */
+    Cartesian3.projectVector = function(a, b, result) {
+                Check.defined('a', a);
+        Check.defined('b', b);
+        Check.defined('result', result);
+        
+        var scalar = Cartesian3.dot(a, b) / Cartesian3.dot(b, b);
+        return Cartesian3.multiplyByScalar(b, scalar, result);
+    };
+
+    /**
      * Compares the provided Cartesians componentwise and returns
      * <code>true</code> if they are equal, <code>false</code> otherwise.
      *
@@ -2653,6 +2683,21 @@ define('Core/Cartographic',[
     };
 
     /**
+     * Creates a new Cartesian3 instance from a Cartographic input. The values in the inputted
+     * object should be in radians.
+     *
+     * @param {Cartographic} cartographic Input to be converted into a Cartesian3 output.
+     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the position lies.
+     * @param {Cartesian3} [result] The object onto which to store the result.
+     * @returns {Cartesian3} The position
+     */
+    Cartographic.toCartesian = function(cartographic, ellipsoid, result) {
+                Check.defined('cartographic', cartographic);
+        
+        return Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, cartographic.height, ellipsoid, result);
+    };
+
+    /**
      * Duplicates a Cartographic instance.
      *
      * @param {Cartographic} cartographic The cartographic to duplicate.
@@ -2856,7 +2901,7 @@ define('Core/Ellipsoid',[
         ellipsoid._centerToleranceSquared = CesiumMath.EPSILON1;
 
         if (ellipsoid._radiiSquared.z !== 0) {
-            ellipsoid._sqauredXOverSquaredZ = ellipsoid._radiiSquared.x / ellipsoid._radiiSquared.z;
+            ellipsoid._squaredXOverSquaredZ = ellipsoid._radiiSquared.x / ellipsoid._radiiSquared.z;
         }
     }
 
@@ -2889,7 +2934,7 @@ define('Core/Ellipsoid',[
         this._minimumRadius = undefined;
         this._maximumRadius = undefined;
         this._centerToleranceSquared = undefined;
-        this._sqauredXOverSquaredZ = undefined;
+        this._squaredXOverSquaredZ = undefined;
 
         initialize(this, x, y, z);
     }
@@ -3396,9 +3441,9 @@ define('Core/Ellipsoid',[
      *                                In earth case, with common earth datums, there is no need for this buffer since the intersection point is always (relatively) very close to the center.
      *                                In WGS84 datum, intersection point is at max z = +-42841.31151331382 (0.673% of z-axis).
      *                                Intersection point could be outside the ellipsoid if the ratio of MajorAxis / AxisOfRotation is bigger than the square root of 2
-     * @param {Cartesian} [result] The cartesian to which to copy the result, or undefined to create and
+     * @param {Cartesian3} [result] The cartesian to which to copy the result, or undefined to create and
      *        return a new instance.
-     * @returns {Cartesian | undefined} the intersection point if it's inside the ellipsoid, undefined otherwise
+     * @returns {Cartesian3 | undefined} the intersection point if it's inside the ellipsoid, undefined otherwise
      *
      * @exception {DeveloperError} position is required.
      * @exception {DeveloperError} Ellipsoid must be an ellipsoid of revolution (radii.x == radii.y).
@@ -3415,7 +3460,7 @@ define('Core/Ellipsoid',[
         
         buffer = defaultValue(buffer, 0.0);
 
-        var sqauredXOverSquaredZ = this._sqauredXOverSquaredZ;
+        var squaredXOverSquaredZ = this._squaredXOverSquaredZ;
 
         if (!defined(result)) {
             result = new Cartesian3();
@@ -3423,7 +3468,7 @@ define('Core/Ellipsoid',[
 
         result.x = 0.0;
         result.y = 0.0;
-        result.z = position.z * (1 - sqauredXOverSquaredZ);
+        result.z = position.z * (1 - squaredXOverSquaredZ);
 
         if (Math.abs(result.z) >= this._radii.z - buffer) {
             return undefined;
@@ -5183,7 +5228,6 @@ define('Core/Cartesian4',[
         return result;
     };
 
-
     /**
      * The number of elements used to pack the object into an array.
      * @type {Number}
@@ -5825,6 +5869,91 @@ define('Core/Cartesian4',[
      */
     Cartesian4.prototype.toString = function() {
         return '(' + this.x + ', ' + this.y + ', ' + this.z + ', ' + this.w + ')';
+    };
+
+    var scratchFloatArray = new Float32Array(1);
+    var SHIFT_LEFT_8 = 256.0;
+    var SHIFT_LEFT_16 = 65536.0;
+    var SHIFT_LEFT_24 = 16777216.0;
+
+    var SHIFT_RIGHT_8 = 1.0 / SHIFT_LEFT_8;
+    var SHIFT_RIGHT_16 = 1.0 / SHIFT_LEFT_16;
+    var SHIFT_RIGHT_24 = 1.0 / SHIFT_LEFT_24;
+
+    var BIAS = 38.0;
+
+    /**
+     * Packs an arbitrary floating point value to 4 values representable using uint8.
+     *
+     * @param {Number} value A floating point number
+     * @param {Cartesian4} [result] The Cartesian4 that will contain the packed float.
+     * @returns {Cartesian4} A Cartesian4 representing the float packed to values in x, y, z, and w.
+     */
+    Cartesian4.packFloat = function(value, result) {
+                Check.typeOf.number('value', value);
+        
+        if (!defined(result)) {
+            result = new Cartesian4();
+        }
+
+        // Force the value to 32 bit precision
+        scratchFloatArray[0] = value;
+        value = scratchFloatArray[0];
+
+        if (value === 0.0) {
+            return Cartesian4.clone(Cartesian4.ZERO, result);
+        }
+
+        var sign = value < 0.0 ? 1.0 : 0.0;
+        var exponent;
+
+        if (!isFinite(value)) {
+            value = 0.1;
+            exponent = BIAS;
+        } else {
+            value = Math.abs(value);
+            exponent = Math.floor(CesiumMath.logBase(value, 10)) + 1.0;
+            value = value / Math.pow(10.0, exponent);
+        }
+
+        var temp = value * SHIFT_LEFT_8;
+        result.x = Math.floor(temp);
+        temp = (temp - result.x) * SHIFT_LEFT_8;
+        result.y = Math.floor(temp);
+        temp = (temp - result.y) * SHIFT_LEFT_8;
+        result.z = Math.floor(temp);
+        result.w = (exponent + BIAS) * 2.0 + sign;
+
+        return result;
+    };
+
+    /**
+     * Unpacks a float packed using Cartesian4.packFloat.
+     *
+     * @param {Cartesian4} packedFloat A Cartesian4 containing a float packed to 4 values representable using uint8.
+     * @returns {Number} The unpacked float.
+     * @private
+     */
+    Cartesian4.unpackFloat = function(packedFloat) {
+                Check.typeOf.object('packedFloat', packedFloat);
+        
+        var temp = packedFloat.w / 2.0;
+        var exponent = Math.floor(temp);
+        var sign = (temp - exponent) * 2.0;
+        exponent = exponent - BIAS;
+
+        sign = sign * 2.0 - 1.0;
+        sign = -sign;
+
+        if (exponent >= BIAS) {
+            return sign < 0.0 ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+        }
+
+        var unpacked = sign * packedFloat.x * SHIFT_RIGHT_8;
+        unpacked += sign * packedFloat.y * SHIFT_RIGHT_16;
+        unpacked += sign * packedFloat.z * SHIFT_RIGHT_24;
+
+        return unpacked * Math.pow(10.0, exponent);
     };
 
     return Cartesian4;
@@ -8704,7 +8833,7 @@ define('Core/Rectangle',[
     /**
      * Creates the smallest possible Rectangle that encloses all positions in the provided array.
      *
-     * @param {Cartesian[]} cartesians The list of Cartesian instances.
+     * @param {Cartesian3[]} cartesians The list of Cartesian instances.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid the cartesians are on.
      * @param {Rectangle} [result] The object onto which to store the result, or undefined if a new instance should be created.
      * @returns {Rectangle} The modified result parameter or a new Rectangle instance if none was provided.
@@ -9260,6 +9389,7 @@ define('Core/BoundingSphere',[
         './GeographicProjection',
         './Intersect',
         './Interval',
+        './Math',
         './Matrix3',
         './Matrix4',
         './Rectangle'
@@ -9273,6 +9403,7 @@ define('Core/BoundingSphere',[
         GeographicProjection,
         Intersect,
         Interval,
+        CesiumMath,
         Matrix3,
         Matrix4,
         Rectangle) {
@@ -9318,13 +9449,14 @@ define('Core/BoundingSphere',[
     var fromPointsMinBoxPt = new Cartesian3();
     var fromPointsMaxBoxPt = new Cartesian3();
     var fromPointsNaiveCenterScratch = new Cartesian3();
+    var volumeConstant = (4.0 / 3.0) * CesiumMath.PI;
 
     /**
      * Computes a tight-fitting bounding sphere enclosing a list of 3D Cartesian points.
      * The bounding sphere is computed by running two algorithms, a naive algorithm and
      * Ritter's algorithm. The smaller of the two spheres is used to ensure a tight fit.
      *
-     * @param {Cartesian3[]} positions An array of points that the bounding sphere will enclose.  Each point must have <code>x</code>, <code>y</code>, and <code>z</code> properties.
+     * @param {Cartesian3[]} [positions] An array of points that the bounding sphere will enclose.  Each point must have <code>x</code>, <code>y</code>, and <code>z</code> properties.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if one was not provided.
      *
@@ -9475,7 +9607,7 @@ define('Core/BoundingSphere',[
     /**
      * Computes a bounding sphere from a rectangle projected in 2D.
      *
-     * @param {Rectangle} rectangle The rectangle around which to create a bounding sphere.
+     * @param {Rectangle} [rectangle] The rectangle around which to create a bounding sphere.
      * @param {Object} [projection=GeographicProjection] The projection used to project the rectangle into 2D.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if none was provided.
@@ -9488,7 +9620,7 @@ define('Core/BoundingSphere',[
      * Computes a bounding sphere from a rectangle projected in 2D.  The bounding sphere accounts for the
      * object's minimum and maximum heights over the rectangle.
      *
-     * @param {Rectangle} rectangle The rectangle around which to create a bounding sphere.
+     * @param {Rectangle} [rectangle] The rectangle around which to create a bounding sphere.
      * @param {Object} [projection=GeographicProjection] The projection used to project the rectangle into 2D.
      * @param {Number} [minimumHeight=0.0] The minimum height over the rectangle.
      * @param {Number} [maximumHeight=0.0] The maximum height over the rectangle.
@@ -9534,7 +9666,7 @@ define('Core/BoundingSphere',[
      * Computes a bounding sphere from a rectangle in 3D. The bounding sphere is created using a subsample of points
      * on the ellipsoid and contained in the rectangle. It may not be accurate for all rectangles on all types of ellipsoids.
      *
-     * @param {Rectangle} rectangle The valid rectangle used to create a bounding sphere.
+     * @param {Rectangle} [rectangle] The valid rectangle used to create a bounding sphere.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid used to determine positions of the rectangle.
      * @param {Number} [surfaceHeight=0.0] The height above the surface of the ellipsoid.
      * @param {BoundingSphere} [result] The object onto which to store the result.
@@ -9544,11 +9676,17 @@ define('Core/BoundingSphere',[
         ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
         surfaceHeight = defaultValue(surfaceHeight, 0.0);
 
-        var positions;
-        if (defined(rectangle)) {
-            positions = Rectangle.subsample(rectangle, ellipsoid, surfaceHeight, fromRectangle3DScratch);
+        if (!defined(result)) {
+            result = new BoundingSphere();
         }
 
+        if (!defined(rectangle)) {
+            result.center = Cartesian3.clone(Cartesian3.ZERO, result.center);
+            result.radius = 0.0;
+            return result;
+        }
+
+        var positions = Rectangle.subsample(rectangle, ellipsoid, surfaceHeight, fromRectangle3DScratch);
         return BoundingSphere.fromPoints(positions, result);
     };
 
@@ -9558,7 +9696,7 @@ define('Core/BoundingSphere',[
      * algorithms, a naive algorithm and Ritter's algorithm. The smaller of the two spheres is used to
      * ensure a tight fit.
      *
-     * @param {Number[]} positions An array of points that the bounding sphere will enclose.  Each point
+     * @param {Number[]} [positions] An array of points that the bounding sphere will enclose.  Each point
      *        is formed from three elements in the array in the order X, Y, Z.
      * @param {Cartesian3} [center=Cartesian3.ZERO] The position to which the positions are relative, which need not be the
      *        origin of the coordinate system.  This is useful when the positions are to be used for
@@ -9739,9 +9877,9 @@ define('Core/BoundingSphere',[
      * algorithms, a naive algorithm and Ritter's algorithm. The smaller of the two spheres is used to
      * ensure a tight fit.
      *
-     * @param {Number[]} positionsHigh An array of high bits of the encoded cartesians that the bounding sphere will enclose.  Each point
+     * @param {Number[]} [positionsHigh] An array of high bits of the encoded cartesians that the bounding sphere will enclose.  Each point
      *        is formed from three elements in the array in the order X, Y, Z.
-     * @param {Number[]} positionsLow An array of low bits of the encoded cartesians that the bounding sphere will enclose.  Each point
+     * @param {Number[]} [positionsLow] An array of low bits of the encoded cartesians that the bounding sphere will enclose.  Each point
      *        is formed from three elements in the array in the order X, Y, Z.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if one was not provided.
@@ -9946,7 +10084,7 @@ define('Core/BoundingSphere',[
     /**
      * Computes a tight-fitting bounding sphere enclosing the provided array of bounding spheres.
      *
-     * @param {BoundingSphere[]} boundingSpheres The array of bounding spheres.
+     * @param {BoundingSphere[]} [boundingSpheres] The array of bounding spheres.
      * @param {BoundingSphere} [result] The object onto which to store the result.
      * @returns {BoundingSphere} The modified result parameter or a new BoundingSphere instance if none was provided.
      */
@@ -10518,6 +10656,15 @@ define('Core/BoundingSphere',[
         return BoundingSphere.clone(this, result);
     };
 
+    /**
+     * Computes the radius of the BoundingSphere.
+     * @returns {Number} The radius of the BoundingSphere.
+     */
+    BoundingSphere.prototype.volume = function() {
+        var radius = this.radius;
+        return volumeConstant * radius * radius * radius;
+    };
+
     return BoundingSphere;
 });
 
@@ -10935,7 +11082,6 @@ define('Core/FeatureDetection',[
         }
         return isWindowsResult;
     }
-
 
     function firefoxVersion() {
         return isFirefox() && firefoxVersionResult;
@@ -12131,7 +12277,7 @@ define('Core/Geometry',[
      * @see BoxGeometry
      * @see EllipsoidGeometry
      *
-     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Geometry%20and%20Appearances.html|Geometry and Appearances Demo}
+     * @demo {@link https://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Geometry%20and%20Appearances.html|Geometry and Appearances Demo}
      *
      * @example
      * // Create geometry with a position attribute and indexed lines.
@@ -12794,7 +12940,7 @@ define('Core/AxisAlignedBoundingBox',[
         }
 
         if (!defined(result)) {
-            return new AxisAlignedBoundingBox(box.minimum, box.maximum);
+            return new AxisAlignedBoundingBox(box.minimum, box.maximum, box.center);
         }
 
         result.minimum = Cartesian3.clone(box.minimum, result.minimum);
@@ -13146,7 +13292,6 @@ define('Core/Cartesian2',[
         Check.typeOf.object('second', second);
         Check.typeOf.object('result', result);
         
-
         result.x = Math.min(first.x, second.x);
         result.y = Math.min(first.y, second.y);
 
@@ -15247,16 +15392,20 @@ define('Core/IntersectionTests',[
 
 define('Core/Plane',[
         './Cartesian3',
+        './Check',
         './defined',
         './DeveloperError',
         './freezeObject',
-        './Math'
+        './Math',
+        './Matrix4'
     ], function(
         Cartesian3,
+        Check,
         defined,
         DeveloperError,
         freezeObject,
-        CesiumMath) {
+        CesiumMath,
+        Matrix4) {
     'use strict';
 
     /**
@@ -15285,15 +15434,11 @@ define('Core/Plane',[
      * @exception {DeveloperError} Normal must be normalized
      */
     function Plane(normal, distance) {
-                if (!defined(normal))  {
-            throw new DeveloperError('normal is required.');
-        }
+                Check.typeOf.object('normal', normal);
         if (!CesiumMath.equalsEpsilon(Cartesian3.magnitude(normal), 1.0, CesiumMath.EPSILON6)) {
             throw new DeveloperError('normal must be normalized.');
         }
-        if (!defined(distance)) {
-            throw new DeveloperError('distance is required.');
-        }
+        Check.typeOf.number('distance', distance);
         
         /**
          * The plane's normal.
@@ -15330,12 +15475,8 @@ define('Core/Plane',[
      * @exception {DeveloperError} Normal must be normalized
      */
     Plane.fromPointNormal = function(point, normal, result) {
-                if (!defined(point)) {
-            throw new DeveloperError('point is required.');
-        }
-        if (!defined(normal)) {
-            throw new DeveloperError('normal is required.');
-        }
+                Check.typeOf.object('point', point);
+        Check.typeOf.object('normal', normal);
         if (!CesiumMath.equalsEpsilon(Cartesian3.magnitude(normal), 1.0, CesiumMath.EPSILON6)) {
             throw new DeveloperError('normal must be normalized.');
         }
@@ -15362,9 +15503,7 @@ define('Core/Plane',[
      * @exception {DeveloperError} Normal must be normalized
      */
     Plane.fromCartesian4 = function(coefficients, result) {
-                if (!defined(coefficients)) {
-            throw new DeveloperError('coefficients is required.');
-        }
+                Check.typeOf.object('coefficients', coefficients);
         
         var normal = Cartesian3.fromCartesian4(coefficients, scratchNormal);
         var distance = coefficients.w;
@@ -15393,14 +15532,90 @@ define('Core/Plane',[
      * @returns {Number} The signed shortest distance of the point to the plane.
      */
     Plane.getPointDistance = function(plane, point) {
-                if (!defined(plane)) {
-            throw new DeveloperError('plane is required.');
-        }
-        if (!defined(point)) {
-            throw new DeveloperError('point is required.');
-        }
+                Check.typeOf.object('plane', plane);
+        Check.typeOf.object('point', point);
         
         return Cartesian3.dot(plane.normal, point) + plane.distance;
+    };
+
+    var scratchCartesian = new Cartesian3();
+    /**
+     * Projects a point onto the plane.
+     * @param {Plane} plane The plane to project the point onto
+     * @param {Cartesian3} point The point to project onto the plane
+     * @param {Cartesian3} [result] The result point.  If undefined, a new Cartesian3 will be created.
+     * @returns {Cartesian3} The modified result parameter or a new Cartesian3 instance if one was not provided.
+     */
+    Plane.projectPointOntoPlane = function(plane, point, result) {
+                Check.typeOf.object('plane', plane);
+        Check.typeOf.object('point', point);
+        
+        if (!defined(result)) {
+            result = new Cartesian3();
+        }
+
+        // projectedPoint = point - (normal.point + scale) * normal
+        var pointDistance = Plane.getPointDistance(plane, point);
+        var scaledNormal = Cartesian3.multiplyByScalar(plane.normal, pointDistance, scratchCartesian);
+
+        return Cartesian3.subtract(point, scaledNormal, result);
+    };
+
+    var scratchPosition = new Cartesian3();
+    /**
+     * Transforms the plane by the given transformation matrix.
+     *
+     * @param {Plane} plane The plane.
+     * @param {Matrix4} transform The transformation matrix.
+     * @param {Plane} [result] The object into which to store the result.
+     * @returns {Plane} The plane transformed by the given transformation matrix.
+     */
+    Plane.transform = function(plane, transform, result) {
+                Check.typeOf.object('plane', plane);
+        Check.typeOf.object('transform', transform);
+        
+        Matrix4.multiplyByPointAsVector(transform, plane.normal, scratchNormal);
+        Cartesian3.normalize(scratchNormal, scratchNormal);
+
+        Cartesian3.multiplyByScalar(plane.normal, -plane.distance, scratchPosition);
+        Matrix4.multiplyByPoint(transform, scratchPosition, scratchPosition);
+
+        return Plane.fromPointNormal(scratchPosition, scratchNormal, result);
+    };
+
+    /**
+     * Duplicates a Plane instance.
+     *
+     * @param {Plane} plane The plane to duplicate.
+     * @param {Plane} [result] The object onto which to store the result.
+     * @returns {Plane} The modified result parameter or a new Plane instance if one was not provided.
+     */
+    Plane.clone = function(plane, result) {
+                Check.typeOf.object('plane', plane);
+        
+        if (!defined(result)) {
+            return new Plane(plane.normal, plane.distance);
+        }
+
+        Cartesian3.clone(plane.normal, result.normal);
+        result.distance = plane.distance;
+
+        return result;
+    };
+
+    /**
+     * Compares the provided Planes by normal and distance and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     *
+     * @param {Plane} left The first plane.
+     * @param {Plane} right The second plane.
+     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
+     */
+    Plane.equals = function(left, right) {
+                Check.typeOf.object('left', left);
+        Check.typeOf.object('right', right);
+        
+        return (left.distance === right.distance) && Cartesian3.equals(left.normal, right.normal);
     };
 
     /**
@@ -16179,122 +16394,10 @@ define('ThirdParty/when',[],function () {
 	// Boilerplate for AMD, Node, and browser global
 );
 
-define('Core/oneTimeWarning',[
-        './defaultValue',
-        './defined',
-        './DeveloperError'
-    ], function(
-        defaultValue,
-        defined,
-        DeveloperError) {
-    'use strict';
-
-    var warnings = {};
-
-    /**
-     * Logs a one time message to the console.  Use this function instead of
-     * <code>console.log</code> directly since this does not log duplicate messages
-     * unless it is called from multiple workers.
-     *
-     * @exports oneTimeWarning
-     *
-     * @param {String} identifier The unique identifier for this warning.
-     * @param {String} [message=identifier] The message to log to the console.
-     *
-     * @example
-     * for(var i=0;i<foo.length;++i) {
-     *    if (!defined(foo[i].bar)) {
-     *       // Something that can be recovered from but may happen a lot
-     *       oneTimeWarning('foo.bar undefined', 'foo.bar is undefined. Setting to 0.');
-     *       foo[i].bar = 0;
-     *       // ...
-     *    }
-     * }
-     *
-     * @private
-     */
-    function oneTimeWarning(identifier, message) {
-                if (!defined(identifier)) {
-            throw new DeveloperError('identifier is required.');
-        }
-        
-        if (!defined(warnings[identifier])) {
-            warnings[identifier] = true;
-            console.warn(defaultValue(message, identifier));
-        }
-    }
-
-    oneTimeWarning.geometryOutlines = 'Entity geometry outlines are unsupported on terrain. Outlines will be disabled. To enable outlines, disable geometry terrain clamping by explicitly setting height to 0.';
-
-    return oneTimeWarning;
-});
-
-define('Core/deprecationWarning',[
-        './defined',
-        './DeveloperError',
-        './oneTimeWarning'
-    ], function(
-        defined,
-        DeveloperError,
-        oneTimeWarning) {
-    'use strict';
-
-    /**
-     * Logs a deprecation message to the console.  Use this function instead of
-     * <code>console.log</code> directly since this does not log duplicate messages
-     * unless it is called from multiple workers.
-     *
-     * @exports deprecationWarning
-     *
-     * @param {String} identifier The unique identifier for this deprecated API.
-     * @param {String} message The message to log to the console.
-     *
-     * @example
-     * // Deprecated function or class
-     * function Foo() {
-     *    deprecationWarning('Foo', 'Foo was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use newFoo instead.');
-     *    // ...
-     * }
-     *
-     * // Deprecated function
-     * Bar.prototype.func = function() {
-     *    deprecationWarning('Bar.func', 'Bar.func() was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newFunc() instead.');
-     *    // ...
-     * };
-     *
-     * // Deprecated property
-     * defineProperties(Bar.prototype, {
-     *     prop : {
-     *         get : function() {
-     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
-     *             // ...
-     *         },
-     *         set : function(value) {
-     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
-     *             // ...
-     *         }
-     *     }
-     * });
-     *
-     * @private
-     */
-    function deprecationWarning(identifier, message) {
-                if (!defined(identifier) || !defined(message)) {
-            throw new DeveloperError('identifier and message are required.');
-        }
-        
-        oneTimeWarning(identifier, message);
-    }
-
-    return deprecationWarning;
-});
-
 define('Core/binarySearch',[
-        './Check',
-        './defined'
+        './Check'
     ], function(
-        Check,
-        defined) {
+        Check) {
     'use strict';
 
     /**
@@ -16964,12 +17067,17 @@ define('Core/TimeStandard',[
          * <code>UTC = TAI - deltaT</code> where <code>deltaT</code> is the number of leap
          * seconds which have been introduced as of the time in TAI.
          *
+         * @type {Number}
+         * @constant
          */
         UTC : 0,
 
         /**
          * Represents the International Atomic Time (TAI) time standard.
          * TAI is the principal time standard to which the other time standards are related.
+         *
+         * @type {Number}
+         * @constant
          */
         TAI : 1
     };
@@ -17989,440 +18097,6 @@ define('Core/JulianDate',[
     return JulianDate;
 });
 
-define('Core/clone',[
-        './defaultValue'
-    ], function(
-        defaultValue) {
-    'use strict';
-
-    /**
-     * Clones an object, returning a new object containing the same properties.
-     *
-     * @exports clone
-     *
-     * @param {Object} object The object to clone.
-     * @param {Boolean} [deep=false] If true, all properties will be deep cloned recursively.
-     * @returns {Object} The cloned object.
-     */
-    function clone(object, deep) {
-        if (object === null || typeof object !== 'object') {
-            return object;
-        }
-
-        deep = defaultValue(deep, false);
-
-        var result = new object.constructor();
-        for ( var propertyName in object) {
-            if (object.hasOwnProperty(propertyName)) {
-                var value = object[propertyName];
-                if (deep) {
-                    value = clone(value, deep);
-                }
-                result[propertyName] = value;
-            }
-        }
-
-        return result;
-    }
-
-    return clone;
-});
-
-define('Core/RequestState',[
-        '../Core/freezeObject'
-    ], function(
-        freezeObject) {
-    'use strict';
-
-    /**
-     * State of the request.
-     *
-     * @exports RequestState
-     */
-    var RequestState = {
-        /**
-         * Initial unissued state.
-         *
-         * @type Number
-         * @constant
-         */
-        UNISSUED : 0,
-
-        /**
-         * Issued but not yet active. Will become active when open slots are available.
-         *
-         * @type Number
-         * @constant
-         */
-        ISSUED : 1,
-
-        /**
-         * Actual http request has been sent.
-         *
-         * @type Number
-         * @constant
-         */
-        ACTIVE : 2,
-
-        /**
-         * Request completed successfully.
-         *
-         * @type Number
-         * @constant
-         */
-        RECEIVED : 3,
-
-        /**
-         * Request was cancelled, either explicitly or automatically because of low priority.
-         *
-         * @type Number
-         * @constant
-         */
-        CANCELLED : 4,
-
-        /**
-         * Request failed.
-         *
-         * @type Number
-         * @constant
-         */
-        FAILED : 5
-    };
-
-    return freezeObject(RequestState);
-});
-
-define('Core/RequestType',[
-        '../Core/freezeObject'
-    ], function(
-        freezeObject) {
-    'use strict';
-
-    /**
-     * An enum identifying the type of request. Used for finer grained logging and priority sorting.
-     *
-     * @exports RequestType
-     */
-    var RequestType = {
-        /**
-         * Terrain request.
-         *
-         * @type Number
-         * @constant
-         */
-        TERRAIN : 0,
-
-        /**
-         * Imagery request.
-         *
-         * @type Number
-         * @constant
-         */
-        IMAGERY : 1,
-
-        /**
-         * 3D Tiles request.
-         *
-         * @type Number
-         * @constant
-         */
-        TILES3D : 2,
-
-        /**
-         * Other request.
-         *
-         * @type Number
-         * @constant
-         */
-        OTHER : 3
-    };
-
-    return freezeObject(RequestType);
-});
-
-define('Core/Request',[
-        './defaultValue',
-        './defined',
-        './defineProperties',
-        './RequestState',
-        './RequestType'
-    ], function(
-        defaultValue,
-        defined,
-        defineProperties,
-        RequestState,
-        RequestType) {
-    'use strict';
-
-    /**
-     * Stores information for making a request. In general this does not need to be constructed directly.
-     *
-     * @alias Request
-     * @constructor
-     *
-     * @param {Object} [options] An object with the following properties:
-     * @param {Boolean} [options.url] The url to request.
-     * @param {Request~RequestCallback} [options.requestFunction] The function that makes the actual data request.
-     * @param {Request~CancelCallback} [options.cancelFunction] The function that is called when the request is cancelled.
-     * @param {Request~PriorityCallback} [options.priorityFunction] The function that is called to update the request's priority, which occurs once per frame.
-     * @param {Number} [options.priority=0.0] The initial priority of the request.
-     * @param {Boolean} [options.throttle=false] Whether to throttle and prioritize the request. If false, the request will be sent immediately. If true, the request will be throttled and sent based on priority.
-     * @param {Boolean} [options.throttleByServer=false] Whether to throttle the request by server.
-     * @param {RequestType} [options.type=RequestType.OTHER] The type of request.
-     */
-    function Request(options) {
-        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
-
-        var throttleByServer = defaultValue(options.throttleByServer, false);
-        var throttle = throttleByServer || defaultValue(options.throttle, false);
-
-        /**
-         * The URL to request.
-         *
-         * @type {String}
-         */
-        this.url = options.url;
-
-        /**
-         * The function that makes the actual data request.
-         *
-         * @type {Request~RequestCallback}
-         */
-        this.requestFunction = options.requestFunction;
-
-        /**
-         * The function that is called when the request is cancelled.
-         *
-         * @type {Request~CancelCallback}
-         */
-        this.cancelFunction = options.cancelFunction;
-
-        /**
-         * The function that is called to update the request's priority, which occurs once per frame.
-         *
-         * @type {Request~PriorityCallback}
-         */
-        this.priorityFunction = options.priorityFunction;
-
-        /**
-         * Priority is a unit-less value where lower values represent higher priority.
-         * For world-based objects, this is usually the distance from the camera.
-         * A request that does not have a priority function defaults to a priority of 0.
-         *
-         * If priorityFunction is defined, this value is updated every frame with the result of that call.
-         *
-         * @type {Number}
-         * @default 0.0
-         */
-        this.priority = defaultValue(options.priority, 0.0);
-
-        /**
-         * Whether to throttle and prioritize the request. If false, the request will be sent immediately. If true, the
-         * request will be throttled and sent based on priority.
-         *
-         * @type {Boolean}
-         * @readonly
-         *
-         * @default false
-         */
-        this.throttle = throttle;
-
-        /**
-         * Whether to throttle the request by server. Browsers typically support about 6-8 parallel connections
-         * for HTTP/1 servers, and an unlimited amount of connections for HTTP/2 servers. Setting this value
-         * to <code>true</code> is preferable for requests going through HTTP/1 servers.
-         *
-         * @type {Boolean}
-         * @readonly
-         *
-         * @default false
-         */
-        this.throttleByServer = throttleByServer;
-
-        /**
-         * Type of request.
-         *
-         * @type {RequestType}
-         * @readonly
-         *
-         * @default RequestType.OTHER
-         */
-        this.type = defaultValue(options.type, RequestType.OTHER);
-
-        /**
-         * A key used to identify the server that a request is going to. It is derived from the url's authority and scheme.
-         *
-         * @type {String}
-         *
-         * @private
-         */
-        this.serverKey = undefined;
-
-        /**
-         * The current state of the request.
-         *
-         * @type {RequestState}
-         * @readonly
-         */
-        this.state = RequestState.UNISSUED;
-
-        /**
-         * The requests's deferred promise.
-         *
-         * @type {Object}
-         *
-         * @private
-         */
-        this.deferred = undefined;
-
-        /**
-         * Whether the request was explicitly cancelled.
-         *
-         * @type {Boolean}
-         *
-         * @private
-         */
-        this.cancelled = false;
-    }
-
-    /**
-     * Mark the request as cancelled.
-     *
-     * @private
-     */
-    Request.prototype.cancel = function() {
-        this.cancelled = true;
-    };
-
-    /**
-     * The function that makes the actual data request.
-     * @callback Request~RequestCallback
-     * @returns {Promise} A promise for the requested data.
-     */
-
-    /**
-     * The function that is called when the request is cancelled.
-     * @callback Request~CancelCallback
-     */
-
-    /**
-     * The function that is called to update the request's priority, which occurs once per frame.
-     * @callback Request~PriorityCallback
-     * @returns {Number} The updated priority value.
-     */
-
-    return Request;
-});
-
-define('Core/parseResponseHeaders',[], function() {
-    'use strict';
-
-    /**
-     * Parses the result of XMLHttpRequest's getAllResponseHeaders() method into
-     * a dictionary.
-     *
-     * @exports parseResponseHeaders
-     *
-     * @param {String} headerString The header string returned by getAllResponseHeaders().  The format is
-     *                 described here: http://www.w3.org/TR/XMLHttpRequest/#the-getallresponseheaders()-method
-     * @returns {Object} A dictionary of key/value pairs, where each key is the name of a header and the corresponding value
-     *                   is that header's value.
-     *
-     * @private
-     */
-    function parseResponseHeaders(headerString) {
-        var headers = {};
-
-        if (!headerString) {
-          return headers;
-        }
-
-        var headerPairs = headerString.split('\u000d\u000a');
-
-        for (var i = 0; i < headerPairs.length; ++i) {
-          var headerPair = headerPairs[i];
-          // Can't use split() here because it does the wrong thing
-          // if the header value has the string ": " in it.
-          var index = headerPair.indexOf('\u003a\u0020');
-          if (index > 0) {
-            var key = headerPair.substring(0, index);
-            var val = headerPair.substring(index + 2);
-            headers[key] = val;
-          }
-        }
-
-        return headers;
-    }
-
-    return parseResponseHeaders;
-});
-
-define('Core/RequestErrorEvent',[
-        './defined',
-        './parseResponseHeaders'
-    ], function(
-        defined,
-        parseResponseHeaders) {
-    'use strict';
-
-    /**
-     * An event that is raised when a request encounters an error.
-     *
-     * @constructor
-     * @alias RequestErrorEvent
-     *
-     * @param {Number} [statusCode] The HTTP error status code, such as 404.
-     * @param {Object} [response] The response included along with the error.
-     * @param {String|Object} [responseHeaders] The response headers, represented either as an object literal or as a
-     *                        string in the format returned by XMLHttpRequest's getAllResponseHeaders() function.
-     */
-    function RequestErrorEvent(statusCode, response, responseHeaders) {
-        /**
-         * The HTTP error status code, such as 404.  If the error does not have a particular
-         * HTTP code, this property will be undefined.
-         *
-         * @type {Number}
-         */
-        this.statusCode = statusCode;
-
-        /**
-         * The response included along with the error.  If the error does not include a response,
-         * this property will be undefined.
-         *
-         * @type {Object}
-         */
-        this.response = response;
-
-        /**
-         * The headers included in the response, represented as an object literal of key/value pairs.
-         * If the error does not include any headers, this property will be undefined.
-         *
-         * @type {Object}
-         */
-        this.responseHeaders = responseHeaders;
-
-        if (typeof this.responseHeaders === 'string') {
-            this.responseHeaders = parseResponseHeaders(this.responseHeaders);
-        }
-    }
-
-    /**
-     * Creates a string representing this RequestErrorEvent.
-     * @memberof RequestErrorEvent
-     *
-     * @returns {String} A string representing the provided RequestErrorEvent.
-     */
-    RequestErrorEvent.prototype.toString = function() {
-        var str = 'Request has failed.';
-        if (defined(this.statusCode)) {
-            str += ' Status Code: ' + this.statusCode;
-        }
-        return str;
-    };
-
-    return RequestErrorEvent;
-});
-
 /**
  * @license
  *
@@ -18699,6 +18373,1228 @@ define('ThirdParty/Uri',[],function() {
 return URI;
 });
 
+define('Core/appendForwardSlash',[],function() {
+    'use strict';
+
+    /**
+     * @private
+     */
+    function appendForwardSlash(url) {
+        if (url.length === 0 || url[url.length - 1] !== '/') {
+            url = url + '/';
+        }
+        return url;
+    }
+
+    return appendForwardSlash;
+});
+
+define('Core/clone',[
+        './defaultValue'
+    ], function(
+        defaultValue) {
+    'use strict';
+
+    /**
+     * Clones an object, returning a new object containing the same properties.
+     *
+     * @exports clone
+     *
+     * @param {Object} object The object to clone.
+     * @param {Boolean} [deep=false] If true, all properties will be deep cloned recursively.
+     * @returns {Object} The cloned object.
+     */
+    function clone(object, deep) {
+        if (object === null || typeof object !== 'object') {
+            return object;
+        }
+
+        deep = defaultValue(deep, false);
+
+        var result = new object.constructor();
+        for ( var propertyName in object) {
+            if (object.hasOwnProperty(propertyName)) {
+                var value = object[propertyName];
+                if (deep) {
+                    value = clone(value, deep);
+                }
+                result[propertyName] = value;
+            }
+        }
+
+        return result;
+    }
+
+    return clone;
+});
+
+define('Core/combine',[
+        './defaultValue',
+        './defined'
+    ], function(
+        defaultValue,
+        defined) {
+    'use strict';
+
+    /**
+     * Merges two objects, copying their properties onto a new combined object. When two objects have the same
+     * property, the value of the property on the first object is used.  If either object is undefined,
+     * it will be treated as an empty object.
+     *
+     * @example
+     * var object1 = {
+     *     propOne : 1,
+     *     propTwo : {
+     *         value1 : 10
+     *     }
+     * }
+     * var object2 = {
+     *     propTwo : 2
+     * }
+     * var final = Cesium.combine(object1, object2);
+     *
+     * // final === {
+     * //     propOne : 1,
+     * //     propTwo : {
+     * //         value1 : 10
+     * //     }
+     * // }
+     *
+     * @param {Object} [object1] The first object to merge.
+     * @param {Object} [object2] The second object to merge.
+     * @param {Boolean} [deep=false] Perform a recursive merge.
+     * @returns {Object} The combined object containing all properties from both objects.
+     *
+     * @exports combine
+     */
+    function combine(object1, object2, deep) {
+        deep = defaultValue(deep, false);
+
+        var result = {};
+
+        var object1Defined = defined(object1);
+        var object2Defined = defined(object2);
+        var property;
+        var object1Value;
+        var object2Value;
+        if (object1Defined) {
+            for (property in object1) {
+                if (object1.hasOwnProperty(property)) {
+                    object1Value = object1[property];
+                    if (object2Defined && deep && typeof object1Value === 'object' && object2.hasOwnProperty(property)) {
+                        object2Value = object2[property];
+                        if (typeof object2Value === 'object') {
+                            result[property] = combine(object1Value, object2Value, deep);
+                        } else {
+                            result[property] = object1Value;
+                        }
+                    } else {
+                        result[property] = object1Value;
+                    }
+                }
+            }
+        }
+        if (object2Defined) {
+            for (property in object2) {
+                if (object2.hasOwnProperty(property) && !result.hasOwnProperty(property)) {
+                    object2Value = object2[property];
+                    result[property] = object2Value;
+                }
+            }
+        }
+        return result;
+    }
+
+    return combine;
+});
+
+define('Core/oneTimeWarning',[
+        './defaultValue',
+        './defined',
+        './DeveloperError'
+    ], function(
+        defaultValue,
+        defined,
+        DeveloperError) {
+    'use strict';
+
+    var warnings = {};
+
+    /**
+     * Logs a one time message to the console.  Use this function instead of
+     * <code>console.log</code> directly since this does not log duplicate messages
+     * unless it is called from multiple workers.
+     *
+     * @exports oneTimeWarning
+     *
+     * @param {String} identifier The unique identifier for this warning.
+     * @param {String} [message=identifier] The message to log to the console.
+     *
+     * @example
+     * for(var i=0;i<foo.length;++i) {
+     *    if (!defined(foo[i].bar)) {
+     *       // Something that can be recovered from but may happen a lot
+     *       oneTimeWarning('foo.bar undefined', 'foo.bar is undefined. Setting to 0.');
+     *       foo[i].bar = 0;
+     *       // ...
+     *    }
+     * }
+     *
+     * @private
+     */
+    function oneTimeWarning(identifier, message) {
+                if (!defined(identifier)) {
+            throw new DeveloperError('identifier is required.');
+        }
+        
+        if (!defined(warnings[identifier])) {
+            warnings[identifier] = true;
+            console.warn(defaultValue(message, identifier));
+        }
+    }
+
+    oneTimeWarning.geometryOutlines = 'Entity geometry outlines are unsupported on terrain. Outlines will be disabled. To enable outlines, disable geometry terrain clamping by explicitly setting height to 0.';
+
+    return oneTimeWarning;
+});
+
+define('Core/deprecationWarning',[
+        './defined',
+        './DeveloperError',
+        './oneTimeWarning'
+    ], function(
+        defined,
+        DeveloperError,
+        oneTimeWarning) {
+    'use strict';
+
+    /**
+     * Logs a deprecation message to the console.  Use this function instead of
+     * <code>console.log</code> directly since this does not log duplicate messages
+     * unless it is called from multiple workers.
+     *
+     * @exports deprecationWarning
+     *
+     * @param {String} identifier The unique identifier for this deprecated API.
+     * @param {String} message The message to log to the console.
+     *
+     * @example
+     * // Deprecated function or class
+     * function Foo() {
+     *    deprecationWarning('Foo', 'Foo was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use newFoo instead.');
+     *    // ...
+     * }
+     *
+     * // Deprecated function
+     * Bar.prototype.func = function() {
+     *    deprecationWarning('Bar.func', 'Bar.func() was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newFunc() instead.');
+     *    // ...
+     * };
+     *
+     * // Deprecated property
+     * defineProperties(Bar.prototype, {
+     *     prop : {
+     *         get : function() {
+     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
+     *             // ...
+     *         },
+     *         set : function(value) {
+     *             deprecationWarning('Bar.prop', 'Bar.prop was deprecated in Cesium 1.01.  It will be removed in 1.03.  Use Bar.newProp instead.');
+     *             // ...
+     *         }
+     *     }
+     * });
+     *
+     * @private
+     */
+    function deprecationWarning(identifier, message) {
+                if (!defined(identifier) || !defined(message)) {
+            throw new DeveloperError('identifier and message are required.');
+        }
+        
+        oneTimeWarning(identifier, message);
+    }
+
+    return deprecationWarning;
+});
+
+define('Core/getAbsoluteUri',[
+        '../ThirdParty/Uri',
+        './defaultValue',
+        './defined',
+        './DeveloperError'
+    ], function(
+        Uri,
+        defaultValue,
+        defined,
+        DeveloperError) {
+    'use strict';
+
+    /**
+     * Given a relative Uri and a base Uri, returns the absolute Uri of the relative Uri.
+     * @exports getAbsoluteUri
+     *
+     * @param {String} relative The relative Uri.
+     * @param {String} [base] The base Uri.
+     * @returns {String} The absolute Uri of the given relative Uri.
+     *
+     * @example
+     * //absolute Uri will be "https://test.com/awesome.png";
+     * var absoluteUri = Cesium.getAbsoluteUri('awesome.png', 'https://test.com');
+     */
+    function getAbsoluteUri(relative, base) {
+        return getAbsoluteUri._implementation(relative, base, document);
+    }
+
+    getAbsoluteUri._implementation = function(relative, base, documentObject) {
+                if (!defined(relative)) {
+            throw new DeveloperError('relative uri is required.');
+        }
+                base = defaultValue(base, defaultValue(documentObject.baseURI, documentObject.location.href));
+        var baseUri = new Uri(base);
+        var relativeUri = new Uri(relative);
+        return relativeUri.resolve(baseUri).toString();
+    };
+
+    return getAbsoluteUri;
+});
+
+define('Core/getBaseUri',[
+        '../ThirdParty/Uri',
+        './defined',
+        './DeveloperError'
+    ], function(
+        Uri,
+        defined,
+        DeveloperError) {
+    'use strict';
+
+    /**
+     * Given a URI, returns the base path of the URI.
+     * @exports getBaseUri
+     *
+     * @param {String} uri The Uri.
+     * @param {Boolean} [includeQuery = false] Whether or not to include the query string and fragment form the uri
+     * @returns {String} The base path of the Uri.
+     *
+     * @example
+     * // basePath will be "/Gallery/";
+     * var basePath = Cesium.getBaseUri('/Gallery/simple.czml?value=true&example=false');
+     *
+     * // basePath will be "/Gallery/?value=true&example=false";
+     * var basePath = Cesium.getBaseUri('/Gallery/simple.czml?value=true&example=false', true);
+     */
+    function getBaseUri(uri, includeQuery) {
+                if (!defined(uri)) {
+            throw new DeveloperError('uri is required.');
+        }
+        
+        var basePath = '';
+        var i = uri.lastIndexOf('/');
+        if (i !== -1) {
+            basePath = uri.substring(0, i + 1);
+        }
+
+        if (!includeQuery) {
+            return basePath;
+        }
+
+        uri = new Uri(uri);
+        if (defined(uri.query)) {
+            basePath += '?' + uri.query;
+        }
+        if (defined(uri.fragment)){
+            basePath += '#' + uri.fragment;
+        }
+
+        return basePath;
+    }
+
+    return getBaseUri;
+});
+
+define('Core/getExtensionFromUri',[
+        '../ThirdParty/Uri',
+        './defined',
+        './DeveloperError'
+    ], function(
+        Uri,
+        defined,
+        DeveloperError) {
+    'use strict';
+
+    /**
+     * Given a URI, returns the extension of the URI.
+     * @exports getExtensionFromUri
+     *
+     * @param {String} uri The Uri.
+     * @returns {String} The extension of the Uri.
+     *
+     * @example
+     * //extension will be "czml";
+     * var extension = Cesium.getExtensionFromUri('/Gallery/simple.czml?value=true&example=false');
+     */
+    function getExtensionFromUri(uri) {
+                if (!defined(uri)) {
+            throw new DeveloperError('uri is required.');
+        }
+        
+        var uriObject = new Uri(uri);
+        uriObject.normalize();
+        var path = uriObject.path;
+        var index = path.lastIndexOf('/');
+        if (index !== -1) {
+            path = path.substr(index + 1);
+        }
+        index = path.lastIndexOf('.');
+        if (index === -1) {
+            path = '';
+        } else {
+            path = path.substr(index + 1);
+        }
+        return path;
+    }
+
+    return getExtensionFromUri;
+});
+
+define('Core/isBlobUri',[
+        './Check'
+    ], function(
+        Check) {
+    'use strict';
+
+    var blobUriRegex = /^blob:/i;
+
+    /**
+     * Determines if the specified uri is a blob uri.
+     *
+     * @exports isBlobUri
+     *
+     * @param {String} uri The uri to test.
+     * @returns {Boolean} true when the uri is a blob uri; otherwise, false.
+     *
+     * @private
+     */
+    function isBlobUri(uri) {
+                Check.typeOf.string('uri', uri);
+        
+        return blobUriRegex.test(uri);
+    }
+
+    return isBlobUri;
+});
+
+define('Core/isCrossOriginUrl',[
+        './defined'
+    ], function(
+        defined) {
+    'use strict';
+
+    var a;
+
+    /**
+     * Given a URL, determine whether that URL is considered cross-origin to the current page.
+     *
+     * @private
+     */
+    function isCrossOriginUrl(url) {
+        if (!defined(a)) {
+            a = document.createElement('a');
+        }
+
+        // copy window location into the anchor to get consistent results
+        // when the port is default for the protocol (e.g. 80 for HTTP)
+        a.href = window.location.href;
+
+        // host includes both hostname and port if the port is not standard
+        var host = a.host;
+        var protocol = a.protocol;
+
+        a.href = url;
+        a.href = a.href; // IE only absolutizes href on get, not set
+
+        return protocol !== a.protocol || host !== a.host;
+    }
+
+    return isCrossOriginUrl;
+});
+
+define('Core/isDataUri',[
+        './Check'
+    ], function(
+        Check) {
+    'use strict';
+
+    var dataUriRegex = /^data:/i;
+
+    /**
+     * Determines if the specified uri is a data uri.
+     *
+     * @exports isDataUri
+     *
+     * @param {String} uri The uri to test.
+     * @returns {Boolean} true when the uri is a data uri; otherwise, false.
+     *
+     * @private
+     */
+    function isDataUri(uri) {
+                Check.typeOf.string('uri', uri);
+        
+        return dataUriRegex.test(uri);
+    }
+
+    return isDataUri;
+});
+
+define('Core/isArray',[
+        './defined'
+    ], function(
+        defined) {
+    'use strict';
+
+    /**
+     * Tests an object to see if it is an array.
+     * @exports isArray
+     *
+     * @param {Object} value The value to test.
+     * @returns {Boolean} true if the value is an array, false otherwise.
+     */
+    var isArray = Array.isArray;
+    if (!defined(isArray)) {
+        isArray = function(value) {
+            return Object.prototype.toString.call(value) === '[object Array]';
+        };
+    }
+
+    return isArray;
+});
+
+define('Core/objectToQuery',[
+        './defined',
+        './DeveloperError',
+        './isArray'
+    ], function(
+        defined,
+        DeveloperError,
+        isArray) {
+    'use strict';
+
+    /**
+     * Converts an object representing a set of name/value pairs into a query string,
+     * with names and values encoded properly for use in a URL.  Values that are arrays
+     * will produce multiple values with the same name.
+     * @exports objectToQuery
+     *
+     * @param {Object} obj The object containing data to encode.
+     * @returns {String} An encoded query string.
+     *
+     *
+     * @example
+     * var str = Cesium.objectToQuery({
+     *     key1 : 'some value',
+     *     key2 : 'a/b',
+     *     key3 : ['x', 'y']
+     * });
+     *
+     * @see queryToObject
+     * // str will be:
+     * // 'key1=some%20value&key2=a%2Fb&key3=x&key3=y'
+     */
+    function objectToQuery(obj) {
+                if (!defined(obj)) {
+            throw new DeveloperError('obj is required.');
+        }
+        
+        var result = '';
+        for ( var propName in obj) {
+            if (obj.hasOwnProperty(propName)) {
+                var value = obj[propName];
+
+                var part = encodeURIComponent(propName) + '=';
+                if (isArray(value)) {
+                    for (var i = 0, len = value.length; i < len; ++i) {
+                        result += part + encodeURIComponent(value[i]) + '&';
+                    }
+                } else {
+                    result += part + encodeURIComponent(value) + '&';
+                }
+            }
+        }
+
+        // trim last &
+        result = result.slice(0, -1);
+
+        // This function used to replace %20 with + which is more compact and readable.
+        // However, some servers didn't properly handle + as a space.
+        // https://github.com/AnalyticalGraphicsInc/cesium/issues/2192
+
+        return result;
+    }
+
+    return objectToQuery;
+});
+
+define('Core/queryToObject',[
+        './defined',
+        './DeveloperError',
+        './isArray'
+    ], function(
+        defined,
+        DeveloperError,
+        isArray) {
+    'use strict';
+
+    /**
+     * Parses a query string into an object, where the keys and values of the object are the
+     * name/value pairs from the query string, decoded. If a name appears multiple times,
+     * the value in the object will be an array of values.
+     * @exports queryToObject
+     *
+     * @param {String} queryString The query string.
+     * @returns {Object} An object containing the parameters parsed from the query string.
+     *
+     *
+     * @example
+     * var obj = Cesium.queryToObject('key1=some%20value&key2=a%2Fb&key3=x&key3=y');
+     * // obj will be:
+     * // {
+     * //   key1 : 'some value',
+     * //   key2 : 'a/b',
+     * //   key3 : ['x', 'y']
+     * // }
+     *
+     * @see objectToQuery
+     */
+    function queryToObject(queryString) {
+                if (!defined(queryString)) {
+            throw new DeveloperError('queryString is required.');
+        }
+        
+        var result = {};
+        if (queryString === '') {
+            return result;
+        }
+        var parts = queryString.replace(/\+/g, '%20').split(/[&;]/);
+        for (var i = 0, len = parts.length; i < len; ++i) {
+            var subparts = parts[i].split('=');
+
+            var name = decodeURIComponent(subparts[0]);
+            var value = subparts[1];
+            if (defined(value)) {
+                value = decodeURIComponent(value);
+            } else {
+                value = '';
+            }
+
+            var resultValue = result[name];
+            if (typeof resultValue === 'string') {
+                // expand the single value to an array
+                result[name] = [resultValue, value];
+            } else if (isArray(resultValue)) {
+                resultValue.push(value);
+            } else {
+                result[name] = value;
+            }
+        }
+        return result;
+    }
+
+    return queryToObject;
+});
+
+define('Core/RequestState',[
+        '../Core/freezeObject'
+    ], function(
+        freezeObject) {
+    'use strict';
+
+    /**
+     * State of the request.
+     *
+     * @exports RequestState
+     */
+    var RequestState = {
+        /**
+         * Initial unissued state.
+         *
+         * @type Number
+         * @constant
+         */
+        UNISSUED : 0,
+
+        /**
+         * Issued but not yet active. Will become active when open slots are available.
+         *
+         * @type Number
+         * @constant
+         */
+        ISSUED : 1,
+
+        /**
+         * Actual http request has been sent.
+         *
+         * @type Number
+         * @constant
+         */
+        ACTIVE : 2,
+
+        /**
+         * Request completed successfully.
+         *
+         * @type Number
+         * @constant
+         */
+        RECEIVED : 3,
+
+        /**
+         * Request was cancelled, either explicitly or automatically because of low priority.
+         *
+         * @type Number
+         * @constant
+         */
+        CANCELLED : 4,
+
+        /**
+         * Request failed.
+         *
+         * @type Number
+         * @constant
+         */
+        FAILED : 5
+    };
+
+    return freezeObject(RequestState);
+});
+
+define('Core/RequestType',[
+        '../Core/freezeObject'
+    ], function(
+        freezeObject) {
+    'use strict';
+
+    /**
+     * An enum identifying the type of request. Used for finer grained logging and priority sorting.
+     *
+     * @exports RequestType
+     */
+    var RequestType = {
+        /**
+         * Terrain request.
+         *
+         * @type Number
+         * @constant
+         */
+        TERRAIN : 0,
+
+        /**
+         * Imagery request.
+         *
+         * @type Number
+         * @constant
+         */
+        IMAGERY : 1,
+
+        /**
+         * 3D Tiles request.
+         *
+         * @type Number
+         * @constant
+         */
+        TILES3D : 2,
+
+        /**
+         * Other request.
+         *
+         * @type Number
+         * @constant
+         */
+        OTHER : 3
+    };
+
+    return freezeObject(RequestType);
+});
+
+define('Core/Request',[
+        './defaultValue',
+        './defined',
+        './RequestState',
+        './RequestType'
+    ], function(
+        defaultValue,
+        defined,
+        RequestState,
+        RequestType) {
+    'use strict';
+
+    /**
+     * Stores information for making a request. In general this does not need to be constructed directly.
+     *
+     * @alias Request
+     * @constructor
+     *
+     * @param {Object} [options] An object with the following properties:
+     * @param {Boolean} [options.url] The url to request.
+     * @param {Request~RequestCallback} [options.requestFunction] The function that makes the actual data request.
+     * @param {Request~CancelCallback} [options.cancelFunction] The function that is called when the request is cancelled.
+     * @param {Request~PriorityCallback} [options.priorityFunction] The function that is called to update the request's priority, which occurs once per frame.
+     * @param {Number} [options.priority=0.0] The initial priority of the request.
+     * @param {Boolean} [options.throttle=false] Whether to throttle and prioritize the request. If false, the request will be sent immediately. If true, the request will be throttled and sent based on priority.
+     * @param {Boolean} [options.throttleByServer=false] Whether to throttle the request by server.
+     * @param {RequestType} [options.type=RequestType.OTHER] The type of request.
+     */
+    function Request(options) {
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+
+        var throttleByServer = defaultValue(options.throttleByServer, false);
+        var throttle = throttleByServer || defaultValue(options.throttle, false);
+
+        /**
+         * The URL to request.
+         *
+         * @type {String}
+         */
+        this.url = options.url;
+
+        /**
+         * The function that makes the actual data request.
+         *
+         * @type {Request~RequestCallback}
+         */
+        this.requestFunction = options.requestFunction;
+
+        /**
+         * The function that is called when the request is cancelled.
+         *
+         * @type {Request~CancelCallback}
+         */
+        this.cancelFunction = options.cancelFunction;
+
+        /**
+         * The function that is called to update the request's priority, which occurs once per frame.
+         *
+         * @type {Request~PriorityCallback}
+         */
+        this.priorityFunction = options.priorityFunction;
+
+        /**
+         * Priority is a unit-less value where lower values represent higher priority.
+         * For world-based objects, this is usually the distance from the camera.
+         * A request that does not have a priority function defaults to a priority of 0.
+         *
+         * If priorityFunction is defined, this value is updated every frame with the result of that call.
+         *
+         * @type {Number}
+         * @default 0.0
+         */
+        this.priority = defaultValue(options.priority, 0.0);
+
+        /**
+         * Whether to throttle and prioritize the request. If false, the request will be sent immediately. If true, the
+         * request will be throttled and sent based on priority.
+         *
+         * @type {Boolean}
+         * @readonly
+         *
+         * @default false
+         */
+        this.throttle = throttle;
+
+        /**
+         * Whether to throttle the request by server. Browsers typically support about 6-8 parallel connections
+         * for HTTP/1 servers, and an unlimited amount of connections for HTTP/2 servers. Setting this value
+         * to <code>true</code> is preferable for requests going through HTTP/1 servers.
+         *
+         * @type {Boolean}
+         * @readonly
+         *
+         * @default false
+         */
+        this.throttleByServer = throttleByServer;
+
+        /**
+         * Type of request.
+         *
+         * @type {RequestType}
+         * @readonly
+         *
+         * @default RequestType.OTHER
+         */
+        this.type = defaultValue(options.type, RequestType.OTHER);
+
+        /**
+         * A key used to identify the server that a request is going to. It is derived from the url's authority and scheme.
+         *
+         * @type {String}
+         *
+         * @private
+         */
+        this.serverKey = undefined;
+
+        /**
+         * The current state of the request.
+         *
+         * @type {RequestState}
+         * @readonly
+         */
+        this.state = RequestState.UNISSUED;
+
+        /**
+         * The requests's deferred promise.
+         *
+         * @type {Object}
+         *
+         * @private
+         */
+        this.deferred = undefined;
+
+        /**
+         * Whether the request was explicitly cancelled.
+         *
+         * @type {Boolean}
+         *
+         * @private
+         */
+        this.cancelled = false;
+    }
+
+    /**
+     * Mark the request as cancelled.
+     *
+     * @private
+     */
+    Request.prototype.cancel = function() {
+        this.cancelled = true;
+    };
+
+    /**
+     * Duplicates a Request instance.
+     *
+     * @param {Request} [result] The object onto which to store the result.
+     *
+     * @returns {Request} The modified result parameter or a new Resource instance if one was not provided.
+     */
+    Request.prototype.clone = function(result) {
+        if (!defined(result)) {
+            return new Request(this);
+        }
+
+        result.url = this.url;
+        result.requestFunction = this.requestFunction;
+        result.cancelFunction = this.cancelFunction;
+        result.priorityFunction = this.priorityFunction;
+        result.priority = this.priority;
+        result.throttle = this.throttle;
+        result.throttleByServer = this.throttleByServer;
+        result.type = this.type;
+        result.serverKey = this.serverKey;
+
+        // These get defaulted because the cloned request hasn't been issued
+        result.state = this.RequestState.UNISSUED;
+        result.deferred = undefined;
+        result.cancelled = false;
+
+        return result;
+    };
+
+    /**
+     * The function that makes the actual data request.
+     * @callback Request~RequestCallback
+     * @returns {Promise} A promise for the requested data.
+     */
+
+    /**
+     * The function that is called when the request is cancelled.
+     * @callback Request~CancelCallback
+     */
+
+    /**
+     * The function that is called to update the request's priority, which occurs once per frame.
+     * @callback Request~PriorityCallback
+     * @returns {Number} The updated priority value.
+     */
+
+    return Request;
+});
+
+define('Core/parseResponseHeaders',[], function() {
+    'use strict';
+
+    /**
+     * Parses the result of XMLHttpRequest's getAllResponseHeaders() method into
+     * a dictionary.
+     *
+     * @exports parseResponseHeaders
+     *
+     * @param {String} headerString The header string returned by getAllResponseHeaders().  The format is
+     *                 described here: http://www.w3.org/TR/XMLHttpRequest/#the-getallresponseheaders()-method
+     * @returns {Object} A dictionary of key/value pairs, where each key is the name of a header and the corresponding value
+     *                   is that header's value.
+     *
+     * @private
+     */
+    function parseResponseHeaders(headerString) {
+        var headers = {};
+
+        if (!headerString) {
+          return headers;
+        }
+
+        var headerPairs = headerString.split('\u000d\u000a');
+
+        for (var i = 0; i < headerPairs.length; ++i) {
+          var headerPair = headerPairs[i];
+          // Can't use split() here because it does the wrong thing
+          // if the header value has the string ": " in it.
+          var index = headerPair.indexOf('\u003a\u0020');
+          if (index > 0) {
+            var key = headerPair.substring(0, index);
+            var val = headerPair.substring(index + 2);
+            headers[key] = val;
+          }
+        }
+
+        return headers;
+    }
+
+    return parseResponseHeaders;
+});
+
+define('Core/RequestErrorEvent',[
+        './defined',
+        './parseResponseHeaders'
+    ], function(
+        defined,
+        parseResponseHeaders) {
+    'use strict';
+
+    /**
+     * An event that is raised when a request encounters an error.
+     *
+     * @constructor
+     * @alias RequestErrorEvent
+     *
+     * @param {Number} [statusCode] The HTTP error status code, such as 404.
+     * @param {Object} [response] The response included along with the error.
+     * @param {String|Object} [responseHeaders] The response headers, represented either as an object literal or as a
+     *                        string in the format returned by XMLHttpRequest's getAllResponseHeaders() function.
+     */
+    function RequestErrorEvent(statusCode, response, responseHeaders) {
+        /**
+         * The HTTP error status code, such as 404.  If the error does not have a particular
+         * HTTP code, this property will be undefined.
+         *
+         * @type {Number}
+         */
+        this.statusCode = statusCode;
+
+        /**
+         * The response included along with the error.  If the error does not include a response,
+         * this property will be undefined.
+         *
+         * @type {Object}
+         */
+        this.response = response;
+
+        /**
+         * The headers included in the response, represented as an object literal of key/value pairs.
+         * If the error does not include any headers, this property will be undefined.
+         *
+         * @type {Object}
+         */
+        this.responseHeaders = responseHeaders;
+
+        if (typeof this.responseHeaders === 'string') {
+            this.responseHeaders = parseResponseHeaders(this.responseHeaders);
+        }
+    }
+
+    /**
+     * Creates a string representing this RequestErrorEvent.
+     * @memberof RequestErrorEvent
+     *
+     * @returns {String} A string representing the provided RequestErrorEvent.
+     */
+    RequestErrorEvent.prototype.toString = function() {
+        var str = 'Request has failed.';
+        if (defined(this.statusCode)) {
+            str += ' Status Code: ' + this.statusCode;
+        }
+        return str;
+    };
+
+    return RequestErrorEvent;
+});
+
+define('Core/Event',[
+        './Check',
+        './defined',
+        './defineProperties'
+    ], function(
+        Check,
+        defined,
+        defineProperties) {
+    'use strict';
+
+    /**
+     * A generic utility class for managing subscribers for a particular event.
+     * This class is usually instantiated inside of a container class and
+     * exposed as a property for others to subscribe to.
+     *
+     * @alias Event
+     * @constructor
+     *
+     * @example
+     * MyObject.prototype.myListener = function(arg1, arg2) {
+     *     this.myArg1Copy = arg1;
+     *     this.myArg2Copy = arg2;
+     * }
+     *
+     * var myObjectInstance = new MyObject();
+     * var evt = new Cesium.Event();
+     * evt.addEventListener(MyObject.prototype.myListener, myObjectInstance);
+     * evt.raiseEvent('1', '2');
+     * evt.removeEventListener(MyObject.prototype.myListener);
+     */
+    function Event() {
+        this._listeners = [];
+        this._scopes = [];
+        this._toRemove = [];
+        this._insideRaiseEvent = false;
+    }
+
+    defineProperties(Event.prototype, {
+        /**
+         * The number of listeners currently subscribed to the event.
+         * @memberof Event.prototype
+         * @type {Number}
+         * @readonly
+         */
+        numberOfListeners : {
+            get : function() {
+                return this._listeners.length - this._toRemove.length;
+            }
+        }
+    });
+
+    /**
+     * Registers a callback function to be executed whenever the event is raised.
+     * An optional scope can be provided to serve as the <code>this</code> pointer
+     * in which the function will execute.
+     *
+     * @param {Function} listener The function to be executed when the event is raised.
+     * @param {Object} [scope] An optional object scope to serve as the <code>this</code>
+     *        pointer in which the listener function will execute.
+     * @returns {Event~RemoveCallback} A function that will remove this event listener when invoked.
+     *
+     * @see Event#raiseEvent
+     * @see Event#removeEventListener
+     */
+    Event.prototype.addEventListener = function(listener, scope) {
+                Check.typeOf.func('listener', listener);
+        
+        this._listeners.push(listener);
+        this._scopes.push(scope);
+
+        var event = this;
+        return function() {
+            event.removeEventListener(listener, scope);
+        };
+    };
+
+    /**
+     * Unregisters a previously registered callback.
+     *
+     * @param {Function} listener The function to be unregistered.
+     * @param {Object} [scope] The scope that was originally passed to addEventListener.
+     * @returns {Boolean} <code>true</code> if the listener was removed; <code>false</code> if the listener and scope are not registered with the event.
+     *
+     * @see Event#addEventListener
+     * @see Event#raiseEvent
+     */
+    Event.prototype.removeEventListener = function(listener, scope) {
+                Check.typeOf.func('listener', listener);
+        
+        var listeners = this._listeners;
+        var scopes = this._scopes;
+
+        var index = -1;
+        for (var i = 0; i < listeners.length; i++) {
+            if (listeners[i] === listener && scopes[i] === scope) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index !== -1) {
+            if (this._insideRaiseEvent) {
+                //In order to allow removing an event subscription from within
+                //a callback, we don't actually remove the items here.  Instead
+                //remember the index they are at and undefined their value.
+                this._toRemove.push(index);
+                listeners[index] = undefined;
+                scopes[index] = undefined;
+            } else {
+                listeners.splice(index, 1);
+                scopes.splice(index, 1);
+            }
+            return true;
+        }
+
+        return false;
+    };
+
+    function compareNumber(a,b) {
+        return b - a;
+    }
+
+    /**
+     * Raises the event by calling each registered listener with all supplied arguments.
+     *
+     * @param {*} arguments This method takes any number of parameters and passes them through to the listener functions.
+     *
+     * @see Event#addEventListener
+     * @see Event#removeEventListener
+     */
+    Event.prototype.raiseEvent = function() {
+        this._insideRaiseEvent = true;
+
+        var i;
+        var listeners = this._listeners;
+        var scopes = this._scopes;
+        var length = listeners.length;
+
+        for (i = 0; i < length; i++) {
+            var listener = listeners[i];
+            if (defined(listener)) {
+                listeners[i].apply(scopes[i], arguments);
+            }
+        }
+
+        //Actually remove items removed in removeEventListener.
+        var toRemove = this._toRemove;
+        length = toRemove.length;
+        if (length > 0) {
+            toRemove.sort(compareNumber);
+            for (i = 0; i < length; i++) {
+                var index = toRemove[i];
+                listeners.splice(index, 1);
+                scopes.splice(index, 1);
+            }
+            toRemove.length = 0;
+        }
+
+        this._insideRaiseEvent = false;
+    };
+
+    /**
+     * A function that removes a listener.
+     * @callback Event~RemoveCallback
+     */
+
+    return Event;
+});
+
 define('Core/Heap',[
         './Check',
         './defaultValue',
@@ -18928,67 +19824,13 @@ define('Core/Heap',[
     return Heap;
 });
 
-define('Core/isBlobUri',[
-        './Check'
-    ], function(
-        Check) {
-    'use strict';
-
-    var blobUriRegex = /^blob:/i;
-
-    /**
-     * Determines if the specified uri is a blob uri.
-     *
-     * @exports isBlobUri
-     *
-     * @param {String} uri The uri to test.
-     * @returns {Boolean} true when the uri is a blob uri; otherwise, false.
-     *
-     * @private
-     */
-    function isBlobUri(uri) {
-                Check.typeOf.string('uri', uri);
-        
-        return blobUriRegex.test(uri);
-    }
-
-    return isBlobUri;
-});
-
-define('Core/isDataUri',[
-        './Check'
-    ], function(
-        Check) {
-    'use strict';
-
-    var dataUriRegex = /^data:/i;
-
-    /**
-     * Determines if the specified uri is a data uri.
-     *
-     * @exports isDataUri
-     *
-     * @param {String} uri The uri to test.
-     * @returns {Boolean} true when the uri is a data uri; otherwise, false.
-     *
-     * @private
-     */
-    function isDataUri(uri) {
-                Check.typeOf.string('uri', uri);
-        
-        return dataUriRegex.test(uri);
-    }
-
-    return isDataUri;
-});
-
 define('Core/RequestScheduler',[
         '../ThirdParty/Uri',
         '../ThirdParty/when',
         './Check',
-        './clone',
         './defined',
         './defineProperties',
+        './Event',
         './Heap',
         './isBlobUri',
         './isDataUri',
@@ -18997,9 +19839,9 @@ define('Core/RequestScheduler',[
         Uri,
         when,
         Check,
-        clone,
         defined,
         defineProperties,
+        Event,
         Heap,
         isBlobUri,
         isDataUri,
@@ -19030,6 +19872,8 @@ define('Core/RequestScheduler',[
     var numberOfActiveRequestsByServer = {};
 
     var pageUri = typeof document !== 'undefined' ? new Uri(document.location.href) : new Uri();
+
+    var requestCompletedEvent = new Event();
 
     /**
      * Tracks the number of active requests and prioritizes incoming requests.
@@ -19068,6 +19912,15 @@ define('Core/RequestScheduler',[
      * @default false
      */
     RequestScheduler.debugShowStatistics = false;
+
+    /**
+     * An event that's raised when a request is completed.  Event handlers are passed
+     * the error object if the request fails.
+     *
+     * @type {Event}
+     * @default Event()
+     */
+    RequestScheduler.requestCompletedEvent = requestCompletedEvent;
 
     defineProperties(RequestScheduler, {
         /**
@@ -19138,6 +19991,7 @@ define('Core/RequestScheduler',[
             }
             --statistics.numberOfActiveRequests;
             --numberOfActiveRequestsByServer[request.serverKey];
+            requestCompletedEvent.raiseEvent();
             request.state = RequestState.RECEIVED;
             request.deferred.resolve(results);
         };
@@ -19152,6 +20006,7 @@ define('Core/RequestScheduler',[
             ++statistics.numberOfFailedRequests;
             --statistics.numberOfActiveRequests;
             --numberOfActiveRequestsByServer[request.serverKey];
+            requestCompletedEvent.raiseEvent(error);
             request.state = RequestState.FAILED;
             request.deferred.reject(error);
         };
@@ -19286,6 +20141,7 @@ define('Core/RequestScheduler',[
         Check.typeOf.func('request.requestFunction', request.requestFunction);
         
         if (isDataUri(request.url) || isBlobUri(request.url)) {
+            requestCompletedEvent.raiseEvent();
             request.state = RequestState.RECEIVED;
             return request.requestFunction();
         }
@@ -19550,101 +20406,1255 @@ define('Core/TrustedServers',[
     return TrustedServers;
 });
 
-define('Core/loadWithXhr',[
+define('Core/Resource',[
+        '../ThirdParty/Uri',
         '../ThirdParty/when',
+        './appendForwardSlash',
         './Check',
+        './clone',
+        './combine',
         './defaultValue',
         './defined',
+        './defineProperties',
         './deprecationWarning',
         './DeveloperError',
+        './freezeObject',
+        './getAbsoluteUri',
+        './getBaseUri',
+        './getExtensionFromUri',
+        './isBlobUri',
+        './isCrossOriginUrl',
+        './isDataUri',
+        './objectToQuery',
+        './queryToObject',
         './Request',
         './RequestErrorEvent',
         './RequestScheduler',
+        './RequestState',
         './RuntimeError',
         './TrustedServers'
     ], function(
+        Uri,
         when,
+        appendForwardSlash,
         Check,
+        clone,
+        combine,
         defaultValue,
         defined,
+        defineProperties,
         deprecationWarning,
         DeveloperError,
+        freezeObject,
+        getAbsoluteUri,
+        getBaseUri,
+        getExtensionFromUri,
+        isBlobUri,
+        isCrossOriginUrl,
+        isDataUri,
+        objectToQuery,
+        queryToObject,
         Request,
         RequestErrorEvent,
         RequestScheduler,
+        RequestState,
         RuntimeError,
         TrustedServers) {
     'use strict';
 
+    var xhrBlobSupported = (function() {
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '#', true);
+            xhr.responseType = 'blob';
+            return xhr.responseType === 'blob';
+        } catch (e) {
+            return false;
+        }
+    })();
+
     /**
-     * Asynchronously loads the given URL.  Returns a promise that will resolve to
-     * the result once loaded, or reject if the URL failed to load.  The data is loaded
+     * Parses a query string and returns the object equivalent.
+     *
+     * @param {Uri} uri The Uri with a query object.
+     * @param {Resource} resource The Resource that will be assigned queryParameters.
+     * @param {Boolean} merge If true, we'll merge with the resource's existing queryParameters. Otherwise they will be replaced.
+     * @param {Boolean} preserveQueryParameters If true duplicate parameters will be concatenated into an array. If false, keys in uri will take precedence.
+     *
+     * @private
+     */
+    function parseQuery(uri, resource, merge, preserveQueryParameters) {
+        var queryString = uri.query;
+        if (!defined(queryString) || (queryString.length === 0)) {
+            return {};
+        }
+
+        var query;
+        // Special case we run into where the querystring is just a string, not key/value pairs
+        if (queryString.indexOf('=') === -1) {
+            var result = {};
+            result[queryString] = undefined;
+            query = result;
+        } else {
+            query = queryToObject(queryString);
+        }
+
+        if (merge) {
+            resource._queryParameters = combineQueryParameters(query, resource._queryParameters, preserveQueryParameters);
+        } else {
+            resource._queryParameters = query;
+        }
+        uri.query = undefined;
+    }
+
+    /**
+     * Converts a query object into a string.
+     *
+     * @param {Uri} uri The Uri object that will have the query object set.
+     * @param {Resource} resource The resource that has queryParameters
+     *
+     * @private
+     */
+    function stringifyQuery(uri, resource) {
+        var queryObject = resource._queryParameters;
+
+        var keys = Object.keys(queryObject);
+
+        // We have 1 key with an undefined value, so this is just a string, not key/value pairs
+        if (keys.length === 1 && !defined(queryObject[keys[0]])) {
+            uri.query = keys[0];
+        } else {
+            uri.query = objectToQuery(queryObject);
+        }
+    }
+
+    /**
+     * Clones a value if it is defined, otherwise returns the default value
+     *
+     * @param {*} [val] The value to clone.
+     * @param {*} [defaultVal] The default value.
+     *
+     * @returns {*} A clone of val or the defaultVal.
+     *
+     * @private
+     */
+    function defaultClone(val, defaultVal) {
+        if (!defined(val)) {
+            return defaultVal;
+        }
+
+        return defined(val.clone) ? val.clone() : clone(val);
+    }
+
+    /**
+     * Checks to make sure the Resource isn't already being requested.
+     *
+     * @param {Request} request The request to check.
+     *
+     * @private
+     */
+    function checkAndResetRequest(request) {
+        if (request.state === RequestState.ISSUED || request.state === RequestState.ACTIVE) {
+            throw new RuntimeError('The Resource is already being fetched.');
+        }
+
+        request.state = RequestState.UNISSUED;
+        request.deferred = undefined;
+    }
+
+    /**
+     * This combines a map of query parameters.
+     *
+     * @param {Object} q1 The first map of query parameters. Values in this map will take precedence if preserveQueryParameters is false.
+     * @param {Object} q2 The second map of query parameters.
+     * @param {Boolean} preserveQueryParameters If true duplicate parameters will be concatenated into an array. If false, keys in q1 will take precedence.
+     *
+     * @returns {Object} The combined map of query parameters.
+     *
+     * @example
+     * var q1 = {
+     *   a: 1,
+     *   b: 2
+     * };
+     * var q2 = {
+     *   a: 3,
+     *   c: 4
+     * };
+     * var q3 = {
+     *   b: [5, 6],
+     *   d: 7
+     * }
+     *
+     * // Returns
+     * // {
+     * //   a: [1, 3],
+     * //   b: 2,
+     * //   c: 4
+     * // };
+     * combineQueryParameters(q1, q2, true);
+     *
+     * // Returns
+     * // {
+     * //   a: 1,
+     * //   b: 2,
+     * //   c: 4
+     * // };
+     * combineQueryParameters(q1, q2, false);
+     *
+     * // Returns
+     * // {
+     * //   a: 1,
+     * //   b: [2, 5, 6],
+     * //   d: 7
+     * // };
+     * combineQueryParameters(q1, q3, true);
+     *
+     * // Returns
+     * // {
+     * //   a: 1,
+     * //   b: 2,
+     * //   d: 7
+     * // };
+     * combineQueryParameters(q1, q3, false);
+     *
+     * @private
+     */
+    function combineQueryParameters(q1, q2, preserveQueryParameters) {
+        if (!preserveQueryParameters) {
+            return combine(q1, q2);
+        }
+
+        var result = clone(q1, true);
+        for (var param in q2) {
+            if (q2.hasOwnProperty(param)) {
+                var value = result[param];
+                var q2Value = q2[param];
+                if (defined(value)) {
+                    if (!Array.isArray(value)) {
+                        value = result[param] = [value];
+                    }
+
+                    result[param] = value.concat(q2Value);
+                } else {
+                    result[param] = Array.isArray(q2Value) ? q2Value.slice() : q2Value;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * A resource that includes the location and any other parameters we need to retrieve it or create derived resources. It also provides the ability to retry requests.
+     *
+     * @alias Resource
+     * @constructor
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     *
+     * @example
+     * function refreshTokenRetryCallback(resource, error) {
+     *   if (error.statusCode === 403) {
+     *     // 403 status code means a new token should be generated
+     *     return getNewAccessToken()
+     *       .then(function(token) {
+     *         resource.queryParameters.access_token = token;
+     *         return true;
+     *       })
+     *       .otherwise(function() {
+     *         return false;
+     *       });
+     *   }
+     *
+     *   return false;
+     * }
+     *
+     * var resource = new Resource({
+     *    url: 'http://server.com/path/to/resource.json',
+     *    proxy: new DefaultProxy('/proxy/'),
+     *    headers: {
+     *      'X-My-Header': 'valueOfHeader'
+     *    },
+     *    queryParameters: {
+     *      'access_token': '123-435-456-000'
+     *    },
+     *    retryCallback: refreshTokenRetryCallback,
+     *    retryAttempts: 1
+     * });
+     */
+    function Resource(options) {
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+        if (typeof options === 'string') {
+            options = {
+                url: options
+            };
+        }
+
+                Check.typeOf.string('options.url', options.url);
+        
+        this._url = undefined;
+        this._templateValues = defaultClone(options.templateValues, {});
+        this._queryParameters = defaultClone(options.queryParameters, {});
+
+        /**
+         * Additional HTTP headers that will be sent with the request.
+         *
+         * @type {Object}
+         */
+        this.headers = defaultClone(options.headers, {});
+
+        /**
+         * A Request object that will be used. Intended for internal use only.
+         *
+         * @type {Request}
+         */
+        this.request = defaultValue(options.request, new Request());
+
+        /**
+         * A proxy to be used when loading the resource.
+         *
+         * @type {DefaultProxy}
+         */
+        this.proxy = options.proxy;
+
+        /**
+         * Function to call when a request for this resource fails. If it returns true or a Promise that resolves to true, the request will be retried.
+         *
+         * @type {Function}
+         */
+        this.retryCallback = options.retryCallback;
+
+        /**
+         * The number of times the retryCallback should be called before giving up.
+         *
+         * @type {Number}
+         */
+        this.retryAttempts = defaultValue(options.retryAttempts, 0);
+        this._retryCount = 0;
+
+        var uri = new Uri(options.url);
+        parseQuery(uri, this, true, true);
+
+        // Remove the fragment as it's not sent with a request
+        uri.fragment = undefined;
+
+        this._url = uri.toString();
+    }
+
+    /**
+     * A helper function to create a resource depending on whether we have a String or a Resource
+     *
+     * @param {Resource|String} resource A Resource or a String to use when creating a new Resource.
+     *
+     * @returns {Resource} If resource is a String, a Resource constructed with the url and options. Otherwise the resource parameter is returned.
+     *
+     * @private
+     */
+    Resource.createIfNeeded = function(resource) {
+        if (resource instanceof Resource) {
+            // Keep existing request object. This function is used internally to duplicate a Resource, so that it can't
+            //  be modified outside of a class that holds it (eg. an imagery or terrain provider). Since the Request objects
+            //  are managed outside of the providers, by the tile loading code, we want to keep the request property the same so if it is changed
+            //  in the underlying tiling code the requests for this resource will use it.
+            return  resource.getDerivedResource({
+                request: resource.request
+            });
+        }
+
+        if (typeof resource !== 'string') {
+            return resource;
+        }
+
+        return new Resource({
+            url: resource
+        });
+    };
+
+    defineProperties(Resource, {
+        /**
+         * Returns true if blobs are supported.
+         *
+         * @memberof Resource
+         * @type {Boolean}
+         *
+         * @readonly
+         */
+        isBlobSupported : {
+            get : function() {
+                return xhrBlobSupported;
+            }
+        }
+    });
+
+    defineProperties(Resource.prototype, {
+        /**
+         * Query parameters appended to the url.
+         *
+         * @memberof Resource.prototype
+         * @type {Object}
+         *
+         * @readonly
+         */
+        queryParameters: {
+            get: function() {
+                return this._queryParameters;
+            }
+        },
+
+        /**
+         * The key/value pairs used to replace template parameters in the url.
+         *
+         * @memberof Resource.prototype
+         * @type {Object}
+         *
+         * @readonly
+         */
+        templateValues: {
+            get: function() {
+                return this._templateValues;
+            }
+        },
+
+        /**
+         * The url to the resource with template values replaced, query string appended and encoded by proxy if one was set.
+         *
+         * @memberof Resource.prototype
+         * @type {String}
+         */
+        url: {
+            get: function() {
+                return this.getUrlComponent(true, true);
+            },
+            set: function(value) {
+                var uri = new Uri(value);
+
+                parseQuery(uri, this, false);
+
+                // Remove the fragment as it's not sent with a request
+                uri.fragment = undefined;
+
+                this._url = uri.toString();
+            }
+        },
+
+        /**
+         * The file extension of the resource.
+         *
+         * @memberof Resource.prototype
+         * @type {String}
+         *
+         * @readonly
+         */
+        extension: {
+            get: function() {
+                return getExtensionFromUri(this._url);
+            }
+        },
+
+        /**
+         * True if the Resource refers to a data URI.
+         *
+         * @memberof Resource.prototype
+         * @type {Boolean}
+         */
+        isDataUri: {
+            get: function() {
+                return isDataUri(this._url);
+            }
+        },
+
+        /**
+         * True if the Resource refers to a blob URI.
+         *
+         * @memberof Resource.prototype
+         * @type {Boolean}
+         */
+        isBlobUri: {
+            get: function() {
+                return isBlobUri(this._url);
+            }
+        },
+
+        /**
+         * True if the Resource refers to a cross origin URL.
+         *
+         * @memberof Resource.prototype
+         * @type {Boolean}
+         */
+        isCrossOriginUrl: {
+            get: function() {
+                return isCrossOriginUrl(this._url);
+            }
+        },
+
+        /**
+         * True if the Resource has request headers. This is equivalent to checking if the headers property has any keys.
+         *
+         * @memberof Resource.prototype
+         * @type {Boolean}
+         */
+        hasHeaders: {
+            get: function() {
+                return (Object.keys(this.headers).length > 0);
+            }
+        }
+    });
+
+    /**
+     * Returns the url, optional with the query string and processed by a proxy.
+     *
+     * @param {Boolean} [query=false] If true, the query string is included.
+     * @param {Boolean} [proxy=false] If true, the url is processed the proxy object if defined.
+     *
+     * @returns {String} The url with all the requested components.
+     */
+    Resource.prototype.getUrlComponent = function(query, proxy) {
+        if(this.isDataUri) {
+            return this._url;
+        }
+
+        var uri = new Uri(this._url);
+
+        if (query) {
+            stringifyQuery(uri, this);
+        }
+
+        // objectToQuery escapes the placeholders.  Undo that.
+        var url = uri.toString().replace(/%7B/g, '{').replace(/%7D/g, '}');
+
+        var template = this._templateValues;
+        var keys = Object.keys(template);
+        if (keys.length > 0) {
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var value = template[key];
+                url = url.replace(new RegExp('{' + key + '}', 'g'), encodeURIComponent(value));
+            }
+        }
+        if (proxy && defined(this.proxy)) {
+            url = this.proxy.getURL(url);
+        }
+        return url;
+    };
+
+    /**
+     * Combines the specified object and the existing query parameters. This allows you to add many parameters at once,
+     *  as opposed to adding them one at a time to the queryParameters property. If a value is already set, it will be replaced with the new value.
+     *
+     * @param {Object} params The query parameters
+     * @param {Boolean} [useAsDefault=false] If true the params will be used as the default values, so they will only be set if they are undefined.
+     */
+    Resource.prototype.setQueryParameters = function(params, useAsDefault) {
+        if (useAsDefault) {
+            this._queryParameters = combineQueryParameters(this._queryParameters, params, false);
+        } else {
+            this._queryParameters = combineQueryParameters(params, this._queryParameters, false);
+        }
+    };
+
+    /**
+     * Combines the specified object and the existing query parameters. This allows you to add many parameters at once,
+     *  as opposed to adding them one at a time to the queryParameters property. If a value is already set, it will be replaced with the new value.
+     *
+     * @param {Object} params The query parameters
+     * @param {Boolean} [useAsDefault=false] If true the params will be used as the default values, so they will only be set if they are undefined.
+     *
+     * @deprecated
+     */
+    Resource.prototype.addQueryParameters = function(params, useAsDefault) {
+        deprecationWarning('Resource.addQueryParameters', 'addQueryParameters has been deprecated and will be removed 1.45. Use setQueryParameters or appendQueryParameters instead.');
+
+        return this.setQueryParameters(params, useAsDefault);
+    };
+
+    /**
+     * Combines the specified object and the existing query parameters. This allows you to add many parameters at once,
+     *  as opposed to adding them one at a time to the queryParameters property.
+     *
+     * @param {Object} params The query parameters
+     */
+    Resource.prototype.appendQueryParameters = function(params) {
+        this._queryParameters = combineQueryParameters(params, this._queryParameters, true);
+    };
+
+    /**
+     * Combines the specified object and the existing template values. This allows you to add many values at once,
+     *  as opposed to adding them one at a time to the templateValues property. If a value is already set, it will become an array and the new value will be appended.
+     *
+     * @param {Object} template The template values
+     * @param {Boolean} [useAsDefault=false] If true the values will be used as the default values, so they will only be set if they are undefined.
+     */
+    Resource.prototype.setTemplateValues = function(template, useAsDefault) {
+        if (useAsDefault) {
+            this._templateValues = combine(this._templateValues, template);
+        } else {
+            this._templateValues = combine(template, this._templateValues);
+        }
+    };
+
+    /**
+     * Combines the specified object and the existing template values. This allows you to add many values at once,
+     *  as opposed to adding them one at a time to the templateValues property. If a value is already set, it will become an array and the new value will be appended.
+     *
+     * @param {Object} template The template values
+     * @param {Boolean} [useAsDefault=false] If true the values will be used as the default values, so they will only be set if they are undefined.
+     *
+     * @deprecated
+     */
+    Resource.prototype.addTemplateValues = function(template, useAsDefault) {
+        deprecationWarning('Resource.addTemplateValues', 'addTemplateValues has been deprecated and will be removed 1.45. Use setTemplateValues.');
+
+        return this.setTemplateValues(template, useAsDefault);
+    };
+
+    /**
+     * Returns a resource relative to the current instance. All properties remain the same as the current instance unless overridden in options.
+     *
+     * @param {Object} options An object with the following properties
+     * @param {String} [options.url]  The url that will be resolved relative to the url of the current instance.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be combined with those of the current instance.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}). These will be combined with those of the current instance.
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The function to call when loading the resource fails.
+     * @param {Number} [options.retryAttempts] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {Boolean} [options.preserveQueryParameters=false] If true, this will keep all query parameters from the current resource and derived resource. If false, derived parameters will replace those of the current resource.
+     *
+     * @returns {Resource} The resource derived from the current one.
+     */
+    Resource.prototype.getDerivedResource = function(options) {
+        var resource = this.clone();
+        resource._retryCount = 0;
+
+        if (defined(options.url)) {
+            var uri = new Uri(options.url);
+
+            var preserveQueryParameters = defaultValue(options.preserveQueryParameters, false);
+            parseQuery(uri, resource, true, preserveQueryParameters);
+
+            // Remove the fragment as it's not sent with a request
+            uri.fragment = undefined;
+
+            resource._url = uri.resolve(new Uri(getAbsoluteUri(this._url))).toString();
+        }
+
+        if (defined(options.queryParameters)) {
+            resource._queryParameters = combine(options.queryParameters, resource._queryParameters);
+        }
+        if (defined(options.templateValues)) {
+            resource._templateValues = combine(options.templateValues, resource.templateValues);
+        }
+        if (defined(options.headers)) {
+            resource.headers = combine(options.headers, resource.headers);
+        }
+        if (defined(options.proxy)) {
+            resource.proxy = options.proxy;
+        }
+        if (defined(options.request)) {
+            resource.request = options.request;
+        }
+        if (defined(options.retryCallback)) {
+            resource.retryCallback = options.retryCallback;
+        }
+        if (defined(options.retryAttempts)) {
+            resource.retryAttempts = options.retryAttempts;
+        }
+
+        return resource;
+    };
+
+    /**
+     * Called when a resource fails to load. This will call the retryCallback function if defined until retryAttempts is reached.
+     *
+     * @param {Error} [error] The error that was encountered.
+     *
+     * @returns {Promise<Boolean>} A promise to a boolean, that if true will cause the resource request to be retried.
+     *
+     * @private
+     */
+    Resource.prototype.retryOnError = function(error) {
+        var retryCallback = this.retryCallback;
+        if ((typeof retryCallback !== 'function') || (this._retryCount >= this.retryAttempts)) {
+            return when(false);
+        }
+
+        var that = this;
+        return when(retryCallback(this, error))
+            .then(function(result) {
+                ++that._retryCount;
+
+                return result;
+            });
+    };
+
+    /**
+     * Duplicates a Resource instance.
+     *
+     * @param {Resource} [result] The object onto which to store the result.
+     *
+     * @returns {Resource} The modified result parameter or a new Resource instance if one was not provided.
+     */
+    Resource.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new Resource({
+                url : this._url
+            });
+        }
+
+        result._url = this._url;
+        result._queryParameters = clone(this._queryParameters);
+        result._templateValues = clone(this._templateValues);
+        result.headers = clone(this.headers);
+        result.proxy = this.proxy;
+        result.retryCallback = this.retryCallback;
+        result.retryAttempts = this.retryAttempts;
+        result._retryCount = 0;
+        result.request = this.request.clone();
+
+        return result;
+    };
+
+    /**
+     * Returns the base path of the Resource.
+     *
+     * @param {Boolean} [includeQuery = false] Whether or not to include the query string and fragment form the uri
+     *
+     * @returns {String} The base URI of the resource
+     */
+    Resource.prototype.getBaseUri = function(includeQuery) {
+        return getBaseUri(this.getUrlComponent(includeQuery), includeQuery);
+    };
+
+    /**
+     * Appends a forward slash to the URL.
+     */
+    Resource.prototype.appendForwardSlash = function() {
+        this._url = appendForwardSlash(this._url);
+    };
+
+    /**
+     * Asynchronously loads the resource as raw binary data.  Returns a promise that will resolve to
+     * an ArrayBuffer once loaded, or reject if the resource failed to load.  The data is loaded
      * using XMLHttpRequest, which means that in order to make requests to another origin,
      * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
      *
-     * @exports loadWithXhr
-     *
-     * @param {Object} options Object with the following properties:
-     * @param {String} options.url The URL of the data.
-     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
-     * @param {String} [options.method='GET'] The HTTP method to use.
-     * @param {String} [options.data] The data to send with the request, if any.
-     * @param {Object} [options.headers] HTTP headers to send with the request, if any.
-     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
-     * @param {Request} [options.request] The request object.
-     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
-     *
+     * @returns {Promise.<ArrayBuffer>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
      *
      * @example
-     * // Load a single URL asynchronously. In real code, you should use loadBlob instead.
-     * Cesium.loadWithXhr({
-     *     url : 'some/url',
-     *     responseType : 'blob'
-     * }).then(function(blob) {
+     * // load a single URL asynchronously
+     * resource.fetchArrayBuffer().then(function(arrayBuffer) {
      *     // use the data
      * }).otherwise(function(error) {
      *     // an error occurred
      * });
      *
-     * @see loadArrayBuffer
-     * @see loadBlob
-     * @see loadJson
-     * @see loadText
      * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
      * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
      */
-    function loadWithXhr(options) {
-        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+    Resource.prototype.fetchArrayBuffer = function () {
+        return this.fetch({
+            responseType : 'arraybuffer'
+        });
+    };
 
-                Check.defined('options.url', options.url);
-        
-        var url = options.url;
+    /**
+     * Creates a Resource and calls fetchArrayBuffer() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @returns {Promise.<ArrayBuffer>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetchArrayBuffer = function (options) {
+        var resource = new Resource(options);
+        return resource.fetchArrayBuffer();
+    };
 
-        if (typeof url !== 'string') {
-            // Returning a promise here is okay because it is unlikely that anyone using the deprecated functionality is also
-            // providing a Request object marked as throttled.
-            deprecationWarning('url promise', 'options.url as a Promise is deprecated and will be removed in Cesium 1.37');
-            return url.then(function(url) {
-                return makeRequest(options, url);
-            });
+    /**
+     * Asynchronously loads the given resource as a blob.  Returns a promise that will resolve to
+     * a Blob once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @returns {Promise.<Blob>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     * @example
+     * // load a single URL asynchronously
+     * resource.fetchBlob().then(function(blob) {
+     *     // use the data
+     * }).otherwise(function(error) {
+     *     // an error occurred
+     * });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.fetchBlob = function () {
+        return this.fetch({
+            responseType : 'blob'
+        });
+    };
+
+    /**
+     * Creates a Resource and calls fetchBlob() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @returns {Promise.<Blob>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetchBlob = function (options) {
+        var resource = new Resource(options);
+        return resource.fetchBlob();
+    };
+
+    /**
+     * Asynchronously loads the given image resource.  Returns a promise that will resolve to
+     * an {@link Image} once loaded, or reject if the image failed to load.
+     *
+     * @param {Boolean} [preferBlob = false]  If true, we will load the image via a blob.
+     * @returns {Promise.<Image>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * // load a single image asynchronously
+     * resource.fetchImage().then(function(image) {
+     *     // use the loaded image
+     * }).otherwise(function(error) {
+     *     // an error occurred
+     * });
+     *
+     * // load several images in parallel
+     * when.all([resource1.fetchImage(), resource2.fetchImage()]).then(function(images) {
+     *     // images is an array containing all the loaded images
+     * });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.fetchImage = function (preferBlob) {
+        preferBlob = defaultValue(preferBlob, false);
+
+        checkAndResetRequest(this.request);
+
+        // We try to load the image normally if
+        // 1. Blobs aren't supported
+        // 2. It's a data URI
+        // 3. It's a blob URI
+        // 4. It doesn't have request headers and we preferBlob is false
+        if (!xhrBlobSupported || this.isDataUri || this.isBlobUri || (!this.hasHeaders && !preferBlob)) {
+            return fetchImage(this, true);
         }
 
-        return makeRequest(options);
+        var blobPromise = this.fetchBlob();
+        if (!defined(blobPromise)) {
+            return;
+        }
+
+        var generatedBlobResource;
+        var generatedBlob;
+        return blobPromise
+            .then(function(blob) {
+                if (!defined(blob)) {
+                    return;
+                }
+                generatedBlob = blob;
+                var blobUrl = window.URL.createObjectURL(blob);
+                generatedBlobResource = new Resource({
+                    url: blobUrl
+                });
+
+                return fetchImage(generatedBlobResource);
+            })
+            .then(function(image) {
+                if (!defined(image)) {
+                    return;
+                }
+                window.URL.revokeObjectURL(generatedBlobResource.url);
+
+                // This is because the blob object is needed for DiscardMissingTileImagePolicy
+                // See https://github.com/AnalyticalGraphicsInc/cesium/issues/1353
+                image.blob = generatedBlob;
+                return image;
+            })
+            .otherwise(function(error) {
+                if (defined(generatedBlobResource)) {
+                    window.URL.revokeObjectURL(generatedBlobResource.url);
+                }
+
+                return when.reject(error);
+            });
+    };
+
+    function fetchImage(resource) {
+        var request = resource.request;
+        request.url = resource.url;
+        request.requestFunction = function() {
+            var url = resource.url;
+            var crossOrigin = false;
+
+            // data URIs can't have crossorigin set.
+            if (!resource.isDataUri && !resource.isBlobUri) {
+                crossOrigin = resource.isCrossOriginUrl;
+            }
+
+            var deferred = when.defer();
+
+            Resource._Implementations.createImage(url, crossOrigin, deferred);
+
+            return deferred.promise;
+        };
+
+        var promise = RequestScheduler.request(request);
+        if (!defined(promise)) {
+            return;
+        }
+
+        return promise
+            .otherwise(function(e) {
+                // Don't retry cancelled or otherwise aborted requests
+                if (request.state !== RequestState.FAILED) {
+                    return when.reject(e);
+                }
+
+                return resource.retryOnError(e)
+                    .then(function(retry) {
+                        if (retry) {
+                            // Reset request so it can try again
+                            request.state = RequestState.UNISSUED;
+                            request.deferred = undefined;
+
+                            return fetchImage(resource);
+                        }
+
+                        return when.reject(e);
+                    });
+            });
     }
 
-    function makeRequest(options, url) {
-        var responseType = options.responseType;
-        var method = defaultValue(options.method, 'GET');
-        var data = options.data;
-        var headers = options.headers;
-        var overrideMimeType = options.overrideMimeType;
-        url = defaultValue(url, options.url);
+    /**
+     * Creates a Resource and calls fetchImage() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {Boolean} [options.preferBlob = false]  If true, we will load the image via a blob.
+     * @returns {Promise.<Image>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetchImage = function (options) {
+        var resource = new Resource(options);
+        return resource.fetchImage(options.preferBlob);
+    };
 
-        var request = defined(options.request) ? options.request : new Request();
-        request.url = url;
+    /**
+     * Asynchronously loads the given resource as text.  Returns a promise that will resolve to
+     * a String once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @returns {Promise.<String>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     * @example
+     * // load text from a URL, setting a custom header
+     * var resource = new Resource({
+     *   url: 'http://someUrl.com/someJson.txt',
+     *   headers: {
+     *     'X-Custom-Header' : 'some value'
+     *   }
+     * });
+     * resource.fetchText().then(function(text) {
+     *     // Do something with the text
+     * }).otherwise(function(error) {
+     *     // an error occurred
+     * });
+     *
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|XMLHttpRequest}
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.fetchText = function() {
+        return this.fetch({
+            responseType : 'text'
+        });
+    };
+
+    /**
+     * Creates a Resource and calls fetchText() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @returns {Promise.<String>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetchText = function (options) {
+        var resource = new Resource(options);
+        return resource.fetchText();
+    };
+
+    // note: &#42;&#47;&#42; below is */* but that ends the comment block early
+    /**
+     * Asynchronously loads the given resource as JSON.  Returns a promise that will resolve to
+     * a JSON object once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled. This function
+     * adds 'Accept: application/json,&#42;&#47;&#42;;q=0.01' to the request headers, if not
+     * already specified.
+     *
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.fetchJson().then(function(jsonData) {
+     *     // Do something with the JSON object
+     * }).otherwise(function(error) {
+     *     // an error occurred
+     * });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.fetchJson = function() {
+        var promise = this.fetch({
+            responseType : 'text',
+            headers: {
+                Accept : 'application/json,*/*;q=0.01'
+            }
+        });
+
+        if (!defined(promise)) {
+            return undefined;
+        }
+
+        return promise
+            .then(function(value) {
+                if (!defined(value)) {
+                    return;
+                }
+                return JSON.parse(value);
+            });
+    };
+
+    /**
+     * Creates a Resource and calls fetchJson() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetchJson = function (options) {
+        var resource = new Resource(options);
+        return resource.fetchJson();
+    };
+
+    /**
+     * Asynchronously loads the given resource as XML.  Returns a promise that will resolve to
+     * an XML Document once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @returns {Promise.<XMLDocument>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * // load XML from a URL, setting a custom header
+     * Cesium.loadXML('http://someUrl.com/someXML.xml', {
+     *   'X-Custom-Header' : 'some value'
+     * }).then(function(document) {
+     *     // Do something with the document
+     * }).otherwise(function(error) {
+     *     // an error occurred
+     * });
+     *
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|XMLHttpRequest}
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.fetchXML = function() {
+        return this.fetch({
+            responseType : 'document',
+            overrideMimeType : 'text/xml'
+        });
+    };
+
+    /**
+     * Creates a Resource and calls fetchXML() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @returns {Promise.<XMLDocument>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetchXML = function (options) {
+        var resource = new Resource(options);
+        return resource.fetchXML();
+    };
+
+    /**
+     * Requests a resource using JSONP.
+     *
+     * @param {String} [callbackParameterName='callback'] The callback parameter name that the server expects.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * // load a data asynchronously
+     * resource.fetchJsonp().then(function(data) {
+     *     // use the loaded data
+     * }).otherwise(function(error) {
+     *     // an error occurred
+     * });
+     *
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.fetchJsonp = function(callbackParameterName) {
+        callbackParameterName = defaultValue(callbackParameterName, 'callback');
+
+        checkAndResetRequest(this.request);
+
+        //generate a unique function name
+        var functionName;
+        do {
+            functionName = 'loadJsonp' + Math.random().toString().substring(2, 8);
+        } while (defined(window[functionName]));
+
+        return fetchJsonp(this, callbackParameterName, functionName);
+    };
+
+    function fetchJsonp(resource, callbackParameterName, functionName) {
+        var callbackQuery = {};
+        callbackQuery[callbackParameterName] = functionName;
+        resource.setQueryParameters(callbackQuery);
+
+        var request = resource.request;
+        request.url = resource.url;
         request.requestFunction = function() {
             var deferred = when.defer();
-            var xhr = loadWithXhr.load(url, responseType, method, data, headers, deferred, overrideMimeType);
+
+            //assign a function with that name in the global scope
+            window[functionName] = function(data) {
+                deferred.resolve(data);
+
+                try {
+                    delete window[functionName];
+                } catch (e) {
+                    window[functionName] = undefined;
+                }
+            };
+
+            Resource._Implementations.loadAndExecuteScript(resource.url, functionName, deferred);
+            return deferred.promise;
+        };
+
+        var promise = RequestScheduler.request(request);
+        if (!defined(promise)) {
+            return;
+        }
+
+        return promise
+            .otherwise(function(e) {
+                if (request.state !== RequestState.FAILED) {
+                    return when.reject(e);
+                }
+
+                return resource.retryOnError(e)
+                    .then(function(retry) {
+                        if (retry) {
+                            // Reset request so it can try again
+                            request.state = RequestState.UNISSUED;
+                            request.deferred = undefined;
+
+                            return fetchJsonp(resource, callbackParameterName, functionName);
+                        }
+
+                        return when.reject(e);
+                    });
+            });
+    }
+
+    /**
+     * Creates a Resource from a URL and calls fetchJsonp() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.callbackParameterName='callback'] The callback parameter name that the server expects.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetchJsonp = function (options) {
+        var resource = new Resource(options);
+        return resource.fetchJsonp(options.callbackParameterName);
+    };
+
+    /**
+     * @private
+     */
+    Resource.prototype._makeRequest = function(options) {
+        var resource = this;
+        checkAndResetRequest(resource.request);
+
+        var request = resource.request;
+        request.url = resource.url;
+
+        request.requestFunction = function() {
+            var responseType = options.responseType;
+            var headers = combine(options.headers, resource.headers);
+            var overrideMimeType = options.overrideMimeType;
+            var method = options.method;
+            var data = options.data;
+            var deferred = when.defer();
+            var xhr = Resource._Implementations.loadWithXhr(resource.url, responseType, method, data, headers, deferred, overrideMimeType);
             if (defined(xhr) && defined(xhr.abort)) {
                 request.cancelFunction = function() {
                     xhr.abort();
@@ -19653,8 +21663,34 @@ define('Core/loadWithXhr',[
             return deferred.promise;
         };
 
-        return RequestScheduler.request(request);
-    }
+        var promise = RequestScheduler.request(request);
+        if (!defined(promise)) {
+            return;
+        }
+
+        return promise
+            .then(function(data) {
+                return data;
+            })
+            .otherwise(function(e) {
+                if (request.state !== RequestState.FAILED) {
+                    return when.reject(e);
+                }
+
+                return resource.retryOnError(e)
+                    .then(function(retry) {
+                        if (retry) {
+                            // Reset request so it can try again
+                            request.state = RequestState.UNISSUED;
+                            request.deferred = undefined;
+
+                            return resource.fetch(options);
+                        }
+
+                        return when.reject(e);
+                    });
+            });
+    };
 
     var dataUriRegex = /^data:(.*?)(;base64)?,(.*)$/;
 
@@ -19700,11 +21736,447 @@ define('Core/loadWithXhr',[
                 return JSON.parse(decodeDataUriText(isBase64, data));
             default:
                                 throw new DeveloperError('Unhandled responseType: ' + responseType);
-                        }
+                    }
     }
 
-    // This is broken out into a separate function so that it can be mocked for testing purposes.
-    loadWithXhr.load = function(url, responseType, method, data, headers, deferred, overrideMimeType) {
+    /**
+     * Asynchronously loads the given resource.  Returns a promise that will resolve to
+     * the result once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled. It's recommended that you use
+     * the more specific functions eg. fetchJson, fetchBlob, etc.
+     *
+     * @param {Object} [options] Object with the following properties:
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {Object} [options.headers] Additional HTTP headers to send with the request, if any.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.fetch()
+     *   .then(function(body) {
+     *       // use the data
+     *   }).otherwise(function(error) {
+     *       // an error occurred
+     *   });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.fetch = function(options) {
+        options = defaultClone(options, {});
+        options.method = 'GET';
+
+        return this._makeRequest(options);
+    };
+
+    /**
+     * Creates a Resource from a URL and calls fetch() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.fetch = function (options) {
+        var resource = new Resource(options);
+        return resource.fetch({
+            // Make copy of just the needed fields because headers can be passed to both the constructor and to fetch
+            responseType: options.responseType,
+            overrideMimeType: options.overrideMimeType
+        });
+    };
+
+    /**
+     * Asynchronously deletes the given resource.  Returns a promise that will resolve to
+     * the result once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @param {Object} [options] Object with the following properties:
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {Object} [options.headers] Additional HTTP headers to send with the request, if any.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.delete()
+     *   .then(function(body) {
+     *       // use the data
+     *   }).otherwise(function(error) {
+     *       // an error occurred
+     *   });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.delete = function(options) {
+        options = defaultClone(options, {});
+        options.method = 'DELETE';
+
+        return this._makeRequest(options);
+    };
+
+    /**
+     * Creates a Resource from a URL and calls delete() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.delete = function (options) {
+        var resource = new Resource(options);
+        return resource.delete({
+            // Make copy of just the needed fields because headers can be passed to both the constructor and to fetch
+            responseType: options.responseType,
+            overrideMimeType: options.overrideMimeType
+        });
+    };
+
+    /**
+     * Asynchronously gets headers the given resource.  Returns a promise that will resolve to
+     * the result once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @param {Object} [options] Object with the following properties:
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {Object} [options.headers] Additional HTTP headers to send with the request, if any.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.head()
+     *   .then(function(headers) {
+     *       // use the data
+     *   }).otherwise(function(error) {
+     *       // an error occurred
+     *   });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.head = function(options) {
+        options = defaultClone(options, {});
+        options.method = 'HEAD';
+
+        return this._makeRequest(options);
+    };
+
+    /**
+     * Creates a Resource from a URL and calls head() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.head = function (options) {
+        var resource = new Resource(options);
+        return resource.head({
+            // Make copy of just the needed fields because headers can be passed to both the constructor and to fetch
+            responseType: options.responseType,
+            overrideMimeType: options.overrideMimeType
+        });
+    };
+
+    /**
+     * Asynchronously gets options the given resource.  Returns a promise that will resolve to
+     * the result once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @param {Object} [options] Object with the following properties:
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {Object} [options.headers] Additional HTTP headers to send with the request, if any.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.options()
+     *   .then(function(headers) {
+     *       // use the data
+     *   }).otherwise(function(error) {
+     *       // an error occurred
+     *   });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.options = function(options) {
+        options = defaultClone(options, {});
+        options.method = 'OPTIONS';
+
+        return this._makeRequest(options);
+    };
+
+    /**
+     * Creates a Resource from a URL and calls options() on it.
+     *
+     * @param {String|Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.options = function (options) {
+        var resource = new Resource(options);
+        return resource.options({
+            // Make copy of just the needed fields because headers can be passed to both the constructor and to fetch
+            responseType: options.responseType,
+            overrideMimeType: options.overrideMimeType
+        });
+    };
+
+    /**
+     * Asynchronously posts data to the given resource.  Returns a promise that will resolve to
+     * the result once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @param {Object} data Data that is posted with the resource.
+     * @param {Object} [options] Object with the following properties:
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {Object} [options.headers] Additional HTTP headers to send with the request, if any.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.post(data)
+     *   .then(function(result) {
+     *       // use the result
+     *   }).otherwise(function(error) {
+     *       // an error occurred
+     *   });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.post = function(data, options) {
+        Check.defined('data', data);
+
+        options = defaultClone(options, {});
+        options.method = 'POST';
+        options.data = data;
+
+        return this._makeRequest(options);
+    };
+
+    /**
+     * Creates a Resource from a URL and calls post() on it.
+     *
+     * @param {Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} options.data Data that is posted with the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.post = function (options) {
+        var resource = new Resource(options);
+        return resource.post(options.data, {
+            // Make copy of just the needed fields because headers can be passed to both the constructor and to post
+            responseType: options.responseType,
+            overrideMimeType: options.overrideMimeType
+        });
+    };
+
+    /**
+     * Asynchronously puts data to the given resource.  Returns a promise that will resolve to
+     * the result once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @param {Object} data Data that is posted with the resource.
+     * @param {Object} [options] Object with the following properties:
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {Object} [options.headers] Additional HTTP headers to send with the request, if any.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.put(data)
+     *   .then(function(result) {
+     *       // use the result
+     *   }).otherwise(function(error) {
+     *       // an error occurred
+     *   });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.put = function(data, options) {
+        Check.defined('data', data);
+
+        options = defaultClone(options, {});
+        options.method = 'PUT';
+        options.data = data;
+
+        return this._makeRequest(options);
+    };
+
+    /**
+     * Creates a Resource from a URL and calls put() on it.
+     *
+     * @param {Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} options.data Data that is posted with the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.put = function (options) {
+        var resource = new Resource(options);
+        return resource.put(options.data, {
+            // Make copy of just the needed fields because headers can be passed to both the constructor and to post
+            responseType: options.responseType,
+            overrideMimeType: options.overrideMimeType
+        });
+    };
+
+    /**
+     * Asynchronously patches data to the given resource.  Returns a promise that will resolve to
+     * the result once loaded, or reject if the resource failed to load.  The data is loaded
+     * using XMLHttpRequest, which means that in order to make requests to another origin,
+     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
+     *
+     * @param {Object} data Data that is posted with the resource.
+     * @param {Object} [options] Object with the following properties:
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {Object} [options.headers] Additional HTTP headers to send with the request, if any.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     *
+     *
+     * @example
+     * resource.patch(data)
+     *   .then(function(result) {
+     *       // use the result
+     *   }).otherwise(function(error) {
+     *       // an error occurred
+     *   });
+     *
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     */
+    Resource.prototype.patch = function(data, options) {
+        Check.defined('data', data);
+
+        options = defaultClone(options, {});
+        options.method = 'PATCH';
+        options.data = data;
+
+        return this._makeRequest(options);
+    };
+
+    /**
+     * Creates a Resource from a URL and calls patch() on it.
+     *
+     * @param {Object} options A url or an object with the following properties
+     * @param {String} options.url The url of the resource.
+     * @param {Object} options.data Data that is posted with the resource.
+     * @param {Object} [options.queryParameters] An object containing query parameters that will be sent when retrieving the resource.
+     * @param {Object} [options.templateValues] Key/Value pairs that are used to replace template values (eg. {x}).
+     * @param {Object} [options.headers={}] Additional HTTP headers that will be sent.
+     * @param {DefaultProxy} [options.proxy] A proxy to be used when loading the resource.
+     * @param {Resource~RetryCallback} [options.retryCallback] The Function to call when a request for this resource fails. If it returns true, the request will be retried.
+     * @param {Number} [options.retryAttempts=0] The number of times the retryCallback should be called before giving up.
+     * @param {Request} [options.request] A Request object that will be used. Intended for internal use only.
+     * @param {String} [options.responseType] The type of response.  This controls the type of item returned.
+     * @param {String} [options.overrideMimeType] Overrides the MIME type returned by the server.
+     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
+     */
+    Resource.patch = function (options) {
+        var resource = new Resource(options);
+        return resource.patch(options.data, {
+            // Make copy of just the needed fields because headers can be passed to both the constructor and to post
+            responseType: options.responseType,
+            overrideMimeType: options.overrideMimeType
+        });
+    };
+
+    /**
+     * Contains implementations of functions that can be replaced for testing
+     *
+     * @private
+     */
+    Resource._Implementations = {};
+
+    Resource._Implementations.createImage = function(url, crossOrigin, deferred) {
+        var image = new Image();
+
+        image.onload = function() {
+            deferred.resolve(image);
+        };
+
+        image.onerror = function(e) {
+            deferred.reject(e);
+        };
+
+        if (crossOrigin) {
+            if (TrustedServers.contains(url)) {
+                image.crossOrigin = 'use-credentials';
+            } else {
+                image.crossOrigin = '';
+            }
+        }
+
+        image.src = url;
+    };
+
+    Resource._Implementations.loadWithXhr = function(url, responseType, method, data, headers, deferred, overrideMimeType) {
         var dataUriRegexResult = dataUriRegex.exec(url);
         if (dataUriRegexResult !== null) {
             deferred.resolve(decodeDataUri(dataUriRegexResult, responseType));
@@ -19735,8 +22207,14 @@ define('Core/loadWithXhr',[
             xhr.responseType = responseType;
         }
 
+        // While non-standard, file protocol always returns a status of 0 on success
+        var localFile = false;
+        if (typeof url === 'string') {
+            localFile = (url.indexOf('file://') === 0) || window.location.origin === 'file://';
+        }
+
         xhr.onload = function() {
-            if (xhr.status < 200 || xhr.status >= 300) {
+            if ((xhr.status < 200 || xhr.status >= 300) && !(localFile && xhr.status === 0)) {
                 deferred.reject(new RequestErrorEvent(xhr.status, xhr.response, xhr.getAllResponseHeaders()));
                 return;
             }
@@ -19744,10 +22222,28 @@ define('Core/loadWithXhr',[
             var response = xhr.response;
             var browserResponseType = xhr.responseType;
 
-            //All modern browsers will go into either the first if block or last else block.
+            if (method === 'HEAD' || method === 'OPTIONS') {
+                var responseHeaderString = xhr.getAllResponseHeaders();
+                var splitHeaders = responseHeaderString.trim().split(/[\r\n]+/);
+
+                var responseHeaders = {};
+                splitHeaders.forEach(function (line) {
+                    var parts = line.split(': ');
+                    var header = parts.shift();
+                    responseHeaders[header] = parts.join(': ');
+                });
+
+                deferred.resolve(responseHeaders);
+                return;
+            }
+
+            //All modern browsers will go into either the first or second if block or last else block.
             //Other code paths support older browsers that either do not support the supplied responseType
             //or do not support the xhr.response property.
-            if (defined(response) && (!defined(responseType) || (browserResponseType === responseType))) {
+            if (xhr.status === 204) {
+                // accept no content
+                deferred.resolve();
+            } else if (defined(response) && (!defined(responseType) || (browserResponseType === responseType))) {
                 deferred.resolve(response);
             } else if ((responseType === 'json') && typeof response === 'string') {
                 try {
@@ -19773,126 +22269,53 @@ define('Core/loadWithXhr',[
         return xhr;
     };
 
-    loadWithXhr.defaultLoad = loadWithXhr.load;
+    Resource._Implementations.loadAndExecuteScript = function(url, functionName, deferred) {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = url;
 
-    return loadWithXhr;
-});
+        var head = document.getElementsByTagName('head')[0];
+        script.onload = function() {
+            script.onload = undefined;
+            head.removeChild(script);
+        };
+        script.onerror = function(e) {
+            deferred.reject(e);
+        };
 
-define('Core/loadText',[
-        './loadWithXhr'
-    ], function(
-        loadWithXhr) {
-    'use strict';
-
-    /**
-     * Asynchronously loads the given URL as text.  Returns a promise that will resolve to
-     * a String once loaded, or reject if the URL failed to load.  The data is loaded
-     * using XMLHttpRequest, which means that in order to make requests to another origin,
-     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
-     *
-     * @exports loadText
-     *
-     * @param {String} url The URL to request.
-     * @param {Object} [headers] HTTP headers to send with the request.
-     * @param {Request} [request] The request object. Intended for internal use only.
-     * @returns {Promise.<String>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
-     *
-     *
-     * @example
-     * // load text from a URL, setting a custom header
-     * Cesium.loadText('http://someUrl.com/someJson.txt', {
-     *   'X-Custom-Header' : 'some value'
-     * }).then(function(text) {
-     *     // Do something with the text
-     * }).otherwise(function(error) {
-     *     // an error occurred
-     * });
-     *
-     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|XMLHttpRequest}
-     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
-     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
-     */
-    function loadText(url, headers, request) {
-        return loadWithXhr({
-            url : url,
-            headers : headers,
-            request : request
-        });
-    }
-
-    return loadText;
-});
-
-define('Core/loadJson',[
-        './clone',
-        './defined',
-        './DeveloperError',
-        './loadText'
-    ], function(
-        clone,
-        defined,
-        DeveloperError,
-        loadText) {
-    'use strict';
-
-    var defaultHeaders = {
-        Accept : 'application/json,*/*;q=0.01'
+        head.appendChild(script);
     };
 
-    // note: &#42;&#47;&#42; below is */* but that ends the comment block early
     /**
-     * Asynchronously loads the given URL as JSON.  Returns a promise that will resolve to
-     * a JSON object once loaded, or reject if the URL failed to load.  The data is loaded
-     * using XMLHttpRequest, which means that in order to make requests to another origin,
-     * the server must have Cross-Origin Resource Sharing (CORS) headers enabled. This function
-     * adds 'Accept: application/json,&#42;&#47;&#42;;q=0.01' to the request headers, if not
-     * already specified.
+     * The default implementations
      *
-     * @exports loadJson
-     *
-     * @param {String} url The URL to request.
-     * @param {Object} [headers] HTTP headers to send with the request.
-     * 'Accept: application/json,&#42;&#47;&#42;;q=0.01' is added to the request headers automatically
-     * if not specified.
-     * @param {Request} [request] The request object. Intended for internal use only.
-     * @returns {Promise.<Object>|undefined} a promise that will resolve to the requested data when loaded. Returns undefined if <code>request.throttle</code> is true and the request does not have high enough priority.
-     *
-     *
-     * @example
-     * Cesium.loadJson('http://someUrl.com/someJson.txt').then(function(jsonData) {
-     *     // Do something with the JSON object
-     * }).otherwise(function(error) {
-     *     // an error occurred
-     * });
-     *
-     * @see loadText
-     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
-     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
+     * @private
      */
-    function loadJson(url, headers, request) {
-                if (!defined(url)) {
-            throw new DeveloperError('url is required.');
-        }
-        
-        if (!defined(headers)) {
-            headers = defaultHeaders;
-        } else if (!defined(headers.Accept)) {
-            // clone before adding the Accept header
-            headers = clone(headers);
-            headers.Accept = defaultHeaders.Accept;
-        }
+    Resource._DefaultImplementations = {};
+    Resource._DefaultImplementations.createImage = Resource._Implementations.createImage;
+    Resource._DefaultImplementations.loadWithXhr = Resource._Implementations.loadWithXhr;
+    Resource._DefaultImplementations.loadAndExecuteScript = Resource._Implementations.loadAndExecuteScript;
 
-        var textPromise = loadText(url, headers, request);
-        if (!defined(textPromise)) {
-            return undefined;
-        }
+    /**
+     * A resource instance initialized to the current browser location
+     *
+     * @type {Resource}
+     * @constant
+     */
+    Resource.DEFAULT = freezeObject(new Resource({
+        url: (typeof document === 'undefined') ? '' : document.location.href.split('?')[0]
+    }));
 
-        return textPromise.then(function(value) {
-            return JSON.parse(value);
-        });
-    }
+    /**
+     * A function that returns the value of the property.
+     * @callback Resource~RetryCallback
+     *
+     * @param {Resource} [resource] The resource that failed to load.
+     * @param {Error} [error] The error that occurred during the loading of the resource.
+     * @returns {Boolean|Promise<Boolean>} If true or a promise that resolved to true, the resource will be retried. Otherwise the failure will be returned.
+     */
 
-    return loadJson;
+    return Resource;
 });
 
 define('Core/EarthOrientationParameters',[
@@ -19904,7 +22327,7 @@ define('Core/EarthOrientationParameters',[
         './freezeObject',
         './JulianDate',
         './LeapSecond',
-        './loadJson',
+        './Resource',
         './RuntimeError',
         './TimeConstants',
         './TimeStandard'
@@ -19917,7 +22340,7 @@ define('Core/EarthOrientationParameters',[
         freezeObject,
         JulianDate,
         LeapSecond,
-        loadJson,
+        Resource,
         RuntimeError,
         TimeConstants,
         TimeStandard) {
@@ -19933,7 +22356,7 @@ define('Core/EarthOrientationParameters',[
      * @constructor
      *
      * @param {Object} [options] Object with the following properties:
-     * @param {String} [options.url] The URL from which to obtain EOP data.  If neither this
+     * @param {Resource|String} [options.url] The URL from which to obtain EOP data.  If neither this
      *                 parameter nor options.data is specified, all EOP values are assumed
      *                 to be 0.0.  If options.data is specified, this parameter is
      *                 ignored.
@@ -19990,12 +22413,14 @@ define('Core/EarthOrientationParameters',[
             // Use supplied EOP data.
             onDataReady(this, options.data);
         } else if (defined(options.url)) {
+            var resource = Resource.createIfNeeded(options.url);
+
             // Download EOP data.
             var that = this;
-            this._downloadPromise = when(loadJson(options.url), function(eopData) {
+            this._downloadPromise = when(resource.fetchJson(), function(eopData) {
                 onDataReady(that, eopData);
             }, function() {
-                that._dataError = 'An error occurred while retrieving the EOP data from the URL ' + options.url + '.';
+                that._dataError = 'An error occurred while retrieving the EOP data from the URL ' + resource.url + '.';
             });
         } else {
             // Use all zeros for EOP data.
@@ -20278,172 +22703,17 @@ define('Core/EarthOrientationParameters',[
     return EarthOrientationParameters;
 });
 
-define('Core/getAbsoluteUri',[
-        '../ThirdParty/Uri',
-        './defaultValue',
-        './defined',
-        './DeveloperError'
-    ], function(
-        Uri,
-        defaultValue,
-        defined,
-        DeveloperError) {
-    'use strict';
-
-    /**
-     * Given a relative Uri and a base Uri, returns the absolute Uri of the relative Uri.
-     * @exports getAbsoluteUri
-     *
-     * @param {String} relative The relative Uri.
-     * @param {String} [base] The base Uri.
-     * @returns {String} The absolute Uri of the given relative Uri.
-     *
-     * @example
-     * //absolute Uri will be "https://test.com/awesome.png";
-     * var absoluteUri = Cesium.getAbsoluteUri('awesome.png', 'https://test.com');
-     */
-    function getAbsoluteUri(relative, base) {
-                if (!defined(relative)) {
-            throw new DeveloperError('relative uri is required.');
-        }
-                base = defaultValue(base, document.location.href);
-        var baseUri = new Uri(base);
-        var relativeUri = new Uri(relative);
-        return relativeUri.resolve(baseUri).toString();
-    }
-
-    return getAbsoluteUri;
-});
-
-define('Core/joinUrls',[
-        '../ThirdParty/Uri',
-        './defaultValue',
-        './defined',
-        './DeveloperError'
-    ], function(
-        Uri,
-        defaultValue,
-        defined,
-        DeveloperError) {
-    'use strict';
-
-    /**
-     * Function for joining URLs in a manner that is aware of query strings and fragments.
-     * This is useful when the base URL has a query string that needs to be maintained
-     * (e.g. a presigned base URL).
-     * @param {String|Uri} first The base URL.
-     * @param {String|Uri} second The URL path to join to the base URL.  If this URL is absolute, it is returned unmodified.
-     * @param {Boolean} [appendSlash=true] The boolean determining whether there should be a forward slash between first and second.
-     *
-     * @return {String} The combined url
-     * @private
-     */
-    function joinUrls(first, second, appendSlash) {
-                if (!defined(first)) {
-            throw new DeveloperError('first is required');
-        }
-        if (!defined(second)) {
-            throw new DeveloperError('second is required');
-        }
-        
-        appendSlash = defaultValue(appendSlash, true);
-
-        if (!(first instanceof Uri)) {
-            first = new Uri(first);
-        }
-
-        if (!(second instanceof Uri)) {
-            second = new Uri(second);
-        }
-
-        // Don't try to join a data uri
-        if (first.scheme === 'data') {
-            return first.toString();
-        }
-
-        // Don't try to join a data uri
-        if (second.scheme === 'data') {
-            return second.toString();
-        }
-
-        // Uri.isAbsolute returns false for a URL like '//foo.com'.  So if we have an authority but
-        // not a scheme, add a scheme matching the page's scheme.
-        if (defined(second.authority) && !defined(second.scheme)) {
-            if (typeof document !== 'undefined' && defined(document.location) && defined(document.location.href)) {
-                second.scheme = new Uri(document.location.href).scheme;
-            } else {
-                // Not in a browser?  Use the first URL's scheme instead.
-                second.scheme = first.scheme;
-            }
-        }
-
-        // If the second URL is absolute, use it for the scheme, authority, and path.
-        var baseUri = first;
-        if (second.isAbsolute()) {
-            baseUri = second;
-        }
-
-        var url = '';
-        if (defined(baseUri.scheme)) {
-            url += baseUri.scheme + ':';
-        }
-        if (defined(baseUri.authority)) {
-            url += '//' + baseUri.authority;
-
-            if (baseUri.path !== '' && baseUri.path !== '/') {
-                url = url.replace(/\/?$/, '/');
-                baseUri.path = baseUri.path.replace(/^\/?/g, '');
-            }
-        }
-
-        // Combine the paths (only if second is relative).
-        if (baseUri === first) {
-            if (appendSlash) {
-                url += first.path.replace(/\/?$/, '/') + second.path.replace(/^\/?/g, '');
-            } else {
-                url += first.path + second.path;
-            }
-        } else {
-            url += second.path;
-        }
-
-        // Combine the queries and fragments.
-        var hasFirstQuery = defined(first.query);
-        var hasSecondQuery = defined(second.query);
-        if (hasFirstQuery && hasSecondQuery) {
-            url += '?' + first.query + '&' + second.query;
-        } else if (hasFirstQuery && !hasSecondQuery) {
-            url += '?' + first.query;
-        } else if (!hasFirstQuery && hasSecondQuery) {
-            url += '?' + second.query;
-        }
-
-        var hasSecondFragment = defined(second.fragment);
-        if (defined(first.fragment) && !hasSecondFragment) {
-            url += '#' + first.fragment;
-        } else if (hasSecondFragment) {
-            url += '#' + second.fragment;
-        }
-
-        return url;
-    }
-
-    return joinUrls;
-});
-
 define('Core/buildModuleUrl',[
         '../ThirdParty/Uri',
         './defined',
         './DeveloperError',
-        './getAbsoluteUri',
-        './joinUrls',
+        './Resource',
         'require'
     ], function(
         Uri,
         defined,
         DeveloperError,
-        getAbsoluteUri,
-        joinUrls,
+        Resource,
         require) {
     'use strict';
     /*global CESIUM_BASE_URL*/
@@ -20461,10 +22731,10 @@ define('Core/buildModuleUrl',[
         return undefined;
     }
 
-    var baseUrl;
+    var baseResource;
     function getCesiumBaseUrl() {
-        if (defined(baseUrl)) {
-            return baseUrl;
+        if (defined(baseResource)) {
+            return baseResource;
         }
 
         var baseUrlString;
@@ -20478,9 +22748,12 @@ define('Core/buildModuleUrl',[
             throw new DeveloperError('Unable to determine Cesium base URL automatically, try defining a global variable called CESIUM_BASE_URL.');
         }
         
-        baseUrl = new Uri(getAbsoluteUri(baseUrlString));
+        baseResource = new Resource({
+            url: baseUrlString
+        });
+        baseResource.appendForwardSlash();
 
-        return baseUrl;
+        return baseResource;
     }
 
     function buildModuleUrlFromRequireToUrl(moduleID) {
@@ -20489,7 +22762,10 @@ define('Core/buildModuleUrl',[
     }
 
     function buildModuleUrlFromBaseUrl(moduleID) {
-        return joinUrls(getCesiumBaseUrl(), moduleID);
+        var resource = getCesiumBaseUrl().getDerivedResource({
+            url: moduleID
+        });
+        return resource.url;
     }
 
     var implementation;
@@ -20503,9 +22779,13 @@ define('Core/buildModuleUrl',[
      * @private
      */
     function buildModuleUrl(moduleID) {
+        if (typeof document === 'undefined') {
+            //document is undefined in node
+            return moduleID;
+        }
         if (!defined(implementation)) {
             //select implementation
-            if (defined(require.toUrl)) {
+            if (defined(define.amd) && !define.amd.toUrlUndefined && defined(require.toUrl)) {
                 implementation = buildModuleUrlFromRequireToUrl;
             } else {
                 implementation = buildModuleUrlFromBaseUrl;
@@ -20526,13 +22806,19 @@ define('Core/buildModuleUrl',[
 
     // exposed for testing
     buildModuleUrl._cesiumScriptRegex = cesiumScriptRegex;
+    buildModuleUrl._buildModuleUrlFromBaseUrl = buildModuleUrlFromBaseUrl;
+    buildModuleUrl._clearBaseResource = function() {
+        baseResource = undefined;
+    };
 
     /**
      * Sets the base URL for resolving modules.
      * @param {String} value The new base URL.
      */
     buildModuleUrl.setBaseUrl = function(value) {
-        baseUrl = new Uri(value).resolve(new Uri(document.location.href));
+        baseResource = Resource.DEFAULT.getDerivedResource({
+            url: value
+        });
     };
 
     return buildModuleUrl;
@@ -20583,7 +22869,7 @@ define('Core/Iau2006XysData',[
         './defined',
         './Iau2006XysSample',
         './JulianDate',
-        './loadJson',
+        './Resource',
         './TimeStandard'
     ], function(
         when,
@@ -20592,7 +22878,7 @@ define('Core/Iau2006XysData',[
         defined,
         Iau2006XysSample,
         JulianDate,
-        loadJson,
+        Resource,
         TimeStandard) {
     'use strict';
 
@@ -20604,7 +22890,7 @@ define('Core/Iau2006XysData',[
      * @constructor
      *
      * @param {Object} [options] Object with the following properties:
-     * @param {String} [options.xysFileUrlTemplate='Assets/IAU2006_XYS/IAU2006_XYS_{0}.json'] A template URL for obtaining the XYS data.  In the template,
+     * @param {Resource|String} [options.xysFileUrlTemplate='Assets/IAU2006_XYS/IAU2006_XYS_{0}.json'] A template URL for obtaining the XYS data.  In the template,
      *                 `{0}` will be replaced with the file index.
      * @param {Number} [options.interpolationOrder=9] The order of interpolation to perform on the XYS data.
      * @param {Number} [options.sampleZeroJulianEphemerisDate=2442396.5] The Julian ephemeris date (JED) of the
@@ -20618,7 +22904,7 @@ define('Core/Iau2006XysData',[
     function Iau2006XysData(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
-        this._xysFileUrlTemplate = options.xysFileUrlTemplate;
+        this._xysFileUrlTemplate = Resource.createIfNeeded(options.xysFileUrlTemplate);
         this._interpolationOrder = defaultValue(options.interpolationOrder, 9);
         this._sampleZeroJulianEphemerisDate = defaultValue(options.sampleZeroJulianEphemerisDate, 2442396.5);
         this._sampleZeroDateTT = new JulianDate(this._sampleZeroJulianEphemerisDate, 0.0, TimeStandard.TAI);
@@ -20816,12 +23102,18 @@ define('Core/Iau2006XysData',[
         var chunkUrl;
         var xysFileUrlTemplate = xysData._xysFileUrlTemplate;
         if (defined(xysFileUrlTemplate)) {
-            chunkUrl = xysFileUrlTemplate.replace('{0}', chunkIndex);
+            chunkUrl = xysFileUrlTemplate.getDerivedResource({
+                templateValues: {
+                    '0': chunkIndex
+                }
+            });
         } else {
-            chunkUrl = buildModuleUrl('Assets/IAU2006_XYS/IAU2006_XYS_' + chunkIndex + '.json');
+            chunkUrl = new Resource({
+                url : buildModuleUrl('Assets/IAU2006_XYS/IAU2006_XYS_' + chunkIndex + '.json')
+            });
         }
 
-        when(loadJson(chunkUrl), function(chunk) {
+        when(chunkUrl.fetchJson(), function(chunk) {
             xysData._chunkDownloadsInProgress[chunkIndex] = false;
 
             var samples = xysData._samples;
@@ -20841,201 +23133,13 @@ define('Core/Iau2006XysData',[
     return Iau2006XysData;
 });
 
-define('Core/HeadingPitchRoll',[
-        './defaultValue',
-        './defined',
-        './DeveloperError',
-        './Math'
-    ], function(
-        defaultValue,
-        defined,
-        DeveloperError,
-        CesiumMath) {
-    'use strict';
-
-    /**
-     * A rotation expressed as a heading, pitch, and roll. Heading is the rotation about the
-     * negative z axis. Pitch is the rotation about the negative y axis. Roll is the rotation about
-     * the positive x axis.
-     * @alias HeadingPitchRoll
-     * @constructor
-     *
-     * @param {Number} [heading=0.0] The heading component in radians.
-     * @param {Number} [pitch=0.0] The pitch component in radians.
-     * @param {Number} [roll=0.0] The roll component in radians.
-     */
-    function HeadingPitchRoll(heading, pitch, roll) {
-        this.heading = defaultValue(heading, 0.0);
-        this.pitch = defaultValue(pitch, 0.0);
-        this.roll = defaultValue(roll, 0.0);
-    }
-
-    /**
-     * Computes the heading, pitch and roll from a quaternion (see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles )
-     *
-     * @param {Quaternion} quaternion The quaternion from which to retrieve heading, pitch, and roll, all expressed in radians.
-     * @param {HeadingPitchRoll} [result] The object in which to store the result. If not provided, a new instance is created and returned.
-     * @returns {HeadingPitchRoll} The modified result parameter or a new HeadingPitchRoll instance if one was not provided.
-     */
-    HeadingPitchRoll.fromQuaternion = function(quaternion, result) {
-                if (!defined(quaternion)) {
-            throw new DeveloperError('quaternion is required');
-        }
-                if (!defined(result)) {
-            result = new HeadingPitchRoll();
-        }
-        var test = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x);
-        var denominatorRoll = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y);
-        var numeratorRoll = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z);
-        var denominatorHeading = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z);
-        var numeratorHeading = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y);
-        result.heading = -Math.atan2(numeratorHeading, denominatorHeading);
-        result.roll = Math.atan2(numeratorRoll, denominatorRoll);
-        result.pitch = -Math.asin(test);
-        return result;
-    };
-
-    /**
-     * Returns a new HeadingPitchRoll instance from angles given in degrees.
-     *
-     * @param {Number} heading the heading in degrees
-     * @param {Number} pitch the pitch in degrees
-     * @param {Number} roll the heading in degrees
-     * @param {HeadingPitchRoll} [result] The object in which to store the result. If not provided, a new instance is created and returned.
-     * @returns {HeadingPitchRoll} A new HeadingPitchRoll instance
-     */
-    HeadingPitchRoll.fromDegrees = function(heading, pitch, roll, result) {
-                if (!defined(heading)) {
-            throw new DeveloperError('heading is required');
-        }
-        if (!defined(pitch)) {
-            throw new DeveloperError('pitch is required');
-        }
-        if (!defined(roll)) {
-            throw new DeveloperError('roll is required');
-        }
-                if (!defined(result)) {
-            result = new HeadingPitchRoll();
-        }
-        result.heading = heading * CesiumMath.RADIANS_PER_DEGREE;
-        result.pitch = pitch * CesiumMath.RADIANS_PER_DEGREE;
-        result.roll = roll * CesiumMath.RADIANS_PER_DEGREE;
-        return result;
-    };
-
-    /**
-     * Duplicates a HeadingPitchRoll instance.
-     *
-     * @param {HeadingPitchRoll} headingPitchRoll The HeadingPitchRoll to duplicate.
-     * @param {HeadingPitchRoll} [result] The object onto which to store the result.
-     * @returns {HeadingPitchRoll} The modified result parameter or a new HeadingPitchRoll instance if one was not provided. (Returns undefined if headingPitchRoll is undefined)
-     */
-    HeadingPitchRoll.clone = function(headingPitchRoll, result) {
-        if (!defined(headingPitchRoll)) {
-            return undefined;
-        }
-        if (!defined(result)) {
-            return new HeadingPitchRoll(headingPitchRoll.heading, headingPitchRoll.pitch, headingPitchRoll.roll);
-        }
-        result.heading = headingPitchRoll.heading;
-        result.pitch = headingPitchRoll.pitch;
-        result.roll = headingPitchRoll.roll;
-        return result;
-    };
-
-    /**
-     * Compares the provided HeadingPitchRolls componentwise and returns
-     * <code>true</code> if they are equal, <code>false</code> otherwise.
-     *
-     * @param {HeadingPitchRoll} [left] The first HeadingPitchRoll.
-     * @param {HeadingPitchRoll} [right] The second HeadingPitchRoll.
-     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
-     */
-    HeadingPitchRoll.equals = function(left, right) {
-        return (left === right) ||
-            ((defined(left)) &&
-                (defined(right)) &&
-                (left.heading === right.heading) &&
-                (left.pitch === right.pitch) &&
-                (left.roll === right.roll));
-    };
-
-    /**
-     * Compares the provided HeadingPitchRolls componentwise and returns
-     * <code>true</code> if they pass an absolute or relative tolerance test,
-     * <code>false</code> otherwise.
-     *
-     * @param {HeadingPitchRoll} [left] The first HeadingPitchRoll.
-     * @param {HeadingPitchRoll} [right] The second HeadingPitchRoll.
-     * @param {Number} relativeEpsilon The relative epsilon tolerance to use for equality testing.
-     * @param {Number} [absoluteEpsilon=relativeEpsilon] The absolute epsilon tolerance to use for equality testing.
-     * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
-     */
-    HeadingPitchRoll.equalsEpsilon = function(left, right, relativeEpsilon, absoluteEpsilon) {
-        return (left === right) ||
-            (defined(left) &&
-                defined(right) &&
-                CesiumMath.equalsEpsilon(left.heading, right.heading, relativeEpsilon, absoluteEpsilon) &&
-                CesiumMath.equalsEpsilon(left.pitch, right.pitch, relativeEpsilon, absoluteEpsilon) &&
-                CesiumMath.equalsEpsilon(left.roll, right.roll, relativeEpsilon, absoluteEpsilon));
-    };
-
-    /**
-     * Duplicates this HeadingPitchRoll instance.
-     *
-     * @param {HeadingPitchRoll} [result] The object onto which to store the result.
-     * @returns {HeadingPitchRoll} The modified result parameter or a new HeadingPitchRoll instance if one was not provided.
-     */
-    HeadingPitchRoll.prototype.clone = function(result) {
-        return HeadingPitchRoll.clone(this, result);
-    };
-
-    /**
-     * Compares this HeadingPitchRoll against the provided HeadingPitchRoll componentwise and returns
-     * <code>true</code> if they are equal, <code>false</code> otherwise.
-     *
-     * @param {HeadingPitchRoll} [right] The right hand side HeadingPitchRoll.
-     * @returns {Boolean} <code>true</code> if they are equal, <code>false</code> otherwise.
-     */
-    HeadingPitchRoll.prototype.equals = function(right) {
-        return HeadingPitchRoll.equals(this, right);
-    };
-
-    /**
-     * Compares this HeadingPitchRoll against the provided HeadingPitchRoll componentwise and returns
-     * <code>true</code> if they pass an absolute or relative tolerance test,
-     * <code>false</code> otherwise.
-     *
-     * @param {HeadingPitchRoll} [right] The right hand side HeadingPitchRoll.
-     * @param {Number} relativeEpsilon The relative epsilon tolerance to use for equality testing.
-     * @param {Number} [absoluteEpsilon=relativeEpsilon] The absolute epsilon tolerance to use for equality testing.
-     * @returns {Boolean} <code>true</code> if they are within the provided epsilon, <code>false</code> otherwise.
-     */
-    HeadingPitchRoll.prototype.equalsEpsilon = function(right, relativeEpsilon, absoluteEpsilon) {
-        return HeadingPitchRoll.equalsEpsilon(this, right, relativeEpsilon, absoluteEpsilon);
-    };
-
-    /**
-     * Creates a string representing this HeadingPitchRoll in the format '(heading, pitch, roll)' in radians.
-     *
-     * @returns {String} A string representing the provided HeadingPitchRoll in the format '(heading, pitch, roll)'.
-     */
-    HeadingPitchRoll.prototype.toString = function() {
-        return '(' + this.heading + ', ' + this.pitch + ', ' + this.roll + ')';
-    };
-
-    return HeadingPitchRoll;
-});
-
 define('Core/Quaternion',[
         './Cartesian3',
         './Check',
         './defaultValue',
         './defined',
-        './deprecationWarning',
         './FeatureDetection',
         './freezeObject',
-        './HeadingPitchRoll',
         './Math',
         './Matrix3'
     ], function(
@@ -21043,10 +23147,8 @@ define('Core/Quaternion',[
         Check,
         defaultValue,
         defined,
-        deprecationWarning,
         FeatureDetection,
         freezeObject,
-        HeadingPitchRoll,
         CesiumMath,
         Matrix3) {
     'use strict';
@@ -21211,26 +23313,13 @@ define('Core/Quaternion',[
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if none was provided.
      */
-    Quaternion.fromHeadingPitchRoll = function(headingOrHeadingPitchRoll, pitchOrResult, roll, result) {
-                if (headingOrHeadingPitchRoll instanceof HeadingPitchRoll) {
-            Check.typeOf.object('headingPitchRoll', headingOrHeadingPitchRoll);
-        } else {
-            Check.typeOf.number('heading', headingOrHeadingPitchRoll);
-            Check.typeOf.number('pitch', pitchOrResult);
-            Check.typeOf.number('roll', roll);
-        }
-                var hpr;
-        if (headingOrHeadingPitchRoll instanceof HeadingPitchRoll) {
-            hpr = headingOrHeadingPitchRoll;
-            result = pitchOrResult;
-        } else {
-            deprecationWarning('Quaternion.fromHeadingPitchRoll(heading, pitch, roll,result)', 'The method was deprecated in Cesium 1.32 and will be removed in version 1.33. ' + 'Use Quaternion.fromHeadingPitchRoll(hpr,result) where hpr is a HeadingPitchRoll');
-            hpr = new HeadingPitchRoll(headingOrHeadingPitchRoll, pitchOrResult, roll);
-        }
-        scratchRollQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_X, hpr.roll, scratchHPRQuaternion);
-        scratchPitchQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Y, -hpr.pitch, result);
+    Quaternion.fromHeadingPitchRoll = function(headingPitchRoll, result) {
+                Check.typeOf.object('headingPitchRoll', headingPitchRoll);
+        
+        scratchRollQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_X, headingPitchRoll.roll, scratchHPRQuaternion);
+        scratchPitchQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Y, -headingPitchRoll.pitch, result);
         result = Quaternion.multiply(scratchPitchQuaternion, scratchRollQuaternion, scratchPitchQuaternion);
-        scratchHeadingQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Z, -hpr.heading, scratchHPRQuaternion);
+        scratchHeadingQuaternion = Quaternion.fromAxisAngle(Cartesian3.UNIT_Z, -headingPitchRoll.heading, scratchHPRQuaternion);
         return Quaternion.multiply(scratchHeadingQuaternion, result, result);
     };
 
@@ -22035,7 +24124,6 @@ define('Core/Transforms',[
         './Check',
         './defaultValue',
         './defined',
-        './deprecationWarning',
         './DeveloperError',
         './EarthOrientationParameters',
         './EarthOrientationParametersSample',
@@ -22057,7 +24145,6 @@ define('Core/Transforms',[
         Check,
         defaultValue,
         defined,
-        deprecationWarning,
         DeveloperError,
         EarthOrientationParameters,
         EarthOrientationParametersSample,
@@ -22248,6 +24335,7 @@ define('Core/Transforms',[
      * <li>The <code>z</code> axis points in the direction of the ellipsoid surface normal which passes through the position.</li>
      * </ul>
      *
+     * @function
      * @param {Cartesian3} origin The center point of the local reference frame.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid whose fixed frame is used in the transformation.
      * @param {Matrix4} [result] The object onto which to store the result.
@@ -22270,6 +24358,7 @@ define('Core/Transforms',[
      * <li>The <code>z</code> axis points in the opposite direction of the ellipsoid surface normal which passes through the position.</li>
      * </ul>
      *
+     * @function
      * @param {Cartesian3} origin The center point of the local reference frame.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid whose fixed frame is used in the transformation.
      * @param {Matrix4} [result] The object onto which to store the result.
@@ -22292,6 +24381,7 @@ define('Core/Transforms',[
      * <li>The <code>z</code> axis points in the local east direction.</li>
      * </ul>
      *
+     * @function
      * @param {Cartesian3} origin The center point of the local reference frame.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid whose fixed frame is used in the transformation.
      * @param {Matrix4} [result] The object onto which to store the result.
@@ -22305,26 +24395,27 @@ define('Core/Transforms',[
     Transforms.northUpEastToFixedFrame = Transforms.localFrameToFixedFrameGenerator('north','up');
 
     /**
-    * Computes a 4x4 transformation matrix from a reference frame with an north-west-up axes
-    * centered at the provided origin to the provided ellipsoid's fixed reference frame.
-    * The local axes are defined as:
-    * <ul>
-    * <li>The <code>x</code> axis points in the local north direction.</li>
-    * <li>The <code>y</code> axis points in the local west direction.</li>
-    * <li>The <code>z</code> axis points in the direction of the ellipsoid surface normal which passes through the position.</li>
-    * </ul>
-    *
-    * @param {Cartesian3} origin The center point of the local reference frame.
-    * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid whose fixed frame is used in the transformation.
-    * @param {Matrix4} [result] The object onto which to store the result.
-    * @returns {Matrix4} The modified result parameter or a new Matrix4 instance if none was provided.
-    *
-    * @example
-    * // Get the transform from local north-West-Up at cartographic (0.0, 0.0) to Earth's fixed frame.
-    * var center = Cesium.Cartesian3.fromDegrees(0.0, 0.0);
-    * var transform = Cesium.Transforms.northWestUpToFixedFrame(center);
-    */
-   Transforms.northWestUpToFixedFrame = Transforms.localFrameToFixedFrameGenerator('north','west');
+     * Computes a 4x4 transformation matrix from a reference frame with an north-west-up axes
+     * centered at the provided origin to the provided ellipsoid's fixed reference frame.
+     * The local axes are defined as:
+     * <ul>
+     * <li>The <code>x</code> axis points in the local north direction.</li>
+     * <li>The <code>y</code> axis points in the local west direction.</li>
+     * <li>The <code>z</code> axis points in the direction of the ellipsoid surface normal which passes through the position.</li>
+     * </ul>
+     *
+     * @function
+     * @param {Cartesian3} origin The center point of the local reference frame.
+     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid whose fixed frame is used in the transformation.
+     * @param {Matrix4} [result] The object onto which to store the result.
+     * @returns {Matrix4} The modified result parameter or a new Matrix4 instance if none was provided.
+     *
+      * @example
+     * // Get the transform from local north-West-Up at cartographic (0.0, 0.0) to Earth's fixed frame.
+     * var center = Cesium.Cartesian3.fromDegrees(0.0, 0.0);
+     * var transform = Cesium.Transforms.northWestUpToFixedFrame(center);
+     */
+    Transforms.northWestUpToFixedFrame = Transforms.localFrameToFixedFrameGenerator('north','west');
 
     var scratchHPRQuaternion = new Quaternion();
     var scratchScale = new Cartesian3(1.0, 1.0, 1.0);
@@ -22339,7 +24430,7 @@ define('Core/Transforms',[
      * @param {Cartesian3} origin The center point of the local reference frame.
      * @param {HeadingPitchRoll} headingPitchRoll The heading, pitch, and roll.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid whose fixed frame is used in the transformation.
-     * @param {Transforms~LocalFrameToFixedFrame} [fixedFrameTransformOrResult=Transforms.eastNorthUpToFixedFrame] A 4x4 transformation
+     * @param {Transforms~LocalFrameToFixedFrame} [fixedFrameTransform=Transforms.eastNorthUpToFixedFrame] A 4x4 transformation
      *  matrix from a reference frame to the provided ellipsoid's fixed reference frame
      * @param {Matrix4} [result] The object onto which to store the result.
      * @returns {Matrix4} The modified result parameter or a new Matrix4 instance if none was provided.
@@ -22353,19 +24444,13 @@ define('Core/Transforms',[
      * var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
      * var transform = Cesium.Transforms.headingPitchRollToFixedFrame(center, hpr);
      */
-    Transforms.headingPitchRollToFixedFrame = function(origin, headingPitchRoll, ellipsoid, fixedFrameTransformOrResult, result) {
+    Transforms.headingPitchRollToFixedFrame = function(origin, headingPitchRoll, ellipsoid, fixedFrameTransform, result) {
                 Check.typeOf.object( 'HeadingPitchRoll', headingPitchRoll);
         
-        // checks for required parameters happen in the called functions
-        if(fixedFrameTransformOrResult instanceof Matrix4){
-            result = fixedFrameTransformOrResult;
-            fixedFrameTransformOrResult = undefined;
-            deprecationWarning('Transforms.headingPitchRollToFixedFrame(origin, headingPitchRoll, ellipsoid, result)', 'The method was deprecated in Cesium 1.31 and will be removed in version 1.33. Transforms.headingPitchRollToFixedFrame(origin, headingPitchRoll, ellipsoid, fixedFrameTransform, result) where fixedFrameTransform is a a 4x4 transformation matrix (see Transforms.localFrameToFixedFrameGenerator)');
-        }
-        fixedFrameTransformOrResult = defaultValue(fixedFrameTransformOrResult,Transforms.eastNorthUpToFixedFrame);
+        fixedFrameTransform = defaultValue(fixedFrameTransform, Transforms.eastNorthUpToFixedFrame);
         var hprQuaternion = Quaternion.fromHeadingPitchRoll(headingPitchRoll, scratchHPRQuaternion);
         var hprMatrix = Matrix4.fromTranslationQuaternionRotationScale(Cartesian3.ZERO, hprQuaternion, scratchScale, scratchHPRMatrix4);
-        result = fixedFrameTransformOrResult(origin, ellipsoid, result);
+        result = fixedFrameTransform(origin, ellipsoid, result);
         return Matrix4.multiply(result, hprMatrix, result);
     };
 
@@ -22381,7 +24466,7 @@ define('Core/Transforms',[
      * @param {Cartesian3} origin The center point of the local reference frame.
      * @param {HeadingPitchRoll} headingPitchRoll The heading, pitch, and roll.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid whose fixed frame is used in the transformation.
-     * @param {Transforms~LocalFrameToFixedFrame} [fixedFrameTransformOrResult=Transforms.eastNorthUpToFixedFrame] A 4x4 transformation
+     * @param {Transforms~LocalFrameToFixedFrame} [fixedFrameTransform=Transforms.eastNorthUpToFixedFrame] A 4x4 transformation
      *  matrix from a reference frame to the provided ellipsoid's fixed reference frame
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if none was provided.
@@ -22395,14 +24480,10 @@ define('Core/Transforms',[
      * var hpr = new HeadingPitchRoll(heading, pitch, roll);
      * var quaternion = Cesium.Transforms.headingPitchRollQuaternion(center, hpr);
      */
-    Transforms.headingPitchRollQuaternion = function(origin, headingPitchRoll, ellipsoid, fixedFrameTransformOrResult, result) {
+    Transforms.headingPitchRollQuaternion = function(origin, headingPitchRoll, ellipsoid, fixedFrameTransform, result) {
                 Check.typeOf.object( 'HeadingPitchRoll', headingPitchRoll);
-                if (fixedFrameTransformOrResult instanceof Quaternion) {
-            result = fixedFrameTransformOrResult;
-            fixedFrameTransformOrResult = undefined;
-            deprecationWarning('Transforms.headingPitchRollQuaternion(origin, headingPitchRoll, ellipsoid, result)', 'The method was deprecated in Cesium 1.31 and will be removed in version 1.33. Transforms.headingPitchRollQuaternion(origin, headingPitchRoll, ellipsoid, fixedFrameTransform, result) where fixedFrameTransform is a a 4x4 transformation matrix (see Transforms.localFrameToFixedFrameGenerator)');
-        }
-        var transform = Transforms.headingPitchRollToFixedFrame(origin, headingPitchRoll, ellipsoid,fixedFrameTransformOrResult, scratchENUMatrix4);
+        
+        var transform = Transforms.headingPitchRollToFixedFrame(origin, headingPitchRoll, ellipsoid, fixedFrameTransform, scratchENUMatrix4);
         var rotation = Matrix4.getRotation(transform, scratchHPRMatrix3);
         return Quaternion.fromRotationMatrix(rotation, result);
     };
@@ -22426,7 +24507,7 @@ define('Core/Transforms',[
      *
      * @example
      * //Set the view to in the inertial frame.
-     * scene.preRender.addEventListener(function(scene, time) {
+     * scene.postUpdate.addEventListener(function(scene, time) {
      *    var now = Cesium.JulianDate.now();
      *    var offset = Cesium.Matrix4.multiplyByPoint(camera.transform, camera.position, new Cesium.Cartesian3());
      *    var transform = Cesium.Matrix4.fromRotationTranslation(Cesium.Transforms.computeTemeToPseudoFixedMatrix(now));
@@ -22556,7 +24637,7 @@ define('Core/Transforms',[
      *
      *
      * @example
-     * scene.preRender.addEventListener(function(scene, time) {
+     * scene.postUpdate.addEventListener(function(scene, time) {
      *   var icrfToFixed = Cesium.Transforms.computeIcrfToFixedMatrix(time);
      *   if (Cesium.defined(icrfToFixed)) {
      *     var offset = Cesium.Matrix4.multiplyByPoint(camera.transform, camera.position, new Cesium.Cartesian3());
@@ -23911,10 +25992,10 @@ define('Core/PolygonPipeline',[
         '../ThirdParty/earcut-2.1.1',
         './Cartesian2',
         './Cartesian3',
+        './Check',
         './ComponentDatatype',
         './defaultValue',
         './defined',
-        './DeveloperError',
         './Ellipsoid',
         './Geometry',
         './GeometryAttribute',
@@ -23925,10 +26006,10 @@ define('Core/PolygonPipeline',[
         earcut,
         Cartesian2,
         Cartesian3,
+        Check,
         ComponentDatatype,
         defaultValue,
         defined,
-        DeveloperError,
         Ellipsoid,
         Geometry,
         GeometryAttribute,
@@ -23949,12 +26030,8 @@ define('Core/PolygonPipeline',[
      * @exception {DeveloperError} At least three positions are required.
      */
     PolygonPipeline.computeArea2D = function(positions) {
-                if (!defined(positions)) {
-            throw new DeveloperError('positions is required.');
-        }
-        if (positions.length < 3) {
-            throw new DeveloperError('At least three positions are required.');
-        }
+                Check.defined('positions', positions);
+        Check.typeOf.number.greaterThanOrEquals('positions.length', positions.length, 3);
         
         var length = positions.length;
         var area = 0.0;
@@ -23987,9 +26064,7 @@ define('Core/PolygonPipeline',[
      * @returns {Number[]} Index array representing triangles that fill the polygon
      */
     PolygonPipeline.triangulate = function(positions, holes) {
-                if (!defined(positions)) {
-            throw new DeveloperError('positions is required.');
-        }
+                Check.defined('positions', positions);
         
         var flattenedPositions = Cartesian2.packArray(positions);
         return earcut(flattenedPositions, holes, 2);
@@ -24018,24 +26093,12 @@ define('Core/PolygonPipeline',[
     PolygonPipeline.computeSubdivision = function(ellipsoid, positions, indices, granularity) {
         granularity = defaultValue(granularity, CesiumMath.RADIANS_PER_DEGREE);
 
-                if (!defined(ellipsoid)) {
-            throw new DeveloperError('ellipsoid is required.');
-        }
-        if (!defined(positions)) {
-            throw new DeveloperError('positions is required.');
-        }
-        if (!defined(indices)) {
-            throw new DeveloperError('indices is required.');
-        }
-        if (indices.length < 3) {
-            throw new DeveloperError('At least three indices are required.');
-        }
-        if (indices.length % 3 !== 0) {
-            throw new DeveloperError('The number of indices must be divisable by three.');
-        }
-        if (granularity <= 0.0) {
-            throw new DeveloperError('granularity must be greater than zero.');
-        }
+                Check.typeOf.object('ellipsoid', ellipsoid);
+        Check.defined('positions', positions);
+        Check.defined('indices', indices);
+        Check.typeOf.number.greaterThanOrEquals('indices.length', indices.length, 3);
+        Check.typeOf.number.equals('indices.length % 3', '0', indices.length % 3, 0);
+        Check.typeOf.number.greaterThan('granularity', granularity, 0.0);
         
         // triangles that need (or might need) to be subdivided.
         var triangles = indices.slice(0);
@@ -24590,29 +26653,6 @@ define('Core/EllipsoidGeodesic',[
     };
 
     return EllipsoidGeodesic;
-});
-
-define('Core/isArray',[
-        './defined'
-    ], function(
-        defined) {
-    'use strict';
-
-    /**
-     * Tests an object to see if it is an array.
-     * @exports isArray
-     *
-     * @param {Object} value The value to test.
-     * @returns {Boolean} true if the value is an array, false otherwise.
-     */
-    var isArray = Array.isArray;
-    if (!defined(isArray)) {
-        isArray = function(value) {
-            return Object.prototype.toString.call(value) === '[object Array]';
-        };
-    }
-
-    return isArray;
 });
 
 define('Core/PolylinePipeline',[
