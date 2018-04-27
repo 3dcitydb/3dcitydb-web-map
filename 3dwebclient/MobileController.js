@@ -191,6 +191,24 @@
                     clearInterval(loop);
                 }
             }, 10);
+        } else {
+            // bring the navigation div to the background
+            var loop1 = window.setInterval(function () {
+                var navDiv = document.getElementById("navigationDiv");
+                if (Cesium.defined(navDiv)) {
+                    navDiv.style.zIndex = "0";
+                    clearInterval(loop1);
+                }
+            }, 10);
+
+            // bring the infobox to the foreground
+            var loop2 = window.setInterval(function () {
+                var infobox = document.getElementsByClassName("cesium-infoBox cesium-infoBox-visible")[0];
+                if (Cesium.defined(infobox)) {
+                    infobox.style.zIndex = "1000";
+                    clearInterval(loop2);
+                }
+            }, 10);
         }
     };
 
