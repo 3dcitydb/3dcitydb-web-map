@@ -384,11 +384,9 @@ define('Core/RuntimeError',[
 
 define('Core/decodeGoogleEarthEnterpriseData',[
         './Check',
-        './defined',
         './RuntimeError'
     ], function(
         Check,
-        defined,
         RuntimeError) {
     'use strict';
 
