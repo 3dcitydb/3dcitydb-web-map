@@ -31,6 +31,11 @@
 // updated Bing Key
 Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';
 
+// Define clock to be animated per default
+var clock = new Cesium.Clock({
+    shouldAnimate: true
+});
+
 // create 3Dcitydb-web-map instance
 var shadows = CitydbUtil.parse_query_string('shadows', window.location.href);
 var terrainShadows = CitydbUtil.parse_query_string('terrainShadows', window.location.href);
@@ -40,7 +45,8 @@ var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
     animation: true,
     fullscreenButton: false,
     shadows: (shadows == "true"),
-    terrainShadows: parseInt(terrainShadows)
+    terrainShadows: parseInt(terrainShadows),
+    clockViewModel: new Cesium.ClockViewModel(clock)
 });
 
 navigationInitialization('cesiumContainer', cesiumViewer);
