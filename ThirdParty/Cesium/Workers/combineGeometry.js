@@ -590,6 +590,7 @@ define('Core/Math',[
      * Math functions.
      *
      * @exports CesiumMath
+     * @alias Math
      */
     var CesiumMath = {};
 
@@ -1299,7 +1300,6 @@ define('Core/Math',[
         return randomNumberGenerator.random();
     };
 
-
     /**
      * Generates a random number between two numbers.
      *
@@ -1374,6 +1374,20 @@ define('Core/Math',[
         }
                 return Math.log(number) / Math.log(base);
     };
+
+    function cbrt(number) {
+        var result = Math.pow(Math.abs(number), 1.0 / 3.0);
+        return number < 0.0 ? -result : result;
+    }
+
+    /**
+     * Finds the cube root of a number.
+     * Returns NaN if <code>number</code> is not provided.
+     *
+     * @param {Number} [number] The number.
+     * @returns {Number} The result.
+     */
+    CesiumMath.cbrt = defined(Math.cbrt) ? Math.cbrt : cbrt;
 
     /**
      * @private
@@ -2019,6 +2033,22 @@ define('Core/Cartesian3',[
     };
 
     /**
+     * Projects vector a onto vector b
+     * @param {Cartesian3} a The vector that needs projecting
+     * @param {Cartesian3} b The vector to project onto
+     * @param {Cartesian3} result The result cartesian
+     * @returns {Cartesian3} The modified result parameter
+     */
+    Cartesian3.projectVector = function(a, b, result) {
+                Check.defined('a', a);
+        Check.defined('b', b);
+        Check.defined('result', result);
+        
+        var scalar = Cartesian3.dot(a, b) / Cartesian3.dot(b, b);
+        return Cartesian3.multiplyByScalar(b, scalar, result);
+    };
+
+    /**
      * Compares the provided Cartesians componentwise and returns
      * <code>true</code> if they are equal, <code>false</code> otherwise.
      *
@@ -2650,6 +2680,21 @@ define('Core/Cartographic',[
         result.latitude = latitude;
         result.height = height;
         return result;
+    };
+
+    /**
+     * Creates a new Cartesian3 instance from a Cartographic input. The values in the inputted
+     * object should be in radians.
+     *
+     * @param {Cartographic} cartographic Input to be converted into a Cartesian3 output.
+     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the position lies.
+     * @param {Cartesian3} [result] The object onto which to store the result.
+     * @returns {Cartesian3} The position
+     */
+    Cartographic.toCartesian = function(cartographic, ellipsoid, result) {
+                Check.defined('cartographic', cartographic);
+        
+        return Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, cartographic.height, ellipsoid, result);
     };
 
     /**
@@ -5183,7 +5228,6 @@ define('Core/Cartesian4',[
         return result;
     };
 
-
     /**
      * The number of elements used to pack the object into an array.
      * @type {Number}
@@ -5825,6 +5869,91 @@ define('Core/Cartesian4',[
      */
     Cartesian4.prototype.toString = function() {
         return '(' + this.x + ', ' + this.y + ', ' + this.z + ', ' + this.w + ')';
+    };
+
+    var scratchFloatArray = new Float32Array(1);
+    var SHIFT_LEFT_8 = 256.0;
+    var SHIFT_LEFT_16 = 65536.0;
+    var SHIFT_LEFT_24 = 16777216.0;
+
+    var SHIFT_RIGHT_8 = 1.0 / SHIFT_LEFT_8;
+    var SHIFT_RIGHT_16 = 1.0 / SHIFT_LEFT_16;
+    var SHIFT_RIGHT_24 = 1.0 / SHIFT_LEFT_24;
+
+    var BIAS = 38.0;
+
+    /**
+     * Packs an arbitrary floating point value to 4 values representable using uint8.
+     *
+     * @param {Number} value A floating point number
+     * @param {Cartesian4} [result] The Cartesian4 that will contain the packed float.
+     * @returns {Cartesian4} A Cartesian4 representing the float packed to values in x, y, z, and w.
+     */
+    Cartesian4.packFloat = function(value, result) {
+                Check.typeOf.number('value', value);
+        
+        if (!defined(result)) {
+            result = new Cartesian4();
+        }
+
+        // Force the value to 32 bit precision
+        scratchFloatArray[0] = value;
+        value = scratchFloatArray[0];
+
+        if (value === 0.0) {
+            return Cartesian4.clone(Cartesian4.ZERO, result);
+        }
+
+        var sign = value < 0.0 ? 1.0 : 0.0;
+        var exponent;
+
+        if (!isFinite(value)) {
+            value = 0.1;
+            exponent = BIAS;
+        } else {
+            value = Math.abs(value);
+            exponent = Math.floor(CesiumMath.logBase(value, 10)) + 1.0;
+            value = value / Math.pow(10.0, exponent);
+        }
+
+        var temp = value * SHIFT_LEFT_8;
+        result.x = Math.floor(temp);
+        temp = (temp - result.x) * SHIFT_LEFT_8;
+        result.y = Math.floor(temp);
+        temp = (temp - result.y) * SHIFT_LEFT_8;
+        result.z = Math.floor(temp);
+        result.w = (exponent + BIAS) * 2.0 + sign;
+
+        return result;
+    };
+
+    /**
+     * Unpacks a float packed using Cartesian4.packFloat.
+     *
+     * @param {Cartesian4} packedFloat A Cartesian4 containing a float packed to 4 values representable using uint8.
+     * @returns {Number} The unpacked float.
+     * @private
+     */
+    Cartesian4.unpackFloat = function(packedFloat) {
+                Check.typeOf.object('packedFloat', packedFloat);
+        
+        var temp = packedFloat.w / 2.0;
+        var exponent = Math.floor(temp);
+        var sign = (temp - exponent) * 2.0;
+        exponent = exponent - BIAS;
+
+        sign = sign * 2.0 - 1.0;
+        sign = -sign;
+
+        if (exponent >= BIAS) {
+            return sign < 0.0 ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+        }
+
+        var unpacked = sign * packedFloat.x * SHIFT_RIGHT_8;
+        unpacked += sign * packedFloat.y * SHIFT_RIGHT_16;
+        unpacked += sign * packedFloat.z * SHIFT_RIGHT_24;
+
+        return unpacked * Math.pow(10.0, exponent);
     };
 
     return Cartesian4;
@@ -9260,6 +9389,7 @@ define('Core/BoundingSphere',[
         './GeographicProjection',
         './Intersect',
         './Interval',
+        './Math',
         './Matrix3',
         './Matrix4',
         './Rectangle'
@@ -9273,6 +9403,7 @@ define('Core/BoundingSphere',[
         GeographicProjection,
         Intersect,
         Interval,
+        CesiumMath,
         Matrix3,
         Matrix4,
         Rectangle) {
@@ -9318,6 +9449,7 @@ define('Core/BoundingSphere',[
     var fromPointsMinBoxPt = new Cartesian3();
     var fromPointsMaxBoxPt = new Cartesian3();
     var fromPointsNaiveCenterScratch = new Cartesian3();
+    var volumeConstant = (4.0 / 3.0) * CesiumMath.PI;
 
     /**
      * Computes a tight-fitting bounding sphere enclosing a list of 3D Cartesian points.
@@ -10524,6 +10656,15 @@ define('Core/BoundingSphere',[
         return BoundingSphere.clone(this, result);
     };
 
+    /**
+     * Computes the radius of the BoundingSphere.
+     * @returns {Number} The radius of the BoundingSphere.
+     */
+    BoundingSphere.prototype.volume = function() {
+        var radius = this.radius;
+        return volumeConstant * radius * radius * radius;
+    };
+
     return BoundingSphere;
 });
 
@@ -10941,7 +11082,6 @@ define('Core/FeatureDetection',[
         }
         return isWindowsResult;
     }
-
 
     function firefoxVersion() {
         return isFirefox() && firefoxVersionResult;
@@ -12137,7 +12277,7 @@ define('Core/Geometry',[
      * @see BoxGeometry
      * @see EllipsoidGeometry
      *
-     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Geometry%20and%20Appearances.html|Geometry and Appearances Demo}
+     * @demo {@link https://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Geometry%20and%20Appearances.html|Geometry and Appearances Demo}
      *
      * @example
      * // Create geometry with a position attribute and indexed lines.
@@ -12779,7 +12919,6 @@ define('Core/Cartesian2',[
         Check.typeOf.object('second', second);
         Check.typeOf.object('result', result);
         
-
         result.x = Math.min(first.x, second.x);
         result.y = Math.min(first.y, second.y);
 
@@ -13225,15 +13364,20 @@ define('Core/AttributeCompression',[
         './Cartesian2',
         './Cartesian3',
         './Check',
+        './defined',
         './DeveloperError',
         './Math'
     ], function(
         Cartesian2,
         Cartesian3,
         Check,
+        defined,
         DeveloperError,
         CesiumMath) {
     'use strict';
+
+    var RIGHT_SHIFT = 1.0 / 256.0;
+    var LEFT_SHIFT = 256.0;
 
     /**
      * Attribute compression and decompression functions.
@@ -13299,6 +13443,31 @@ define('Core/AttributeCompression',[
         return AttributeCompression.octEncodeInRange(vector, 255, result);
     };
 
+    var octEncodeScratch = new Cartesian2();
+    var uint8ForceArray = new Uint8Array(1);
+    function forceUint8(value) {
+        uint8ForceArray[0] = value;
+        return uint8ForceArray[0];
+    }
+    /**
+     * @param {Cartesian3} vector The normalized vector to be compressed into 4 byte 'oct' encoding.
+     * @param {Cartesian4} result The 4 byte oct-encoded unit length vector.
+     * @returns {Cartesian4} The 4 byte oct-encoded unit length vector.
+     *
+     * @exception {DeveloperError} vector must be normalized.
+     *
+     * @see AttributeCompression.octEncodeInRange
+     * @see AttributeCompression.octDecodeFromCartesian4
+     */
+    AttributeCompression.octEncodeToCartesian4 = function(vector, result) {
+        AttributeCompression.octEncodeInRange(vector, 65535, octEncodeScratch);
+        result.x = forceUint8(octEncodeScratch.x * RIGHT_SHIFT);
+        result.y = forceUint8(octEncodeScratch.x);
+        result.z = forceUint8(octEncodeScratch.y * RIGHT_SHIFT);
+        result.w = forceUint8(octEncodeScratch.y);
+        return result;
+    };
+
     /**
      * Decodes a unit-length vector in 'oct' encoding to a normalized 3-component vector.
      *
@@ -13308,14 +13477,14 @@ define('Core/AttributeCompression',[
      * @param {Cartesian3} result The decoded and normalized vector
      * @returns {Cartesian3} The decoded and normalized vector.
      *
-     * @exception {DeveloperError} x and y must be an unsigned normalized integer between 0 and rangeMax.
+     * @exception {DeveloperError} x and y must be unsigned normalized integers between 0 and rangeMax.
      *
      * @see AttributeCompression.octEncodeInRange
      */
     AttributeCompression.octDecodeInRange = function(x, y, rangeMax, result) {
                 Check.defined('result', result);
         if (x < 0 || x > rangeMax || y < 0 || y > rangeMax) {
-            throw new DeveloperError('x and y must be a signed normalized integer between 0 and ' + rangeMax);
+            throw new DeveloperError('x and y must be unsigned normalized integers between 0 and ' + rangeMax);
         }
         
         result.x = CesiumMath.fromSNorm(x, rangeMax);
@@ -13346,6 +13515,34 @@ define('Core/AttributeCompression',[
      */
     AttributeCompression.octDecode = function(x, y, result) {
         return AttributeCompression.octDecodeInRange(x, y, 255, result);
+    };
+
+    /**
+     * Decodes a unit-length vector in 4 byte 'oct' encoding to a normalized 3-component vector.
+     *
+     * @param {Cartesian4} encoded The oct-encoded unit length vector.
+     * @param {Cartesian3} result The decoded and normalized vector.
+     * @returns {Cartesian3} The decoded and normalized vector.
+     *
+     * @exception {DeveloperError} x, y, z, and w must be unsigned normalized integers between 0 and 255.
+     *
+     * @see AttributeCompression.octDecodeInRange
+     * @see AttributeCompression.octEncodeToCartesian4
+     */
+    AttributeCompression.octDecodeFromCartesian4 = function(encoded, result) {
+                Check.typeOf.object('encoded', encoded);
+        Check.typeOf.object('result', result);
+                var x = encoded.x;
+        var y = encoded.y;
+        var z = encoded.z;
+        var w = encoded.w;
+                if (x < 0 || x > 255 || y < 0 || y > 255 || z < 0 || z > 255 || w < 0 || w > 255) {
+            throw new DeveloperError('x, y, z, and w must be unsigned normalized integers between 0 and 255');
+        }
+        
+        var xOct16 = x * LEFT_SHIFT + y;
+        var yOct16 = z * LEFT_SHIFT + w;
+        return AttributeCompression.octDecodeInRange(xOct16, yOct16, 65535, result);
     };
 
     /**
@@ -13482,6 +13679,47 @@ define('Core/AttributeCompression',[
         return result;
     };
 
+    function zigZagDecode(value) {
+        return (value >> 1) ^ (-(value & 1));
+    }
+
+    /**
+     * Decodes delta and ZigZag encoded vertices. This modifies the buffers in place.
+     *
+     * @param {Uint16Array} uBuffer The buffer view of u values.
+     * @param {Uint16Array} vBuffer The buffer view of v values.
+     * @param {Uint16Array} [heightBuffer] The buffer view of height values.
+     *
+     * @see {@link https://github.com/AnalyticalGraphicsInc/quantized-mesh|quantized-mesh-1.0 terrain format}
+     */
+    AttributeCompression.zigZagDeltaDecode = function(uBuffer, vBuffer, heightBuffer) {
+                Check.defined('uBuffer', uBuffer);
+        Check.defined('vBuffer', vBuffer);
+        Check.typeOf.number.equals('uBuffer.length', 'vBuffer.length', uBuffer.length, vBuffer.length);
+        if (defined(heightBuffer)) {
+            Check.typeOf.number.equals('uBuffer.length', 'heightBuffer.length', uBuffer.length, heightBuffer.length);
+        }
+        
+        var count = uBuffer.length;
+
+        var u = 0;
+        var v = 0;
+        var height = 0;
+
+        for (var i = 0; i < count; ++i) {
+            u += zigZagDecode(uBuffer[i]);
+            v += zigZagDecode(vBuffer[i]);
+
+            uBuffer[i] = u;
+            vBuffer[i] = v;
+
+            if (defined(heightBuffer)) {
+                height += zigZagDecode(heightBuffer[i]);
+                heightBuffer[i] = height;
+            }
+        }
+    };
+
     return AttributeCompression;
 });
 
@@ -13527,7 +13765,6 @@ define('Core/barycentricCoordinates',[
         Check.defined('p1', p1);
         Check.defined('p2', p2);
         
-
         if (!defined(result)) {
             result = new Cartesian3();
         }
@@ -15689,6 +15926,29 @@ define('Core/Plane',[
         Check.typeOf.object('point', point);
         
         return Cartesian3.dot(plane.normal, point) + plane.distance;
+    };
+
+    var scratchCartesian = new Cartesian3();
+    /**
+     * Projects a point onto the plane.
+     * @param {Plane} plane The plane to project the point onto
+     * @param {Cartesian3} point The point to project onto the plane
+     * @param {Cartesian3} [result] The result point.  If undefined, a new Cartesian3 will be created.
+     * @returns {Cartesian3} The modified result parameter or a new Cartesian3 instance if one was not provided.
+     */
+    Plane.projectPointOntoPlane = function(plane, point, result) {
+                Check.typeOf.object('plane', plane);
+        Check.typeOf.object('point', point);
+        
+        if (!defined(result)) {
+            result = new Cartesian3();
+        }
+
+        // projectedPoint = point - (normal.point + scale) * normal
+        var pointDistance = Plane.getPointDistance(plane, point);
+        var scaledNormal = Cartesian3.multiplyByScalar(plane.normal, pointDistance, scratchCartesian);
+
+        return Cartesian3.subtract(point, scaledNormal, result);
     };
 
     var scratchPosition = new Cartesian3();
