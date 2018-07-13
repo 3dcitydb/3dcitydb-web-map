@@ -36,6 +36,10 @@
         <title>3DCityDB-Web-Map-Client</title>
         <link rel="icon" type="image/png" href="../theme/img/favicon.png" sizes="16x16">
         <script src="../ThirdParty/JQuery-1.9.1/jquery-1.9.1-min.js"></script>  	
+        <!-- Load jquery ui datepicker FLATPICKR -->
+        <link rel="stylesheet" type="text/css" href="css/flatpickrv4.5.1.css">
+        <script type="text/javascript" src="utils/flatpickrv4.5.1.js"></script>
+        <!-- CesiumJS -->
         <script src="../ThirdParty/Cesium/Cesium.js"></script> 
         <script src="../ThirdParty/Intersection/IntersectionAPI.js"></script>
         <script src="../ThirdParty/Cesium-Navigation/Cesium-Navigation.js"></script>
@@ -50,9 +54,9 @@
         <script src="../js/CitydbKmlLayer.js"></script> 
         <script src="../js/Cesium3DTilesDataLayer.js"></script>
         <!-- GPS geolocation with device orientation in real-time -->
-        <script src="GPSController.js"></script>
+        <script src="utils/GPSController.js"></script>
         <!-- Mobile utilities -->
-        <script src="MobileController.js"></script>
+        <script src="utils/MobileController.js"></script>
 
         <style>
             @import url(../ThirdParty/Cesium/Widgets/widgets.css);

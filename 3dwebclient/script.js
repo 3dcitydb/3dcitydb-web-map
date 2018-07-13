@@ -67,7 +67,7 @@ var addLayerViewModel = {
 };
 Cesium.knockout.track(addLayerViewModel);
 Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
-		
+
 var addWmsViewModel = {
     name: '',
     iconUrl: '',
@@ -90,7 +90,7 @@ Cesium.knockout.track(addTerrainViewModel);
 Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('citydb_addterrainpanel'));
 
 /*---------------------------------  Load Configurations and Layers  ----------------------------------------*/
-	
+
 intiClient();
 
 function intiClient() {
@@ -138,25 +138,25 @@ function intiClient() {
                 cesiumViewer.geocoder.viewModel.search.call(this, true);
             });
         }
-  			});
-  	
+    });
+
     // inspect the status of the showed and cached tiles	
     inspectTileStatus();
-  	
+
     // bind view and model of the highlighted and hidden Objects...
     observeObjectList();
-  	
+
     // Zoom to desired camera position and load layers if encoded in the url...	
     zoomToDefaultCameraPosition().then(function (info) {
         var layers = getLayersFromUrl();
         loadLayerGroup(layers);
-  	
+
         var basemapConfigString = CitydbUtil.parse_query_string('basemap', window.location.href);
         if (basemapConfigString) {
             var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(basemapConfigString))[0]);
             for (key in viewMoModel) {
                 addWmsViewModel[key] = viewMoModel[key];
-  			} 	  			
+            }
             addWebMapServiceProvider();
         }
 
@@ -178,6 +178,27 @@ function intiClient() {
         clock.currentTime = julianDate;
         clock.shouldAnimate = false;
     }
+
+    // add a calendar picker in the timeline using the JS library flatpickr
+    var clockElement = document.getElementsByClassName("cesium-animation-blank")[0];
+    flatpickr(clockElement, {
+        enableTime: true,
+        defaultDate: Cesium.JulianDate.toDate(cesiumViewer.clock.currentTime),
+        enableSeconds: true
+    });
+    clockElement.addEventListener("change", function () {
+        var dateValue = clockElement.value;
+        var cesiumClock = cesiumViewer.clock;
+        cesiumClock.shouldAnimate = false; // stop the clock
+        cesiumClock.currentTime = Cesium.JulianDate.fromIso8601(dateValue.replace(" ", "T") + "Z");
+        // update timeline also
+        var cesiumTimeline = cesiumViewer.timeline;
+        var lowerBound = Cesium.JulianDate.addHours(cesiumViewer.clock.currentTime, -12, new Object());
+        var upperBound = Cesium.JulianDate.addHours(cesiumViewer.clock.currentTime, 12, new Object());
+        cesiumTimeline.updateFromClock(); // center the needle in the timeline
+        cesiumViewer.timeline.zoomTo(lowerBound, upperBound);
+        cesiumViewer.timeline.resize();
+    });
 }
 
 /*---------------------------------  methods and functions  ----------------------------------------*/
@@ -212,8 +233,7 @@ function inspectTileStatus() {
         var loadingTilesInspector = document.getElementById('citydb_loadingTilesInspector');
         if (numberOfTasks > 0 || !tilesLoaded) {
             loadingTilesInspector.style.display = 'block';
-        }
-        else {
+        } else {
             loadingTilesInspector.style.display = 'none';
         }
     }, 200);
@@ -239,8 +259,7 @@ function getLayersFromUrl() {
 
         if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1) {
             nLayers.push(new CitydbKmlLayer(options));
-        }
-        else {
+        } else {
             nLayers.push(new Cesium3DTilesDataLayer(options));
         }
 
@@ -306,8 +325,7 @@ function observeObjectList() {
             selectedLayer.hiddenObjects = selectedLayer.hiddenObjects;
 
             updateAddLayerViewModel(selectedLayer);
-        }
-        else {
+        } else {
             while (highlightingListElement.length > 1) {
                 highlightingListElement.remove(1);
             }
@@ -364,8 +382,7 @@ function saveLayerSettings() {
         var newValue = addLayerViewModel[propertyName];
         if (Cesium.isArray(newValue)) {
             activeLayer[propertyName] = newValue[0];
-        }
-        else {
+        } else {
             activeLayer[propertyName] = newValue;
         }
     }
@@ -387,8 +404,7 @@ function loadLayerGroup(_layers) {
             if (index < (_layers.length - 1)) {
                 index++;
                 _loadLayer(index);
-            }
-            else {
+            } else {
                 webMap._activeLayer = _layers[0];
                 document.getElementById('loadingIndicator').style.display = 'none';
             }
@@ -455,8 +471,7 @@ function addEventListeners(layer) {
         if (layer instanceof CitydbKmlLayer) {
             targetEntity = object.id;
             objectId = targetEntity.name;
-        }
-        else if (layer instanceof Cesium3DTilesDataLayer) {
+        } else if (layer instanceof Cesium3DTilesDataLayer) {
             console.log(object);
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
@@ -495,8 +510,7 @@ function zoomToDefaultCameraPosition() {
             roll: parseFloat(rollStr)
         }
         return flyToCameraPosition(cameraPostion);
-    }
-    else {
+    } else {
         return zoomToDefaultCameraPosition_expired();
     }
 
@@ -545,8 +559,7 @@ function zoomToDefaultCameraPosition_expired() {
                 deferred.resolve("fly to the desired camera position");
             }
         })
-    }
-    else {
+    } else {
         // default camera postion
         deferred.resolve("fly to the default camera position");
         ;
@@ -670,8 +683,7 @@ function basemapToQuery() {
         return Cesium.objectToQuery({
             basemap: Cesium.objectToQuery(addWmsViewModel)
         });
-    }
-    else {
+    } else {
         return null;
     }
 }
@@ -683,8 +695,7 @@ function terrainToQuery() {
         return Cesium.objectToQuery({
             terrain: Cesium.objectToQuery(addTerrainViewModel)
         });
-    }
-    else {
+    } else {
         return null;
     }
 }
@@ -735,8 +746,7 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
             var lon = (obj.envelope[0] + obj.envelope[2]) / 2.0;
             var lat = (obj.envelope[1] + obj.envelope[3]) / 2.0;
             flyToMapLocation(lat, lon, callBackFunc);
-        }
-        else {
+        } else {
             var thematicDataUrl = webMap.activeLayer.thematicDataUrl;
             var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
             Cesium.when(promise, function (result) {
@@ -746,8 +756,7 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
                     var lon = parseFloat(res[0]);
                     var lat = parseFloat(res[1]);
                     flyToMapLocation(lat, lon, callBackFunc);
-                }
-                else {
+                } else {
                     if (Cesium.defined(errorCallbackFunc)) {
                         errorCallbackFunc.call(this);
                     }
@@ -758,8 +767,7 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
                 }
             });
         }
-    }
-    else {
+    } else {
         if (Cesium.defined(errorCallbackFunc)) {
             errorCallbackFunc.call(this);
         }
@@ -778,17 +786,17 @@ function flyToMapLocation(lat, lon, callBackFunc) {
     camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(lon, lat, 2000),
         complete: function () {
-        	var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth/2 , clientHeight/2)), scene);
-        	var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;
-        	var center = Cesium.Cartesian3.fromDegrees(lon, lat, terrainHeight);
+            var intersectedPoint = globe.pick(camera.getPickRay(new Cesium.Cartesian2(clientWidth / 2, clientHeight / 2)), scene);
+            var terrainHeight = Cesium.Ellipsoid.WGS84.cartesianToCartographic(intersectedPoint).height;
+            var center = Cesium.Cartesian3.fromDegrees(lon, lat, terrainHeight);
             var heading = Cesium.Math.toRadians(0);
             var pitch = Cesium.Math.toRadians(-50);
-        	var range = 100;   
-        	camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
-        	camera.lookAtTransform(Cesium.Matrix4.IDENTITY); 
-        	if (Cesium.defined(callBackFunc)) {
-        		callBackFunc.call(this);
-        	}  
+            var range = 100;
+            camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+            camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+            if (Cesium.defined(callBackFunc)) {
+                callBackFunc.call(this);
+            }
         }
     })
 }
@@ -807,8 +815,7 @@ function addNewLayer() {
     }
     if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
         _layers.push(new CitydbKmlLayer(options));
-    }
-    else {
+    } else {
         _layers.push(new Cesium3DTilesDataLayer(options));
     }
 
@@ -825,8 +832,7 @@ function removeSelectedLayer() {
         var webMapLayers = webMap._layers;
         if (webMapLayers.length > 0) {
             webMap.activeLayer = webMapLayers[0];
-        }
-        else {
+        } else {
             webMap.activeLayer = undefined;
         }
     }
@@ -843,7 +849,7 @@ function addWebMapServiceProvider() {
                 url: addWmsViewModel.url.trim(),
                 layers: addWmsViewModel.layers.trim(),
                 parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim()),
-                proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null: new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
             });
         }
     });
@@ -910,8 +916,7 @@ function toggleShadows() {
 function toggleTerrainShadows() {
     if (cesiumViewer.terrainShadows == Cesium.ShadowMode.ENABLED) {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.DISABLED;
-    }
-    else {
+    } else {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.ENABLED;
         if (!cesiumViewer.shadows) {
             CitydbUtil.showAlertWindow("OK", "Switching on terrain shadows now", 'Please note that shadows for 3D models will also be switched on.',
@@ -983,7 +988,7 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
     var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
     var queryLink = "https://www.googleapis.com/fusiontables/v2/query";
-    new Cesium.Resource({ url: queryLink, queryParameters: {sql: sql, key: apiKey} }).fetch({ responseType: 'json' }).then(function(data) {
+    new Cesium.Resource({url: queryLink, queryParameters: {sql: sql, key: apiKey}}).fetch({responseType: 'json'}).then(function (data) {
         console.log(data);
         var columns = data.columns;
         var rows = data.rows;
@@ -1017,8 +1022,7 @@ function showInExternalMaps() {
         var boundingSphereScratch = new Cesium.BoundingSphere();
         cesiumViewer._dataSourceDisplay.getBoundingSphere(selectedEntity, false, boundingSphereScratch);
         wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(boundingSphereScratch.center);
-    }
-    else {
+    } else {
         wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityPosition._value);
 
     }
@@ -1040,7 +1044,7 @@ function showInExternalMaps() {
             mapLink = 'http://data.dualmaps.com/dualmaps4/map.htm?x=' + lon + '&y=' + lat + '&z=16&gm=0&ve=4&gc=0&bz=0&bd=0&mw=1&sv=1&sva=1&svb=0&svp=0&svz=0&svm=2&svf=0&sve=1';
             break;
         default:
-            //	do nothing...
+        //	do nothing...
     }
 
     window.open(mapLink);
