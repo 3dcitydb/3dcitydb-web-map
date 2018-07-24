@@ -343,6 +343,36 @@
 			}			
 		}
 	}
+        
+        /**
+         * Support both old and new version of glTF
+         * 
+         * @param {type} material
+         * @returns {unresolved}
+         */
+        function _getEmissiveFactor(material) {
+            var testObj = material.getValue('emissiveFactor');
+            if (Cesium.defined(testObj)) {
+                return testObj;
+            }
+            return material.getValue('emission');
+        }
+
+        /**
+         * Support both old and new version of glTF
+         * 
+         * @param {type} material
+         * @param {type} value
+         * @returns {undefined}
+         */
+        function _setEmissiveFactor(material, value) {
+            var testObj = material.getValue('emissiveFactor');
+            if (Cesium.defined(testObj)) {
+                material.setValue('emissiveFactor', value);
+            } else {
+                material.setValue('emission', value);
+            }
+        }
 	
 	/**
 	 * adds this layer to the given Cesium viewer
@@ -472,13 +502,13 @@
 					targetEntity.addProperty("originalMaterial");
 					var materials = primitive._runtime.materialsByName;				
 					for (var materialId in materials){
-						targetEntity.originalMaterial = materials[materialId].getValue('emission').clone();
+						targetEntity.originalMaterial = _getEmissiveFactor(materials[materialId]).clone();
 					}
 				}	
 				var materials = object.mesh._materials;
 				for (var i = 0; i < materials.length; i++) {
 					// do mouseOver highlighting
-					materials[i].setValue('emission', Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
+                                        _setEmissiveFactor(materials[i], Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
 				} 
 			}
 			else if (primitive instanceof Cesium.Primitive) {	
@@ -512,7 +542,7 @@
 				for (var i = 0; i < materials.length; i++) {
 					// dismiss highlighting
 					console.log(targetEntity.originalMaterial);
-					materials[i].setValue('emission', targetEntity.originalMaterial);
+                                        _setEmissiveFactor(materials[i], targetEntity.originalMaterial);
 				} 
 			}
 			else if (primitive instanceof Cesium.Primitive) {				
@@ -529,7 +559,7 @@
 				catch(e){return;} // not valid entities
 				_dismissMouseoverHighlighting(childrenEntities, primitive);	
 			}
-		})	 
+		})
 	 	
 		function _doMouseoverHighlighting(_childrenEntities, _primitive, _mouseOverhighlightColor) {
 			for (var i = 0; i < _childrenEntities.length; i++){	
@@ -873,12 +903,12 @@
 						targetEntity.addProperty("originalMaterial");
 						var materials = object._runtime.materialsByName;				
 						for (var materialId in materials){
-							targetEntity.originalMaterial = materials[materialId].getValue('emission').clone();
+							targetEntity.originalMaterial = _getEmissiveFactor(materials[materialId]).clone();
 						}
 					}	
 					var materials = object._runtime.materialsByName;				
 					for (var materialId in materials){
-						materials[materialId].setValue('emission', Cesium.Cartesian4.fromColor(highlightColor));
+                                                _setEmissiveFactor(materials[materialId], Cesium.Cartesian4.fromColor(highlightColor));
 					}
 				}			
 			}
@@ -903,7 +933,7 @@
 				var targetEntity = object._id;
 				var materials = object._runtime.materialsByName;			
 				for (var materialId in materials){
-					materials[materialId].setValue('emission', targetEntity.originalMaterial);
+                                _setEmissiveFactor(materials[materialId], targetEntity.originalMaterial);
 				}
 			}	
 		}
@@ -944,7 +974,7 @@
 			}
 			var materials = object._runtime.materialsByName;
 			for (var materialId in materials){
-				if (!materials[materialId].getValue('emission').equals(Cesium.Cartesian4.fromColor(highlightColor))) {
+				if (!_getEmissiveFactor(materials[materialId]).equals(Cesium.Cartesian4.fromColor(highlightColor))) {
 					return false;
 				}			
 			}
