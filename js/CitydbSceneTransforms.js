@@ -30,8 +30,8 @@
  * @see {@link http://www.3dcitydb.net/3dcitydb/3dimpexp/|3D City Database Importer Exporter}
  */
 
-(function() {
-	// loading referenced Cesium classes
+(function () {
+    // loading referenced Cesium classes
     var BoundingRectangle = Cesium.BoundingRectangle;
     var Cartesian2 = Cesium.Cartesian2;
     var Cartesian3 = Cesium.Cartesian3;
@@ -77,7 +77,7 @@
      *     console.log(Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, position));
      * }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
      */
-    SceneTransforms.wgs84ToWindowCoordinates = function(scene, position, result) {
+    SceneTransforms.wgs84ToWindowCoordinates = function (scene, position, result) {
         return SceneTransforms.wgs84WithEyeOffsetToWindowCoordinates(scene, position, Cartesian3.ZERO, result);
     };
 
@@ -104,7 +104,7 @@
     /**
      * @private
      */
-    SceneTransforms.wgs84WithEyeOffsetToWindowCoordinates = function(scene, position, eyeOffset, result) {
+    SceneTransforms.wgs84WithEyeOffsetToWindowCoordinates = function (scene, position, eyeOffset, result) {
         //>>includeStart('debug', pragmas.debug);
         if (!defined(scene)) {
             throw new DeveloperError('scene is required.');
@@ -205,11 +205,11 @@
             positionCC = worldToClip(actualPosition, eyeOffset, camera, positionCC);
             if (positionCC.z < 0 && frameState.mode !== SceneMode.SCENE2D) {
 //	----> Changes to Cesium-Version 1.30 for 3dcitydb-web-map
-            //  return undefined;
+                //  return undefined;
                 positionCC.y = 0 - positionCC.y;
 // <-----------------------------------------------------------------------
             }
-            
+
             result = SceneTransforms.clipToGLWindowCoordinates(viewport, positionCC, result);
         }
 
@@ -236,7 +236,7 @@
      *     console.log(Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, position));
      * }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
      */
-    SceneTransforms.wgs84ToDrawingBufferCoordinates = function(scene, position, result) {
+    SceneTransforms.wgs84ToDrawingBufferCoordinates = function (scene, position, result) {
         result = SceneTransforms.wgs84ToWindowCoordinates(scene, position, result);
         if (!defined(result)) {
             return undefined;
@@ -251,7 +251,7 @@
     /**
      * @private
      */
-    SceneTransforms.computeActualWgs84Position = function(frameState, position, result) {
+    SceneTransforms.computeActualWgs84Position = function (frameState, position, result) {
         var mode = frameState.mode;
 
         if (mode === SceneMode.SCENE3D) {
@@ -277,10 +277,10 @@
         // mode === SceneMode.MORPHING
         var morphTime = frameState.morphTime;
         return Cartesian3.fromElements(
-            CesiumMath.lerp(projectedPosition.z, position.x, morphTime),
-            CesiumMath.lerp(projectedPosition.x, position.y, morphTime),
-            CesiumMath.lerp(projectedPosition.y, position.z, morphTime),
-            result);
+                CesiumMath.lerp(projectedPosition.z, position.x, morphTime),
+                CesiumMath.lerp(projectedPosition.x, position.y, morphTime),
+                CesiumMath.lerp(projectedPosition.y, position.z, morphTime),
+                result);
     };
 
     var positionNDC = new Cartesian3();
@@ -290,7 +290,7 @@
     /**
      * @private
      */
-    SceneTransforms.clipToGLWindowCoordinates = function(viewport, position, result) {
+    SceneTransforms.clipToGLWindowCoordinates = function (viewport, position, result) {
         // Perspective divide to transform from clip coordinates to normalized device coordinates
         Cartesian3.divideByScalar(position, position.w, positionNDC);
 
@@ -304,7 +304,7 @@
     /**
      * @private
      */
-    SceneTransforms.clipToDrawingBufferCoordinates = function(viewport, position, result) {
+    SceneTransforms.clipToDrawingBufferCoordinates = function (viewport, position, result) {
         // Perspective divide to transform from clip coordinates to normalized device coordinates
         Cartesian3.divideByScalar(position, position.w, positionNDC);
 
@@ -318,7 +318,7 @@
     /**
      * @private
      */
-    SceneTransforms.transformWindowToDrawingBuffer = function(scene, windowPosition, result) {
+    SceneTransforms.transformWindowToDrawingBuffer = function (scene, windowPosition, result) {
         var canvas = scene.canvas;
         var xScale = scene.drawingBufferWidth / canvas.clientWidth;
         var yScale = scene.drawingBufferHeight / canvas.clientHeight;
@@ -331,7 +331,7 @@
     /**
      * @private
      */
-    SceneTransforms.drawingBufferToWgs84Coordinates = function(scene, drawingBufferPosition, depth, result) {
+    SceneTransforms.drawingBufferToWgs84Coordinates = function (scene, drawingBufferPosition, depth, result) {
         var context = scene.context;
         var uniformState = context.uniformState;
 
@@ -350,7 +350,7 @@
 
         return Cartesian3.fromCartesian4(worldCoords, result);
     };
-    
+
     window.CitydbSceneTransforms = SceneTransforms;
 })();
 

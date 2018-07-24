@@ -28,101 +28,101 @@
 /**
  * Web Worker for controlling Appearance of objects created by the dynamically loaded KML/KMZ data tiles
  */
-(function() {
-	var dataPool = new Object();
-	var shouldRun = false;
-	var stack = [];
-	var isStillUpdating = true;
+(function () {
+    var dataPool = new Object();
+    var shouldRun = false;
+    var stack = [];
+    var isStillUpdating = true;
 
-	var eventlisteners = {
-			
-		initWorker : function(initDataPool) {
-			dataPool = initDataPool;
-			shouldRun = true;
-			eventlisteners["checkDataPool"].apply(self);
-		},
+    var eventlisteners = {
 
-		checkDataPool : function() {
-			if (shouldRun == false) {
-				return;
-			}
-			if (Object.keys(dataPool).length == 0) {
-				reply("refreshView", false);
-			}
-			for (var objectId in dataPool) {
-				reply("checkMasterPool", objectId, dataPool[objectId]);
-				stack.push(objectId);
-			}
-		},
+        initWorker: function (initDataPool) {
+            dataPool = initDataPool;
+            shouldRun = true;
+            eventlisteners["checkDataPool"].apply(self);
+        },
 
-		updateDataPool : function() {
-			isStillUpdating = true;
-		},
+        checkDataPool: function () {
+            if (shouldRun == false) {
+                return;
+            }
+            if (Object.keys(dataPool).length == 0) {
+                reply("refreshView", false);
+            }
+            for (var objectId in dataPool) {
+                reply("checkMasterPool", objectId, dataPool[objectId]);
+                stack.push(objectId);
+            }
+        },
 
-		notifySleep : function() {
-			shouldRun = false;
-		},
+        updateDataPool: function () {
+            isStillUpdating = true;
+        },
 
-		notifyWake : function() {
-			shouldRun = true;
-			eventlisteners["checkDataPool"].apply(self);
-		},
-		
-		abortAndnotifyWake : function() {
-			stack = [];
-			eventlisteners["notifyWake"].apply(self);
-		},
+        notifySleep: function () {
+            shouldRun = false;
+        },
 
-		addData : function(objectId) {
-			dataPool[objectId] = true;
-		},
+        notifyWake: function () {
+            shouldRun = true;
+            eventlisteners["checkDataPool"].apply(self);
+        },
 
-		removeData : function(objectId) {
-			delete dataPool[objectId];
-		},
+        abortAndnotifyWake: function () {
+            stack = [];
+            eventlisteners["notifyWake"].apply(self);
+        },
 
-		rebuildDataPool : function(newDataPool) {
-			dataPool = newDataPool;
-			shouldRun = true;
-			eventlisteners["checkDataPool"].apply(self);
-		},
+        addData: function (objectId) {
+            dataPool[objectId] = true;
+        },
 
-		clearDataPool : function() {
-			dataPool = new Object();
-		},
+        removeData: function (objectId) {
+            delete dataPool[objectId];
+        },
 
-		updateTaskStack : function() {
-			stack.pop();
-			if (stack.length == 0) {	
-				reply("refreshView", isStillUpdating, dataPool);
-				isStillUpdating = false;  		    	
-			}
-		}
-	};
+        rebuildDataPool: function (newDataPool) {
+            dataPool = newDataPool;
+            shouldRun = true;
+            eventlisteners["checkDataPool"].apply(self);
+        },
 
-	// system functions	
-	function defaultListener(vMsg) {
-		// your default PUBLIC function executed only when main page calls the queryableWorker.postMessage() method directly
-		// do something
-	}
+        clearDataPool: function () {
+            dataPool = new Object();
+        },
 
-	function reply(/* listener name, argument to pass 1, argument to pass 2, etc. etc */) {
-		if (arguments.length < 1) {
-			throw new TypeError("reply - not enough arguments");
-			return;
-		}
-		postMessage({
-			"vo42t30" : arguments[0],
-			"rnb93qh" : Array.prototype.slice.call(arguments, 1)
-		});
-	}
+        updateTaskStack: function () {
+            stack.pop();
+            if (stack.length == 0) {
+                reply("refreshView", isStillUpdating, dataPool);
+                isStillUpdating = false;
+            }
+        }
+    };
 
-	self.onmessage = function(oEvent) {
-		if (oEvent.data instanceof Object && oEvent.data.hasOwnProperty("bk4e1h0") && oEvent.data.hasOwnProperty("ktp3fm1")) {
-			eventlisteners[oEvent.data.bk4e1h0].apply(self, oEvent.data.ktp3fm1);
-		} else {
-			defaultListener(oEvent.data);
-		}
-	};
+    // system functions	
+    function defaultListener(vMsg) {
+        // your default PUBLIC function executed only when main page calls the queryableWorker.postMessage() method directly
+        // do something
+    }
+
+    function reply(/* listener name, argument to pass 1, argument to pass 2, etc. etc */) {
+        if (arguments.length < 1) {
+            throw new TypeError("reply - not enough arguments");
+            return;
+        }
+        postMessage({
+            "vo42t30": arguments[0],
+            "rnb93qh": Array.prototype.slice.call(arguments, 1)
+        });
+    }
+
+    self.onmessage = function (oEvent) {
+        if (oEvent.data instanceof Object && oEvent.data.hasOwnProperty("bk4e1h0") && oEvent.data.hasOwnProperty("ktp3fm1")) {
+            eventlisteners[oEvent.data.bk4e1h0].apply(self, oEvent.data.ktp3fm1);
+        } else {
+            defaultListener(oEvent.data);
+        }
+    };
 })()
 	
