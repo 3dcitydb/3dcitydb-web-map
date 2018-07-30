@@ -93,6 +93,7 @@ Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('city
 
 intiClient();
 
+var clockElementClicked = false;
 function intiClient() {
     // init progress indicator gif
     document.getElementById('loadingIndicator').style.display = 'none';
@@ -198,6 +199,12 @@ function intiClient() {
         cesiumTimeline.updateFromClock(); // center the needle in the timeline
         cesiumViewer.timeline.zoomTo(lowerBound, upperBound);
         cesiumViewer.timeline.resize();
+    });
+    clockElement.addEventListener("click", function () {
+        if (clockElementClicked) {
+            clockElement._flatpickr.close();
+        }
+        clockElementClicked = !clockElementClicked;
     });
 }
 
