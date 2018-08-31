@@ -28,8 +28,14 @@
 /**-----------------------------------------Separate Line-------------------------------------------------**/
 
 /*---------------------------------  set globe variables  ----------------------------------------*/
-// updated Bing Key
-Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';
+// BingMapsAPI Key for Bing Imagery Layers and Geocoder
+// If this is not valid, the Bing Imagery Layers will be removed and the Bing Geocoder will be replaced with OSM Nominatim
+var bingToken = CitydbUtil.parse_query_string('bingToken', window.location.href);
+if (Cesium.defined(bingToken) && bingToken !== "") {
+    Cesium.BingMapsApi.defaultKey = bingToken;
+} else {
+    Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';
+}
 
 // Define clock to be animated per default
 var clock = new Cesium.Clock({
@@ -39,7 +45,8 @@ var clock = new Cesium.Clock({
 // create 3Dcitydb-web-map instance
 var shadows = CitydbUtil.parse_query_string('shadows', window.location.href);
 var terrainShadows = CitydbUtil.parse_query_string('terrainShadows', window.location.href);
-var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
+
+var cesiumViewerOptions = {
     selectedImageryProviderViewModel: Cesium.createDefaultImageryProviderViewModels()[1],
     timeline: true,
     animation: true,
@@ -47,7 +54,13 @@ var cesiumViewer = new Cesium.Viewer('cesiumContainer', {
     shadows: (shadows == "true"),
     terrainShadows: parseInt(terrainShadows),
     clockViewModel: new Cesium.ClockViewModel(clock)
-});
+}
+// If neither BingMapsAPI key nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
+if ((!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") 
+        && (!Cesium.defined(ionToken) || ionToken === "")) {
+    cesiumViewerOptions.geocoder = new OpenStreetMapNominatimGeocoder();
+}
+var cesiumViewer = new Cesium.Viewer('cesiumContainer', cesiumViewerOptions);
 
 navigationInitialization('cesiumContainer', cesiumViewer);
 
@@ -92,6 +105,8 @@ Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('city
 /*---------------------------------  Load Configurations and Layers  ----------------------------------------*/
 
 intiClient();
+
+adjustIonFeatures();
 
 var clockElementClicked = false;
 function intiClient() {
@@ -206,6 +221,57 @@ function intiClient() {
         }
         clockElementClicked = !clockElementClicked;
     });
+}
+
+var ionToken = CitydbUtil.parse_query_string('ionToken', window.location.href);
+function adjustIonFeatures() {
+    if (Cesium.defined(ionToken) && ionToken !== "") {
+        Cesium.Ion.defaultAccessToken = ionToken;
+        console.log("Please enter your ion access token using the URL-parameter \"ionToken=your-token\" and refresh the page if you wish to use ion features.");
+    } else {
+        // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
+        if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
+            var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
+            var i = 0;
+            while (i < imageryProviders.length) {
+                if (imageryProviders[i].name.indexOf("Bing Maps") !== -1) {
+                    //imageryProviders[i]._creationCommand.canExecute = false;
+                    imageryProviders.remove(imageryProviders[i]);
+                } else {
+                    i++;
+                }
+            }
+            console.log("Due to invalid BingMapsAPI key, the Bing Maps Imagery layers have been disabled.")
+
+            // Set default imagery to OpenStreetMap
+            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[6];
+            
+            // Disable auto-complete of OSM Geocoder due to OSM usage limitations
+            // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
+            cesiumViewer._geocoder._viewModel.autoComplete = false;
+        }
+
+        var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+        var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
+        baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
+        baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+
+        // Remove Cesium World Terrain from the Terrain Providers
+        var terrainProviders = cesiumViewer.baseLayerPicker.viewModel.terrainProviderViewModels;
+        i = 0;
+        while (i < terrainProviders.length) {
+            if (terrainProviders[i].name.indexOf("Cesium World Terrain") !== -1) {
+                //terrainProviders[i]._creationCommand.canExecute = false;
+                terrainProviders.remove(terrainProviders[i]);
+            } else {
+                i++;
+            }
+        }
+
+        // Set default imagery to an open-source terrain
+        // cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
+        console.log("Due to invalid or missing ion access token from user, Cesium World Terrain has been removed.");
+    }
 }
 
 /*---------------------------------  methods and functions  ----------------------------------------*/
