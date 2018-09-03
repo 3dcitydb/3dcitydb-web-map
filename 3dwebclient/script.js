@@ -227,7 +227,6 @@ var ionToken = CitydbUtil.parse_query_string('ionToken', window.location.href);
 function adjustIonFeatures() {
     if (Cesium.defined(ionToken) && ionToken !== "") {
         Cesium.Ion.defaultAccessToken = ionToken;
-        console.log("Please enter your ion access token using the URL-parameter \"ionToken=your-token\" and refresh the page if you wish to use ion features.");
     } else {
         // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
         if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
@@ -266,6 +265,7 @@ function adjustIonFeatures() {
         // Set default imagery to an open-source terrain
         // cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
         console.log("Due to invalid or missing ion access token from user, Cesium World Terrain has been removed.");
+        console.log("Please enter your ion access token using the URL-parameter \"ionToken=your-token\" and refresh the page if you wish to use ion features.");
     }
 }
 
