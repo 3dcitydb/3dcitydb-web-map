@@ -251,11 +251,6 @@ function adjustIonFeatures() {
             cesiumViewer._geocoder._viewModel.autoComplete = false;
         }
 
-        var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-        var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
-        baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
-        baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
-
         // Remove Cesium World Terrain from the Terrain Providers
         var terrainProviders = cesiumViewer.baseLayerPicker.viewModel.terrainProviderViewModels;
         i = 0;
