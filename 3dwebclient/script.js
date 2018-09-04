@@ -251,20 +251,20 @@ function adjustIonFeatures() {
         }
 
         // Remove Cesium World Terrain from the Terrain Providers
-        var terrainProviders = cesiumViewer.baseLayerPicker.viewModel.terrainProviderViewModels;
-        i = 0;
-        while (i < terrainProviders.length) {
-            if (terrainProviders[i].name.indexOf("Cesium World Terrain") !== -1) {
-                //terrainProviders[i]._creationCommand.canExecute = false;
-                terrainProviders.remove(terrainProviders[i]);
-            } else {
-                i++;
-            }
-        }
+//        var terrainProviders = cesiumViewer.baseLayerPicker.viewModel.terrainProviderViewModels;
+//        i = 0;
+//        while (i < terrainProviders.length) {
+//            if (terrainProviders[i].name.indexOf("Cesium World Terrain") !== -1) {
+//                //terrainProviders[i]._creationCommand.canExecute = false;
+//                terrainProviders.remove(terrainProviders[i]);
+//            } else {
+//                i++;
+//            }
+//        }
+//        console.log("Due to invalid or missing ion access token from user, Cesium World Terrain has been removed.");
 
         // Set default imagery to an open-source terrain
         // cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
-        console.log("Due to invalid or missing ion access token from user, Cesium World Terrain has been removed.");
         console.log("Please enter your ion access token using the URL-parameter \"ionToken=your-token\" and refresh the page if you wish to use ion features.");
     }
 }
