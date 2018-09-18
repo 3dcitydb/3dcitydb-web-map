@@ -3,9 +3,11 @@
 
 News
 -------
-#### [Mar 28, 2018] Docker images for the 3DCityDB are now available under [Web-Map-Client](https://github.com/tum-gis/3dcitydb-web-map-docker), [3DCityDB PostGIS](https://github.com/tum-gis/3dcitydb-docker-postgis), [Web Feature Service (WFS)](https://github.com/tum-gis/3dcitydb-wfs-docker) and [Service orchestration](https://github.com/tum-gis/3dcitydb-docker-compose).
+#### [Sep 15, 2018] The current 3DCityDB Web Map Client version v1.6.1 will be included in the upcoming major release v4.0 of the [3DCityDB](https://github.com/3dcitydb/3dcitydb).
 
-#### [Sep 5, 2017] Mobile support has been implemented to the web client. </i></b> <a href="https://github.com/3dcitydb/3dcitydb-web-map#mobile-support-extension">Read more...</a>
+**[Mar 28, 2018]** Docker images for the 3DCityDB are now available under [Web-Map-Client](https://github.com/tum-gis/3dcitydb-web-map-docker), [3DCityDB PostGIS](https://github.com/tum-gis/3dcitydb-docker-postgis), [Web Feature Service (WFS)](https://github.com/tum-gis/3dcitydb-wfs-docker) and [Service orchestration](https://github.com/tum-gis/3dcitydb-docker-compose).
+
+**[Sep 5, 2017]** Mobile support has been implemented to the web client. </i></b> <a href="https://github.com/3dcitydb/3dcitydb-web-map#mobile-support-extension">Read more...</a>
 
 Introduction
 -------
