@@ -175,14 +175,22 @@ function intiClient() {
             }
             addWebMapServiceProvider();
         }
-
-        var terrainConfigString = CitydbUtil.parse_query_string('terrain', window.location.href);
-        if (terrainConfigString) {
-            var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(terrainConfigString))[0]);
-            for (key in viewMoModel) {
-                addTerrainViewModel[key] = viewMoModel[key];
+        
+        var cesiumWorldTerrainString = CitydbUtil.parse_query_string('cesiumWorldTerrain', window.location.href);
+        if(cesiumWorldTerrainString === "true") {
+            // if the Cesium World Terrain is given in the URL --> activate, else other terrains
+            cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
+            var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+            baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[1];
+        } else {
+            var terrainConfigString = CitydbUtil.parse_query_string('terrain', window.location.href);
+            if (terrainConfigString) {
+                var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(terrainConfigString))[0]);
+                for (key in viewMoModel) {
+                    addTerrainViewModel[key] = viewMoModel[key];
+                }
+                addTerrainProvider();
             }
-            addTerrainProvider();
         }
     });
 
@@ -761,6 +769,9 @@ function terrainToQuery() {
     var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     var baseLayerProviderFunc = baseLayerPickerViewModel.selectedTerrain.creationCommand();
     if (baseLayerProviderFunc instanceof Cesium.CesiumTerrainProvider) {
+        if (baseLayerPickerViewModel.selectedTerrain.name.indexOf("Cesium World Terrain") !== -1) {
+            return "cesiumWorldTerrain=true";
+        }
         return Cesium.objectToQuery({
             terrain: Cesium.objectToQuery(addTerrainViewModel)
         });
