@@ -236,7 +236,6 @@ function adjustIonFeatures() {
     if (Cesium.defined(ionToken) && ionToken !== "") {
         Cesium.Ion.defaultAccessToken = ionToken;
     } else {
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4OTdhN2RhOS0xNWU4LTRjMWMtODRkNS0zMDY4NGQ2NDcyODciLCJpZCI6NDI2NCwic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU0MDM4NzgyNn0._Wei7xsUhEhteFWhzkf2W7ogPNyQFGhcgIRfVtBk_eE';
         // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
         if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
             var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
@@ -274,7 +273,7 @@ function adjustIonFeatures() {
 
         // Set default imagery to an open-source terrain
         // cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
-        console.log("Please enter your ion access token using the URL-parameter \"ionToken=your-token\" and refresh the page if you wish to use ion features.");
+        console.warn("Please enter your ion access token using the URL-parameter \"ionToken=<your-token>\" and refresh the page if you wish to use ion features.");
     }
 }
 
