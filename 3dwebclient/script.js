@@ -33,8 +33,6 @@
 var bingToken = CitydbUtil.parse_query_string('bingToken', window.location.href);
 if (Cesium.defined(bingToken) && bingToken !== "") {
     Cesium.BingMapsApi.defaultKey = bingToken;
-} else {
-    Cesium.BingMapsApi.defaultKey = 'ApOW9LMkerqWIVSnFauilSeaZyp8df66byy1USCTjgTdMvhb4y1iAhEsUHQfCgzq';
 }
 
 // Define clock to be animated per default
@@ -248,7 +246,7 @@ function adjustIonFeatures() {
                     i++;
                 }
             }
-            console.log("Due to invalid BingMapsAPI key, the Bing Maps Imagery layers have been disabled.")
+            console.warn("Due to invalid BingMapsAPI key, the Bing Maps Imagery layers have been disabled.")
 
             // Set default imagery to OpenStreetMap
             cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[6];
