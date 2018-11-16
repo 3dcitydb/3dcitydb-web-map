@@ -246,7 +246,7 @@ function adjustIonFeatures() {
                     i++;
                 }
             }
-            console.warn("Due to invalid BingMapsAPI key, the Bing Maps Imagery layers have been disabled.")
+            console.warn("Please enter your Bing Maps API token using the URL-parameter \"bingToken=<your-token>\" and refresh the page if you wish to use Bing Maps.")
 
             // Set default imagery to OpenStreetMap
             cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[6];
