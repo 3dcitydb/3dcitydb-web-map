@@ -923,10 +923,9 @@ function addWebMapServiceProvider() {
         tooltip: addWmsViewModel.tooltip.trim(),
         creationFunction: function () {
             return new Cesium.WebMapServiceImageryProvider({
-                url: addWmsViewModel.url.trim(),
+                url: new Cesium.Resource({url: addWmsViewModel.url.trim(), proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())}),
                 layers: addWmsViewModel.layers.trim(),
-                parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim()),
-                proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
             });
         }
     });
