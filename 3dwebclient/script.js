@@ -326,7 +326,7 @@ function getLayersFromUrl() {
             cityobjectsJsonUrl: Cesium.defaultValue(layerConfig.cityobjectsJsonUrl, ""),
             active: (layerConfig.active == "true"),
             minLodPixels: Cesium.defaultValue(layerConfig.minLodPixels, 140),
-            maxLodPixels: Cesium.defaultValue(layerConfig.maxLodPixels, Number.MAX_VALUE),
+            maxLodPixels: Cesium.defaultValue(layerConfig.maxLodPixels == -1 ? Number.MAX_VALUE : layerConfig.maxLodPixels, Number.MAX_VALUE),
             maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
             maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
         }
@@ -454,6 +454,9 @@ function saveLayerSettings() {
 
     function applySaving(propertyName, activeLayer) {
         var newValue = addLayerViewModel[propertyName];
+        if (propertyName === 'maxLodPixels' && newValue == -1) {
+            newValue = Number.MAX_VALUE;
+        }
         if (Cesium.isArray(newValue)) {
             activeLayer[propertyName] = newValue[0];
         } else {
@@ -740,7 +743,7 @@ function layersToQuery() {
             spreadsheetUrl: layer.thematicDataUrl,
             cityobjectsJsonUrl: layer.cityobjectsJsonUrl,
             minLodPixels: layer.minLodPixels,
-            maxLodPixels: layer.maxLodPixels,
+            maxLodPixels: layer.maxLodPixels == -1 ? Number.MAX_VALUE : layer.maxLodPixels,
             maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
             maxCountOfVisibleTiles: layer.maxCountOfVisibleTiles,
         }
