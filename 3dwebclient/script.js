@@ -893,10 +893,13 @@ function addNewLayer() {
         maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
         maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles
     }
-    if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
-        _layers.push(new CitydbKmlLayer(options));
-    } else {
+    
+    // since Cesium 3D Tiles also require name.json in the URL, it must be checked first
+    var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'cesium3DTiles') {
         _layers.push(new Cesium3DTilesDataLayer(options));
+    } else if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
+        _layers.push(new CitydbKmlLayer(options));
     }
 
     loadLayerGroup(_layers);
