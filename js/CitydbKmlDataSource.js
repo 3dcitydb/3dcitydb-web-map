@@ -1599,6 +1599,10 @@
             rollValue = 0;
         }
 
+        // by default in glTF 2.0 +Z faces forward, while earlier version of Cesium uses +X 
+        // https://github.com/AnalyticalGraphicsInc/cesium/pull/6632
+        headingValue = headingValue + 90;
+        
         var heading = Cesium.Math.toRadians(headingValue);
         var pitch = Cesium.Math.toRadians(tiltValue);
         var roll = Cesium.Math.toRadians(rollValue);
@@ -1606,8 +1610,10 @@
         // Backward compatible....
         var gltfVersion = CitydbUtil.parse_query_string('gltf_version', window.location.href);
         if (gltfVersion == '0.8') {
-            var heading = Cesium.Math.toRadians(headingValue - 180);
-            var pitch = Cesium.Math.toRadians(180);
+            heading = Cesium.Math.toRadians(headingValue - 180);
+            pitch = Cesium.Math.toRadians(180);
+        } else if (gltfVersion == '1.0') {
+            heading = Cesium.Math.toRadians(headingValue - 90);
         }
 
         var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
