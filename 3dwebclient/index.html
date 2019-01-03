@@ -170,7 +170,7 @@
                 display: none;
                 background: rgba(42, 42, 42, 0.5);        
                 border: 3px #505050 solid;
-            }    
+            }
 
         </style>
     </head>
@@ -221,10 +221,20 @@
                                     <tr>
                                         <td>Layer data type</td>
                                         <td>
-                                            <select id="layerDataTypeDropdown">
-                                                <option value="collada_kml_gltf" selected="selected">COLLADA/KML/glTF</option>
-                                                <option value="cesium3DTiles">Cesium 3D Tiles</option>
-                                                <option value="others">Others</option>
+                                            <select id="layerDataTypeDropdown" data-bind="value: layerDataType">
+                                                <option value="COLLADA/KML/glTF" selected="selected">COLLADA/KML/glTF</option>
+                                                <option value="Cesium 3D Tiles">Cesium 3D Tiles</option>
+                                                <option value="Others">Others</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>glTF version</td>
+                                        <td>
+                                            <select id="gltfVersionDropdown" data-bind="value: gltfVersion">
+                                                <option value="0.8">0.8</option>
+                                                <option value="1.0">1.0</option>
+                                                <option value="2.0" selected="selected">2.0</option>
                                             </select>
                                         </td>
                                     </tr>

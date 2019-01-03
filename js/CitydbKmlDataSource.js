@@ -1608,11 +1608,10 @@
         var roll = Cesium.Math.toRadians(rollValue);
 
         // Backward compatible....
-        var gltfVersion = CitydbUtil.parse_query_string('gltf_version', window.location.href);
-        if (gltfVersion == '0.8') {
+        if (dataSource._gltfVersion == '0.8') {
             heading = Cesium.Math.toRadians(headingValue - 180);
             pitch = Cesium.Math.toRadians(180);
-        } else if (gltfVersion == '1.0') {
+        } else if (dataSource._gltfVersion == '1.0') {
             heading = Cesium.Math.toRadians(headingValue - 90);
         }
 
@@ -2386,6 +2385,8 @@
         };
         this._layerId = options.layerId;
         this._lookAt = null;
+
+        this._gltfVersion = options.gltfVersion;
     }
 
     /**
@@ -2530,6 +2531,18 @@
                     throw new DeveloperError('value must be defined.');
                 }
                 this._entityCluster = value;
+            }
+        },
+
+        /**
+         * Get/Set the glTF version of each layer
+         */
+        gltfVersion: {
+            get: function () {
+                return this._gltfVersion;
+            },
+            set: function (value) {
+                this._gltfVersion = value;
             }
         }
     });

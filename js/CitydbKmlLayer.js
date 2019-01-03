@@ -69,10 +69,15 @@
         this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
         this._mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
 
+        this._layerDataType = options.layerDataType;
+        this._gltfVersion = options.gltfVersion;
+
         this._configParameters = {
             "id": this.id,
             "url": this.url,
             "name": this.name,
+            "layerDataType": this.layerDataType,
+            "gltfVersion": this.gltfVersion,
             "thematicDataUrl": this.thematicDataUrl,
             "thematicDataProvider": this._thematicDataProvider,
             "cityobjectsJsonUrl": this.cityobjectsJsonUrl,
@@ -279,6 +284,24 @@
             }
         },
 
+        gltfVersion: {
+            get: function () {
+                return this._gltfVersion;
+            },
+            set: function (value) {
+                this._gltfVersion = value;
+            }
+        },
+
+        layerDataType: {
+            get: function () {
+                return this._layerDataType;
+            },
+            set: function (value) {
+                this._layerDataType = value;
+            }
+        },
+
         configParameters: {
             get: function () {
                 return this._configParameters;
@@ -386,7 +409,8 @@
             this._citydbKmlDataSource = new CitydbKmlDataSource({
                 layerId: this._id,
                 camera: cesiumViewer.scene.camera,
-                canvas: cesiumViewer.scene.canvas
+                canvas: cesiumViewer.scene.canvas,
+                gltfVersion: this._gltfVersion
             });
             this.registerMouseEventHandlers();
             return loadMasterJSON(that, true);
@@ -779,7 +803,8 @@
             this._citydbKmlDataSource = new CitydbKmlDataSource({
                 layerId: this._id,
                 camera: this._cesiumViewer.scene.camera,
-                canvas: this._cesiumViewer.scene.canvas
+                canvas: this._cesiumViewer.scene.canvas,
+                gltfVersion: this._gltfVersion
             });
             this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
             return loadMasterJSON(this, false);
