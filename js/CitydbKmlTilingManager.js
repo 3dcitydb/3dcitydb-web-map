@@ -104,7 +104,7 @@ var GlobeTileTaskQueue = {};
         var fileextension = jsonLayerInfo.fileextension;
         var colnum = jsonLayerInfo.colnum;
         var rownum = jsonLayerInfo.rownum;
-        var gltfVersion = CitydbUtil.parse_query_string('gltf_version', window.location.href);
+        var gltfVersion = CitydbUtil.parse_query_string('gltfVersion', window.location.href);
         if (gltfVersion == '0.8') {
             colnum = colnum + 1;
             rownum = rownum + 1;
@@ -251,7 +251,8 @@ var GlobeTileTaskQueue = {};
                 var newKmlDatasource = new CitydbKmlDataSource({
                     layerId: scope.citydbKmlLayerInstance.id,
                     camera: scope.citydbKmlLayerInstance.cesiumViewer.scene.camera,
-                    canvas: scope.citydbKmlLayerInstance.cesiumViewer.scene.canvas
+                    canvas: scope.citydbKmlLayerInstance.cesiumViewer.scene.canvas,
+                    gltfVersion: scope.citydbKmlLayerInstance.gltfVersion
                 });
                 var newNetworklinkItem = {
                     url: tileUrl,
