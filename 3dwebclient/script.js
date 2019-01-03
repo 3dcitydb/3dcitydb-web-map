@@ -66,9 +66,12 @@ var cesiumCamera = cesiumViewer.scene.camera;
 var webMap = new WebMap3DCityDB(cesiumViewer);
 
 // set default input parameter value and bind the view and model
+
 var addLayerViewModel = {
     url: "",
     name: "",
+    layerDataType: "",
+    gltfVersion: "",
     thematicDataUrl: "",
     cityobjectsJsonUrl: "",
     minLodPixels: "",
@@ -322,6 +325,8 @@ function getLayersFromUrl() {
         var options = {
             url: layerConfig.url,
             name: layerConfig.name,
+            layerDataType: Cesium.defaultValue(layerConfig.layerDataType, "COLLADA/KML/glTF"),
+            gltfVersion: Cesium.defaultValue(layerConfig.gltfVersion, "2.0"),
             thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
             cityobjectsJsonUrl: Cesium.defaultValue(layerConfig.cityobjectsJsonUrl, ""),
             active: (layerConfig.active == "true"),
@@ -412,6 +417,8 @@ function observeObjectList() {
     function updateAddLayerViewModel(selectedLayer) {
         addLayerViewModel.url = selectedLayer.url;
         addLayerViewModel.name = selectedLayer.name;
+        addLayerViewModel.layerDataType = selectedLayer.layerDataType;
+        addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
         addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
         addLayerViewModel.cityobjectsJsonUrl = selectedLayer.cityobjectsJsonUrl;
         addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
@@ -425,6 +432,8 @@ function saveLayerSettings() {
     var activeLayer = webMap.activeLayer;
     applySaving('url', activeLayer);
     applySaving('name', activeLayer);
+    applySaving('layerDataType', activeLayer);
+    applySaving('gltfVersion', activeLayer);
     applySaving('thematicDataUrl', activeLayer);
     applySaving('cityobjectsJsonUrl', activeLayer);
     applySaving('minLodPixels', activeLayer);
@@ -676,10 +685,6 @@ function showSceneLink() {
 function generateLink() {
     var cameraPosition = getCurrentCameraPostion();
     var projectLink = location.protocol + '//' + location.host + location.pathname + '?';
-    var gltf_version = CitydbUtil.parse_query_string('gltf_version', window.location.href);
-
-    if (gltf_version)
-        projectLink = projectLink + 'gltf_version=' + gltf_version + "&";
 
     var clock = cesiumViewer.cesiumWidget.clock;
     if (!clock.shouldAnimate) {
@@ -739,6 +744,8 @@ function layersToQuery() {
         var layerConfig = {
             url: layer.url,
             name: layer.name,
+            layerDataType: layer.layerDataType,
+            gltfVersion: layer.gltfVersion,
             active: layer.active,
             spreadsheetUrl: layer.thematicDataUrl,
             cityobjectsJsonUrl: layer.cityobjectsJsonUrl,
@@ -886,6 +893,8 @@ function addNewLayer() {
     var options = {
         url: addLayerViewModel.url.trim(),
         name: addLayerViewModel.name.trim(),
+        layerDataType: addLayerViewModel.layerDataType.trim(),
+        gltfVersion: addLayerViewModel.gltfVersion.trim(),
         thematicDataUrl: addLayerViewModel.thematicDataUrl.trim(),
         cityobjectsJsonUrl: addLayerViewModel.cityobjectsJsonUrl.trim(),
         minLodPixels: addLayerViewModel.minLodPixels,
@@ -896,7 +905,7 @@ function addNewLayer() {
     
     // since Cesium 3D Tiles also require name.json in the URL, it must be checked first
     var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
-    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'cesium3DTiles') {
+    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'Cesium 3D Tiles') {
         _layers.push(new Cesium3DTilesDataLayer(options));
     } else if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
         _layers.push(new CitydbKmlLayer(options));
