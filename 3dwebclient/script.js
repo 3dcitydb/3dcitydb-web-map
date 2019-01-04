@@ -251,8 +251,8 @@ function adjustIonFeatures() {
             }
             console.warn("Please enter your Bing Maps API token using the URL-parameter \"bingToken=<your-token>\" and refresh the page if you wish to use Bing Maps.");
 
-            // Set default imagery to OpenStreetMap
-            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[6];
+            // Set default imagery to ESRI World Imagery
+            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
             
             // Disable auto-complete of OSM Geocoder due to OSM usage limitations
             // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
