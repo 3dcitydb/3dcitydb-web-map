@@ -4012,6 +4012,7 @@ define('Core/Fullscreen',[
      * Browser-independent functions for working with the standard fullscreen API.
      *
      * @exports Fullscreen
+     * @namespace
      *
      * @see {@link http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html|W3C Fullscreen Living Specification}
      */
@@ -16342,6 +16343,7 @@ define('Core/IntersectionTests',[
      * Functions for computing the intersection between geometries such as rays, planes, triangles, and ellipsoids.
      *
      * @exports IntersectionTests
+     * @namespace
      */
     var IntersectionTests = {};
 
@@ -18216,7 +18218,6 @@ define('Core/binarySearch',[
      * Finds an item in a sorted array.
      *
      * @exports binarySearch
-     *
      * @param {Array} array The sorted array to search.
      * @param {*} itemToFind The item to find in the array.
      * @param {binarySearch~Comparator} comparator The function to use to compare the item to
@@ -21012,9 +21013,10 @@ define('Core/Request',[
      *
      * @alias Request
      * @constructor
-     *
+     * @namespace
+     * @exports Request
      * @param {Object} [options] An object with the following properties:
-     * @param {Boolean} [options.url] The url to request.
+     * @param {String} [options.url] The url to request.
      * @param {Request~RequestCallback} [options.requestFunction] The function that makes the actual data request.
      * @param {Request~CancelCallback} [options.cancelFunction] The function that is called when the request is cancelled.
      * @param {Request~PriorityCallback} [options.priorityFunction] The function that is called to update the request's priority, which occurs once per frame.
@@ -21323,7 +21325,6 @@ define('Core/Event',[
      *
      * @alias Event
      * @constructor
-     *
      * @example
      * MyObject.prototype.myListener = function(arg1, arg2) {
      *     this.myArg1Copy = arg1;
@@ -24403,7 +24404,7 @@ define('Core/EarthOrientationParameters',[
      * Gets a promise that, when resolved, indicates that the EOP data has been loaded and is
      * ready to use.
      *
-     * @returns {Promise.<undefined>} The promise.
+     * @returns {Promise} The promise.
      *
      * @see when
      */
@@ -25104,7 +25105,7 @@ define('Core/Iau2006XysData',[
      *                 the Terrestrial Time (TT) time standard.
      * @param {Number} stopSecondTT The seconds past noon of the end of the interval to preload, expressed in
      *                 the Terrestrial Time (TT) time standard.
-     * @returns {Promise.<undefined>} A promise that, when resolved, indicates that the requested interval has been
+     * @returns {Promise} A promise that, when resolved, indicates that the requested interval has been
      *                    preloaded.
      */
     Iau2006XysData.prototype.preload = function(startDayTT, startSecondTT, stopDayTT, stopSecondTT) {
@@ -26309,6 +26310,7 @@ define('Core/Transforms',[
      * Contains functions for transforming positions to various reference frames.
      *
      * @exports Transforms
+     * @namespace
      */
     var Transforms = {};
 
@@ -26787,7 +26789,7 @@ define('Core/Transforms',[
      * indicates that the preload has completed.
      *
      * @param {TimeInterval} timeInterval The interval to preload.
-     * @returns {Promise.<undefined>} A promise that, when resolved, indicates that the preload has completed
+     * @returns {Promise} A promise that, when resolved, indicates that the preload has completed
      *          and evaluation of the transformation between the fixed and ICRF axes will
      *          no longer return undefined for a time inside the interval.
      *
@@ -27743,19 +27745,6 @@ define('Core/OrientedBoundingBox',[
 
     var scratchOffset = new Cartesian3();
     var scratchScale = new Cartesian3();
-    /**
-     * Computes an OrientedBoundingBox given extents in the east-north-up space of the tangent plane.
-     *
-     * @param {Plane} tangentPlane The tangent place corresponding to east-north-up.
-     * @param {Number} minimumX Minimum X extent in tangent plane space.
-     * @param {Number} maximumX Maximum X extent in tangent plane space.
-     * @param {Number} minimumY Minimum Y extent in tangent plane space.
-     * @param {Number} maximumY Maximum Y extent in tangent plane space.
-     * @param {Number} minimumZ Minimum Z extent in tangent plane space.
-     * @param {Number} maximumZ Maximum Z extent in tangent plane space.
-     * @param {OrientedBoundingBox} [result] The object onto which to store the result.
-     * @returns {OrientedBoundingBox} The modified result parameter or a new OrientedBoundingBox instance if one was not provided.
-     */
     function fromTangentPlaneExtents(tangentPlane, minimumX, maximumX, minimumY, maximumY, minimumZ, maximumZ, result) {
                 if (!defined(minimumX) ||
             !defined(maximumX) ||
