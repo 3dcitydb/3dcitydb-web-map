@@ -336,7 +336,7 @@ function getLayersFromUrl() {
             maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
         }
 
-        if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1) {
+        if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1 && options.layerDataType === "COLLADA/KML/glTF") {
             nLayers.push(new CitydbKmlLayer(options));
         } else {
             nLayers.push(new Cesium3DTilesDataLayer(options));

@@ -53,10 +53,13 @@
         this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
         this._mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
 
+        this._layerDataType = options.layerDataType;
+
         this._configParameters = {
             "id": this.id,
             "name": this.name,
             "url": this.url,
+            "layerDataType": this.layerDataType,
             "thematicDataUrl": this.thematicDataUrl,
             "thematicDataProvider": this._thematicDataProvider
         }
@@ -209,6 +212,15 @@
             },
             set: function (value) {
                 this._mouseOverhighlightColor = value;
+            }
+        },
+
+        layerDataType: {
+            get: function () {
+                return this._layerDataType;
+            },
+            set: function (value) {
+                this._layerDataType = value;
             }
         },
 
