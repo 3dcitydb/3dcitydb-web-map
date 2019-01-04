@@ -272,7 +272,7 @@
                 if (Cesium.defined(features)) {
                     var object = features[k];
 
-                    var idArray = object._content._batchTable.batchTableJson.id;
+                    var idArray = object._content._batchTable._properties.id;
                     if (!Cesium.defined(idArray))
                         return;
                     var objectId = idArray[object._batchId];
@@ -304,7 +304,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -325,7 +325,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -343,7 +343,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -359,7 +359,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -444,7 +444,7 @@
         if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
             return;
 
-        var idArray = object._content._batchTable.batchTableJson.id;
+        var idArray = object._content._batchTable._properties.id;
         if (!Cesium.defined(idArray))
             return;
 
@@ -465,7 +465,7 @@
             if (!(loadedTiles[i]._content instanceof Cesium.Batched3DModel3DTileContent))
                 continue;
 
-            var idArray = loadedTiles[i]._content.batchTable.batchTableJson.id;
+            var idArray = loadedTiles[i]._content.batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 break;
 
