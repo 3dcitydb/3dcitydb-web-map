@@ -493,6 +493,9 @@ function loadLayerGroup(_layers) {
             } else {
                 webMap._activeLayer = _layers[0];
                 document.getElementById('loadingIndicator').style.display = 'none';
+
+                // show/hide glTF version based on the value of Layer Data Type
+                layerDataTypeDropdownOnchange();
             }
         }).otherwise(function (error) {
             CitydbUtil.showAlertWindow("OK", "Error", error.message);
@@ -1142,6 +1145,15 @@ function showInExternalMaps() {
     }
 
     window.open(mapLink);
+}
+
+function layerDataTypeDropdownOnchange() {
+    var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "COLLADA/KML/glTF") {
+        document.getElementById("gltfVersionDropdownRow").style.display = "none";
+    } else {
+        document.getElementById("gltfVersionDropdownRow").style.display = "";
+    }
 }
 
 // Mobile layouts and functionalities

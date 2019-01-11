@@ -221,14 +221,14 @@
                                     <tr>
                                         <td>Layer data type</td>
                                         <td>
-                                            <select id="layerDataTypeDropdown" data-bind="value: layerDataType">
+                                            <select id="layerDataTypeDropdown" data-bind="value: layerDataType" onchange="layerDataTypeDropdownOnchange()">
                                                 <option value="COLLADA/KML/glTF" selected="selected">COLLADA/KML/glTF</option>
                                                 <option value="Cesium 3D Tiles">Cesium 3D Tiles</option>
                                                 <option value="Others">Others</option>
                                             </select>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr id="gltfVersionDropdownRow" style="display: none;">
                                         <td>glTF version</td>
                                         <td>
                                             <select id="gltfVersionDropdown" data-bind="value: gltfVersion">
