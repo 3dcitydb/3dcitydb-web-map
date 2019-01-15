@@ -31,6 +31,3 @@ For example, all of the following URLs are aquivalent:
     * `http://example.com/cesium3DTiles/`
     * `http://example.com/cesium3DTiles/tileset.json`
 
-[comment]: <> (##### DEPRECATED)
-
-[comment]: <> (##### FIXED)
