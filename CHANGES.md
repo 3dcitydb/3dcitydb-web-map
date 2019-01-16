@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.6.3
+### 1.7.1
 ---------
 
 ##### UPDATES
@@ -30,4 +30,3 @@ For example, all of the following URLs are aquivalent:
     * `http://example.com/cesium3DTiles`
     * `http://example.com/cesium3DTiles/`
     * `http://example.com/cesium3DTiles/tileset.json`
-
