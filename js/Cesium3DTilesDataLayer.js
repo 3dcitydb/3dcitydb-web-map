@@ -36,7 +36,7 @@
         }
         this._defaultProxy = new Cesium.DefaultProxy(proxyUrl)
 
-        this._url = options.url;
+        this._url = this.autofillUrl(options.url);
         this._name = options.name;
         this._id = Cesium.defaultValue(options.id, Cesium.createGuid());
         this._region = options.region;
@@ -53,10 +53,13 @@
         this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
         this._mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
 
+        this._layerDataType = options.layerDataType;
+
         this._configParameters = {
             "id": this.id,
             "name": this.name,
             "url": this.url,
+            "layerDataType": this.layerDataType,
             "thematicDataUrl": this.thematicDataUrl,
             "thematicDataProvider": this._thematicDataProvider
         }
@@ -212,12 +215,37 @@
             }
         },
 
+        layerDataType: {
+            get: function () {
+                return this._layerDataType;
+            },
+            set: function (value) {
+                this._layerDataType = value;
+            }
+        },
+
         configParameters: {
             get: function () {
                 return this._configParameters;
             }
         }
     });
+
+    /**
+     * Automatically add `tileset.json` in Cesium 3D Tiles URL if no file is given
+     *
+     * @param strUrl
+     * @returns {*}
+     */
+    Cesium3DTilesDataLayer.prototype.autofillUrl = function (strUrl) {
+        var scope = this;
+
+        if (['json'].indexOf(CitydbUtil.get_suffix_from_filename(strUrl)) > -1) {
+            return strUrl;
+        } else {
+            return strUrl + ((strUrl.charAt(strUrl.length - 1) === "/" || strUrl.charAt(strUrl.length - 1) === "\\") ? "" : "/") + "tileset.json";
+        }
+    }
 
     /**
      * adds this layer to the given Cesium viewer
@@ -260,7 +288,7 @@
                 if (Cesium.defined(features)) {
                     var object = features[k];
 
-                    var idArray = object._content._batchTable.batchTableJson.id;
+                    var idArray = object._content._batchTable._properties.id;
                     if (!Cesium.defined(idArray))
                         return;
                     var objectId = idArray[object._batchId];
@@ -292,7 +320,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -313,7 +341,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -331,7 +359,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -347,7 +375,7 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable.batchTableJson.id;
+            var idArray = object._content._batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 return;
             var objectId = idArray[object._batchId];
@@ -397,7 +425,7 @@
         this._cesiumViewer.scene.primitives.remove(this._tileset);
 
         this._tileset = new Cesium.Cesium3DTileset({
-            url: this._url
+            url: this.autofillUrl(this._url)
         });
 
         this._tileset.readyPromise.then(function (tileset) {
@@ -432,7 +460,7 @@
         if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
             return;
 
-        var idArray = object._content._batchTable.batchTableJson.id;
+        var idArray = object._content._batchTable._properties.id;
         if (!Cesium.defined(idArray))
             return;
 
@@ -453,7 +481,7 @@
             if (!(loadedTiles[i]._content instanceof Cesium.Batched3DModel3DTileContent))
                 continue;
 
-            var idArray = loadedTiles[i]._content.batchTable.batchTableJson.id;
+            var idArray = loadedTiles[i]._content.batchTable._properties.id;
             if (!Cesium.defined(idArray))
                 break;
 

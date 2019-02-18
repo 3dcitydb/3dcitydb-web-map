@@ -66,9 +66,12 @@ var cesiumCamera = cesiumViewer.scene.camera;
 var webMap = new WebMap3DCityDB(cesiumViewer);
 
 // set default input parameter value and bind the view and model
+
 var addLayerViewModel = {
     url: "",
     name: "",
+    layerDataType: "",
+    gltfVersion: "",
     thematicDataUrl: "",
     cityobjectsJsonUrl: "",
     minLodPixels: "",
@@ -248,8 +251,8 @@ function adjustIonFeatures() {
             }
             console.warn("Please enter your Bing Maps API token using the URL-parameter \"bingToken=<your-token>\" and refresh the page if you wish to use Bing Maps.");
 
-            // Set default imagery to OpenStreetMap
-            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[6];
+            // Set default imagery to ESRI World Imagery
+            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
             
             // Disable auto-complete of OSM Geocoder due to OSM usage limitations
             // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
@@ -322,6 +325,8 @@ function getLayersFromUrl() {
         var options = {
             url: layerConfig.url,
             name: layerConfig.name,
+            layerDataType: Cesium.defaultValue(layerConfig.layerDataType, "COLLADA/KML/glTF"),
+            gltfVersion: Cesium.defaultValue(layerConfig.gltfVersion, "2.0"),
             thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
             cityobjectsJsonUrl: Cesium.defaultValue(layerConfig.cityobjectsJsonUrl, ""),
             active: (layerConfig.active == "true"),
@@ -331,7 +336,7 @@ function getLayersFromUrl() {
             maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
         }
 
-        if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1) {
+        if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1 && options.layerDataType === "COLLADA/KML/glTF") {
             nLayers.push(new CitydbKmlLayer(options));
         } else {
             nLayers.push(new Cesium3DTilesDataLayer(options));
@@ -412,6 +417,8 @@ function observeObjectList() {
     function updateAddLayerViewModel(selectedLayer) {
         addLayerViewModel.url = selectedLayer.url;
         addLayerViewModel.name = selectedLayer.name;
+        addLayerViewModel.layerDataType = selectedLayer.layerDataType;
+        addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
         addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
         addLayerViewModel.cityobjectsJsonUrl = selectedLayer.cityobjectsJsonUrl;
         addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
@@ -425,6 +432,8 @@ function saveLayerSettings() {
     var activeLayer = webMap.activeLayer;
     applySaving('url', activeLayer);
     applySaving('name', activeLayer);
+    applySaving('layerDataType', activeLayer);
+    applySaving('gltfVersion', activeLayer);
     applySaving('thematicDataUrl', activeLayer);
     applySaving('cityobjectsJsonUrl', activeLayer);
     applySaving('minLodPixels', activeLayer);
@@ -484,6 +493,9 @@ function loadLayerGroup(_layers) {
             } else {
                 webMap._activeLayer = _layers[0];
                 document.getElementById('loadingIndicator').style.display = 'none';
+
+                // show/hide glTF version based on the value of Layer Data Type
+                layerDataTypeDropdownOnchange();
             }
         }).otherwise(function (error) {
             CitydbUtil.showAlertWindow("OK", "Error", error.message);
@@ -676,10 +688,6 @@ function showSceneLink() {
 function generateLink() {
     var cameraPosition = getCurrentCameraPostion();
     var projectLink = location.protocol + '//' + location.host + location.pathname + '?';
-    var gltf_version = CitydbUtil.parse_query_string('gltf_version', window.location.href);
-
-    if (gltf_version)
-        projectLink = projectLink + 'gltf_version=' + gltf_version + "&";
 
     var clock = cesiumViewer.cesiumWidget.clock;
     if (!clock.shouldAnimate) {
@@ -739,6 +747,8 @@ function layersToQuery() {
         var layerConfig = {
             url: layer.url,
             name: layer.name,
+            layerDataType: layer.layerDataType,
+            gltfVersion: layer.gltfVersion,
             active: layer.active,
             spreadsheetUrl: layer.thematicDataUrl,
             cityobjectsJsonUrl: layer.cityobjectsJsonUrl,
@@ -886,6 +896,8 @@ function addNewLayer() {
     var options = {
         url: addLayerViewModel.url.trim(),
         name: addLayerViewModel.name.trim(),
+        layerDataType: addLayerViewModel.layerDataType.trim(),
+        gltfVersion: addLayerViewModel.gltfVersion.trim(),
         thematicDataUrl: addLayerViewModel.thematicDataUrl.trim(),
         cityobjectsJsonUrl: addLayerViewModel.cityobjectsJsonUrl.trim(),
         minLodPixels: addLayerViewModel.minLodPixels,
@@ -893,10 +905,13 @@ function addNewLayer() {
         maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
         maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles
     }
-    if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
-        _layers.push(new CitydbKmlLayer(options));
-    } else {
+    
+    // since Cesium 3D Tiles also require name.json in the URL, it must be checked first
+    var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'Cesium 3D Tiles') {
         _layers.push(new Cesium3DTilesDataLayer(options));
+    } else if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
+        _layers.push(new CitydbKmlLayer(options));
     }
 
     loadLayerGroup(_layers);
@@ -1130,6 +1145,15 @@ function showInExternalMaps() {
     }
 
     window.open(mapLink);
+}
+
+function layerDataTypeDropdownOnchange() {
+    var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "COLLADA/KML/glTF") {
+        document.getElementById("gltfVersionDropdownRow").style.display = "none";
+    } else {
+        document.getElementById("gltfVersionDropdownRow").style.display = "";
+    }
 }
 
 // Mobile layouts and functionalities
