@@ -1,5 +1,11 @@
 # Change Log
 
+### 1.7.2
+---------
+
+##### UPDATES
+* Added splashscreen while opening the web client
+    
 ### 1.7.1
 ---------
 
