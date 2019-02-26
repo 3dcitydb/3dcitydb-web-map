@@ -60,6 +60,18 @@
         <!-- OpenStreetMap GeoCoder Nominatim -->
         <script src="utils/OpenStreetMapNominatimGeocoder.js"></script>
 
+        <!-- Add a loading screen -->
+        <script>
+            function displayLoadingScreen() {
+                setTimeout(function () {
+                    var loadingScreen = document.getElementById('loadingScreen');
+                    loadingScreen.style.display = "none";
+                }, 3000);
+            }
+
+            displayLoadingScreen();
+        </script>
+
         <style>
             @import url(../ThirdParty/Cesium/Widgets/widgets.css);
             @import url(css/GPSButtonStyles.css);
@@ -98,6 +110,20 @@
                 background-position: center;
                 background-repeat: no-repeat;
                 background-image: url(../theme/img/ajax-loader.gif);
+            }
+
+            #loadingScreen {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 999999;
+                width: 100vw;
+                height: 100vh;
+                background-color: rgb(255, 255, 255);
+                background-image: url("../theme/img/3DCityDB_v4_Splashscreen.jpg");
+                background-repeat: no-repeat;
+                background-position: center;
             }
 
             .citydb_overSelect {
@@ -174,6 +200,9 @@
 
         </style>
     </head>
+
+    <div id="loadingScreen"></div>
+
     <body>
         <div id="cesiumContainer"></div>
         <div id="loadingIndicator" class="loadingIndicator"></div>
