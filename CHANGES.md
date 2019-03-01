@@ -3,8 +3,38 @@
 ### 1.7.2
 ---------
 
-##### UPDATES
-* Added splashscreen while opening the web client
+##### NEW
+* It is now possible to display your own information about your web client in a splash window that is loaded upon start. 
+By default: 
+    * All contents (HTML, CSS, JS) are to be stored in the folder [splash](3dwebclient/splash)
+    * The HTML page is named `SplashWindow.html` and all belonging CSS and JS files must be declared/imported in the HTML file.
+        
+* If the contents of the splash window are however stored somewhere else, 
+    the splash window can be declared as a set of string parameters in the web client URL using the following syntax: 
+    
+    `&splashWindow=url=<path_to_your_html_file>&showOnStart=<true|false>` 
+    
+    where:
+    
+    | Parameter        | Description           | Allowed values  | Default Value |
+    | ------------- |-------------| -----| ----|
+    | `url`      | A valid path to the HTML file | An absolute path if the HTML file is located in another domain or a relative path if the HTML file is located in the same project folder as the web client | `splash/SplashWindow.html` |
+    | `showOnStart`     | A boolean that determines whether the splash window should be shown upon start or not      |   `true` or `false` | `true` |
+    
+* The splash window has two buttons: `Close` and `Ignore` (or `Do not show again`). the former closes the splash window but does not prevent it from appearing again if the page is reloaded. 
+Therefore, the latter button can be used to suppress the splash window from appearing again. 
+Note that a cookie named `ignoreSplashWindow` will be created locally, which tells the web client whether or not to display the splash window based on the user's choice.
+
+* The configurations of the splash window (`url` and `showOnStart`) can be modified using the main toolbox in the web client. There, you can also overwrite or remove the current splash window.
+    * Once the flag `showOnStart` has been modified and saved, it will overwrite the cookie `ignoreSplashWindow`. 
+For example, a checked `showOnStart` flag in the toolbox will set the cookie `ignoreSplashWindow` to `false` again, regardless of the cookie's value.
+    * On the other hand, the cookie `ignoreSplashWindow` will be priortized against the string parameters in the web client URL. For example, a web client with URL `...&showOnStart=true` will display the splash window on the first load. 
+    After the option `Ignore` (or `Do not show again`) is selected, the cookie `ignoreSplashWindow` with value `true` is created. This cookie will prevent the web client from displaying the splash window again on the next load, as expected, even if the web client URL has the parameter `showOnStart=true`.
+    To reset or remove the cookie, simply go to the main toolbox and set the flag `showOnStart` accordingly, since the flag has the highest priority and will overwrite the current value of the cookie.
+    
+    
+[comment]: <> (##### UPDATES)
+
     
 ### 1.7.1
 ---------
