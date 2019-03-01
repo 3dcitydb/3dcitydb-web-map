@@ -1,0 +1,318 @@
+<!-- Page template taken from https://codepen.io/anon/pen/jJPBRd -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        $(function () {
+            var stickyTop = 0,
+                scrollTarget = false;
+
+            var timeline = $('.timeline__nav'),
+                items = $('li', timeline),
+                milestones = $('.timeline__section .milestone'),
+                offsetTop = parseInt(timeline.css('top'));
+
+            var TIMELINE_VALUES = {
+                start: 190,
+                step: 30
+            };
+
+
+            $(window).resize(function () {
+                timeline.removeClass('fixed');
+
+                stickyTop = timeline.offset().top - offsetTop;
+
+                $(window).trigger('scroll');
+            }).trigger('resize');
+
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > stickyTop) {
+                    timeline.addClass('fixed');
+                } else {
+                    timeline.removeClass('fixed');
+                }
+            }).trigger('scroll');
+
+            items.find('span').click(function () {
+                var li = $(this).parent(),
+                    index = li.index(),
+                    milestone = milestones.eq(index);
+
+                if (!li.hasClass('active') && milestone.length) {
+                    scrollTarget = index;
+
+                    var scrollTargetTop = milestone.offset().top - 80;
+
+                    $('html, body').animate({scrollTop: scrollTargetTop}, {
+                        duration: 400,
+                        complete: function complete() {
+                            scrollTarget = false;
+                        }
+                    });
+
+                }
+            });
+
+            $(window).scroll(function () {
+                var viewLine = $(window).scrollTop() + $(window).height() / 3,
+                    active = -1;
+
+                if (scrollTarget === false) {
+                    milestones.each(function () {
+                        if ($(this).offset().top - viewLine > 0) {
+                            return false;
+                        }
+
+                        active++;
+                    });
+                } else {
+                    active = scrollTarget;
+                }
+
+                timeline.css('top', -1 * active * TIMELINE_VALUES.step + TIMELINE_VALUES.start + 'px');
+
+                items.filter('.active').removeClass('active');
+
+                items.eq(active != -1 ? active : 0).addClass('active');
+            }).trigger('scroll');
+        });
+    </script>
+
+    <style>
+        html {
+            box-sizing: border-box;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            line-height: 1.5;
+        }
+
+        h1 {
+            padding: 0 20% 100px;
+        }
+
+        h2 {
+            color: white;
+            padding-left: 15px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            background-color: #2c7cff;
+        }
+
+        .wrapper {
+            margin: 0 auto;
+            padding: 0 20% 100px;
+            width: 100%;
+        }
+
+        article {
+            position: relative;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .timeline__nav {
+            position: fixed;
+            z-index: 99;
+            top: 0;
+            transition: top 0.3s ease-out;
+        }
+
+        .timeline__nav ul {
+            list-style: none;
+            list-style-position: inside;
+            margin: 15px 0;
+        }
+
+        .timeline__nav ul li {
+            margin: 15px 0;
+            padding-left: 0;
+            list-style-type: none;
+            color: #bfc1c3;
+            border-bottom: 1px dotted rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease-out;
+        }
+
+        .timeline__nav ul li.active {
+            font-weight: bold;
+            color: #2c7cff;
+            border-bottom: 1px dotted transparent;
+            -webkit-transform: scale(1.5);
+            transform: scale(1.5);
+        }
+
+        .timeline__nav ul li:hover {
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>3DCityDB-Web-Map-Client</h1>
+
+<article class="timeline">
+    <nav class="timeline__nav">
+        <ul>
+            <li><span>Introduction</span></li>
+            <li><span>Architecture</span></li>
+            <li><span>License</span></li>
+            <li><span>Release</span></li>
+            <li><span>Requirements</span></li>
+            <li><span>Documentation</span></li>
+            <li><span>Contributing</span></li>
+            <li><span>Developers</span></li>
+            <li><span>More info</span></li>
+        </ul>
+    </nav>
+    <section class="timeline__section">
+        <div class="wrapper">
+
+            <h2 class="milestone">Introduction</h2>
+            <p>
+                The <b>3DCityDB-Web-Map-Client</b> is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of <b>arbitrarily large semantic 3D city models in CityGML</b>. It utilizes the <a href="http://cesiumjs.org/index.html" target="_blank">Cesium Virtual Globe</a> as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
+            </p>
+            <p>
+                The key features and functionalities of the 3DCityDB-Web-Map-Client is summarized as follows:
+
+                <ul>
+                    <li>
+                        Support for efficient displaying, caching, prefetching, dynamic loading and unloading of large pre-styled 3D visualization models in the form of tiled KML/glTF datasets exported from the 3DCityDB using the Importer/Exporter
+                    </li>
+                    <li>
+                        Intuitive user interface for adding and removing arbitrary number of data layers like 3D visualization model (KML/glTF), WMS imagery layer, and Cesium digital terrain model
+                    </li>
+                    <li>
+                        Support for linking the 3D visualization models (KML/glTF) with the cloud-based Google Fusion Table allowing for querying the thematic data of every 3D object
+                    </li>
+                    <li>
+                        Support for rich interaction with 3D visualization models (KML/glTF), for example, highlighting of 3D objects on mouseover and mouseclick as well as hiding and showing of the selected 3D objects
+                    </li>
+                    <li>
+                        Support for exploring a 3D object of interest from different view perspectives using third-party mapping services like Microsoft Bing Maps with oblique view, Google Streetview, and a combined version (DualMaps)
+                    </li>
+                    <li>
+                        Support for on-the-fly activating and deactivating shadow visualization of 3D objects (only for glTF, KML is currently not supported yet) and Cesium digital terrain models
+                    </li>
+                    <li>
+                        Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of generating a scene link including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers etc.
+                    </li>
+                </ul>
+            </p>
+
+            <h2 class="milestone">Architecture</h2>
+            <img src="../../theme/img/3dcitydb-web-map-client-architecture.jpg" alt="Components used in the demonstrator" width="100%">
+
+            <h2 class="milestone">License</h2>
+            <p>
+                The 3DCityDb-Web-Map-Client is licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License, Version 2.0</a>. See the <samp>LICENSE</samp> file for more details.
+            </p>
+
+            <h2 class="milestone">Latest release</h2>
+            <p>
+                The latest stable release of the 3DCityDB-Web-Map-Client is <samp>1.7.1</samp>.
+            <p>
+                All releases are available from the <a href="https://github.com/3dcitydb/3dcitydb-web-map/releases" target="_blank">releases section</a>.
+            </p>
+            <p>
+                For convenient use, there is an official <a href="https://www.3dcitydb.org/3dcitydb-web-map/1.7.1/3dwebclient/index.html" target="_blank">web link</a> available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser.
+            </p>
+
+            <h2 class="milestone">System requirements</h2>
+            <p>
+                The hardware on which the 3DCityDB-Web-Map-Client will be run must have a graphics card installed that supports WebGL. In addition, the web browser in use must also provide appropriate WebGL support.
+            </p>
+            <p>
+                You can visit the <a href="http://get.webgl.org/](http://get.webgl.org/" target="_blank">WebGL website</a> to check whether your web browser supports WebGL.
+            </p>
+            <p>
+                The 3DCityDB-Web-Map-Client has been successfully tested on (but is not limited to) the following web browsers under different desktop operating systems like Microsoft Windows, Linux, Apple Mac OS X, and even on mobile operating systems like Android and iOS.
+                <ul>
+                    <li>
+                        Apple Safari
+                    </li>
+                    <li>
+                        Mozilla Firefox
+                    </li>
+                    <li>
+                        Google Chrome
+                    </li>
+                    <li>
+                        Opera
+                    </li>
+                </ul>
+            </p>
+            <p>
+                For best performance, it is recommended to use Google Chrome.
+            </p>
+
+            <h2 class="milestone">Documentation</h2>
+            <p>
+                A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client is installed with the 3DCityDB Importer/Exporter and is also available <a href="https://www.3dcitydb.org/3dcitydb/documentation/" target="_blank">online</a>.
+            </p>
+
+            <h2 class="milestone">Contributing</h2>
+            <p>
+                <ul>
+                    <li>
+                        To file bugs found in the software create a GitHub issue.
+                    </li>
+                    <li>
+                        To contribute code for fixing filed issues create a pull request with the issue id.
+                    </li>
+                    <li>
+                        To propose a new feature create a GitHub issue and open a discussion.
+                    </li>
+                </ul>
+            </p>
+
+            <h2 class="milestone">Developers</h2>
+            <p>
+                The 3DCityDB-Web-Map-Client has been developed by:
+                <ul>
+                    <li>
+                        Zhihang Yao, Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
+                        <br>
+                        <a href="https://www.gis.bgu.tum.de/" target="_blank">Chair of Geoinformatics, Technical University of Munich</a>
+                    </li>
+                </ul>
+            </p>
+            <p>
+                and with the support from the following cooperation partners:
+                <ul>
+                    <li>
+                        Jannes Bolling, Lucas van Walstijn, and Claus Nagel
+                        <br>
+                        <a href="https://www.virtualcitysystems.de/" target="_blank">virtualcitySYSTEMS GmbH, Berlin</a>
+                    </li>
+                </ul>
+            </p>
+
+            <h2 class="milestone">More information</h2>
+            <p>
+                <a href="https://www.opengeospatial.org/standards/citygml" target="_blank">OGC CityGML</a> is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the <a href="https://www.opengeospatial.org/standards/gml" target="_blank">Geography Markup Language version 3.1.1 (GML3)</a>, the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model.
+            </p>
+            <p>
+                CityGML is an international OGC standard and can be used free of charge.
+            </p>
+        </div>
+    </section>
+</article>
+
+</body>
+</html>
