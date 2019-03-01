@@ -32,10 +32,6 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
     After the option `Ignore` (or `Do not show again`) is selected, the cookie `ignoreSplashWindow` with value `true` is created. This cookie will prevent the web client from displaying the splash window again on the next load, as expected, even if the web client URL has the parameter `showOnStart=true`.
     To reset or remove the cookie, simply go to the main toolbox and set the flag `showOnStart` accordingly, since the flag has the highest priority and will overwrite the current value of the cookie.
     
-    
-[comment]: <> (##### UPDATES)
-
-    
 ### 1.7.1
 ---------
 
