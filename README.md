@@ -64,7 +64,7 @@ For best performance, it is recommended to use Google Chrome.
 
 Documentation
 -------------
-A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client is installed with the 3DCityDB Importer/Exporter and is also available [online](http://www.3dcitydb.org/3dcitydb/documentation/).
+A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client is installed with the 3DCityDB Importer/Exporter and is also available [online](https://www.3dcitydb.org/3dcitydb/documentation/).
 
 Contributing
 ------------
@@ -83,7 +83,7 @@ The 3DCityDB-Web-Map-Client has been developed by:
 and with the support from the following cooperation partners:
 
 * Jannes Bolling, Lucas van Walstijn, and Claus Nagel 
-<br>[virtualcitySYSTEMS GmbH, Berlin](http://www.virtualcitysystems.de/)
+<br>[virtualcitySYSTEMS GmbH, Berlin](https://www.virtualcitysystems.de/)
 
 
 Demos
@@ -196,6 +196,6 @@ Additional important notes:
 
 More information
 ----------------
-[OGC CityGML](http://www.opengeospatial.org/standards/citygml) is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the [Geography Markup Language version 3.1.1 (GML3)](http://www.opengeospatial.org/standards/gml), the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model.
+[OGC CityGML](https://www.opengeospatial.org/standards/citygml) is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the [Geography Markup Language version 3.1.1 (GML3)](https://www.opengeospatial.org/standards/gml), the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model.
 
 CityGML is an international OGC standard and can be used free of charge.
