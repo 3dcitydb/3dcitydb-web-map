@@ -60,22 +60,11 @@
         <!-- OpenStreetMap GeoCoder Nominatim -->
         <script src="utils/OpenStreetMapNominatimGeocoder.js"></script>
 
-        <!-- Add a loading screen -->
-        <script>
-            function displayLoadingScreen() {
-                setTimeout(function () {
-                    var loadingScreen = document.getElementById('loadingScreen');
-                    loadingScreen.style.display = "none";
-                }, 3000);
-            }
-
-            displayLoadingScreen();
-        </script>
-
         <style>
             @import url(../ThirdParty/Cesium/Widgets/widgets.css);
             @import url(css/GPSButtonStyles.css);
             @import url(css/MobileFullscreenStyles.css);
+            @import url(css/SplashWindow.css);
 
             html, body, #cesiumContainer {
                 top: 0px;
@@ -200,8 +189,6 @@
 
         </style>
     </head>
-
-    <div id="loadingScreen"></div>
 
     <body>
         <div id="cesiumContainer"></div>
@@ -422,7 +409,41 @@
                                 <button style="width: 100%;" type="button" class="cesium-button" onclick="addTerrainProvider()">Add Terrain layer</button>
                             </div>											
                         </div>
-                    </div>			        		        
+                    </div>
+
+                    <div style="width: 100%;">
+                        <!-- add splash window -->
+                        <div class="citydb_short_container" onclick="showAddSplashWindow()">
+                            <select style="width: 100%;" class="cesium-button" >
+                                <option>Add Splash Window</option>
+                            </select>
+                            <div class="citydb_overSelect"></div>
+                        </div>
+                        <div class="citydb_short_container">
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeSplashWindow()">Remove Splash Window</button>
+                        </div>
+                        <div id="citydb_addsplashwindow" class="citydb_dynamic_box">
+                            <table class="citydb_inputtable">
+                                <tbody>
+                                <tr>
+                                    <td WIDTH="35%">URL(*)</td>
+                                    <td WIDTH="65%">
+                                        <input type="text" data-bind="value: url">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td WIDTH="35%">Show on start(*)</td>
+                                    <td WIDTH="65%">
+                                        <input id="showOnStart_checkbox" type="checkbox" data-bind="checked: showOnStart">
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="citydb_long_container">
+                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addSplashWindow()">Add Splash Window</button>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="citydb_long_container">
                         <select id = "citydb_highlightinglist" style="width: 100%;" class="cesium-button">
@@ -482,6 +503,17 @@
         <!-- GPS button -->
         <button id="gpsButton" type="button" class="cesium-button"></button>
 
+        <!-- Splash window -->
+        <div id="splashwindow_iframe" class="splash-wrapper">
+            <div class="splash-iframe-container">
+                <iframe id="splashwindow_iframe_content" src="" frameborder="0"></iframe>
+                <div class="splashscreen-buttons">
+                    <input id="not_show_again_button" type="button" value="Ignore" onclick="ignoreSplashWindow()">
+                    <input id="close_button" type="button" value="Close" onclick="closeSplashWindow()">
+                </div>
+            </div>
+        </div>
+
         <script>
             var expanded = false;
             function showToolbox() {
@@ -527,6 +559,18 @@
                     expanded4 = true;
                 } else {
                     citydb_addterrainpanel.style.display = "none";
+                    expanded4 = false;
+                }
+            }
+
+            var expanded4 = false;
+            function showAddSplashWindow() {
+                var citydb_addsplashwindow = document.getElementById("citydb_addsplashwindow");
+                if (!expanded4) {
+                    citydb_addsplashwindow.style.display = "block";
+                    expanded4 = true;
+                } else {
+                    citydb_addsplashwindow.style.display = "none";
                     expanded4 = false;
                 }
             }

@@ -103,6 +103,13 @@ var addTerrainViewModel = {
 Cesium.knockout.track(addTerrainViewModel);
 Cesium.knockout.applyBindings(addTerrainViewModel, document.getElementById('citydb_addterrainpanel'));
 
+var addSplashWindowModel = {
+    url: '',
+    showOnStart: ''
+};
+Cesium.knockout.track(addSplashWindowModel);
+Cesium.knockout.applyBindings(addSplashWindowModel, document.getElementById('citydb_addsplashwindow'));
+
 /*---------------------------------  Load Configurations and Layers  ----------------------------------------*/
 
 intiClient();
@@ -111,6 +118,9 @@ adjustIonFeatures();
 
 var clockElementClicked = false;
 function intiClient() {
+    // read splash window from url
+    getSplashWindowFromUrl();
+
     // init progress indicator gif
     document.getElementById('loadingIndicator').style.display = 'none';
 
@@ -314,6 +324,41 @@ function inspectTileStatus() {
             loadingTilesInspector.style.display = 'none';
         }
     }, 200);
+}
+
+function getSplashWindowFromUrl() {
+    var tmp_url = "";
+    var tmp_showOnStart = "";
+    var default_url = "splash/SplashWindow.html";
+    var default_showOnStart = "true";
+
+    var ignoreSplashWindow_cookie = getCookie("ignoreSplashWindow");
+    var splashWindowConfigString = CitydbUtil.parse_query_string('splashWindow', window.location.href);
+    if (splashWindowConfigString) {
+        var splashWindowConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(splashWindowConfigString))[0]);
+        tmp_url = splashWindowConfig.url ? splashWindowConfig.url : "";
+        // if this page has already been visited and has the cookie ignoreSplashWindow, then priortize this cookie before the URL string parameter showOnStart
+        if (typeof ignoreSplashWindow_cookie === "undefined" || ignoreSplashWindow_cookie == "") {
+            tmp_showOnStart = (typeof splashWindowConfig.showOnStart === "undefined" || splashWindowConfig.showOnStart === "") ? default_showOnStart : splashWindowConfig.showOnStart;
+        } else {
+            tmp_showOnStart = (ignoreSplashWindow_cookie == "false") + "";
+        }
+    } else {
+        tmp_url = default_url;
+        if (typeof ignoreSplashWindow_cookie === "undefined" || ignoreSplashWindow_cookie == "") {
+            tmp_showOnStart = default_showOnStart;
+            ignoreSplashWindow_cookie = (default_showOnStart == "false") + "";
+        } else {
+            tmp_showOnStart = (ignoreSplashWindow_cookie == "false") + "";
+        }
+    }
+
+    addSplashWindowModel.url = tmp_url;
+    addSplashWindowModel.showOnStart = tmp_showOnStart;
+    document.getElementById("showOnStart_checkbox").checked = (tmp_showOnStart == "true");
+    ignoreSplashWindow_cookie = (tmp_showOnStart == "false") + "";
+
+    ignoreSplashWindow_cookie == "true" ? closeSplashWindow() : addSplashWindow();
 }
 
 function getLayersFromUrl() {
@@ -716,9 +761,13 @@ function generateLink() {
         projectLink = projectLink + '&' + terrain;
     }
 
+    var splashWindow = splashWindowToQuery();
+    if (splashWindow != null) {
+        projectLink = projectLink + '&' + splashWindow;
+    }
+
     return projectLink;
 }
-;
 
 function getCurrentCameraPostion() {
     var cesiumCamera = cesiumViewer.scene.camera;
@@ -788,6 +837,15 @@ function terrainToQuery() {
     } else {
         return null;
     }
+}
+
+function splashWindowToQuery() {
+    if (addSplashWindowModel.url) {
+        return Cesium.objectToQuery({
+            splashWindow: Cesium.objectToQuery(addSplashWindowModel)
+        });
+    }
+    return null;
 }
 
 // Clear Highlighting effect of all highlighted objects
@@ -979,6 +1037,81 @@ function removeTerrainProvider() {
     var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
     baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
     baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+}
+
+function addSplashWindow() {
+    document.getElementById("splashwindow_iframe_content").src = addSplashWindowModel.url;
+    setCookie("ignoreSplashWindow", (addSplashWindowModel.showOnStart == "false" || addSplashWindowModel.showOnStart == false) + "");
+
+    // show splash window now
+    openSplashWindow();
+}
+
+function removeSplashWindow() {
+    document.getElementById("splashwindow_iframe_content").src = undefined;
+    setCookie("ignoreSplashWindow", undefined);
+    addSplashWindowModel.url = "";
+    addSplashWindowModel.showOnStart = "";
+
+    // close splash window now
+    closeSplashWindow();
+}
+
+function ignoreSplashWindow() {
+    createCookie("ignoreSplashWindow","true", 14);
+    document.getElementById("showOnStart_checkbox").checked = false;
+    closeSplashWindow();
+}
+
+// Hide splash window and unblur all elements
+function closeSplashWindow() {
+    document.getElementById("splashwindow_iframe").style.display = 'none';
+    $('*').css({
+        '-webkit-filter': 'none',
+        '-moz-filter': 'none',
+        '-o-filter': 'none',
+        '-ms-filter': 'none',
+        'filter': 'none',
+    });
+}
+
+// Open splash window and blur all elements but the splash window
+function openSplashWindow() {
+    document.getElementById("splashwindow_iframe").style.display = 'block';
+    $('body>*:not(#splashwindow_iframe)').css("filter","blur(3px)");
+}
+
+// Source: https://stackoverflow.com/questions/4825683/how-do-i-create-and-read-a-value-from-cookie
+function createCookie(name, value, days) {
+    var expires;
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toGMTString();
+    }
+    else {
+        expires = "";
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function getCookie(c_name) {
+    if (document.cookie.length > 0) {
+        c_start = document.cookie.indexOf(c_name + "=");
+        if (c_start != -1) {
+            c_start = c_start + c_name.length + 1;
+            c_end = document.cookie.indexOf(";", c_start);
+            if (c_end == -1) {
+                c_end = document.cookie.length;
+            }
+            return unescape(document.cookie.substring(c_start, c_end));
+        }
+    }
+    return "";
+}
+
+function setCookie(c_name, value) {
+    createCookie(c_name, value);
 }
 
 function createScreenshot() {
