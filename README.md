@@ -3,7 +3,9 @@
 
 News
 -------
-#### [Sep 15, 2018] The current 3DCityDB Web Map Client version v1.6.1 is included in the newest major release v4.0 of the [3DCityDB](https://github.com/3dcitydb/3dcitydb).
+#### [Mar 1, 2019] Version [v1.7.1](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.7.1) released!.
+
+**[Sep 15, 2018]** The current 3DCityDB Web Map Client version v1.6.1 is included in the newest major release v4.0 of the [3DCityDB](https://github.com/3dcitydb/3dcitydb).
 
 **[Mar 28, 2018]** Docker images for the 3DCityDB are now available under [Web-Map-Client](https://github.com/tum-gis/3dcitydb-web-map-docker), [3DCityDB PostGIS](https://github.com/tum-gis/3dcitydb-docker-postgis), [Web Feature Service (WFS)](https://github.com/tum-gis/3dcitydb-wfs-docker) and [Service orchestration](https://github.com/tum-gis/3dcitydb-docker-compose).
 
