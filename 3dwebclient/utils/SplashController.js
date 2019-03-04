@@ -25,19 +25,23 @@ function ignoreSplashWindow() {
 // Hide splash window and unblur all elements
 function closeSplashWindow() {
     document.getElementById("splashwindow_iframe").style.display = 'none';
-    $('*').css({
-        '-webkit-filter': 'none',
-        '-moz-filter': 'none',
-        '-o-filter': 'none',
-        '-ms-filter': 'none',
-        'filter': 'none',
-    });
+    (function($) {
+        $('*').css({
+            '-webkit-filter': 'none',
+            '-moz-filter': 'none',
+            '-o-filter': 'none',
+            '-ms-filter': 'none',
+            'filter': 'none',
+        });
+    })(jQuery);
 }
 
 // Open splash window and blur all elements but the splash window
 function openSplashWindow() {
     document.getElementById("splashwindow_iframe").style.display = 'block';
-    $('body>*:not(#splashwindow_iframe)').css("filter", "blur(3px)");
+    (function($) {
+        $('body>*:not(#splashwindow_iframe)').css("filter","blur(3px)");
+    })(jQuery);
 }
 
 function getSplashWindowFromUrl() {
