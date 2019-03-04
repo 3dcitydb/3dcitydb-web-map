@@ -31,7 +31,14 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
     * On the other hand, the cookie `ignoreSplashWindow` will be priortized against the string parameters in the web client URL. For example, a web client with URL `...&showOnStart=true` will display the splash window on the first load. 
     After the option `Ignore` (or `Do not show again`) is selected, the cookie `ignoreSplashWindow` with value `true` is created. This cookie will prevent the web client from displaying the splash window again on the next load, as expected, even if the web client URL has the parameter `showOnStart=true`.
     To reset or remove the cookie, simply go to the main toolbox and set the flag `showOnStart` accordingly, since the flag has the highest priority and will overwrite the current value of the cookie.
-    
+
+##### FIXES
+* Fixed a bug that prevented the web client from reading user's ion token correctly (see https://github.com/3dcitydb/3dcitydb-web-map/commit/59a62f60ae87e4c91f8fcfb862a50f2473bebc20).
+
+##### UPDATES
+* Updated JQuery to v3.3.1 (see https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627).
+
+
 ### 1.7.1
 ---------
 
