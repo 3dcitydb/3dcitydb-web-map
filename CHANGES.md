@@ -33,10 +33,10 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
     To reset or remove the cookie, simply go to the main toolbox and set the flag `showOnStart` accordingly, since the flag has the highest priority and will overwrite the current value of the cookie.
 
 ##### FIXES
-* Fixed a bug that prevented the web client from reading user's ion token correctly (see https://github.com/3dcitydb/3dcitydb-web-map/commit/59a62f60ae87e4c91f8fcfb862a50f2473bebc20).
+* Fixed a bug that prevented the web client from reading user's ion token correctly (see [commit](https://github.com/3dcitydb/3dcitydb-web-map/commit/59a62f60ae87e4c91f8fcfb862a50f2473bebc20)).
 
 ##### UPDATES
-* Updated JQuery to v3.3.1 (see https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627).
+* Updated JQuery to v3.3.1 (see [commit](https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627)).
 
 
 ### 1.7.1
