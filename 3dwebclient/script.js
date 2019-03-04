@@ -53,12 +53,20 @@ var cesiumViewerOptions = {
     terrainShadows: parseInt(terrainShadows),
     clockViewModel: new Cesium.ClockViewModel(clock)
 }
+
 // If neither BingMapsAPI key nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
-if ((!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") 
-        && (!Cesium.defined(ionToken) || ionToken === "")) {
+var ionToken = CitydbUtil.parse_query_string('ionToken', window.location.href);
+if (Cesium.defined(ionToken) && ionToken !== "") {
+    Cesium.Ion.defaultAccessToken = ionToken;
+}
+if ((!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "")
+    && (!Cesium.defined(ionToken) || ionToken === "")) {
     cesiumViewerOptions.geocoder = new OpenStreetMapNominatimGeocoder();
 }
+
 var cesiumViewer = new Cesium.Viewer('cesiumContainer', cesiumViewerOptions);
+
+adjustIonFeatures();
 
 navigationInitialization('cesiumContainer', cesiumViewer);
 
@@ -66,7 +74,6 @@ var cesiumCamera = cesiumViewer.scene.camera;
 var webMap = new WebMap3DCityDB(cesiumViewer);
 
 // set default input parameter value and bind the view and model
-
 var addLayerViewModel = {
     url: "",
     name: "",
@@ -113,8 +120,6 @@ Cesium.knockout.applyBindings(addSplashWindowModel, document.getElementById('cit
 /*---------------------------------  Load Configurations and Layers  ----------------------------------------*/
 
 intiClient();
-
-adjustIonFeatures();
 
 var clockElementClicked = false;
 function intiClient() {
@@ -242,34 +247,30 @@ function intiClient() {
     });
 }
 
-var ionToken = CitydbUtil.parse_query_string('ionToken', window.location.href);
 function adjustIonFeatures() {
-    if (Cesium.defined(ionToken) && ionToken !== "") {
-        Cesium.Ion.defaultAccessToken = ionToken;
-    } else {
-        // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
-        if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
-            var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
-            var i = 0;
-            while (i < imageryProviders.length) {
-                if (imageryProviders[i].name.indexOf("Bing Maps") !== -1) {
-                    //imageryProviders[i]._creationCommand.canExecute = false;
-                    imageryProviders.remove(imageryProviders[i]);
-                } else {
-                    i++;
-                }
+    // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
+    if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
+        var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
+        var i = 0;
+        while (i < imageryProviders.length) {
+            if (imageryProviders[i].name.indexOf("Bing Maps") !== -1) {
+                //imageryProviders[i]._creationCommand.canExecute = false;
+                imageryProviders.remove(imageryProviders[i]);
+            } else {
+                i++;
             }
-            console.warn("Please enter your Bing Maps API token using the URL-parameter \"bingToken=<your-token>\" and refresh the page if you wish to use Bing Maps.");
-
-            // Set default imagery to ESRI World Imagery
-            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
-            
-            // Disable auto-complete of OSM Geocoder due to OSM usage limitations
-            // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
-            cesiumViewer._geocoder._viewModel.autoComplete = false;
         }
+        console.warn("Please enter your Bing Maps API token using the URL-parameter \"bingToken=<your-token>\" and refresh the page if you wish to use Bing Maps.");
 
-        // Remove Cesium World Terrain from the Terrain Providers
+        // Set default imagery to ESRI World Imagery
+        cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
+
+        // Disable auto-complete of OSM Geocoder due to OSM usage limitations
+        // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
+        cesiumViewer._geocoder._viewModel.autoComplete = false;
+    }
+
+    // Remove Cesium World Terrain from the Terrain Providers
 //        var terrainProviders = cesiumViewer.baseLayerPicker.viewModel.terrainProviderViewModels;
 //        i = 0;
 //        while (i < terrainProviders.length) {
@@ -282,10 +283,9 @@ function adjustIonFeatures() {
 //        }
 //        console.log("Due to invalid or missing ion access token from user, Cesium World Terrain has been removed.");
 
-        // Set default imagery to an open-source terrain
-        // cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
-        console.warn("Please enter your ion access token using the URL-parameter \"ionToken=<your-token>\" and refresh the page if you wish to use ion features.");
-    }
+    // Set default imagery to an open-source terrain
+    // cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
+    console.warn("Please enter your ion access token using the URL-parameter \"ionToken=<your-token>\" and refresh the page if you wish to use ion features.");
 }
 
 /*---------------------------------  methods and functions  ----------------------------------------*/
@@ -324,41 +324,6 @@ function inspectTileStatus() {
             loadingTilesInspector.style.display = 'none';
         }
     }, 200);
-}
-
-function getSplashWindowFromUrl() {
-    var tmp_url = "";
-    var tmp_showOnStart = "";
-    var default_url = "splash/SplashWindow.html";
-    var default_showOnStart = "true";
-
-    var ignoreSplashWindow_cookie = getCookie("ignoreSplashWindow");
-    var splashWindowConfigString = CitydbUtil.parse_query_string('splashWindow', window.location.href);
-    if (splashWindowConfigString) {
-        var splashWindowConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(splashWindowConfigString))[0]);
-        tmp_url = splashWindowConfig.url ? splashWindowConfig.url : "";
-        // if this page has already been visited and has the cookie ignoreSplashWindow, then priortize this cookie before the URL string parameter showOnStart
-        if (typeof ignoreSplashWindow_cookie === "undefined" || ignoreSplashWindow_cookie == "") {
-            tmp_showOnStart = (typeof splashWindowConfig.showOnStart === "undefined" || splashWindowConfig.showOnStart === "") ? default_showOnStart : splashWindowConfig.showOnStart;
-        } else {
-            tmp_showOnStart = (ignoreSplashWindow_cookie == "false") + "";
-        }
-    } else {
-        tmp_url = default_url;
-        if (typeof ignoreSplashWindow_cookie === "undefined" || ignoreSplashWindow_cookie == "") {
-            tmp_showOnStart = default_showOnStart;
-            ignoreSplashWindow_cookie = (default_showOnStart == "false") + "";
-        } else {
-            tmp_showOnStart = (ignoreSplashWindow_cookie == "false") + "";
-        }
-    }
-
-    addSplashWindowModel.url = tmp_url;
-    addSplashWindowModel.showOnStart = tmp_showOnStart;
-    document.getElementById("showOnStart_checkbox").checked = (tmp_showOnStart == "true");
-    ignoreSplashWindow_cookie = (tmp_showOnStart == "false") + "";
-
-    ignoreSplashWindow_cookie == "true" ? closeSplashWindow() : addSplashWindow();
 }
 
 function getLayersFromUrl() {
@@ -1037,48 +1002,6 @@ function removeTerrainProvider() {
     var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
     baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
     baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
-}
-
-function addSplashWindow() {
-    document.getElementById("splashwindow_iframe_content").src = addSplashWindowModel.url;
-    setCookie("ignoreSplashWindow", (addSplashWindowModel.showOnStart == "false" || addSplashWindowModel.showOnStart == false) + "");
-
-    // show splash window now
-    openSplashWindow();
-}
-
-function removeSplashWindow() {
-    document.getElementById("splashwindow_iframe_content").src = undefined;
-    setCookie("ignoreSplashWindow", undefined);
-    addSplashWindowModel.url = "";
-    addSplashWindowModel.showOnStart = "";
-
-    // close splash window now
-    closeSplashWindow();
-}
-
-function ignoreSplashWindow() {
-    createCookie("ignoreSplashWindow","true", 14);
-    document.getElementById("showOnStart_checkbox").checked = false;
-    closeSplashWindow();
-}
-
-// Hide splash window and unblur all elements
-function closeSplashWindow() {
-    document.getElementById("splashwindow_iframe").style.display = 'none';
-    $('*').css({
-        '-webkit-filter': 'none',
-        '-moz-filter': 'none',
-        '-o-filter': 'none',
-        '-ms-filter': 'none',
-        'filter': 'none',
-    });
-}
-
-// Open splash window and blur all elements but the splash window
-function openSplashWindow() {
-    document.getElementById("splashwindow_iframe").style.display = 'block';
-    $('body>*:not(#splashwindow_iframe)').css("filter","blur(3px)");
 }
 
 // Source: https://stackoverflow.com/questions/4825683/how-do-i-create-and-read-a-value-from-cookie
