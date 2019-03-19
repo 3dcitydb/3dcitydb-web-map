@@ -123,6 +123,8 @@ intiClient();
 
 var clockElementClicked = false;
 function intiClient() {
+    // adjust cesium navigation help popup for splash window
+    insertSplashInfoHelp();
     // read splash window from url
     getSplashWindowFromUrl();
 
@@ -245,6 +247,10 @@ function intiClient() {
         }
         clockElementClicked = !clockElementClicked;
     });
+
+    // Bring the cesium navigation help popup above the compass
+    var cesiumNavHelp = document.getElementsByClassName("cesium-navigation-help")[0];
+    cesiumNavHelp.style.zIndex = 99999;
 }
 
 function adjustIonFeatures() {
