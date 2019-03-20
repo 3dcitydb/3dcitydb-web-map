@@ -138,8 +138,8 @@
             customCesiumViewerToolbar.removeChild(customHomeButton);
 
             // remove info button
-            var customInfoButton = customCesiumViewerToolbar.getElementsByClassName("cesium-navigationHelpButton-wrapper")[0];
-            customCesiumViewerToolbar.removeChild(customInfoButton);
+            // var customInfoButton = customCesiumViewerToolbar.getElementsByClassName("cesium-navigationHelpButton-wrapper")[0];
+            // customCesiumViewerToolbar.removeChild(customInfoButton);
         }
 
         // --------------------------MOUSE HELD EVENT--------------------------
