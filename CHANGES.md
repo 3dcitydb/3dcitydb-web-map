@@ -6,8 +6,12 @@
 ##### NEW
 * It is now possible to display your own information about your web client in a splash window that is loaded upon start. 
 By default: 
-    * All contents (HTML, CSS, JS) are to be stored in the folder [splash](3dwebclient/splash)
+    * All contents (HTML, CSS, JS) are to be stored in the folder [splash](3dwebclient/splash).
     * The HTML page is named `SplashWindow.html` and all belonging CSS and JS files must be declared/imported in the HTML file.
+    * On mobile devices, the web client will search for the HTML page named `SplashWindow_Mobile.html` and display it instead.
+    If such file does not exist, the default `SplashWindow.html` shall be used. 
+    Thus, if you wish to display your own contents modified for mobile devices, 
+    make sure to save them in the additional `SplashWindow_Mobile.html` file.
         
 * If the contents of the splash window are however stored somewhere else, 
     the splash window can be declared as a set of string parameters in the web client URL using the following syntax: 
