@@ -36,25 +36,31 @@ function insertSplashInfoHelp() {
     contents.style.display = "none";
     contents.innerHTML = '\
             <div class="cesium-navigation-help-zoom" style="padding: 15px 5px 20px 5px; text-align: center;">3DCityDB Web Map Client</div>\
-            <div class="cesium-navigation-help-details" style="padding: 5px; text-align: center;">Developed and maintained by:</div>\
+            <hr width="50%" style="margin-top: -10px; border-color: grey;">\
+            <div class="cesium-navigation-help-details" style="padding: 5px; text-align: center;">This tool employs the JavaScript library <a href="https://cesiumjs.org/" target="_blank">CesiumJS</a> and is a part of the 3D City Database (3DCityDB) <a href="https://www.3dcitydb.org/3dcitydb/software/" target="_blank">Software Suite</a>.</div>\
+            <table>\
+                <tr>\
+                    <td><img src="' + 'images/3DCityDB_Logo.png' + '" width="76" height="81" /></td>\
+                    <td>\
+                        <!-- <div class="cesium-navigation-help-pan">Chair of Geoinformatics</div>\ -->\
+                        <div class="cesium-navigation-help-details"><a href="https://www.3dcitydb.org/" target="_blank">3D City Database</a></div>\
+                    </td>\
+                </tr>\
+            </table>\
+            \
+            <hr width="50%" style="margin-top: 5px; border-color: grey;">\
+            <div class="cesium-navigation-help-details" style="padding: 5px 5px 5px 5px; text-align: center;">Developed and maintained by:</div>\
             <table>\
                 <tr>\
                     <td><img src="' + 'images/TUM_Logo.svg' + '" width="76" height="40" /></td>\
                     <td>\
                         <!-- <div class="cesium-navigation-help-pan">Chair of Geoinformatics</div>\ -->\
-                        <div class="cesium-navigation-help-details"> TUM, Chair of Geoinformatics</div>\
-                    </td>\
-                </tr>\
-                <tr>\
-                    <td><img src="' + 'images/VCS_Logo.png' + '" width="76" height="40" /></td>\
-                    <td>\
-                        <!-- <div class="cesium-navigation-help-pan">Chair of Geoinformatics</div>\ -->\
-                        <div class="cesium-navigation-help-details">virtualcitySYSTEMS GmbH, Berlin</div>\
+                        <div class="cesium-navigation-help-details"><a href="https://www.gis.bgu.tum.de/en/home/" target="_blank">TUM, Chair of Geoinformatics</a></div>\
                     </td>\
                 </tr>\
             </table>\
-            <div class="cesium-navigation-help-zoom" style="padding: 5px; text-align: center;">\
-                <button class="cesium-button" style="font-size: medium; padding: 10px 15px 10px 15px; text-align: center;" onclick="addSplashWindow()">More information</button>\
+            <div class="cesium-navigation-help-zoom" style="padding: 15px 5px 5px 15px; text-align: center;">\
+                <button class="cesium-button" style="font-size: medium; padding: 10px 15px 10px 15px; text-align: center;" onclick="addSplashWindow()">Show splash window</button>\
             </div>';
     container.appendChild(contents);
 
