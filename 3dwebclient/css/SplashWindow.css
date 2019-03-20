@@ -24,7 +24,7 @@
     max-height: 90%;
     top: 10%;
     position: relative;
-    z-index: 99999;
+    z-index: 99990;
 }
 
 #opaque_curtain {
@@ -50,8 +50,10 @@
 
 .splashscreen-buttons {
     position: absolute;
-    right: 3%;
-    bottom: 3%;
+    right: 12%;
+    bottom: 10%;
+    z-index: 99999;
+    display: none;
 }
 
 #not_show_again_button:hover {

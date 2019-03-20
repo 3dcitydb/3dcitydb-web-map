@@ -86,7 +86,7 @@
                 position: absolute;
                 left: 5px;
                 font-family: "Arial";
-                z-index: 99999;
+                z-index: 99980;
             }	
 
             .loadingIndicator {
@@ -506,15 +506,16 @@
         <button id="gpsButton" type="button" class="cesium-button"></button>
 
         <!-- Splash window -->
+        <div class="splashscreen-buttons">
+            <input id="not_show_again_button" type="button" value="Ignore" onclick="ignoreSplashWindow()">
+            <input id="close_button" type="button" value="Close" onclick="closeSplashWindow()">
+        </div>
         <div id="splashwindow_iframe" class="splash-wrapper">
             <div class="splash-iframe-container">
                 <iframe id="splashwindow_iframe_content" src="" frameborder="0"></iframe>
-                <div class="splashscreen-buttons">
-                    <input id="not_show_again_button" type="button" value="Ignore" onclick="ignoreSplashWindow()">
-                    <input id="close_button" type="button" value="Close" onclick="closeSplashWindow()">
-                </div>
             </div>
         </div>
+
 
         <script>
             var expanded = false;

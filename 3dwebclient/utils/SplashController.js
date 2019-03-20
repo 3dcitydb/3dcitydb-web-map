@@ -168,6 +168,7 @@ function ignoreSplashWindow() {
 // Hide splash window and unblur all elements
 function closeSplashWindow() {
     document.getElementById("splashwindow_iframe").style.display = 'none';
+    document.getElementsByClassName("splashscreen-buttons")[0].style.display = 'none';
     (function($) {
         $('*').css({
             '-webkit-filter': 'none',
@@ -182,8 +183,9 @@ function closeSplashWindow() {
 // Open splash window and blur all elements but the splash window
 function openSplashWindow() {
     document.getElementById("splashwindow_iframe").style.display = 'block';
+    document.getElementsByClassName("splashscreen-buttons")[0].style.display = 'block';
     (function($) {
-        $('body>*:not(#splashwindow_iframe)').css("filter","blur(3px)");
+        $('body>*:not(#splashwindow_iframe):not(.splashscreen-buttons)').css("filter","blur(3px)");
     })(jQuery);
 }
 
@@ -214,7 +216,7 @@ function getSplashWindowFromUrl() {
         }
     }
 
-    addSplashWindowModel.url = tmp_url;
+    addSplashWindowModel.url = (addSplashWindowModel.url ? addSplashWindowModel.url : tmp_url);
     addSplashWindowModel.showOnStart = tmp_showOnStart;
     document.getElementById("showOnStart_checkbox").checked = (tmp_showOnStart == "true");
     ignoreSplashWindow_cookie = (tmp_showOnStart == "false") + "";

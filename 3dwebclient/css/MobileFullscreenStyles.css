@@ -177,3 +177,26 @@
         -webkit-transform: scaleY(1.0);
     }
 }
+
+/*------------------------------------------------------*/
+.splash-wrapper-mobile {
+    top: 2%!important;
+    right: 2%!important;
+    bottom: 2%!important;
+    left: 2%!important;
+    width: 96%!important;
+    max-width: 96%!important;
+    height: 96%!important;
+    max-height: 96%!important;
+    padding: 0!important;
+    margin: 0!important;
+    border-radius: 0.3rem!important;
+}
+.splash-wrapper-mobile-ios {
+    overflow: auto!important;
+    -webkit-overflow-scrolling: touch!important;
+}
+.splashscreen-buttons-mobile {
+    right: 3%!important;
+    bottom: 3%!important;
+}

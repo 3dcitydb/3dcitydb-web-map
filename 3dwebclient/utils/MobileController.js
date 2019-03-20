@@ -53,6 +53,7 @@
 
         this.setInfoboxFullscreen();
         this.setToolboxFullscreen();
+        this.setSplashWindowFullscreen();
     }
 
     Object.defineProperties(MobileController.prototype, {
@@ -309,6 +310,39 @@
 
             var toolbox = document.getElementById('citydb_toolbox');
             toolbox.classList.add("toolbox-full");
+        }
+    };
+
+    /**
+     * Set splash window to fullscreen on mobile devices.
+     *
+     * @returns {undefined}
+     */
+    MobileController.prototype.setSplashWindowFullscreen = function () {
+        var scope = this;
+
+        if (scope._isMobile) {
+            var splashWindow = document.getElementById('splashwindow_iframe');
+            splashWindow.classList.add("splash-wrapper-mobile");
+            if (scope.getMobileOS() === "iOS") {
+                splashWindow.classList.add("splash-wrapper-mobile-ios");
+            }
+
+            var closeIgnoreButtons = document.getElementsByClassName("splashscreen-buttons")[0];
+            closeIgnoreButtons.classList.add("splashscreen-buttons-mobile");
+
+
+
+            // Simplify contents of the splash window
+            var mobileContentUrl = "splash/SplashWindow_Mobile.html";
+            var http = new XMLHttpRequest();
+            http.open('HEAD', mobileContentUrl, false);
+            http.send();
+            if (http.status != 404) {
+                // Mobile version for the contents of the splash window exists
+                document.getElementById('splashwindow_iframe_content').src = mobileContentUrl;
+                addSplashWindowModel.url = mobileContentUrl;
+            }
         }
     };
 

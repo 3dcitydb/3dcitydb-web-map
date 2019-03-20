@@ -5,89 +5,12 @@
     <meta charset="UTF-8">
     <title>Title</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script>
-        $(function () {
-            var stickyTop = 0,
-                scrollTarget = false;
-
-            var timeline = $('.timeline__nav'),
-                items = $('li', timeline),
-                milestones = $('.timeline__section .milestone'),
-                offsetTop = parseInt(timeline.css('top'));
-
-            var TIMELINE_VALUES = {
-                start: 190,
-                step: 30
-            };
-
-
-            $(window).resize(function () {
-                timeline.removeClass('fixed');
-
-                stickyTop = timeline.offset().top - offsetTop;
-
-                $(window).trigger('scroll');
-            }).trigger('resize');
-
-            $(window).scroll(function () {
-                if ($(window).scrollTop() > stickyTop) {
-                    timeline.addClass('fixed');
-                } else {
-                    timeline.removeClass('fixed');
-                }
-            }).trigger('scroll');
-
-            items.find('span').click(function () {
-                var li = $(this).parent(),
-                    index = li.index(),
-                    milestone = milestones.eq(index);
-
-                if (!li.hasClass('active') && milestone.length) {
-                    scrollTarget = index;
-
-                    var scrollTargetTop = milestone.offset().top - 80;
-
-                    $('html, body').animate({scrollTop: scrollTargetTop}, {
-                        duration: 400,
-                        complete: function complete() {
-                            scrollTarget = false;
-                        }
-                    });
-
-                }
-            });
-
-            $(window).scroll(function () {
-                var viewLine = $(window).scrollTop() + $(window).height() / 3,
-                    active = -1;
-
-                if (scrollTarget === false) {
-                    milestones.each(function () {
-                        if ($(this).offset().top - viewLine > 0) {
-                            return false;
-                        }
-
-                        active++;
-                    });
-                } else {
-                    active = scrollTarget;
-                }
-
-                timeline.css('top', -1 * active * TIMELINE_VALUES.step + TIMELINE_VALUES.start + 'px');
-
-                items.filter('.active').removeClass('active');
-
-                items.eq(active != -1 ? active : 0).addClass('active');
-            }).trigger('scroll');
-        });
-    </script>
-
     <style>
         html {
             box-sizing: border-box;
             text-align: justify;
             text-justify: inter-word;
+            font-size: small;
         }
 
         *,
@@ -102,12 +25,12 @@
         }
 
         h1 {
-            padding: 0 20% 100px;
+            padding: 0 5% 20px;
         }
 
         h2 {
             color: white;
-            padding-left: 15px;
+            padding-left: 5px;
             padding-top: 5px;
             padding-bottom: 5px;
             background-color: #2c7cff;
@@ -115,7 +38,7 @@
 
         .wrapper {
             margin: 0 auto;
-            padding: 0 20% 100px;
+            padding: 0 5% 50px;
             width: 100%;
         }
 
@@ -167,19 +90,6 @@
 <h1>3DCityDB-Web-Map-Client</h1>
 
 <article class="timeline">
-    <nav class="timeline__nav">
-        <ul>
-            <li><span>Introduction</span></li>
-            <li><span>Architecture</span></li>
-            <li><span>License</span></li>
-            <li><span>Release</span></li>
-            <li><span>Requirements</span></li>
-            <li><span>Documentation</span></li>
-            <li><span>Contributing</span></li>
-            <li><span>Developers</span></li>
-            <li><span>More info</span></li>
-        </ul>
-    </nav>
     <section class="timeline__section">
         <div class="wrapper">
 
