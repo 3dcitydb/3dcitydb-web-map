@@ -86,7 +86,7 @@ function insertSplashInfoHelp() {
         touchContents.classList.remove("cesium-touch-navigation-help-visible");
     }
 
-    mouseButton.onclick = function() {
+    mouseButton.onclick = function () {
         // Unselect info button
         infoButton.classList.remove('cesium-navigation-button-selected');
         infoButton.classList.add('cesium-navigation-button-unselected');
@@ -125,6 +125,20 @@ function insertSplashInfoHelp() {
         // Hide info contents
         contents.style.display = "none";
     }
+
+    // Source: https://stackoverflow.com/questions/2705583/how-to-simulate-a-click-with-javascript
+    function eventFire(el, etype) {
+        if (el.fireEvent) {
+            el.fireEvent('on' + etype);
+        } else {
+            var evObj = document.createEvent('Events');
+            evObj.initEvent(etype, true, false);
+            el.dispatchEvent(evObj);
+        }
+    }
+
+    // Show info in the help popup by default
+    eventFire(infoButton, 'click');
 }
 
 function addSplashWindow() {
