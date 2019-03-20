@@ -2,6 +2,7 @@
 function insertSplashInfoHelp() {
     // Insert info button
     var cesiumNavHelp = document.getElementsByClassName("cesium-navigation-help")[0];
+    cesiumNavHelp.style.width = "270px";
 
     var mouseButton = document.getElementsByClassName("cesium-navigation-button cesium-navigation-button-left")[0];
     mouseButton.classList.add("cesium-navigation-button-custom");
