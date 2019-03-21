@@ -123,6 +123,11 @@
         return check;
     };
 
+    /**
+     * Set the max width and height of Cesium's error dialog to fit to the screen estate on mobile devices.
+     *
+     * @returns {undefined}
+     */
     MobileController.prototype.setDialogSize = function () {
         var scope = this;
 
