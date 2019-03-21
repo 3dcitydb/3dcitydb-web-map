@@ -39,12 +39,12 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * The splash window as well as other information about the web client are displayed in an additional tab in the Cesium's default navigation help popup triggered by the "question mark" button in the top right corner of the screen.
 
 ##### FIXES
-* Fixed the size of Cesium's error dialog that could not be displayed correctly on mobile devices (see [commit](https://github.com/3dcitydb/3dcitydb-web-map/commit/763df044428a6a1b3cb554637e8c727d1f9fd045)).
-* Fixed a bug that prevented the web client from reading user's ion token correctly (see [commit](https://github.com/3dcitydb/3dcitydb-web-map/commit/59a62f60ae87e4c91f8fcfb862a50f2473bebc20)).
-* Fixed point size of point cloud datasets (see [commit](https://github.com/3dcitydb/3dcitydb-web-map/commit/73c7c84b27f1f92ef8dae35d62f159737d89cb74)).
+* Fixed the size of Cesium's error dialog that could not be displayed correctly on mobile devices, see 763df044428a6a1b3cb554637e8c727d1f9fd045 and f0705bc18e53612305c096b51d0e4c68cf935cec.
+* Fixed a bug that prevented the web client from reading user's ion token correctly, see 59a62f60ae87e4c91f8fcfb862a50f2473bebc20.
+* Fixed point size of point cloud datasets, see 73c7c84b27f1f92ef8dae35d62f159737d89cb74.
 
 ##### UPDATES
-* Updated JQuery to v3.3.1 (see [commit](https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627)).
+* Updated JQuery to v3.3.1, see a60b900b9c14ac40ab6c0e5736a40c8ea060a627.
 
 
 ### 1.7.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.7.1/3dwebclient/index.html)
