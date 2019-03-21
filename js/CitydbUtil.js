@@ -180,6 +180,7 @@ var CitydbUtil = {
 
         var showErrorPaneElement = document.getElementsByClassName('cesium-widget-errorPanel-content')[0];
         showErrorPaneElement.style.width = '400px';
+        mobileController.setDialogSize();
     }
 };
 

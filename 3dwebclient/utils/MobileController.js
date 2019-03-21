@@ -44,8 +44,6 @@
         this._oldIframeVisibility = this._visibleInfoboxClassName;
         // this.watchInfoboxVisibility();
 
-        this.setDialogSize();
-
         this.setDistanceLegend();
         this.setLoadingIndicator();
 
