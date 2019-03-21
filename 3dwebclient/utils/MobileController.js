@@ -44,6 +44,8 @@
         this._oldIframeVisibility = this._visibleInfoboxClassName;
         // this.watchInfoboxVisibility();
 
+        this.setDialogSize();
+
         this.setDistanceLegend();
         this.setLoadingIndicator();
 
@@ -119,6 +121,17 @@
             }
         })(navigator.userAgent || navigator.vendor || window.opera);
         return check;
+    };
+
+    MobileController.prototype.setDialogSize = function () {
+        var scope = this;
+
+        if (scope._isMobile) {
+            var dialogDiv = document.getElementsByClassName("cesium-widget-errorPanel-content")[0];
+            if (Cesium.defined(dialogDiv)) {
+                dialogDiv.classList.add("cesium-widget-errorPanel-content-mobile");
+            }
+        }
     };
 
     /**
