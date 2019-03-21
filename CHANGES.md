@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.7.2
+### 1.7.2 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.7.2/3dwebclient/index.html)
 ---------
 
 ##### NEW
@@ -47,7 +47,7 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * Updated JQuery to v3.3.1 (see [commit](https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627)).
 
 
-### 1.7.1
+### 1.7.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.7.1/3dwebclient/index.html)
 ---------
 
 ##### UPDATES
