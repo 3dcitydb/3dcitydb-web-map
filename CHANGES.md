@@ -39,6 +39,7 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * The splash window as well as other information about the web client are displayed in an additional tab in the Cesium's default navigation help popup triggered by the "question mark" button in the top right corner of the screen.
 
 ##### FIXES
+* Fixed a bug when multiple alert windows appear at the same time, see [`d5c5f4e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d5c5f4eb6b1227346eb367cf17f4edbd4f124046).
 * Fixed the size of Cesium's error dialog that could not be displayed correctly on mobile devices, see [`763df04`](https://github.com/3dcitydb/3dcitydb-web-map/commit/763df044428a6a1b3cb554637e8c727d1f9fd045) and [`f0705bc`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f0705bc18e53612305c096b51d0e4c68cf935cec).
 * Fixed a bug that prevented the web client from reading user's ion token correctly, see [`59a62f6`](https://github.com/3dcitydb/3dcitydb-web-map/commit/59a62f60ae87e4c91f8fcfb862a50f2473bebc20).
 * Fixed point size of point cloud datasets, see [`73c7c84`](https://github.com/3dcitydb/3dcitydb-web-map/commit/73c7c84b27f1f92ef8dae35d62f159737d89cb74).
