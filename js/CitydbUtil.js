@@ -93,6 +93,10 @@ var CitydbUtil = {
      * 
      */
     showAlertWindow: function (mode, title, message, yesBtnCallback, noBtnCallback) {
+        if (document.getElementsByClassName("cesium-widget-errorPanel")[0] && document.getElementsByClassName("cesium-widget-errorPanel-content")[0]) {
+            // If an alert window has already been generated, then do nothing
+            return;
+        }
         var element = cesiumViewer.cesiumWidget._element;
         var overlay = document.createElement('div');
         overlay.className = 'cesium-widget-errorPanel';
