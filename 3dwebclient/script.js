@@ -251,6 +251,12 @@ function intiClient() {
     // Bring the cesium navigation help popup above the compass
     var cesiumNavHelp = document.getElementsByClassName("cesium-navigation-help")[0];
     cesiumNavHelp.style.zIndex = 99999;
+
+    // If the web client has a layer, add an onclick event to the home button to fly to this layer
+    var cesiumHomeButton = document.getElementsByClassName("cesium-button cesium-toolbar-button cesium-home-button")[0];
+    cesiumHomeButton.onclick = function () {
+        zoomToDefaultCameraPosition();
+    }
 }
 
 function adjustIonFeatures() {
@@ -658,12 +664,15 @@ function zoomToDefaultCameraPosition_expired() {
         var _range = range;
         cesiumCamera.flyTo({
             destination: Cesium.Cartesian3.fromDegrees(lon, lat, _range),
+            orientation: {
+                heading: _heading,
+                pitch: _pitch,
+                roll: 0
+            },
             complete: function () {
-                cesiumCamera.lookAt(_center, new Cesium.HeadingPitchRange(_heading, _pitch, _range));
-                cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY);
                 deferred.resolve("fly to the desired camera position");
             }
-        })
+        });
     } else {
         // default camera postion
         deferred.resolve("fly to the default camera position");
@@ -680,15 +689,12 @@ function flyToCameraPosition(cameraPosition) {
     var height = cameraPosition.height;
     cesiumCamera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
+        orientation: {
+            heading: Cesium.Math.toRadians(cameraPosition.heading),
+            pitch: Cesium.Math.toRadians(cameraPosition.pitch),
+            roll: Cesium.Math.toRadians(cameraPosition.roll)
+        },
         complete: function () {
-            cesiumCamera.setView({
-                destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
-                orientation: {
-                    heading: Cesium.Math.toRadians(cameraPosition.heading),
-                    pitch: Cesium.Math.toRadians(cameraPosition.pitch),
-                    roll: Cesium.Math.toRadians(cameraPosition.roll)
-                }
-            });
             deferred.resolve("fly to the desired camera position");
         }
     });
