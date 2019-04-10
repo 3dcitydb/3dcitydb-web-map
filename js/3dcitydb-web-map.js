@@ -152,7 +152,7 @@
     WebMap3DCityDB.prototype.clearHighlight = function (object) {
         var layers = this._layers;
         for (var i = 0; i < layers.length; i++) {
-            if (layers[i].active && layers[i].id != object.id.layerId) {
+            if (layers[i].active && (object.id && layers[i].id != object.id.layerId)) {
                 layers[i].unHighlightAllObjects();
             }
         }
