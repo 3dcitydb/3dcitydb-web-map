@@ -587,10 +587,10 @@ function addEventListeners(layer) {
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable._batchValues;
-            if (!Cesium.defined(idArray))
+            var featureArray = object._content._batchTable._features;
+            if (!Cesium.defined(featureArray))
                 return;
-            var objectId = idArray[object._batchId];
+            var objectId = featureArray[object._batchId].getProperty("id");
 
             targetEntity = new Cesium.Entity({
                 id: objectId
