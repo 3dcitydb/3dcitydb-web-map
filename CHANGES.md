@@ -39,6 +39,7 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * The splash window as well as other information about the web client are displayed in an additional tab in the Cesium's default navigation help popup triggered by the "question mark" button in the top right corner of the screen.
 
 ##### FIXES
+* Fix a bug that prevented retrieving properties of Cesium3DTileFeatures , see [`20e0a8e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/20e0a8e32a06784ca4ab50a59beb9d425a41d0f8)
 * Fixed a bug that prevents selection of 3D tiles objects, see [`ce18aab`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ce18aab826e8ef10bd099b340ac5298f2e3c50e4).
 * Fixed (un)highlight of 3D tiles objects, see [`6be754c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6be754cd59df1031f58159157166fdaf8fc3eb70).
 * Fixed a bug when multiple alert windows appear at the same time, see [`d5c5f4e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d5c5f4eb6b1227346eb367cf17f4edbd4f124046).
