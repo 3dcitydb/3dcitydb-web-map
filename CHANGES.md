@@ -55,7 +55,7 @@ This way, a direct fly to hightlighted/clicked entites is possible without havin
 However, this will not work if the stored entities are not yet loaded or have been unloaded (e.g. typically when the camera has been moved to a different location).
 In this case, the web client will fall back to using the `cityobjectsJsonUrl`. See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59). 
 * Selected as well as highlighted objects from different layers can now be listed together in the 
-`Choose highlighted objects` as well as `Choose hidden objects` dropdown list (prior to v1.7.1 this was not possible since only objects from the same active layer were allowed). See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59).
+`Choose highlighted object` as well as `Choose hidden object` dropdown list (prior to v1.7.1 this was not possible since only objects from the same active layer were allowed). See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59).
 * Clicking the home button will fly the camera to the position and orientation defined in the URL.
 If no corresponding parameters exist or are found in the URL, the camera shall fly to the default location and orientation defined in Cesium. See, [`4f23407`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4f23407bcd8d9f8fd1d7608e16c5b6345ea560d3).
 * Updated JQuery to v3.3.1, see [`a60b900`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627).
