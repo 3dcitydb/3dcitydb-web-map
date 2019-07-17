@@ -48,6 +48,14 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * Fixed point size of point cloud datasets, see [`73c7c84`](https://github.com/3dcitydb/3dcitydb-web-map/commit/73c7c84b27f1f92ef8dae35d62f159737d89cb74).
 
 ##### UPDATES
+* It is now possible to fly the camera directly a recently highlighted/clicked entity, even if no `cityobjectsJsonUrl` is present. 
+The `cityobjectsJsonUrl` is a JSON file containing information about location and coordinates linked to object IDs and thus was used prior to v1.7.1 to enable flying to such entities.
+Starting with v1.7.2, the web client shall store recently highlighted/clicked entities in a dictionary with `{id, target entity}` tuples as its key-value-pairs. 
+This way, a direct fly to hightlighted/clicked entites is possible without having to rely on the `cityobjectsJsonUrl`.
+However, this will not work if the stored entities are not yet loaded or have been unloaded (e.g. typically when the camera has been moved to a different location).
+In this case, the web client will fall back to using the `cityobjectsJsonUrl`. 
+* Selected as well as highlighted objects from different layers can now be listed together in the 
+`Choose highlighted objects` as well as `Choose hidden objects` dropdown list (prior to v1.7.1 this was not possible since only objects from the same active layer were allowed). See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59).
 * Clicking the home button will fly the camera to the position and orientation defined in the URL.
 If no corresponding parameters exist or are found in the URL, the camera shall fly to the default location and orientation defined in Cesium. See, [`4f23407`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4f23407bcd8d9f8fd1d7608e16c5b6345ea560d3).
 * Updated JQuery to v3.3.1, see [`a60b900`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627).
