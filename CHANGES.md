@@ -53,7 +53,7 @@ The `cityobjectsJsonUrl` is a JSON file containing information about location an
 Starting with v1.7.2, the web client shall store recently highlighted/clicked entities in a dictionary with `{id, target entity}` tuples as its key-value-pairs. 
 This way, a direct fly to hightlighted/clicked entites is possible without having to rely on the `cityobjectsJsonUrl`.
 However, this will not work if the stored entities are not yet loaded or have been unloaded (e.g. typically when the camera has been moved to a different location).
-In this case, the web client will fall back to using the `cityobjectsJsonUrl`. 
+In this case, the web client will fall back to using the `cityobjectsJsonUrl`. See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59). 
 * Selected as well as highlighted objects from different layers can now be listed together in the 
 `Choose highlighted objects` as well as `Choose hidden objects` dropdown list (prior to v1.7.1 this was not possible since only objects from the same active layer were allowed). See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59).
 * Clicking the home button will fly the camera to the position and orientation defined in the URL.
