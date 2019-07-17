@@ -121,6 +121,9 @@ Cesium.knockout.applyBindings(addSplashWindowModel, document.getElementById('cit
 
 intiClient();
 
+// Store clicked entities
+var clickedEntities = {};
+
 var clockElementClicked = false;
 function intiClient() {
     // adjust cesium navigation help popup for splash window
@@ -176,9 +179,6 @@ function intiClient() {
 
     // inspect the status of the showed and cached tiles	
     inspectTileStatus();
-
-    // bind view and model of the highlighted and hidden Objects...
-    observeObjectList();
 
     // Zoom to desired camera position and load layers if encoded in the url...	
     zoomToDefaultCameraPosition().then(function (info) {
@@ -370,84 +370,57 @@ function getLayersFromUrl() {
     return nLayers;
 }
 
-function observeObjectList() {
-    var observable = Cesium.knockout.getObservable(webMap, '_activeLayer');
-    var highlightedObjectsSubscription = undefined;
-    var hiddenObjectsSubscription = undefined;
-
+function listHighlightedObjects() {
     var highlightingListElement = document.getElementById("citydb_highlightinglist");
-    highlightingListElement.onchange = function () {
-        zoomToObjectById(this.value);
-        highlightingListElement.selectedIndex = 0;
-    };
 
-    var hiddenListElement = document.getElementById("citydb_hiddenlist");
-    hiddenListElement.onchange = function () {
-        zoomToObjectById(this.value);
-        hiddenListElement.selectedIndex = 0;
-    };
-
-    observable.subscribe(function (deSelectedLayer) {
-        if (Cesium.defined(highlightedObjectsSubscription)) {
-            highlightedObjectsSubscription.dispose();
-        }
-        if (Cesium.defined(hiddenObjectsSubscription)) {
-            hiddenObjectsSubscription.dispose();
-        }
-    }, observable, "beforeChange");
-
-    observable.subscribe(function (selectedLayer) {
-        if (Cesium.defined(selectedLayer)) {
-            document.getElementById(selectedLayer.id).childNodes[0].checked = true;
-
-            highlightedObjectsSubscription = Cesium.knockout.getObservable(selectedLayer, '_highlightedObjects').subscribe(function (highlightedObjects) {
-                while (highlightingListElement.length > 1) {
-                    highlightingListElement.remove(1);
-                }
-                for (var id in highlightedObjects) {
-                    var option = document.createElement("option");
-                    option.text = id;
-                    highlightingListElement.add(option);
-                }
-            });
-            selectedLayer.highlightedObjects = selectedLayer.highlightedObjects;
-
-            hiddenObjectsSubscription = Cesium.knockout.getObservable(selectedLayer, '_hiddenObjects').subscribe(function (hiddenObjects) {
-                while (hiddenListElement.length > 1) {
-                    hiddenListElement.remove(1);
-                }
-                for (var k = 0; k < hiddenObjects.length; k++) {
-                    var id = hiddenObjects[k];
-                    var option = document.createElement("option");
-                    option.text = id;
-                    hiddenListElement.add(option);
-                }
-            });
-            selectedLayer.hiddenObjects = selectedLayer.hiddenObjects;
-
-            updateAddLayerViewModel(selectedLayer);
-        } else {
-            while (highlightingListElement.length > 1) {
-                highlightingListElement.remove(1);
-            }
-            while (hiddenListElement.length > 1) {
-                hiddenListElement.remove(1);
-            }
+    emptySelectBox(highlightingListElement, function() {
+        var highlightedObjects = webMap.getAllHightlightedObjects();
+        for (var i = 0; i < highlightedObjects.length; i++) {
+            var option = document.createElement("option");
+            option.text = highlightedObjects[i];
+            highlightingListElement.add(option);
+            highlightingListElement.selectedIndex = 0;
         }
     });
+}
 
-    function updateAddLayerViewModel(selectedLayer) {
-        addLayerViewModel.url = selectedLayer.url;
-        addLayerViewModel.name = selectedLayer.name;
-        addLayerViewModel.layerDataType = selectedLayer.layerDataType;
-        addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
-        addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
-        addLayerViewModel.cityobjectsJsonUrl = selectedLayer.cityobjectsJsonUrl;
-        addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
-        addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
-        addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
-        addLayerViewModel.maxCountOfVisibleTiles = selectedLayer.maxCountOfVisibleTiles;
+function listHiddenObjects() {
+    var hidddenListElement = document.getElementById("citydb_hiddenlist");
+
+    emptySelectBox(hidddenListElement, function() {
+        var hiddenObjects = webMap.getAllHiddenObjects();
+        for (var i = 0; i < hiddenObjects.length; i++) {
+            var option = document.createElement("option");
+            option.text = hiddenObjects[i];
+            hidddenListElement.add(option);
+            hidddenListElement.selectedIndex = 0;
+        }
+    });
+}
+
+function emptySelectBox(selectElement, callback) {
+    for (var i = selectElement.length - 1; i >= 0; i--) {
+        selectElement.remove(1);
     }
+
+    callback();
+}
+
+function flyToClickedObject(obj) {
+    // The web client stores clicked or ctrlclicked entities in a dictionary clickedEntities with {id, entity} as KVP.
+    // The function flyTo from Cesium Viewer will be first employed to fly to the selected entity.
+    // NOTE: This flyTo function will fail if the target entity has been unloaded (e.g. user has moved camera away).
+    // In this case, the function zoomToObjectById shall be used instead.
+    // NOTE: This zoomToObjectById function requires a JSON file containing the IDs and coordinates of objects.
+    cesiumViewer.flyTo(clickedEntities[obj.value]).then(function (result) {
+        if (!result) {
+            zoomToObjectById(obj.value);
+        }
+    }).otherwise(function (error) {
+        zoomToObjectById(obj.value);
+    });
+
+    obj.selectedIndex = 0;
 }
 
 function saveLayerSettings() {
@@ -471,7 +444,6 @@ function saveLayerSettings() {
         if (layerOption.id == activeLayer.id) {
             layerOption.childNodes[2].innerHTML = activeLayer.name;
         }
-        ;
     }
 
     document.getElementById('loadingIndicator').style.display = 'block';
@@ -576,7 +548,8 @@ function addLayerToList(layer) {
 }
 
 function addEventListeners(layer) {
-    layer.registerEventHandler("CLICK", function (object) {
+
+    function auxClickEventListener(object) {
         var objectId;
         var targetEntity;
         if (layer instanceof CitydbKmlLayer) {
@@ -598,7 +571,19 @@ function addEventListeners(layer) {
             cesiumViewer.selectedEntity = targetEntity;
         }
 
-        createInfoTable(objectId, targetEntity, layer);
+        // Save this clicked object for later use (such as zooming using ID)
+        clickedEntities[objectId] = targetEntity;
+
+        return [objectId ,targetEntity];
+    }
+
+    layer.registerEventHandler("CLICK", function (object) {
+        var res = auxClickEventListener(object);
+        createInfoTable(res[0], res[1], layer);
+    });
+
+    layer.registerEventHandler("CTRLCLICK", function (object) {
+        auxClickEventListener(object);
     });
 }
 

@@ -41,7 +41,6 @@
         this._eventHandler = new Cesium.ScreenSpaceEventHandler(cesiumViewer.scene.canvas);
         this._cameraEventAggregator = new Cesium.CameraEventAggregator(cesiumViewer.scene.canvas);
         this._activeLayer = undefined;
-        Cesium.knockout.track(this, ['_activeLayer']);
     }
 
     Object.defineProperties(WebMap3DCityDB.prototype, {
@@ -279,5 +278,40 @@
         }
         this._mouseMoveEvents = active;
     };
+
+    /**
+     * get highlighted objects from all layers
+     * @returns {Array}
+     */
+    WebMap3DCityDB.prototype.getAllHightlightedObjects = function () {
+        var results = [];
+        var count = 0;
+        var layers = this._layers;
+        for (var i = 0; i < layers.length; i++) {
+            var curLayer = this._layers[i];
+            for (var obj in curLayer._highlightedObjects) {
+                results[count++] = obj;
+            }
+        }
+        return results;
+    };
+
+    /**
+     * get hidden objects from all layers
+     * @returns {Array}
+     */
+    WebMap3DCityDB.prototype.getAllHiddenObjects = function () {
+        var results = [];
+        var count = 0;
+        var layers = this._layers;
+        for (var i = 0; i < layers.length; i++) {
+            var curLayer = this._layers[i];
+            for (var j = 0; j < curLayer._hiddenObjects.length; j++) {
+                results[count++] = curLayer._hiddenObjects[j];
+            }
+        }
+        return results;
+    };
+
     window.WebMap3DCityDB = WebMap3DCityDB;
 })();
