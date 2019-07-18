@@ -180,6 +180,9 @@ function intiClient() {
     // inspect the status of the showed and cached tiles	
     inspectTileStatus();
 
+    // display current infos of active layer in the main menu
+    observeActiveLayer();
+
     // Zoom to desired camera position and load layers if encoded in the url...	
     zoomToDefaultCameraPosition().then(function (info) {
         var layers = getLayersFromUrl();
@@ -256,6 +259,31 @@ function intiClient() {
     var cesiumHomeButton = document.getElementsByClassName("cesium-button cesium-toolbar-button cesium-home-button")[0];
     cesiumHomeButton.onclick = function () {
         zoomToDefaultCameraPosition();
+    }
+}
+
+function observeActiveLayer() {
+    var observable = Cesium.knockout.getObservable(webMap, '_activeLayer');
+
+    observable.subscribe(function (selectedLayer) {
+        if (Cesium.defined(selectedLayer)) {
+            document.getElementById(selectedLayer.id).childNodes[0].checked = true;
+
+            updateAddLayerViewModel(selectedLayer);
+        }
+    });
+
+    function updateAddLayerViewModel(selectedLayer) {
+        addLayerViewModel.url = selectedLayer.url;
+        addLayerViewModel.name = selectedLayer.name;
+        addLayerViewModel.layerDataType = selectedLayer.layerDataType;
+        addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
+        addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
+        addLayerViewModel.cityobjectsJsonUrl = selectedLayer.cityobjectsJsonUrl;
+        addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
+        addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
+        addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
+        addLayerViewModel.maxCountOfVisibleTiles = selectedLayer.maxCountOfVisibleTiles;
     }
 }
 

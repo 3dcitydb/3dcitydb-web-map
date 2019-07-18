@@ -41,6 +41,7 @@
         this._eventHandler = new Cesium.ScreenSpaceEventHandler(cesiumViewer.scene.canvas);
         this._cameraEventAggregator = new Cesium.CameraEventAggregator(cesiumViewer.scene.canvas);
         this._activeLayer = undefined;
+        Cesium.knockout.track(this, ['_activeLayer']);
     }
 
     Object.defineProperties(WebMap3DCityDB.prototype, {
