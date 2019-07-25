@@ -858,24 +858,37 @@
 
     CitydbKmlLayer.prototype.getEntitiesById = function (objectId) {
         var primitives = this._cesiumViewer.scene.primitives;
-        for (var i = 0; i < primitives.length; i++) {
-            var primitive = primitives.get(i);
-            if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
-                for (var j = 0; j < primitive._instanceIds.length; j++) {
-                    var tmpprimitiveInstance = primitive._instanceIds[j];
-                    if (tmpprimitiveInstance.name === objectId && tmpprimitiveInstance.layerId == this._id) {
-                        var targetEntity = tmpprimitiveInstance;
-                        var parentEntity = targetEntity._parent
-                        if (Cesium.defined(parentEntity)) {
-                            return parentEntity._children;
-                        } else {
-                            return [targetEntity]
+
+        function getEntitiesByIdFromPrimitiveCollection (primitiveCollection, layerId) {
+            for (var i = 0; i < primitiveCollection.length; i++) {
+                var primitive = primitiveCollection.get(i);
+
+                if (primitive instanceof Cesium.PrimitiveCollection) {
+                    var entity = getEntitiesByIdFromPrimitiveCollection(primitiveCollection.get(i), layerId);
+
+                    if(entity) {
+                        return entity;
+                    }
+                } else if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
+                    for (var j = 0; j < primitive._instanceIds.length; j++) {
+                        var tmpPrimitiveInstance = primitive._instanceIds[j];
+                        if (tmpPrimitiveInstance.name === objectId && tmpPrimitiveInstance.layerId === layerId) {
+                            var targetEntity = tmpPrimitiveInstance;
+                            var parentEntity = targetEntity._parent
+                            if (Cesium.defined(parentEntity)) {
+                                return parentEntity._children;
+                            } else {
+                                return [targetEntity]
+                            }
                         }
                     }
                 }
             }
+
+            return null;
         }
-        return null;
+
+        return getEntitiesByIdFromPrimitiveCollection(primitives, this._id);
     };
 
     CitydbKmlLayer.prototype.setEntityColorByPrimitive = function (entity, color) {

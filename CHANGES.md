@@ -39,7 +39,8 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * The splash window as well as other information about the web client are displayed in an additional tab in the Cesium's default navigation help popup triggered by the "question mark" button in the top right corner of the screen.
 
 ##### FIXES
-* Fixed a bug that prevented retrieving properties of Cesium3DTileFeatures , see [`20e0a8e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/20e0a8e32a06784ca4ab50a59beb9d425a41d0f8)
+* Fixed a bug that caused selected geometries to stay highlighted even after deselecting, see [`a161234`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a161234647bea4a527afab0e708a99a5b7d06efe). 
+* Fixed a bug that prevented retrieving properties of `Cesium3DTileFeatures`, see [`20e0a8e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/20e0a8e32a06784ca4ab50a59beb9d425a41d0f8).
 * Fixed a bug that prevents selection of 3D tiles objects, see [`ce18aab`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ce18aab826e8ef10bd099b340ac5298f2e3c50e4).
 * Fixed (un)highlight of 3D tiles objects, see [`6be754c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6be754cd59df1031f58159157166fdaf8fc3eb70).
 * Fixed a bug when multiple alert windows appear at the same time, see [`d5c5f4e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d5c5f4eb6b1227346eb367cf17f4edbd4f124046).
@@ -48,6 +49,14 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * Fixed point size of point cloud datasets, see [`73c7c84`](https://github.com/3dcitydb/3dcitydb-web-map/commit/73c7c84b27f1f92ef8dae35d62f159737d89cb74).
 
 ##### UPDATES
+* It is now possible to fly the camera directly to a recently highlighted/clicked entity, even if no `cityobjectsJsonUrl` is present. 
+The `cityobjectsJsonUrl` is a JSON file containing information about location and coordinates linked to object IDs and thus was used prior to v1.7.1 to enable flying to such entities.
+Starting with v1.7.2, the web client shall store recently highlighted/clicked entities in a dictionary with `{id, target entity}` tuples as its key-value-pairs. 
+This way, a direct fly to hightlighted/clicked entites is possible without having to rely on the `cityobjectsJsonUrl`.
+However, this will not work if the stored entities are not yet loaded or have been unloaded (e.g. typically when the camera has been moved to a different location).
+In this case, the web client will fall back to using the `cityobjectsJsonUrl`. See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59). 
+* Selected as well as highlighted objects from different layers can now be listed together in the 
+`Choose highlighted object` as well as `Choose hidden object` dropdown list (prior to v1.7.1 this was not possible since only objects from the same active layer were allowed). See [`4c7bcfd`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4c7bcfd535e4bc5197260511b3e4ee6ac3b09e59).
 * Clicking the home button will fly the camera to the position and orientation defined in the URL.
 If no corresponding parameters exist or are found in the URL, the camera shall fly to the default location and orientation defined in Cesium. See, [`4f23407`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4f23407bcd8d9f8fd1d7608e16c5b6345ea560d3).
 * Updated JQuery to v3.3.1, see [`a60b900`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627).
