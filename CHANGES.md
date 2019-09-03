@@ -60,7 +60,7 @@ In this case, the web client will fall back to using the `cityobjectsJsonUrl`. S
 * Clicking the home button will fly the camera to the position and orientation defined in the URL.
 If no corresponding parameters exist or are found in the URL, the camera shall fly to the default location and orientation defined in Cesium. See, [`4f23407`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4f23407bcd8d9f8fd1d7608e16c5b6345ea560d3).
 * Updated JQuery to v3.3.1, see [`a60b900`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a60b900b9c14ac40ab6c0e5736a40c8ea060a627).
-* Updated Flatpickr v4.5.1 to v4.6.2, see [`6d9d570`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6d9d570cd0c5b26a63bd103c1b095b83b43910d4).
+* Updated Flatpickr v4.5.1 to v4.6.2, see [`6d9d570`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6d9d570cd0c5b26a63bd103c1b095b83b43910d4) and [`a56076e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a56076e48aeef895cdb5d0a373019cdd31ee7959).
 
 
 ### 1.7.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.7.1/3dwebclient/index.html)
