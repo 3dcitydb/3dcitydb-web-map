@@ -402,7 +402,7 @@ function listHighlightedObjects() {
     var highlightingListElement = document.getElementById("citydb_highlightinglist");
 
     emptySelectBox(highlightingListElement, function() {
-        var highlightedObjects = webMap.getAllHightlightedObjects();
+        var highlightedObjects = webMap.getAllHighlightedObjects();
         for (var i = 0; i < highlightedObjects.length; i++) {
             var option = document.createElement("option");
             option.text = highlightedObjects[i];
@@ -588,10 +588,12 @@ function addEventListeners(layer) {
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var featureArray = object._content._batchTable._features;
+            var featureArray = object._content._features;
             if (!Cesium.defined(featureArray))
                 return;
             var objectId = featureArray[object._batchId].getProperty("id");
+            if (!Cesium.defined(objectId))
+                return;
 
             targetEntity = new Cesium.Entity({
                 id: objectId
