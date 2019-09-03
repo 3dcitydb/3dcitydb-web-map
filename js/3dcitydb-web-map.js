@@ -284,7 +284,7 @@
      * get highlighted objects from all layers
      * @returns {Array}
      */
-    WebMap3DCityDB.prototype.getAllHightlightedObjects = function () {
+    WebMap3DCityDB.prototype.getAllHighlightedObjects = function () {
         var results = [];
         var count = 0;
         var layers = this._layers;

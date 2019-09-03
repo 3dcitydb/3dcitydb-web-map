@@ -288,10 +288,10 @@
                 if (Cesium.defined(features)) {
                     var object = features[k];
 
-                    var idArray = object._content._batchTable._properties.id;
-                    if (!Cesium.defined(idArray))
+                    var featureArray = object._content._features;
+                    if (!Cesium.defined(featureArray))
                         return;
-                    var objectId = idArray[object._batchId];
+                    var objectId = featureArray[object._batchId].getProperty("id");
 
                     if (scope.isInHighlightedList(objectId) && !Cesium.Color.equals(object.color, scope._highlightColor)) {
                         scope.highlightObject(object)
@@ -320,10 +320,12 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable._properties.id;
-            if (!Cesium.defined(idArray))
+            var featureArray = object._content._features;
+            if (!Cesium.defined(featureArray))
                 return;
-            var objectId = idArray[object._batchId];
+            var objectId = featureArray[object._batchId].getProperty("id");
+            if (!Cesium.defined(objectId))
+                return;
 
             if (scope.isInHighlightedList(objectId))
                 return;
@@ -341,10 +343,12 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable._properties.id;
-            if (!Cesium.defined(idArray))
+            var featureArray = object._content._features;
+            if (!Cesium.defined(featureArray))
                 return;
-            var objectId = idArray[object._batchId];
+            var objectId = featureArray[object._batchId].getProperty("id");
+            if (!Cesium.defined(objectId))
+                return;
 
             if (scope.isInHighlightedList(objectId)) {
                 scope.unHighlight([objectId]);
@@ -359,10 +363,10 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable._properties.id;
-            if (!Cesium.defined(idArray))
+            var featureArray = object._content._features;
+            if (!Cesium.defined(featureArray))
                 return;
-            var objectId = idArray[object._batchId];
+            var objectId = featureArray[object._batchId].getProperty("id");
 
             if (scope.isInHighlightedList(objectId))
                 return;
@@ -375,10 +379,10 @@
             if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
                 return;
 
-            var idArray = object._content._batchTable._properties.id;
-            if (!Cesium.defined(idArray))
+            var featureArray = object._content._features;
+            if (!Cesium.defined(featureArray))
                 return;
-            var objectId = idArray[object._batchId];
+            var objectId = featureArray[object._batchId].getProperty("id");
 
             if (scope.isInHighlightedList(objectId))
                 return;
@@ -460,11 +464,11 @@
         if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
             return;
 
-        var idArray = object._content._batchTable._properties.id;
-        if (!Cesium.defined(idArray))
+        var featureArray = object._content._features;
+        if (!Cesium.defined(featureArray))
             return;
+        var objectId = featureArray[object._batchId].getProperty("id");
 
-        var objectId = idArray[object._batchId];
         var highlightColor = this._highlightedObjects[objectId];
         if (highlightColor) {
             if (!Cesium.defined(object.getProperty("originalColorValue"))) {
