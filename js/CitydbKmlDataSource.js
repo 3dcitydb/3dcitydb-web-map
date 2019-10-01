@@ -1609,7 +1609,7 @@
 
         // Backward compatible....
         if (dataSource._gltfVersion == '0.8') {
-            heading = Cesium.Math.toRadians(headingValue - 180);
+            heading = Cesium.Math.toRadians(headingValue - 270);
             pitch = Cesium.Math.toRadians(180);
         } else if (dataSource._gltfVersion == '1.0') {
             heading = Cesium.Math.toRadians(headingValue - 90);
