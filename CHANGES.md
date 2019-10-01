@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.7.2 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.7.2/3dwebclient/index.html)
+### 1.8.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.0/3dwebclient/index.html)
 ---------
 
 ##### NEW
