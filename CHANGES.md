@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.1 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.1/3dwebclient/index.html)
+---------
+
+
 ### 1.8.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.0/3dwebclient/index.html)
 ---------
 
@@ -43,9 +47,9 @@ For example, a checked `showOnStart` flag in the toolbox will set the cookie `ig
 * Fixed a bug that prevented highlighting of `Cesium3DTileFeatures`, see [`01b0241`](https://github.com/3dcitydb/3dcitydb-web-map/commit/01b0241aaae818b2a6c28185b3330a5ffb30bac0).
 * Fixed a bug that caused selected geometries to stay highlighted even after deselecting, see [`a161234`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a161234647bea4a527afab0e708a99a5b7d06efe). 
 * Fixed a bug that prevented retrieving properties of `Cesium3DTileFeatures`, see [`20e0a8e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/20e0a8e32a06784ca4ab50a59beb9d425a41d0f8).
-* Fixed a bug that prevents selection of 3D tiles objects, see [`ce18aab`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ce18aab826e8ef10bd099b340ac5298f2e3c50e4).
+* Fixed a bug that prevented selection of 3D tiles objects, see [`ce18aab`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ce18aab826e8ef10bd099b340ac5298f2e3c50e4).
 * Fixed (un)highlight of 3D tiles objects, see [`6be754c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6be754cd59df1031f58159157166fdaf8fc3eb70).
-* Fixed a bug when multiple alert windows appear at the same time, see [`d5c5f4e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d5c5f4eb6b1227346eb367cf17f4edbd4f124046).
+* Fixed a bug when multiple alert windows appeared at the same time, see [`d5c5f4e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d5c5f4eb6b1227346eb367cf17f4edbd4f124046).
 * Fixed the size of Cesium's error dialog that could not be displayed correctly on mobile devices, see [`763df04`](https://github.com/3dcitydb/3dcitydb-web-map/commit/763df044428a6a1b3cb554637e8c727d1f9fd045) and [`f0705bc`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f0705bc18e53612305c096b51d0e4c68cf935cec).
 * Fixed a bug that prevented the web client from reading user's ion token correctly, see [`59a62f6`](https://github.com/3dcitydb/3dcitydb-web-map/commit/59a62f60ae87e4c91f8fcfb862a50f2473bebc20).
 * Fixed point size of point cloud datasets, see [`73c7c84`](https://github.com/3dcitydb/3dcitydb-web-map/commit/73c7c84b27f1f92ef8dae35d62f159737d89cb74).
