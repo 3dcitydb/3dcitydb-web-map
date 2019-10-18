@@ -80,6 +80,10 @@ var addLayerViewModel = {
     layerDataType: "",
     gltfVersion: "",
     thematicDataUrl: "",
+    thematicDataSource: "",
+    // googleSheetsApiKey: "",
+    // googleSheetsRanges: "",
+    // googleSheetsClientId: "",
     cityobjectsJsonUrl: "",
     minLodPixels: "",
     maxLodPixels: "",
@@ -279,6 +283,10 @@ function observeActiveLayer() {
         addLayerViewModel.layerDataType = selectedLayer.layerDataType;
         addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
         addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
+        addLayerViewModel.thematicDataSource = selectedLayer.thematicDataSource;
+        // addLayerViewModel.googleSheetsApiKey = selectedLayer.googleSheetsApiKey;
+        // addLayerViewModel.googleSheetsRanges = selectedLayer.googleSheetsRanges;
+        // addLayerViewModel.googleSheetsClientId = selectedLayer.googleSheetsClientId;
         addLayerViewModel.cityobjectsJsonUrl = selectedLayer.cityobjectsJsonUrl;
         addLayerViewModel.minLodPixels = selectedLayer.minLodPixels;
         addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
@@ -378,6 +386,10 @@ function getLayersFromUrl() {
             layerDataType: Cesium.defaultValue(layerConfig.layerDataType, "COLLADA/KML/glTF"),
             gltfVersion: Cesium.defaultValue(layerConfig.gltfVersion, "2.0"),
             thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
+            thematicDataSource: Cesium.defaultValue(layerConfig.thematicDataSource, "GoogleSheets"),
+            // googleSheetsApiKey: Cesium.defaultValue(layerConfig.googleSheetsApiKey, ""),
+            // googleSheetsRanges: Cesium.defaultValue(layerConfig.googleSheetsRanges, ""),
+            // googleSheetsClientId: Cesium.defaultValue(layerConfig.googleSheetsClientId, ""),
             cityobjectsJsonUrl: Cesium.defaultValue(layerConfig.cityobjectsJsonUrl, ""),
             active: (layerConfig.active == "true"),
             minLodPixels: Cesium.defaultValue(layerConfig.minLodPixels, 140),
@@ -458,6 +470,10 @@ function saveLayerSettings() {
     applySaving('layerDataType', activeLayer);
     applySaving('gltfVersion', activeLayer);
     applySaving('thematicDataUrl', activeLayer);
+    applySaving('thematicDataSource', activeLayer);
+    // applySaving('googleSheetsApiKey', activeLayer);
+    // applySaving('googleSheetsRanges', activeLayer);
+    // applySaving('googleSheetsClientId', activeLayer);
     applySaving('cityobjectsJsonUrl', activeLayer);
     applySaving('minLodPixels', activeLayer);
     applySaving('maxLodPixels', activeLayer);
@@ -792,6 +808,10 @@ function layersToQuery() {
             gltfVersion: layer.gltfVersion,
             active: layer.active,
             spreadsheetUrl: layer.thematicDataUrl,
+            thematicDataSource: layer.thematicDataSource,
+            // googleSheetsApiKey: layer.googleSheetsApiKey,
+            // googleSheetsRanges: layer.googleSheetsRanges,
+            // googleSheetsClientId: layer.googleSheetsClientId,
             cityobjectsJsonUrl: layer.cityobjectsJsonUrl,
             minLodPixels: layer.minLodPixels,
             maxLodPixels: layer.maxLodPixels == -1 ? Number.MAX_VALUE : layer.maxLodPixels,
@@ -888,24 +908,44 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
             flyToMapLocation(lat, lon, callBackFunc);
         } else {
             var thematicDataUrl = webMap.activeLayer.thematicDataUrl;
-            var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
-            Cesium.when(promise, function (result) {
-                var centroid = result["CENTROID"];
-                if (centroid) {
-                    var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
-                    var lon = parseFloat(res[0]);
-                    var lat = parseFloat(res[1]);
-                    flyToMapLocation(lat, lon, callBackFunc);
-                } else {
+            dataSourceController.fetchData("SELECT B,C WHERE A='" + gmlId + "'", 1000, function (result) {
+                if (!result) {
                     if (Cesium.defined(errorCallbackFunc)) {
                         errorCallbackFunc.call(this);
                     }
-                }
-            }, function () {
-                if (Cesium.defined(errorCallbackFunc)) {
-                    errorCallbackFunc.call(this);
+                } else {
+                    var centroid = result["CENTROID"];
+                    if (centroid) {
+                        var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
+                        var lon = parseFloat(res[0]);
+                        var lat = parseFloat(res[1]);
+                        flyToMapLocation(lat, lon, callBackFunc);
+                    } else {
+                        if (Cesium.defined(errorCallbackFunc)) {
+                            errorCallbackFunc.call(this);
+                        }
+                    }
                 }
             });
+
+            // var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
+            // Cesium.when(promise, function (result) {
+            //     var centroid = result["CENTROID"];
+            //     if (centroid) {
+            //         var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
+            //         var lon = parseFloat(res[0]);
+            //         var lat = parseFloat(res[1]);
+            //         flyToMapLocation(lat, lon, callBackFunc);
+            //     } else {
+            //         if (Cesium.defined(errorCallbackFunc)) {
+            //             errorCallbackFunc.call(this);
+            //         }
+            //     }
+            // }, function () {
+            //     if (Cesium.defined(errorCallbackFunc)) {
+            //         errorCallbackFunc.call(this);
+            //     }
+            // });
         }
     } else {
         if (Cesium.defined(errorCallbackFunc)) {
@@ -949,6 +989,10 @@ function addNewLayer() {
         layerDataType: addLayerViewModel.layerDataType.trim(),
         gltfVersion: addLayerViewModel.gltfVersion.trim(),
         thematicDataUrl: addLayerViewModel.thematicDataUrl.trim(),
+        thematicDataSource: addLayerViewModel.thematicDataSource.trim(),
+        // googleSheetsApiKey: addLayerViewModel.googleSheetsApiKey.trim(),
+        // googleSheetsRanges: addLayerViewModel.googleSheetsRanges.trim(),
+        // googleSheetsClientId: addLayerViewModel.googleSheetsClientId.trim(),
         cityobjectsJsonUrl: addLayerViewModel.cityobjectsJsonUrl.trim(),
         minLodPixels: addLayerViewModel.minLodPixels,
         maxLodPixels: addLayerViewModel.maxLodPixels == -1 ? Number.MAX_VALUE : addLayerViewModel.maxLodPixels,
@@ -1108,18 +1152,33 @@ function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
     var thematicDataUrl = citydbLayer.thematicDataUrl;
     cesiumEntity.description = "Loading feature information...";
 
-    fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl).then(function (kvp) {
-        console.log(kvp);
-        var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
-        for (var key in kvp) {
-            html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
-        }
-        html += '</tbody></table>';
+    dataSourceController.fetchData(gmlid, function (kvp) {
+        if (!kvp) {
+            cesiumEntity.description = 'No feature information found';
+        } else {
+            console.log(kvp);
+            var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
+            for (var key in kvp) {
+                html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
+            }
+            html += '</tbody></table>';
 
-        cesiumEntity.description = html;
-    }).otherwise(function (error) {
-        cesiumEntity.description = 'No feature information found';
-    });
+            cesiumEntity.description = html;
+        }
+    }, 1000);
+
+    // fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl).then(function (kvp) {
+    //     console.log(kvp);
+    //     var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
+    //     for (var key in kvp) {
+    //         html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
+    //     }
+    //     html += '</tbody></table>';
+    //
+    //     cesiumEntity.description = html;
+    // }).otherwise(function (error) {
+    //     cesiumEntity.description = 'No feature information found';
+    // });
 }
 
 function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
@@ -1239,5 +1298,34 @@ function layerDataTypeDropdownOnchange() {
     }
 }
 
+function thematicDataSourceDropdownOnchange() {
+    var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+
+    // if (selectedThematicDataSource == "GoogleSheets") {
+    //     document.getElementById("rowGoogleSheetsApiKey").style.display = "table-row";
+    //     document.getElementById("rowGoogleSheetsRanges").style.display = "table-row";
+    //     document.getElementById("rowGoogleSheetsClientId").style.display = "table-row";
+    // } else {
+    //     document.getElementById("rowGoogleSheetsApiKey").style.display = "none";
+    //     document.getElementById("rowGoogleSheetsRanges").style.display = "none";
+    //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
+    // }
+
+    var options = {
+        // name: "",
+        // type: "",
+        // provider: "",
+        uri: addLayerViewModel.thematicDataUrl
+        // ranges: addLayerViewModel.googleSheetsRanges,
+        // apiKey: addLayerViewModel.googleSheetsApiKey,
+        // clientId: addLayerViewModel.googleSheetsClientId
+    };
+    dataSourceController = new DataSourceController(selectedThematicDataSource, options);
+}
+
 // Mobile layouts and functionalities
 var mobileController = new MobileController();
+
+// Mashup Data Source Service
+var dataSourceController;
