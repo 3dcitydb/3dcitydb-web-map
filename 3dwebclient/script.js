@@ -907,8 +907,9 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
             var lat = (obj.envelope[1] + obj.envelope[3]) / 2.0;
             flyToMapLocation(lat, lon, callBackFunc);
         } else {
+            // TODO
             var thematicDataUrl = webMap.activeLayer.thematicDataUrl;
-            dataSourceController.fetchData("SELECT B,C WHERE A='" + gmlId + "'", 1000, function (result) {
+            dataSourceController.fetchData(gmlId, function (result) {
                 if (!result) {
                     if (Cesium.defined(errorCallbackFunc)) {
                         errorCallbackFunc.call(this);
@@ -926,7 +927,7 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
                         }
                     }
                 }
-            });
+            }, 1000);
 
             // var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
             // Cesium.when(promise, function (result) {
