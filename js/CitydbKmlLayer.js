@@ -50,6 +50,7 @@
         // extended variables for CitydbKmlLayer	
         this._cesiumViewer = undefined;
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
+        this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._cityobjectsJsonData = new Object();
@@ -79,6 +80,7 @@
             "layerDataType": this.layerDataType,
             "gltfVersion": this.gltfVersion,
             "thematicDataUrl": this.thematicDataUrl,
+            "thematicDataSource": this.thematicDataSource,
             "thematicDataProvider": this._thematicDataProvider,
             "cityobjectsJsonUrl": this.cityobjectsJsonUrl,
             "minLodPixels": this.minLodPixels,
@@ -170,6 +172,15 @@
             },
             set: function (value) {
                 this._thematicDataUrl = value;
+            }
+        },
+
+        thematicDataSource: {
+            get: function () {
+                return this._thematicDataSource;
+            },
+            set: function (value) {
+                this._thematicDataSource = value;
             }
         },
 

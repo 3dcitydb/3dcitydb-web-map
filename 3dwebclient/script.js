@@ -480,6 +480,7 @@ function saveLayerSettings() {
     applySaving('maxSizeOfCachedTiles', activeLayer);
     applySaving('maxCountOfVisibleTiles', activeLayer);
     console.log(activeLayer);
+    var test = activeLayer["thematicDataSource"];
 
     // update GUI:
     var nodes = document.getElementById('citydb_layerlistpanel').childNodes;
@@ -534,6 +535,8 @@ function loadLayerGroup(_layers) {
 
                 // show/hide glTF version based on the value of Layer Data Type
                 layerDataTypeDropdownOnchange();
+
+                thematicDataSourceDropdownOnchange();
             }
         }).otherwise(function (error) {
             CitydbUtil.showAlertWindow("OK", "Error", error.message);
@@ -1297,11 +1300,13 @@ function layerDataTypeDropdownOnchange() {
     } else {
         document.getElementById("gltfVersionDropdownRow").style.display = "";
     }
+    addLayerViewModel["layerDataType"] = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
 }
 
 function thematicDataSourceDropdownOnchange() {
     var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
     var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
 
     // if (selectedThematicDataSource == "GoogleSheets") {
     //     document.getElementById("rowGoogleSheetsApiKey").style.display = "table-row";
