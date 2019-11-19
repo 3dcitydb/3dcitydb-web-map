@@ -277,9 +277,18 @@
                                     <tr>
                                         <td>> Thematic Data Source</td>
                                         <td>
-                                            <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource" onchange="thematicDataSourceDropdownOnchange()">
+                                            <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
                                                 <option value="GoogleSheets" selected="selected">Google Sheets API</option>
                                                 <option value="PostgreSQL">PostgreSQL REST API</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>> Table type</td>
+                                        <td>
+                                            <select id="tableTypeDropdown" data-bind="value: tableType" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
+                                                <option value="Horizontal" selected="selected">All object attributes in one row</option>
+                                                <option value="Vertical">One row per object attribute</option>
                                             </select>
                                         </td>
                                     </tr>

@@ -25,6 +25,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         _this._clientId = !options.clientId ? '' : options.clientId;
         _this._scope = !options.scope ? 'https://www.googleapis.com/auth/spreadsheets' : options.scope;
         _this._gapi = gapi;
+        _this._idColName = !options.idColName ? "A" : options.idColName;
         return _this;
     }
     GoogleSheets.prototype.responseToKvp = function (response) {
@@ -35,11 +36,25 @@ var GoogleSheets = /** @class */ (function (_super) {
             // Structure of the JSON response from Google Visualization API
             // https://developers.google.com/chart/interactive/docs/reference#dataparam
             // Ignore the first column (containing ID) --> start i with 1 instead of 0
-            for (var i = 1; i < rows[0].c.length; i++) {
-                // Consider only the first two rows for keys and values respectively
-                var key = cols[i].label;
-                var value = rows[0].c[i] ? rows[0].c[i].v : undefined;
-                result[key] = value;
+            if (this.tableType == TableTypes.Horizontal) {
+                for (var i = 1; i < rows[0].c.length; i++) {
+                    var key = cols[i].label;
+                    var value = rows[0].c[i] ? rows[0].c[i].v : undefined;
+                    result[key] = value;
+                }
+            }
+            else {
+                // one attribute per row
+                // only store id once
+                // (because the vertical table has multiple lines of the same id)
+                // assuming id is in the first column
+                // result[this.idColName] = rows[0].c[0].v;
+                for (var i = 1; i < rows.length; i++) {
+                    // TODO generic implemetation for fields id (c[0]) attribute (c[1]) and value (c[2])
+                    var key = rows[i].c[1].v;
+                    var value = rows[i].c[2].v;
+                    result[key] = value;
+                }
             }
         }
         return result;

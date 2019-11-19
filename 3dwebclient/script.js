@@ -81,6 +81,7 @@ var addLayerViewModel = {
     gltfVersion: "",
     thematicDataUrl: "",
     thematicDataSource: "",
+    tableType: "",
     // googleSheetsApiKey: "",
     // googleSheetsRanges: "",
     // googleSheetsClientId: "",
@@ -284,6 +285,7 @@ function observeActiveLayer() {
         addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
         addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
         addLayerViewModel.thematicDataSource = selectedLayer.thematicDataSource;
+        addLayerViewModel.tableType = selectedLayer.tableType;
         // addLayerViewModel.googleSheetsApiKey = selectedLayer.googleSheetsApiKey;
         // addLayerViewModel.googleSheetsRanges = selectedLayer.googleSheetsRanges;
         // addLayerViewModel.googleSheetsClientId = selectedLayer.googleSheetsClientId;
@@ -387,6 +389,7 @@ function getLayersFromUrl() {
             gltfVersion: Cesium.defaultValue(layerConfig.gltfVersion, "2.0"),
             thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
             thematicDataSource: Cesium.defaultValue(layerConfig.thematicDataSource, "GoogleSheets"),
+            tableType: Cesium.defaultValue(layerConfig.tableType, "Horizontal"),
             // googleSheetsApiKey: Cesium.defaultValue(layerConfig.googleSheetsApiKey, ""),
             // googleSheetsRanges: Cesium.defaultValue(layerConfig.googleSheetsRanges, ""),
             // googleSheetsClientId: Cesium.defaultValue(layerConfig.googleSheetsClientId, ""),
@@ -471,6 +474,7 @@ function saveLayerSettings() {
     applySaving('gltfVersion', activeLayer);
     applySaving('thematicDataUrl', activeLayer);
     applySaving('thematicDataSource', activeLayer);
+    applySaving('tableType', activeLayer);
     // applySaving('googleSheetsApiKey', activeLayer);
     // applySaving('googleSheetsRanges', activeLayer);
     // applySaving('googleSheetsClientId', activeLayer);
@@ -480,7 +484,9 @@ function saveLayerSettings() {
     applySaving('maxSizeOfCachedTiles', activeLayer);
     applySaving('maxCountOfVisibleTiles', activeLayer);
     console.log(activeLayer);
-    var test = activeLayer["thematicDataSource"];
+
+    // Update Data Source
+    thematicDataSourceAndTableTypeDropdownOnchange();
 
     // update GUI:
     var nodes = document.getElementById('citydb_layerlistpanel').childNodes;
@@ -536,7 +542,7 @@ function loadLayerGroup(_layers) {
                 // show/hide glTF version based on the value of Layer Data Type
                 layerDataTypeDropdownOnchange();
 
-                thematicDataSourceDropdownOnchange();
+                thematicDataSourceAndTableTypeDropdownOnchange();
             }
         }).otherwise(function (error) {
             CitydbUtil.showAlertWindow("OK", "Error", error.message);
@@ -812,6 +818,7 @@ function layersToQuery() {
             active: layer.active,
             spreadsheetUrl: layer.thematicDataUrl,
             thematicDataSource: layer.thematicDataSource,
+            tableType: layer.tableType,
             // googleSheetsApiKey: layer.googleSheetsApiKey,
             // googleSheetsRanges: layer.googleSheetsRanges,
             // googleSheetsClientId: layer.googleSheetsClientId,
@@ -994,6 +1001,7 @@ function addNewLayer() {
         gltfVersion: addLayerViewModel.gltfVersion.trim(),
         thematicDataUrl: addLayerViewModel.thematicDataUrl.trim(),
         thematicDataSource: addLayerViewModel.thematicDataSource.trim(),
+        tableType: addLayerViewModel.tableType.trim(),
         // googleSheetsApiKey: addLayerViewModel.googleSheetsApiKey.trim(),
         // googleSheetsRanges: addLayerViewModel.googleSheetsRanges.trim(),
         // googleSheetsClientId: addLayerViewModel.googleSheetsClientId.trim(),
@@ -1303,10 +1311,15 @@ function layerDataTypeDropdownOnchange() {
     addLayerViewModel["layerDataType"] = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
 }
 
-function thematicDataSourceDropdownOnchange() {
+function thematicDataSourceAndTableTypeDropdownOnchange() {
     var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
     var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+
+    var tableTypeDropdown = document.getElementById("tableTypeDropdown");
+    var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
+
     addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
+    addLayerViewModel["tableType"] = selectedTableType;
 
     // if (selectedThematicDataSource == "GoogleSheets") {
     //     document.getElementById("rowGoogleSheetsApiKey").style.display = "table-row";
@@ -1322,7 +1335,8 @@ function thematicDataSourceDropdownOnchange() {
         // name: "",
         // type: "",
         // provider: "",
-        uri: addLayerViewModel.thematicDataUrl
+        uri: addLayerViewModel.thematicDataUrl,
+        tableType: selectedTableType,
         // ranges: addLayerViewModel.googleSheetsRanges,
         // apiKey: addLayerViewModel.googleSheetsApiKey,
         // clientId: addLayerViewModel.googleSheetsClientId

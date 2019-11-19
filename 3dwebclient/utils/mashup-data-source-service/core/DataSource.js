@@ -10,6 +10,7 @@ var DataSource = /** @class */ (function () {
         this._type = !options.type ? "Data Type" : options.type;
         this._uri = !options.uri ? "" : options.uri;
         this._capabilities = !options.capabilities ? undefined : options.capabilities;
+        this._tableType = !options.tableType ? TableTypes.Horizontal : options.tableType;
     }
     Object.defineProperty(DataSource.prototype, "name", {
         get: function () {
@@ -57,6 +58,26 @@ var DataSource = /** @class */ (function () {
         },
         set: function (value) {
             this._capabilities = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DataSource.prototype, "tableType", {
+        get: function () {
+            return this._tableType;
+        },
+        set: function (value) {
+            this._tableType = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DataSource.prototype, "idColName", {
+        get: function () {
+            return this._idColName;
+        },
+        set: function (value) {
+            this._idColName = value;
         },
         enumerable: true,
         configurable: true

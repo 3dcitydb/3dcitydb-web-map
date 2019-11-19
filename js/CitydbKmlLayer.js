@@ -51,6 +51,7 @@
         this._cesiumViewer = undefined;
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
         this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
+        this._tableType = Cesium.defaultValue(options.tableType, "");
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._cityobjectsJsonData = new Object();
@@ -81,6 +82,7 @@
             "gltfVersion": this.gltfVersion,
             "thematicDataUrl": this.thematicDataUrl,
             "thematicDataSource": this.thematicDataSource,
+            "tableType": this.tableType,
             "thematicDataProvider": this._thematicDataProvider,
             "cityobjectsJsonUrl": this.cityobjectsJsonUrl,
             "minLodPixels": this.minLodPixels,
@@ -181,6 +183,15 @@
             },
             set: function (value) {
                 this._thematicDataSource = value;
+            }
+        },
+
+        tableType: {
+            get: function () {
+                return this._tableType;
+            },
+            set: function (value) {
+                this._tableType = value;
             }
         },
 

@@ -15,18 +15,33 @@ var __extends = (this && this.__extends) || (function () {
 var PostgreSQL = /** @class */ (function (_super) {
     __extends(PostgreSQL, _super);
     function PostgreSQL(options) {
-        return _super.call(this, options) || this;
+        var _this = _super.call(this, options) || this;
+        _this._idColName = !options.idColName ? "gmlid" : options.idColName;
+        return _this;
     }
     PostgreSQL.prototype.responseToKvp = function (response) {
         // TODO test with PostgREST
         // response is just a text -> parse to JSON
         var responseJson = JSON.parse(response);
         var result = new Map();
-        ;
-        for (var i = 0; i < responseJson.length; i++) {
-            var ele = responseJson[i];
-            for (var key in ele) {
-                result[key] = ele[key];
+        if (this.tableType == TableTypes.Horizontal) {
+            // all attributes per object are stored in one row
+            for (var i = 0; i < responseJson.length; i++) {
+                var ele = responseJson[i];
+                for (var key in ele) {
+                    result[key] = ele[key];
+                }
+            }
+        }
+        else {
+            // one attribute per row
+            // only store id once
+            // (because the vertical table has multiple lines of the same id)
+            // result[this.idColName] = responseJson[0][this.idColName];
+            for (var i = 0; i < responseJson.length; i++) {
+                var ele = responseJson[i];
+                // TODO generic implementation for attribute and value
+                result[ele.attribute] = ele.value;
             }
         }
         return result;
@@ -56,7 +71,7 @@ var PostgreSQL = /** @class */ (function (_super) {
     };
     PostgreSQL.prototype.queryUsingId = function (id, callback, limit) {
         // TODO use column number instead of column name (such as gmlid here)
-        this.queryUsingSql("?gmlid=eq." + id, callback, !limit ? Number.MAX_VALUE : limit);
+        this.queryUsingSql("?" + this.idColName + "=eq." + id, callback, !limit ? Number.MAX_VALUE : limit);
     };
     PostgreSQL.prototype.queryUsingSql = function (sql, callback, limit) {
         // TODO handle limit
