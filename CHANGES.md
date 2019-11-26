@@ -9,6 +9,9 @@
     + Horizontal: all object attributes are stored in columns of one single row, which means each ID occurs only once in the table
     + Vertical: each object attribute is stored in one row consisting of three columns `ID`, `Attribute` and `Value`, which means an ID may occur in multiple rows in the table
 
+##### FIXES
+* Fixed a bug that prevented Geocoder to function properly on defined active layers, see [`0e60059`](https://github.com/3dcitydb/3dcitydb-web-map/commit/0e60059f29a53b1cb413c9ab0e36721559ce22f8)
+
 ### 1.8.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.0/3dwebclient/index.html)
 ---------
 
