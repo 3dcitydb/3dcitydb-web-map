@@ -172,7 +172,7 @@ function intiClient() {
         if (callGeocodingService != true) {
             var gmlId = cesiumViewer.geocoder.viewModel.searchText;
             info.cancel = true;
-            cesiumViewer.geocoder.viewModel.searchText = "Searching now......."
+            cesiumViewer.geocoder.viewModel.searchText = "Searching now.......";
             zoomToObjectById(gmlId, function () {
                 cesiumViewer.geocoder.viewModel.searchText = gmlId;
             }, function () {
@@ -911,7 +911,13 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
     var activeLayer = webMap._activeLayer;
     if (Cesium.defined(activeLayer)) {
         var cityobjectsJsonData = activeLayer.cityobjectsJsonData;
-        var obj = cityobjectsJsonData[gmlId];
+        if (!cityobjectsJsonData) {
+            if (Cesium.defined(errorCallbackFunc)) {
+                errorCallbackFunc.call(this);
+            }
+        } else {
+            var obj = cityobjectsJsonData[gmlId];
+        }
         if (obj) {
             var lon = (obj.envelope[0] + obj.envelope[2]) / 2.0;
             var lat = (obj.envelope[1] + obj.envelope[3]) / 2.0;
