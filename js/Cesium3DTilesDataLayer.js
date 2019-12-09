@@ -45,6 +45,8 @@
         this._hiddenObjects = [];
         this._cameraPosition = {};
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
+        this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
+        this._tableType = Cesium.defaultValue(options.tableType, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._cesiumViewer = undefined;
@@ -176,6 +178,24 @@
             },
             set: function (value) {
                 this._thematicDataUrl = value;
+            }
+        },
+
+        thematicDataSource: {
+            get: function () {
+                return this._thematicDataSource;
+            },
+            set: function (value) {
+                this._thematicDataSource = value;
+            }
+        },
+
+        tableType: {
+            get: function () {
+                return this._tableType;
+            },
+            set: function (value) {
+                this._tableType = value;
             }
         },
 
