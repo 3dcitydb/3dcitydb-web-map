@@ -925,7 +925,7 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
         } else {
             // TODO
             var thematicDataUrl = webMap.activeLayer.thematicDataUrl;
-            dataSourceController.fetchData(gmlId, function (result) {
+            webmap._activeLayer.dataSourceController.fetchData(gmlId, function (result) {
                 if (!result) {
                     if (Cesium.defined(errorCallbackFunc)) {
                         errorCallbackFunc.call(this);
@@ -1170,7 +1170,7 @@ function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
     var thematicDataUrl = citydbLayer.thematicDataUrl;
     cesiumEntity.description = "Loading feature information...";
 
-    dataSourceController.fetchData(gmlid, function (kvp) {
+    citydbLayer.dataSourceController.fetchData(gmlid, function (kvp) {
         if (!kvp) {
             cesiumEntity.description = 'No feature information found';
         } else {
@@ -1347,11 +1347,11 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         // apiKey: addLayerViewModel.googleSheetsApiKey,
         // clientId: addLayerViewModel.googleSheetsClientId
     };
-    dataSourceController = new DataSourceController(selectedThematicDataSource, options);
+    // Mashup Data Source Service
+    if (webMap && webMap._activeLayer) {
+        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, options);
+    }
 }
 
 // Mobile layouts and functionalities
 var mobileController = new MobileController();
-
-// Mashup Data Source Service
-var dataSourceController;

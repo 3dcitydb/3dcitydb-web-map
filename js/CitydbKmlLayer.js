@@ -52,6 +52,10 @@
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
         this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
         this._tableType = Cesium.defaultValue(options.tableType, "");
+        var dataSourceControllerOptions = {};
+        dataSourceControllerOptions.uri = this._thematicDataUrl;
+        dataSourceControllerOptions.tableType = this._tableType;
+        this._dataSourceController = new DataSourceController(this._thematicDataSource, dataSourceControllerOptions);
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._cityobjectsJsonData = new Object();
@@ -183,6 +187,15 @@
             },
             set: function (value) {
                 this._thematicDataSource = value;
+            }
+        },
+
+        dataSourceController: {
+            get: function () {
+                return this._dataSourceController;
+            },
+            set: function (value) {
+                this._dataSourceController = value;
             }
         },
 
