@@ -1,6 +1,8 @@
 # Change Log
 
-### 1.8.2 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.2/3dwebclient/index.html)
+### 1.8.3 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
+
+### 1.8.2 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.2/3dwebclient/index.html)
 
 ##### FIXES
 * Fixed querying data sources from multiple layers, see [`69fce7b`](https://github.com/3dcitydb/3dcitydb-web-map/commit/69fce7b2a6c0568ad9fbf183ccc87599aa5d6147).
