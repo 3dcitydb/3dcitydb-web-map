@@ -2,6 +2,13 @@
 
 ### 1.8.3 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
 
+##### NEW
+
+* The web client now supports both `.gltf` and binary `.glb` files. 
+It automatically detects for each individual object whether a `.gltf` or a `.glb` is present and visualize accordingly,
+i.e. the web client can visualize a list of files mixed with `.gltf` and `.glb`, 
+see[`737b4a0`](https://github.com/3dcitydb/3dcitydb-web-map/commit/737b4a017af5a0433c08df4d2e593a1e61152446). 
+
 ### 1.8.2 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.2/3dwebclient/index.html)
 
 ##### FIXES
