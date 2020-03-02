@@ -1621,6 +1621,10 @@
         var linkNode = queryFirstNode(modelNode, 'Link', namespaces.kml);
         var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
         var uri = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".gltf").trim());
+        checkExists(uri, function() {
+            // if a .gltf file does not exist --> search for .glb
+            uri = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".glb").trim());
+        })
 
         entity.label = '';
         entity.position = position;
@@ -1629,6 +1633,16 @@
             uri: uri,
             asynchronous: false
         };
+
+        function checkExists(url, callback) {
+            var xhr = new XMLHttpRequest()
+            xhr.onreadystatechange = function() {
+                if (this.readyState !== this.DONE) {
+                    callback()
+                }
+            }
+            xhr.open('HEAD', url)
+        }
     }
 
     var geometryTypes = {
