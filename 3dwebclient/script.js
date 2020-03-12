@@ -129,7 +129,6 @@ intiClient();
 // Store clicked entities
 var clickedEntities = {};
 
-var clockElementClicked = false;
 function intiClient() {
     // adjust cesium navigation help popup for splash window
     insertSplashInfoHelp();
@@ -233,8 +232,10 @@ function intiClient() {
     var clockElement = document.getElementsByClassName("cesium-animation-blank")[0];
     flatpickr(clockElement, {
         enableTime: true,
-        defaultDate: Cesium.JulianDate.toDate(cesiumViewer.clock.currentTime),
-        enableSeconds: true
+        defaultDate: new Date(new Date().toUTCString().substr(0, 25)), // force flatpickr to use UTC
+        enableSeconds: true,
+        time_24hr: true,
+        clickOpens: false
     });
     clockElement.addEventListener("change", function () {
         var dateValue = clockElement.value;
@@ -250,11 +251,15 @@ function intiClient() {
         cesiumViewer.timeline.resize();
     });
     clockElement.addEventListener("click", function () {
-        if (clockElementClicked) {
+        if (clockElement._flatpickr.isOpen) {
             clockElement._flatpickr.close();
+        } else {
+            clockElement._flatpickr.open();
         }
-        clockElementClicked = !clockElementClicked;
     });
+    cesiumViewer.timeline.addEventListener("click", function() {
+        clockElement._flatpickr.setDate(new Date(Cesium.JulianDate.toDate(cesiumViewer.clock.currentTime).toUTCString().substr(0, 25)));
+    })
 
     // Bring the cesium navigation help popup above the compass
     var cesiumNavHelp = document.getElementsByClassName("cesium-navigation-help")[0];
