@@ -12,6 +12,7 @@ see[`737b4a0`](https://github.com/3dcitydb/3dcitydb-web-map/commit/737b4a017af5a
 ### 1.8.2 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.2/3dwebclient/index.html)
 
 ##### FIXES
+* Fixed a bug that prevented calendar `flatpickr` from displaying correctly, see [`942d9f1`](https://github.com/3dcitydb/3dcitydb-web-map/commit/942d9f1e28646bed6c0fba04e62cf4e6efdbdbf8).
 * Fixed querying data sources from multiple layers, see [`69fce7b`](https://github.com/3dcitydb/3dcitydb-web-map/commit/69fce7b2a6c0568ad9fbf183ccc87599aa5d6147).
 * Fixed loading of thematic data sources in Cesium 3D Tiles, see [`08bc00d`](https://github.com/3dcitydb/3dcitydb-web-map/commit/08bc00da66510939ac7811a8b8c750f961eeeb8e).
 
