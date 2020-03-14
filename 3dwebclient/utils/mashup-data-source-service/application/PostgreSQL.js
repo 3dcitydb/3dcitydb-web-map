@@ -14,8 +14,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var PostgreSQL = /** @class */ (function (_super) {
     __extends(PostgreSQL, _super);
-    function PostgreSQL(options) {
-        var _this = _super.call(this, options) || this;
+    function PostgreSQL(signInController, options) {
+        var _this = _super.call(this, signInController, options) || this;
         _this._idColName = !options.idColName ? "gmlid" : options.idColName;
         return _this;
     }

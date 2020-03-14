@@ -55,7 +55,7 @@
         var dataSourceControllerOptions = {};
         dataSourceControllerOptions.uri = this._thematicDataUrl;
         dataSourceControllerOptions.tableType = this._tableType;
-        this._dataSourceController = new DataSourceController(this._thematicDataSource, dataSourceControllerOptions);
+        this._dataSourceController = new DataSourceController(this._thematicDataSource, signInController, dataSourceControllerOptions);
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._cityobjectsJsonData = new Object();

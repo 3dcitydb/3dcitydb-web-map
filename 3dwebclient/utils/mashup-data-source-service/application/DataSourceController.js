@@ -9,14 +9,14 @@ var TableTypes;
     TableTypes["Vertical"] = "Vertical";
 })(TableTypes || (TableTypes = {}));
 var DataSourceController = /** @class */ (function () {
-    function DataSourceController(selectedDataSource, options) {
+    function DataSourceController(selectedDataSource, signInController, options) {
         var scope = this;
         scope._options = options;
         if (selectedDataSource == DataSourceTypes.GoogleSheets) {
-            scope._dataSource = new GoogleSheets(scope._options);
+            scope._dataSource = new GoogleSheets(signInController, scope._options);
         }
         else if (selectedDataSource == DataSourceTypes.PostgreSQL) {
-            scope._dataSource = new PostgreSQL(scope._options);
+            scope._dataSource = new PostgreSQL(signInController, scope._options);
         }
     }
     DataSourceController.prototype.fetchData = function (id, callback, limit) {

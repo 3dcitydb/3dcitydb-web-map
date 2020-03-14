@@ -13,8 +13,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var SQLDataSource = /** @class */ (function (_super) {
     __extends(SQLDataSource, _super);
-    function SQLDataSource(options) {
-        return _super.call(this, options) || this;
+    function SQLDataSource(signInController, options) {
+        return _super.call(this, signInController, options) || this;
     }
     return SQLDataSource;
 }(DataSource));

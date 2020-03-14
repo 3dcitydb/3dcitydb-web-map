@@ -1351,11 +1351,18 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         // ranges: addLayerViewModel.googleSheetsRanges,
         // apiKey: addLayerViewModel.googleSheetsApiKey,
         // clientId: addLayerViewModel.googleSheetsClientId
+        clientId: googleClientId ? googleClientId : ""
     };
     // Mashup Data Source Service
     if (webMap && webMap._activeLayer) {
-        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, options);
+        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
     }
+}
+
+// Sign in utilities
+var googleClientId = CitydbUtil.parse_query_string('googleClientId', window.location.href);
+if (googleClientId) {
+    var signInController = new SigninController(googleClientId);
 }
 
 // Mobile layouts and functionalities

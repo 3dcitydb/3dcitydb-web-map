@@ -14,8 +14,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var GoogleSheets = /** @class */ (function (_super) {
     __extends(GoogleSheets, _super);
-    function GoogleSheets(options, gapi) {
-        var _this = _super.call(this, options) || this;
+    function GoogleSheets(signInController, options, gapi) {
+        var _this = _super.call(this, signInController, options) || this;
         _this._spreadsheetId = options.uri.replace(/.+?(spreadsheets\/d\/)/, "").replace(/(?=\/edit).+/, "");
         // take the entire first sheet using default name 'Sheet1' if no range is provided
         // more information on the A1 notation:
@@ -26,6 +26,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         _this._scope = !options.scope ? 'https://www.googleapis.com/auth/spreadsheets' : options.scope;
         _this._gapi = gapi;
         _this._idColName = !options.idColName ? "A" : options.idColName;
+        _this._signInController = signInController;
         return _this;
     }
     GoogleSheets.prototype.responseToKvp = function (response) {
@@ -121,6 +122,7 @@ var GoogleSheets = /** @class */ (function (_super) {
             }
         };
         xmlHttp.open("GET", baseUrl + this._spreadsheetId + "/gviz/tq?tq=" + encodeURI(sql), true); // true for asynchronous
+        xmlHttp.setRequestHeader('Authorization', 'Bearer ' + this._signInController.accessToken);
         xmlHttp.send(null);
     };
     // This function is implemented using gapi
@@ -289,6 +291,16 @@ var GoogleSheets = /** @class */ (function (_super) {
         },
         set: function (value) {
             this._gapi = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GoogleSheets.prototype, "signInController", {
+        get: function () {
+            return this._signInController;
+        },
+        set: function (value) {
+            this._signInController = value;
         },
         enumerable: true,
         configurable: true

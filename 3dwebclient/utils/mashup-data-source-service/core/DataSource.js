@@ -4,13 +4,14 @@
 // Alternatively we can do this:
 // interface DataSource extends ReadableDataSource, WritableDataSource {}
 var DataSource = /** @class */ (function () {
-    function DataSource(options) {
+    function DataSource(signInController, options) {
         this._name = !options.name ? "Data Source" : options.name;
         this._provider = !options.provider ? "Data Provider" : options.provider;
         this._type = !options.type ? "Data Type" : options.type;
         this._uri = !options.uri ? "" : options.uri;
         this._capabilities = !options.capabilities ? undefined : options.capabilities;
         this._tableType = !options.tableType ? TableTypes.Horizontal : options.tableType;
+        this._signInController = signInController;
     }
     Object.defineProperty(DataSource.prototype, "name", {
         get: function () {
@@ -78,6 +79,16 @@ var DataSource = /** @class */ (function () {
         },
         set: function (value) {
             this._idColName = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DataSource.prototype, "signInController", {
+        get: function () {
+            return this._signInController;
+        },
+        set: function (value) {
+            this._signInController = value;
         },
         enumerable: true,
         configurable: true
