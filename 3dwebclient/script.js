@@ -788,6 +788,11 @@ function generateLink() {
         projectLink = projectLink + '&' + splashWindow;
     }
 
+    // only export client ID if user is logged in
+    if ((signInController && signInController.clientID && signInController.isSignIn())) {
+        projectLink = projectLink + '&googleClientId=' + (signInController.clientID ? signInController.clientID : googleClientId);
+    }
+
     return projectLink;
 }
 
