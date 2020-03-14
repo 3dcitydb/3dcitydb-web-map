@@ -6,7 +6,7 @@
 * It is now possible to access own private/non-public Google Spreadsheets using OAuth, see [`082145c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/082145c73bf68c6f29614581b4f09f703d627bde).
 The following steps explain how to enable OAuth for your project and use it in the Web Client 
 (this is not the requirement of the web client, but rather a standard procedure when using OAuth):
-  0. Make sure you really have read/write access to the table
+  1. Make sure you really have read/write access to the table
   1. Register your project using [Google Developer Console](https://console.developers.google.com/)
   2. Search and activate [Google Sheets API](https://console.developers.google.com/apis/library) for your project
   3. Create and copy your client ID from the [credentials page](https://console.developers.google.com/apis/credentials)
