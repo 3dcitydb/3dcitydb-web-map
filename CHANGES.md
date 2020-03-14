@@ -3,7 +3,28 @@
 ### 1.8.3 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
 
 ##### NEW
-
+* It is now possible to access own private/non-public Google Spreadsheets using OAuth, see [`082145c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/082145c73bf68c6f29614581b4f09f703d627bde).
+The following steps explain how to enable OAuth for your project and use it in the Web Client 
+(this is not the requirement of the web client, but rather a standard procedure when using OAuth):
+  0. Make sure you really have read/write access to the table
+  1. Register your project using [Google Developer Console](https://console.developers.google.com/)
+  2. Search and activate [Google Sheets API](https://console.developers.google.com/apis/library) for your project
+  3. Create and copy your client ID from the [credentials page](https://console.developers.google.com/apis/credentials)
+  4. Insert the trusted [redirect URIs](https://console.developers.google.com/apis/credentials/oauthclient), 
+  or the URIs in which the web client is running. For example if you are using the latest web client from our 3DCityDB server,
+  then you should insert the following URI: 
+  ``https://www.3dcitydb.org/3dcitydb-web-map/latest/3dwebclient/index.html``
+  5. Paste your client ID in the web client's URL using the parameter `googleClientId`, such as
+  ``https://www.3dcitydb.org/3dcitydb-web-map/latest/3dwebclient/index.html?googleClientId=<YOUR_CLIENT_ID>``
+     + You can then `googleClientId` log into Google by clicking the button marked with a key symbol, 
+     which can be found in the top right area of the screen.
+     + When logged in, you can click the button again to log out.
+     + If the parameter `googleClientId` does not exist in the client URL, then this button shall not be displayed 
+     (backward compatibility to earlier versions of the web client)
+  6. (Optional) You can share your project as usual by clicking the button `Generate Scene Link`.
+  You need to stay logged in to attach your client ID in the project share link. 
+  If you wish to not include your client ID in the project share link, then simply log out beforehand,
+  see [`bd99b17`](https://github.com/3dcitydb/3dcitydb-web-map/commit/bd99b176894618f1b8623c2de1f95e6555711b5c).
 * The web client now supports both `.gltf` and binary `.glb` files. 
 It automatically detects for each individual object whether a `.gltf` or a `.glb` is present and visualize accordingly,
 i.e. the web client can visualize a list of files mixed with `.gltf` and `.glb`, 
