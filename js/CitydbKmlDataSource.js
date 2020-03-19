@@ -1621,27 +1621,33 @@
         var linkNode = queryFirstNode(modelNode, 'Link', namespaces.kml);
         var hostAndPath = sourceUri.substring(0, sourceUri.lastIndexOf("/"));
         var uri = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".gltf").trim());
-        checkExists(uri, function(uri) {
-            // if a .gltf file does not exist --> search for .glb
-            uri = hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".glb").trim());
-        })
 
         entity.label = '';
         entity.position = position;
         entity.orientation = orientation;
         entity.model = {
-            uri: uri,
+            uri: checkExists(uri) ? uri : hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".glb").trim()),
             asynchronous: false
         };
 
-        function checkExists(url, callback) {
-            var xhr = new XMLHttpRequest()
-            xhr.onreadystatechange = function() {
-                if (this.readyState === 404) {
-                    callback(url)
+        function checkExists(url) {
+            checkExistsAux(url, function(status) {
+                if (status) {
+                    return false;
                 }
-            }
-            xhr.open('HEAD', url)
+                return true;
+            });
+        }
+
+        function checkExistsAux(url, callback) {
+            var xhr = new XMLHttpRequest()
+            xhr.onreadystatechange = () => {
+                if (xhr.status === 404) {
+                    callback(xhr.status);
+                }
+            };
+            xhr.open('GET', url, true);
+            xhr.send();
         }
     }
 
