@@ -1625,30 +1625,22 @@
         entity.label = '';
         entity.position = position;
         entity.orientation = orientation;
-        entity.model = {
-            uri: checkExists(uri) ? uri : hostAndPath.concat("/", queryStringValue(linkNode, 'href', namespaces.kml).replace(".dae", ".glb").trim()),
-            asynchronous: false
-        };
 
-        function checkExists(url) {
-            checkExistsAux(url, function(status) {
-                if (status) {
-                    return false;
-                }
-                return true;
+        // automatically check if the .gltf file is available
+        // if not, the extension shall be changed to .glb
+        new Cesium.Resource({url: uri}).fetch({responseType: 'json'})
+            .then(function (loadedData) {
+                entity.model = {
+                    uri: uri,
+                    asynchronous: false
+                };
+            })
+            .otherwise(function (error) {
+                entity.model = {
+                    uri: uri.replace(".gltf", ".glb"),
+                    asynchronous: false
+                };
             });
-        }
-
-        function checkExistsAux(url, callback) {
-            var xhr = new XMLHttpRequest()
-            xhr.onreadystatechange = () => {
-                if (xhr.status === 404) {
-                    callback(xhr.status);
-                }
-            };
-            xhr.open('GET', url, true);
-            xhr.send();
-        }
     }
 
     var geometryTypes = {
