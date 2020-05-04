@@ -501,7 +501,8 @@
         } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
                 camera: cesiumViewer.scene.camera,
-                canvas: cesiumViewer.scene.canvas
+                canvas: cesiumViewer.scene.canvas,
+                clampToGround: this._layerClampToGround
             });
 
             this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
@@ -895,7 +896,8 @@
         } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
                 camera: this._cesiumViewer.scene.camera,
-                canvas: this._cesiumViewer.scene.canvas
+                canvas: this._cesiumViewer.scene.canvas,
+                clampToGround: this._layerClampToGround
             });
 
             this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
