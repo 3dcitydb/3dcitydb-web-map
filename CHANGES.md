@@ -3,6 +3,19 @@
 ### 1.8.3 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
 
 ##### NEW
+* Added support for loading KML/COLLADA/glTF layers via proxy (see [`c736ba7`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c736ba7dc56c251f46e055a4d924cd71fe35c268) and [`4894ca4`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4894ca4075a447874bc1003c785f47db661a6b56)):
+  + This can be toggled in the main toolbox while adding new layer;
+  + This shall be stored in the shared URLs as parameter `layerProxy=<true|false>`;
+  + For backward compatibility, shared URLs without this parameter shall receive the default value `false`.
+  + It is not recommended to load large datasets via proxy, e.g. Cesium 3D Tiles;
+  + Proxy only works for web client hosted in one of the following domains: `http(s)://(www.)3dcitydb.[org|net|de]`;
+  + Users have to ensure the resource URL and the web client's URL have the same protocol HTTP/HTTPS.
+
+* Added support for clamping KML models to ground (see [`c736ba7`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c736ba7dc56c251f46e055a4d924cd71fe35c268) and [`f64372c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f64372c02408e734d07c01ee93c55c12c1117bcf)):
+  + This can be toggled in the main toolbox while adding new layer;
+  + This shall be stored in the shared URLs as parameter `layerClampToGround=<true|false>`;
+  + For backward compatibility, shared URLs without this parameter shall receive the default value `true`.
+
 * It is now possible to access own private/non-public Google Spreadsheets using OAuth, see [`082145c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/082145c73bf68c6f29614581b4f09f703d627bde).
 The following steps explain how to enable OAuth for your project and use it in the Web Client 
 (this is not the requirement of the web client, but rather a standard procedure when using OAuth):
@@ -25,6 +38,7 @@ The following steps explain how to enable OAuth for your project and use it in t
   You need to stay logged in to attach your client ID in the project share link. 
   If you wish to not include your client ID in the project share link, then simply log out beforehand,
   see [`bd99b17`](https://github.com/3dcitydb/3dcitydb-web-map/commit/bd99b176894618f1b8623c2de1f95e6555711b5c).
+
 * The web client now supports both `.gltf` and binary `.glb` files. 
 It automatically detects for each individual object whether a `.gltf` or a `.glb` is present and visualize accordingly,
 i.e. the web client can visualize a list of files mixed with `.gltf` and `.glb`, 
