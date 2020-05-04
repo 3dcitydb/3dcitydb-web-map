@@ -501,11 +501,10 @@
         } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
                 camera: cesiumViewer.scene.camera,
-                canvas: cesiumViewer.scene.canvas,
-                clampToGround: this._layerClampToGround
+                canvas: cesiumViewer.scene.canvas
             });
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
+            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
@@ -896,11 +895,10 @@
         } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
                 camera: this._cesiumViewer.scene.camera,
-                canvas: this._cesiumViewer.scene.canvas,
-                clampToGround: this._layerClampToGround
+                canvas: this._cesiumViewer.scene.canvas
             });
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
+            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 that._cesiumViewer.dataSources.add(dataSource);
                 deferred.resolve(that);
