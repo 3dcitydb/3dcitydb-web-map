@@ -78,6 +78,8 @@ var addLayerViewModel = {
     url: "",
     name: "",
     layerDataType: "",
+    layerProxy: false,
+    layerClampToGround: true,
     gltfVersion: "",
     thematicDataUrl: "",
     thematicDataSource: "",
@@ -287,6 +289,8 @@ function observeActiveLayer() {
         addLayerViewModel.url = selectedLayer.url;
         addLayerViewModel.name = selectedLayer.name;
         addLayerViewModel.layerDataType = selectedLayer.layerDataType;
+        addLayerViewModel.layerProxy = selectedLayer.layerProxy;
+        addLayerViewModel.layerClampToGround = selectedLayer.layerClampToGround;
         addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
         addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
         addLayerViewModel.thematicDataSource = selectedLayer.thematicDataSource;
@@ -391,6 +395,8 @@ function getLayersFromUrl() {
             url: layerConfig.url,
             name: layerConfig.name,
             layerDataType: Cesium.defaultValue(layerConfig.layerDataType, "COLLADA/KML/glTF"),
+            layerProxy: Cesium.defined(layerConfig.layerProxy) ? layerConfig.layerProxy === "true" : false,
+            layerClampToGround: Cesium.defined(layerConfig.layerProxy) ? layerConfig.layerClampToGround === "true" : true,
             gltfVersion: Cesium.defaultValue(layerConfig.gltfVersion, "2.0"),
             thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
             thematicDataSource: Cesium.defaultValue(layerConfig.thematicDataSource, "GoogleSheets"),
@@ -476,6 +482,8 @@ function saveLayerSettings() {
     applySaving('url', activeLayer);
     applySaving('name', activeLayer);
     applySaving('layerDataType', activeLayer);
+    applySaving('layerProxy', activeLayer);
+    applySaving('layerClampToGround', activeLayer);
     applySaving('gltfVersion', activeLayer);
     applySaving('thematicDataUrl', activeLayer);
     applySaving('thematicDataSource', activeLayer);
@@ -824,6 +832,8 @@ function layersToQuery() {
             url: layer.url,
             name: layer.name,
             layerDataType: layer.layerDataType,
+            layerProxy: layer.layerProxy,
+            layerClampToGround: layer.layerClampToGround,
             gltfVersion: layer.gltfVersion,
             active: layer.active,
             spreadsheetUrl: layer.thematicDataUrl,
@@ -1014,6 +1024,8 @@ function addNewLayer() {
         url: addLayerViewModel.url.trim(),
         name: addLayerViewModel.name.trim(),
         layerDataType: addLayerViewModel.layerDataType.trim(),
+        layerProxy: (addLayerViewModel.layerProxy === true),
+        layerClampToGround: (addLayerViewModel.layerClampToGround === true),
         gltfVersion: addLayerViewModel.gltfVersion.trim(),
         thematicDataUrl: addLayerViewModel.thematicDataUrl.trim(),
         thematicDataSource: addLayerViewModel.thematicDataSource.trim(),
@@ -1321,8 +1333,10 @@ function layerDataTypeDropdownOnchange() {
     var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
     if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "COLLADA/KML/glTF") {
         document.getElementById("gltfVersionDropdownRow").style.display = "none";
+        document.getElementById("layerProxyAndClampToGround").style.display = "none";
     } else {
         document.getElementById("gltfVersionDropdownRow").style.display = "";
+        document.getElementById("layerProxyAndClampToGround").style.display = "";
     }
     addLayerViewModel["layerDataType"] = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
 }
