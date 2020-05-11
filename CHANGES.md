@@ -3,7 +3,7 @@
 ### 1.8.3 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
 
 ##### NEW
-*Added support for retrieving and displaying thematic datasource from KML documents themselves 
+* Added support for retrieving and displaying thematic datasource from KML documents themselves 
 (see [`d0e82ad`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d0e82adb8ec9dceb4a77ba7bdc2a7b48e81dab67)).
 Note that:
   + The option ``> Thematic Data Source`` in the main toolbox must be set to `KML documents`;
