@@ -3,6 +3,27 @@
 ### 1.8.3 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
 
 ##### NEW
+* Added support for retrieving and displaying thematic datasource from KML documents themselves 
+(see [`d0e82ad`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d0e82adb8ec9dceb4a77ba7bdc2a7b48e81dab67)).
+Note that:
+  + The option ``> Thematic Data Source`` in the main toolbox must be set to `KML documents`;
+  + If Cesium is used to retrieve thematic data from KML documents, only ``Data`` of `ExtendedData` is allowed.
+  ``SchemaData`` or custom data are simply ignored by Cesium, see [here](https://cesium.com/docs/cesiumjs-ref-doc/KmlFeatureData.html);
+  + An example of a KML document with thematic data:
+  ```xml
+  ...
+  <Placemark>
+    ...
+    <ExtendedData>
+       <Data name="dataName">
+          <displayName></displayName>
+          <value></value>
+       </Data>
+    </ExtendedData>
+  </Placemark>  
+  ```
+  + If the ``Data`` elements do not have `displayName`, the attribute `name` shall be used as label instead.
+
 * Added support for loading KML/COLLADA/glTF layers via proxy (see [`c736ba7`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c736ba7dc56c251f46e055a4d924cd71fe35c268) and [`4894ca4`](https://github.com/3dcitydb/3dcitydb-web-map/commit/4894ca4075a447874bc1003c785f47db661a6b56)):
   + This can be toggled in the main toolbox while adding new layer;
   + This shall be stored in the shared URLs as parameter `layerProxy=<true|false>`;

@@ -11,6 +11,7 @@ var DataSource = /** @class */ (function () {
         this._uri = !options.uri ? "" : options.uri;
         this._capabilities = !options.capabilities ? undefined : options.capabilities;
         this._tableType = !options.tableType ? TableTypes.Horizontal : options.tableType;
+        this._thirdPartyHandler = !options.thirdPartyHandler ? undefined : options.thirdPartyHandler;
         this._signInController = signInController;
     }
     Object.defineProperty(DataSource.prototype, "name", {
@@ -79,6 +80,16 @@ var DataSource = /** @class */ (function () {
         },
         set: function (value) {
             this._idColName = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DataSource.prototype, "thirdPartyHandler", {
+        get: function () {
+            return this._thirdPartyHandler;
+        },
+        set: function (value) {
+            this._thirdPartyHandler = value;
         },
         enumerable: true,
         configurable: true
