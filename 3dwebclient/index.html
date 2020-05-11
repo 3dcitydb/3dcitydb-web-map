@@ -72,8 +72,10 @@
         <script src="utils/mashup-data-source-service/core/WritableDataSource.js"></script>
         <script src="utils/mashup-data-source-service/core/DataSource.js"></script>
         <script src="utils/mashup-data-source-service/core/SQLDataSource.js"></script>
+        <script src="utils/mashup-data-source-service/core/XMLDataSource.js"></script>
         <script src="utils/mashup-data-source-service/application/GoogleSheets.js"></script>
         <script src="utils/mashup-data-source-service/application/PostgreSQL.js"></script>
+        <script src="utils/mashup-data-source-service/application/KMLDataSource.js"></script>
         <script src="utils/mashup-data-source-service/core/MashupDataSource.js"></script>
         <script src="utils/mashup-data-source-service/application/DataSourceController.js"></script>
 
@@ -291,6 +293,7 @@
                                             <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
                                                 <option value="GoogleSheets" selected="selected">Google Sheets API</option>
                                                 <option value="PostgreSQL">PostgreSQL REST API</option>
+                                                <option value="KML">KML Documents</option>
                                             </select>
                                         </td>
                                     </tr>

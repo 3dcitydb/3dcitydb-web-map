@@ -646,8 +646,10 @@ function addEventListeners(layer) {
     }
 
     layer.registerEventHandler("CLICK", function (object) {
+        var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+        var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
         var res = auxClickEventListener(object);
-        createInfoTable(res[0], res[1], layer);
+        createInfoTable(selectedThematicDataSource === "KML" ? res[1]._id : res[0], res[1], layer);
     });
 
     layer.registerEventHandler("CTRLCLICK", function (object) {
@@ -1367,6 +1369,10 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         // provider: "",
         uri: addLayerViewModel.thematicDataUrl,
         tableType: selectedTableType,
+        thirdPartyHandler: {
+            type: "Cesium",
+            handler: webMap._activeLayer ? webMap._activeLayer._citydbKmlDataSource : undefined
+        },
         // ranges: addLayerViewModel.googleSheetsRanges,
         // apiKey: addLayerViewModel.googleSheetsApiKey,
         // clientId: addLayerViewModel.googleSheetsClientId
