@@ -45,11 +45,9 @@ The 3DCityDb-Web-Map-Client is licensed under the [Apache License, Version 2.0](
 
 Latest release
 --------------
-The latest stable release of the 3DCityDB-Web-Map-Client is `1.7.1`.
-
 All releases are available from the [releases section](https://github.com/3dcitydb/3dcitydb-web-map/releases).
 
-For convenient use, there is an official [web link](https://www.3dcitydb.org/3dcitydb-web-map/1.7.1/3dwebclient/index.html) available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. 
+For convenient use, there is an official [web link](https://www.3dcitydb.org/3dcitydb-web-map/latest/3dwebclient/index.html) available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. 
 
 
 System requirements
