@@ -7,7 +7,7 @@
 * Fix a bug that prevented loading of Cesium 3D Tiles,
 see [`9966228`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9966228394acc86c51578e40e322c9c699617e6a).
 
-### 1.8.3 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
+### 1.8.3 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
 
 ##### NEW
 * Added support for retrieving and displaying thematic datasource from KML documents themselves 
