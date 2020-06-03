@@ -126,12 +126,12 @@ Cesium.knockout.applyBindings(addSplashWindowModel, document.getElementById('cit
 
 /*---------------------------------  Load Configurations and Layers  ----------------------------------------*/
 
-intiClient();
+initClient();
 
 // Store clicked entities
 var clickedEntities = {};
 
-function intiClient() {
+function initClient() {
     // adjust cesium navigation help popup for splash window
     insertSplashInfoHelp();
     // read splash window from url
