@@ -486,7 +486,7 @@
                             <div class="citydb_overSelect"></div>
                         </div>
                         <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeSplashWindow()">Remove Splash Window</button>
+                            <button type="button" style="width: 100%;" class="cesium-button" onclick="splashController.removeSplashWindow(jQuery)">Remove Splash Window</button>
                         </div>
                         <div id="citydb_addsplashwindow" class="citydb_dynamic_box">
                             <table class="citydb_inputtable">
@@ -506,7 +506,7 @@
                                 </tbody>
                             </table>
                             <div class="citydb_long_container">
-                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addSplashWindow()">Add Splash Window</button>
+                                <button style="width: 100%;" type="button" class="cesium-button" onclick="splashController.addSplashWindow(jQuery)">Add Splash Window</button>
                             </div>
                         </div>
                     </div>
@@ -571,8 +571,8 @@
 
         <!-- Splash window -->
         <div class="splashscreen-buttons">
-            <input id="not_show_again_button" type="button" value="Ignore" onclick="ignoreSplashWindow()">
-            <input id="close_button" type="button" value="Close" onclick="closeSplashWindow()">
+            <input id="not_show_again_button" type="button" value="Ignore" onclick="splashController.ignoreSplashWindow(jQuery)">
+            <input id="close_button" type="button" value="Close" onclick="splashController.closeSplashWindow(jQuery)">
         </div>
         <div id="splashwindow_iframe" class="splash-wrapper">
             <div class="splash-iframe-container">
