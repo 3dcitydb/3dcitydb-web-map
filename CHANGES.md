@@ -2,6 +2,15 @@
 
 ### 1.8.4 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.4/3dwebclient/index.html)
 
+##### CHANGES
+* Added a URL controller to export and parse project URLs (see 
+[`ff07d0c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ff07d0ca5ea001758e48d14e6d31380b53450295) and 
+[`f076322`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f076322cc37aad8d831fb8e4bfb96a57f8972446)):
+  + The URL parameters and its values are now kept compact;
+  + For the list of the abbreviations used for the URL parameters, please refer to [this list](3dwebclient/utils/UrlController.js):
+  + Backwards compatibility is enabled to also parse URLs generated from older versions;
+  + To convert older URLs to newer ones, simply open them using the newest version of the 3DCityDB Web Map Client and then export the scene link again.
+
 ##### FIXES
 
 * Fix a bug that prevented loading of Cesium 3D Tiles,
