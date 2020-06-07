@@ -175,13 +175,13 @@ var SplashController = /** @class */ (function () {
             $('body>*:not(#splashwindow_iframe):not(.splashscreen-buttons)').css("filter", "blur(3px)");
         })(jQuery);
     };
-    SplashController.prototype.getSplashWindowFromUrl = function (urlController, jQuery, CitydbUtil, Cesium) {
+    SplashController.prototype.getSplashWindowFromUrl = function (url, urlController, jQuery, CitydbUtil, Cesium) {
         var tmp_url = "";
         var tmp_showOnStart = "";
         var default_url = this.getDefaultAddSplashWindowModel().url;
         var default_showOnStart = this.getDefaultAddSplashWindowModel().showOnStart;
         var ignoreSplashWindow_cookie = this.getCookie("ignoreSplashWindow");
-        var splashWindowConfigString = CitydbUtil.parse_query_string(urlController.getUrlPara('splashWindow'), window.location.href);
+        var splashWindowConfigString = urlController.getUrlParaValue('splashWindow', url, CitydbUtil);
         if (splashWindowConfigString) {
             var splashWindowConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(splashWindowConfigString))[0]);
             tmp_url = (typeof splashWindowConfig.url === "undefined" || splashWindowConfig.url === "") ? default_url : splashWindowConfig.url;

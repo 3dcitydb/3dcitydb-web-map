@@ -56,9 +56,39 @@ var UrlController = /** @class */ (function () {
             "googleClientId": "gid"
         };
     }
-    UrlController.prototype.getUrlPara = function (parameter) {
-        var value = this._urlDictionary[parameter];
-        return value ? value : parameter;
+    // return only the shortened name of the URL parameters
+    UrlController.prototype.getUrlParaForward = function (parameter) {
+        var value = "";
+        if (parameter.indexOf("layer_") >= 0) {
+            // layer_N, with N as a number
+            value = this._urlDictionary["layer_"] + parameter.substring("layer_".length);
+        }
+        else {
+            value = this._urlDictionary[parameter];
+        }
+        if (typeof value !== "undefined" && value !== "") {
+            return value;
+        }
+        return null;
+    };
+    // return only the full name of the URL parameters
+    UrlController.prototype.getUrlParaAuxReverse = function (parameter) {
+        for (var key in this._urlDictionary) {
+            if (this._urlDictionary[key] === parameter) {
+                return key;
+            }
+        }
+        return null;
+    };
+    // return the value defined by the URL parameter
+    UrlController.prototype.getUrlParaValue = function (parameter, url, CitydbUtil) {
+        var result = CitydbUtil.parse_query_string(this.getUrlParaForward(parameter), url);
+        if (typeof result === "undefined" || result === "") {
+            // reverse mapping
+            // result = CitydbUtil.parse_query_string(this.getUrlParaAuxReverse(parameter), url);
+            result = CitydbUtil.parse_query_string(parameter, url);
+        }
+        return result;
     };
     UrlController.prototype.generateLink = function (webMap, addWmsViewModel, addTerrainViewModel, addSplashWindowModel, signInController, googleClientId, splashController, cesiumViewer, Cesium) {
         var cameraPosition = this.getCurrentCameraPostion(cesiumViewer, Cesium);
@@ -67,19 +97,19 @@ var UrlController = /** @class */ (function () {
         if (!clock.shouldAnimate) {
             var currentJulianDate = clock.currentTime;
             var daytimeObject = {};
-            daytimeObject[this.getUrlPara('dayTime')] = Cesium.JulianDate.toIso8601(currentJulianDate, 0);
+            daytimeObject[this.getUrlParaForward('dayTime')] = Cesium.JulianDate.toIso8601(currentJulianDate, 0);
             projectLink = projectLink + Cesium.objectToQuery(daytimeObject) + '&';
         }
         projectLink = projectLink +
-            this.getUrlPara('title') + '=' + document.title +
-            '&' + this.getUrlPara('shadows') + '=' + cesiumViewer.shadows +
-            '&' + this.getUrlPara('terrainShadows') + '=' + (isNaN(cesiumViewer.terrainShadows) ? 0 : cesiumViewer.terrainShadows) +
-            '&' + this.getUrlPara('latitude') + '=' + Math.round(cameraPosition.latitude * 1e6) / 1e6 +
-            '&' + this.getUrlPara('longitude') + '=' + Math.round(cameraPosition.longitude * 1e6) / 1e6 +
-            '&' + this.getUrlPara('height') + '=' + Math.round(cameraPosition.height * 1e3) / 1e3 +
-            '&' + this.getUrlPara('heading') + '=' + Math.round(cameraPosition.heading * 1e2) / 1e2 +
-            '&' + this.getUrlPara('pitch') + '=' + Math.round(cameraPosition.pitch * 1e2) / 1e2 +
-            '&' + this.getUrlPara('roll') + '=' + Math.round(cameraPosition.roll * 1e2) / 1e2 +
+            this.getUrlParaForward('title') + '=' + document.title +
+            '&' + this.getUrlParaForward('shadows') + '=' + cesiumViewer.shadows +
+            '&' + this.getUrlParaForward('terrainShadows') + '=' + (isNaN(cesiumViewer.terrainShadows) ? 0 : cesiumViewer.terrainShadows) +
+            '&' + this.getUrlParaForward('latitude') + '=' + Math.round(cameraPosition.latitude * 1e6) / 1e6 +
+            '&' + this.getUrlParaForward('longitude') + '=' + Math.round(cameraPosition.longitude * 1e6) / 1e6 +
+            '&' + this.getUrlParaForward('height') + '=' + Math.round(cameraPosition.height * 1e3) / 1e3 +
+            '&' + this.getUrlParaForward('heading') + '=' + Math.round(cameraPosition.heading * 1e2) / 1e2 +
+            '&' + this.getUrlParaForward('pitch') + '=' + Math.round(cameraPosition.pitch * 1e2) / 1e2 +
+            '&' + this.getUrlParaForward('roll') + '=' + Math.round(cameraPosition.roll * 1e2) / 1e2 +
             '&' + this.layersToQuery(webMap, Cesium);
         var basemap = this.basemapToQuery(addWmsViewModel, cesiumViewer, Cesium);
         if (basemap != null) {
@@ -95,7 +125,7 @@ var UrlController = /** @class */ (function () {
         }
         // only export client ID if user is logged in
         if ((signInController && signInController.clientID && signInController.isSignIn())) {
-            projectLink = projectLink + '&' + this.getUrlPara('googleClientId') + '=' + (signInController.clientID ? signInController.clientID : googleClientId);
+            projectLink = projectLink + '&' + this.getUrlParaForward('googleClientId') + '=' + (signInController.clientID ? signInController.clientID : googleClientId);
         }
         return projectLink;
     };
@@ -124,25 +154,25 @@ var UrlController = /** @class */ (function () {
         for (var i = 0; i < layers.length; i++) {
             var layer = layers[i];
             var layerConfig = {};
-            layerConfig[this.getUrlPara('url')] = Cesium.defaultValue(layer.url, "");
-            layerConfig[this.getUrlPara('name')] = Cesium.defaultValue(layer.name, "");
-            layerConfig[this.getUrlPara('layerDataType')] = Cesium.defaultValue(layer.layerDataType, "");
-            layerConfig[this.getUrlPara('layerProxy')] = Cesium.defaultValue(layer.layerProxy, "");
-            layerConfig[this.getUrlPara('layerClampToGround')] = Cesium.defaultValue(layer.layerClampToGround, "");
-            layerConfig[this.getUrlPara('gltfVersion')] = Cesium.defaultValue(layer.gltfVersion, "");
-            layerConfig[this.getUrlPara('active')] = Cesium.defaultValue(layer.active, "");
-            layerConfig[this.getUrlPara('spreadsheetUrl')] = Cesium.defaultValue(layer.spreadsheetUrl, "");
-            layerConfig[this.getUrlPara('thematicDataSource')] = Cesium.defaultValue(layer.thematicDataSource, "");
-            layerConfig[this.getUrlPara('tableType')] = Cesium.defaultValue(layer.tableType, "");
-            // layerConfig[this.getUrlPara('googleSheetsApiKey')] = Cesium.defaultValue(layer.googleSheetsApiKey, "");
-            // layerConfig[this.getUrlPara('googleSheetsRanges')] = Cesium.defaultValue(layer.googleSheetsRanges, "");
-            // layerConfig[this.getUrlPara('googleSheetsClientId')] = Cesium.defaultValue(layer.googleSheetsClientId, "")layer.;
-            layerConfig[this.getUrlPara('cityobjectsJsonUrl')] = Cesium.defaultValue(layer.cityobjectsJsonUrl, "");
-            layerConfig[this.getUrlPara('minLodPixels')] = Cesium.defaultValue(layer.minLodPixels, "");
-            layerConfig[this.getUrlPara('maxLodPixels')] = Cesium.defaultValue(layer.maxLodPixels, "");
-            layerConfig[this.getUrlPara('maxSizeOfCachedTiles')] = Cesium.defaultValue(layer.maxSizeOfCachedTiles, "");
-            layerConfig[this.getUrlPara('maxCountOfVisibleTiles')] = Cesium.defaultValue(layer.maxCountOfVisibleTiles, "");
-            layerGroupObject[this.getUrlPara('layer_') + i] = Cesium.objectToQuery(layerConfig);
+            layerConfig[this.getUrlParaForward('url')] = Cesium.defaultValue(layer.url, "");
+            layerConfig[this.getUrlParaForward('name')] = Cesium.defaultValue(layer.name, "");
+            layerConfig[this.getUrlParaForward('layerDataType')] = Cesium.defaultValue(layer.layerDataType, "");
+            layerConfig[this.getUrlParaForward('layerProxy')] = Cesium.defaultValue(layer.layerProxy, "");
+            layerConfig[this.getUrlParaForward('layerClampToGround')] = Cesium.defaultValue(layer.layerClampToGround, "");
+            layerConfig[this.getUrlParaForward('gltfVersion')] = Cesium.defaultValue(layer.gltfVersion, "");
+            layerConfig[this.getUrlParaForward('active')] = Cesium.defaultValue(layer.active, "");
+            layerConfig[this.getUrlParaForward('spreadsheetUrl')] = Cesium.defaultValue(layer.spreadsheetUrl, "");
+            layerConfig[this.getUrlParaForward('thematicDataSource')] = Cesium.defaultValue(layer.thematicDataSource, "");
+            layerConfig[this.getUrlParaForward('tableType')] = Cesium.defaultValue(layer.tableType, "");
+            // layerConfig[this.getUrlParaForward('googleSheetsApiKey')] = Cesium.defaultValue(layer.googleSheetsApiKey, "");
+            // layerConfig[this.getUrlParaForward('googleSheetsRanges')] = Cesium.defaultValue(layer.googleSheetsRanges, "");
+            // layerConfig[this.getUrlParaForward('googleSheetsClientId')] = Cesium.defaultValue(layer.googleSheetsClientId, "")layer.;
+            layerConfig[this.getUrlParaForward('cityobjectsJsonUrl')] = Cesium.defaultValue(layer.cityobjectsJsonUrl, "");
+            layerConfig[this.getUrlParaForward('minLodPixels')] = Cesium.defaultValue(layer.minLodPixels, "");
+            layerConfig[this.getUrlParaForward('maxLodPixels')] = Cesium.defaultValue(layer.maxLodPixels, "");
+            layerConfig[this.getUrlParaForward('maxSizeOfCachedTiles')] = Cesium.defaultValue(layer.maxSizeOfCachedTiles, "");
+            layerConfig[this.getUrlParaForward('maxCountOfVisibleTiles')] = Cesium.defaultValue(layer.maxCountOfVisibleTiles, "");
+            layerGroupObject[this.getUrlParaForward('layer_') + i] = Cesium.objectToQuery(layerConfig);
         }
         return Cesium.objectToQuery(layerGroupObject);
     };
@@ -151,7 +181,7 @@ var UrlController = /** @class */ (function () {
         var baseLayerProviderFunc = baseLayerPickerViewModel.selectedImagery.creationCommand();
         if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider) {
             var basemapObject = {};
-            basemapObject[this.getUrlPara('basemap')] = Cesium.objectToQuery(addWmsViewModel);
+            basemapObject[this.getUrlParaForward('basemap')] = Cesium.objectToQuery(addWmsViewModel);
             return Cesium.objectToQuery(basemapObject);
         }
         else {
@@ -163,10 +193,10 @@ var UrlController = /** @class */ (function () {
         var baseLayerProviderFunc = baseLayerPickerViewModel.selectedTerrain.creationCommand();
         if (baseLayerProviderFunc instanceof Cesium.CesiumTerrainProvider) {
             if (baseLayerPickerViewModel.selectedTerrain.name.indexOf('Cesium World Terrain') !== -1) {
-                return this.getUrlPara('cesiumWorldTerrain') + '=true';
+                return this.getUrlParaForward('cesiumWorldTerrain') + '=true';
             }
             var terrainObject = {};
-            terrainObject[this.getUrlPara('terrain')] = Cesium.objectToQuery(addTerrainViewModel);
+            terrainObject[this.getUrlParaForward('terrain')] = Cesium.objectToQuery(addTerrainViewModel);
             return Cesium.objectToQuery(terrainObject);
         }
         else {
@@ -185,36 +215,46 @@ var UrlController = /** @class */ (function () {
                 splashObjectTmp.showOnStart = addSplashWindowModel.showOnStart;
             }
             var splashObject = {};
-            splashObject[this.getUrlPara('splashWindow')] = Cesium.objectToQuery(splashObjectTmp);
+            splashObject[this.getUrlParaForward('splashWindow')] = Cesium.objectToQuery(splashObjectTmp);
             return Cesium.objectToQuery(splashObject);
         }
         return null;
     };
-    UrlController.prototype.getLayersFromUrl = function (CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium) {
+    UrlController.prototype.getValueFromObject = function (name, customObject, defaultValue, Cesium) {
+        var result = customObject[this.getUrlParaForward(name)];
+        if (typeof result === "undefined" || result === "") {
+            result = customObject[name];
+        }
+        if (typeof Cesium === "undefined") {
+            return result;
+        }
+        return Cesium.defaultValue(result, defaultValue);
+    };
+    UrlController.prototype.getLayersFromUrl = function (url, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium) {
         var index = 0;
         var nLayers = [];
-        var layerConfigString = CitydbUtil.parse_query_string(this.getUrlPara('layer_') + index, window.location.href);
+        var layerConfigString = this.getUrlParaValue('layer_' + index, url, CitydbUtil);
         while (layerConfigString) {
             var layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);
             var options = {
-                url: layerConfig[this.getUrlPara('url')],
-                name: layerConfig[this.getUrlPara('name')],
-                layerDataType: Cesium.defaultValue(layerConfig[this.getUrlPara('layerDataType')], "COLLADA/KML/glTF"),
-                layerProxy: Cesium.defined(layerConfig[this.getUrlPara('layerProxy')]) ? layerConfig[this.getUrlPara('layerProxy')] === "true" : false,
-                layerClampToGround: Cesium.defined(layerConfig[this.getUrlPara('layerClampToGround')]) ? layerConfig[this.getUrlPara('layerClampToGround')] === "true" : true,
-                gltfVersion: Cesium.defaultValue(layerConfig[this.getUrlPara('gltfVersion')], "2.0"),
-                thematicDataUrl: Cesium.defaultValue(layerConfig[this.getUrlPara('spreadsheetUrl')], ""),
-                thematicDataSource: Cesium.defaultValue(layerConfig[this.getUrlPara('thematicDataSource')], "GoogleSheets"),
-                tableType: Cesium.defaultValue(layerConfig[this.getUrlPara('tableType')], "Horizontal"),
-                // googleSheetsApiKey: this._Cesium.defaultValue(layerConfig[urlController.getUrlPara('googleSheetsApiKey')], ""),
-                // googleSheetsRanges: this._Cesium.defaultValue(layerConfig[urlController.getUrlPara('googleSheetsRanges')], ""),
-                // googleSheetsClientId: this._Cesium.defaultValue(layerConfig[urlController.getUrlPara('googleSheetsClientId')], ""),
-                cityobjectsJsonUrl: Cesium.defaultValue(layerConfig[this.getUrlPara('cityobjectsJsonUrl')], ""),
-                active: (layerConfig[this.getUrlPara('active')] == "true"),
-                minLodPixels: Cesium.defaultValue(layerConfig[this.getUrlPara('minLodPixels')], 140),
-                maxLodPixels: Cesium.defaultValue(layerConfig[this.getUrlPara('maxLodPixels')] == -1 ? Number.MAX_VALUE : layerConfig[this.getUrlPara('maxLodPixels')], Number.MAX_VALUE),
-                maxSizeOfCachedTiles: layerConfig[this.getUrlPara('maxSizeOfCachedTiles')],
-                maxCountOfVisibleTiles: layerConfig[this.getUrlPara('maxCountOfVisibleTiles')]
+                url: this.getValueFromObject('url', layerConfig),
+                name: this.getValueFromObject('name', layerConfig),
+                layerDataType: this.getValueFromObject('layerDataType', layerConfig, 'COLLADA/KML/glTF', Cesium),
+                layerProxy: this.getValueFromObject('layerProxy', layerConfig, false, Cesium) === "true",
+                layerClampToGround: this.getValueFromObject('layerClampToGround', layerConfig, true, Cesium) === "true",
+                gltfVersion: this.getValueFromObject('gltfVersion', layerConfig, '2.0', Cesium),
+                thematicDataUrl: this.getValueFromObject('spreadsheetUrl', layerConfig, '', Cesium),
+                thematicDataSource: this.getValueFromObject('thematicDataSource', layerConfig, 'GoogleSheets', Cesium),
+                tableType: this.getValueFromObject('tableType', layerConfig, 'Horizontal', Cesium),
+                // googleSheetsApiKey: this.getValueFromObject('googleSheetsApiKey', layerConfig, '', Cesium),
+                // googleSheetsRanges: this.getValueFromObject('googleSheetsRanges', layerConfig, '', Cesium),
+                // googleSheetsClientId: this.getValueFromObject('googleSheetsClientId', layerConfig, '', Cesium),
+                cityobjectsJsonUrl: this.getValueFromObject('cityobjectsJsonUrl', layerConfig, '', Cesium),
+                active: this.getValueFromObject('active', layerConfig, false, Cesium) === "true",
+                minLodPixels: this.getValueFromObject('minLodPixels', layerConfig, 140, Cesium),
+                maxLodPixels: this.getValueFromObject('maxLodPixels', layerConfig, Number.MAX_VALUE, Cesium) === -1 ? Number.MAX_VALUE : this.getValueFromObject('maxLodPixels', layerConfig, Number.MAX_VALUE, Cesium),
+                maxSizeOfCachedTiles: this.getValueFromObject('maxSizeOfCachedTiles', layerConfig, 140, Cesium),
+                maxCountOfVisibleTiles: this.getValueFromObject('maxCountOfVisibleTiles', layerConfig, 140, Cesium),
             };
             if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1
                 && options.layerDataType === "COLLADA/KML/glTF") {
@@ -224,7 +264,7 @@ var UrlController = /** @class */ (function () {
                 nLayers.push(new Cesium3DTilesDataLayer(options));
             }
             index++;
-            layerConfigString = CitydbUtil.parse_query_string(this.getUrlPara('layer_') + index, window.location.href);
+            layerConfigString = this.getUrlParaValue('layer_' + index, url, CitydbUtil);
         }
         return nLayers;
     };

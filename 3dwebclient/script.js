@@ -44,8 +44,8 @@ var clock = new Cesium.Clock({
 });
 
 // create 3Dcitydb-web-map instance
-var shadows = CitydbUtil.parse_query_string(urlController.getUrlPara('shadows'), window.location.href);
-var terrainShadows = CitydbUtil.parse_query_string(urlController.getUrlPara('terrainShadows'), window.location.href);
+var shadows = urlController.getUrlParaValue('shadows', window.location.href, CitydbUtil);
+var terrainShadows = urlController.getUrlParaValue('terrainShadows', window.location.href, CitydbUtil);
 
 var cesiumViewerOptions = {
     selectedImageryProviderViewModel: Cesium.createDefaultImageryProviderViewModels()[1],
@@ -58,7 +58,7 @@ var cesiumViewerOptions = {
 }
 
 // If neither BingMapsAPI key nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
-var ionToken = CitydbUtil.parse_query_string(urlController.getUrlPara('ionToken'), window.location.href);
+var ionToken = urlController.getUrlParaValue('ionToken', window.location.href, CitydbUtil);
 if (Cesium.defined(ionToken) && ionToken !== "") {
     Cesium.Ion.defaultAccessToken = ionToken;
 }
@@ -141,7 +141,7 @@ function initClient() {
     // adjust cesium navigation help popup for splash window
     splashController.insertSplashInfoHelp();
     // read splash window from url
-    splashController.getSplashWindowFromUrl(urlController, jQuery, CitydbUtil, Cesium);
+    splashController.getSplashWindowFromUrl(window.location.href, urlController, jQuery, CitydbUtil, Cesium);
 
     // init progress indicator gif
     document.getElementById('loadingIndicator').style.display = 'none';
@@ -161,14 +161,14 @@ function initClient() {
     creditDisplay.addDefaultCredit(tumCreditLogo);
 
     // activate debug mode
-    var debugStr = CitydbUtil.parse_query_string(urlController.getUrlPara('debug'), window.location.href);
+    var debugStr = urlController.getUrlParaValue('debug', window.location.href, CitydbUtil);
     if (debugStr == "true") {
         cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
         cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
     }
 
     // set title of the web page
-    var titleStr = CitydbUtil.parse_query_string(urlController.getUrlPara('title'), window.location.href);
+    var titleStr = urlController.getUrlParaValue('title', window.location.href, CitydbUtil);
     if (titleStr) {
         document.title = titleStr;
     }
@@ -197,10 +197,10 @@ function initClient() {
 
     // Zoom to desired camera position and load layers if encoded in the url...	
     zoomToDefaultCameraPosition().then(function (info) {
-        var layers = urlController.getLayersFromUrl(CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium);
+        var layers = urlController.getLayersFromUrl(window.location.href, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium);
         loadLayerGroup(layers);
 
-        var basemapConfigString = CitydbUtil.parse_query_string(urlController.getUrlPara('basemap'), window.location.href);
+        var basemapConfigString = urlController.getUrlParaValue('basemap', window.location.href, CitydbUtil);
         if (basemapConfigString) {
             var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(basemapConfigString))[0]);
             for (key in viewMoModel) {
@@ -209,14 +209,14 @@ function initClient() {
             addWebMapServiceProvider();
         }
         
-        var cesiumWorldTerrainString = CitydbUtil.parse_query_string(urlController.getUrlPara('cesiumWorldTerrain'), window.location.href);
+        var cesiumWorldTerrainString = urlController.getUrlParaValue('cesiumWorldTerrain', window.location.href, CitydbUtil);
         if(cesiumWorldTerrainString === "true") {
             // if the Cesium World Terrain is given in the URL --> activate, else other terrains
             cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
             var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
             baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[1];
         } else {
-            var terrainConfigString = CitydbUtil.parse_query_string(urlController.getUrlPara('terrain'), window.location.href);
+            var terrainConfigString = urlController.getUrlParaValue('terrain', window.location.href, CitydbUtil);
             if (terrainConfigString) {
                 var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(terrainConfigString))[0]);
                 for (key in viewMoModel) {
@@ -228,7 +228,7 @@ function initClient() {
     });
 
     // jump to a timepoint
-    var dayTimeStr = CitydbUtil.parse_query_string(urlController.getUrlPara('dayTime'), window.location.href);
+    var dayTimeStr = urlController.getUrlParaValue('dayTime', window.location.href, CitydbUtil);
     if (dayTimeStr) {
         var julianDate = Cesium.JulianDate.fromIso8601(decodeURIComponent(dayTimeStr));
         var clock = cesiumViewer.cesiumWidget.clock;
@@ -626,12 +626,12 @@ function addEventListeners(layer) {
 
 function zoomToDefaultCameraPosition() {
     var deferred = Cesium.when.defer();
-    var latitudeStr = CitydbUtil.parse_query_string(urlController.getUrlPara('latitude'), window.location.href);
-    var longitudeStr = CitydbUtil.parse_query_string(urlController.getUrlPara('longitude'), window.location.href);
-    var heightStr = CitydbUtil.parse_query_string(urlController.getUrlPara('height'), window.location.href);
-    var headingStr = CitydbUtil.parse_query_string(urlController.getUrlPara('heading'), window.location.href);
-    var pitchStr = CitydbUtil.parse_query_string(urlController.getUrlPara('pitch'), window.location.href);
-    var rollStr = CitydbUtil.parse_query_string(urlController.getUrlPara('roll'), window.location.href);
+    var latitudeStr = urlController.getUrlParaValue('latitude', window.location.href, CitydbUtil);
+    var longitudeStr = urlController.getUrlParaValue('longitude', window.location.href, CitydbUtil);
+    var heightStr = urlController.getUrlParaValue('height', window.location.href, CitydbUtil);
+    var headingStr = urlController.getUrlParaValue('heading', window.location.href, CitydbUtil);
+    var pitchStr = urlController.getUrlParaValue('pitch', window.location.href, CitydbUtil);
+    var rollStr = urlController.getUrlParaValue('roll', window.location.href, CitydbUtil);
 
     if (latitudeStr && longitudeStr && heightStr && headingStr && pitchStr && rollStr) {
         var cameraPostion = {
@@ -653,8 +653,8 @@ function zoomToDefaultCameraPosition() {
 function zoomToDefaultCameraPosition_expired() {
     var deferred = Cesium.when.defer();
     var cesiumCamera = cesiumViewer.scene.camera;
-    var latstr = CitydbUtil.parse_query_string(urlController.getUrlPara('lat'), window.location.href);
-    var lonstr = CitydbUtil.parse_query_string(urlController.getUrlPara('lon'), window.location.href);
+    var latstr = urlController.getUrlParaValue('lat', window.location.href, CitydbUtil);
+    var lonstr = urlController.getUrlParaValue('lon', window.location.href, CitydbUtil);
 
     if (latstr && lonstr) {
         var lat = parseFloat(latstr);
@@ -664,19 +664,19 @@ function zoomToDefaultCameraPosition_expired() {
         var tilt = 49;
         var altitude = 40;
 
-        var rangestr = CitydbUtil.parse_query_string(urlController.getUrlPara('range'), window.location.href);
+        var rangestr = urlController.getUrlParaValue('range', window.location.href, CitydbUtil);
         if (rangestr)
             range = parseFloat(rangestr);
 
-        var headingstr = CitydbUtil.parse_query_string(urlController.getUrlPara('heading'), window.location.href);
+        var headingstr = urlController.getUrlParaValue('heading', window.location.href, CitydbUtil);
         if (headingstr)
             heading = parseFloat(headingstr);
 
-        var tiltstr = CitydbUtil.parse_query_string(urlController.getUrlPara('tilt'), window.location.href);
+        var tiltstr = urlController.getUrlParaValue('tilt', window.location.href, CitydbUtil);
         if (tiltstr)
             tilt = parseFloat(tiltstr);
 
-        var altitudestr = CitydbUtil.parse_query_string(urlController.getUrlPara('altitude'), window.location.href);
+        var altitudestr = urlController.getUrlParaValue('altitude', window.location.href, CitydbUtil);
         if (altitudestr)
             altitude = parseFloat(altitudestr);
 
@@ -1072,7 +1072,7 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var kvp = {};
     var deferred = Cesium.when.defer();
 
-    var tableID = CitydbUtil.parse_query_string(urlController.getUrlPara('docid'), thematicDataUrl);
+    var tableID = urlController.getUrlParaValue('docid', thematicDataUrl, CitydbUtil);
     var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
     var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
     var queryLink = "https://www.googleapis.com/fusiontables/v2/query";
@@ -1194,7 +1194,7 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
 }
 
 // Sign in utilities
-var googleClientId = CitydbUtil.parse_query_string(urlController.getUrlPara('googleClientId'), window.location.href);
+var googleClientId = urlController.getUrlParaValue('googleClientId', window.location.href, CitydbUtil);
 if (googleClientId) {
     var signInController = new SigninController(googleClientId);
 }

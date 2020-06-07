@@ -203,14 +203,14 @@ class SplashController {
         })(jQuery);
     }
 
-    public getSplashWindowFromUrl(urlController: UrlController, jQuery: any, CitydbUtil: any, Cesium: any): void {
+    public getSplashWindowFromUrl(url: string, urlController: UrlController, jQuery: any, CitydbUtil: any, Cesium: any): void {
         let tmp_url = "";
         let tmp_showOnStart = "";
         let default_url = this.getDefaultAddSplashWindowModel().url;
         let default_showOnStart = this.getDefaultAddSplashWindowModel().showOnStart;
 
         let ignoreSplashWindow_cookie = this.getCookie("ignoreSplashWindow");
-        let splashWindowConfigString = CitydbUtil.parse_query_string(urlController.getUrlPara('splashWindow'), window.location.href);
+        let splashWindowConfigString = urlController.getUrlParaValue('splashWindow', url, CitydbUtil);
         if (splashWindowConfigString) {
             let splashWindowConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(splashWindowConfigString))[0]);
             tmp_url = (typeof splashWindowConfig.url === "undefined" || splashWindowConfig.url === "") ? default_url : splashWindowConfig.url;
