@@ -76,6 +76,7 @@ class UrlController {
         addSplashWindowModel: any,
         signInController: any,
         googleClientId: any,
+        splashController: SplashController,
         cesiumViewer: any,
         Cesium: any
     ): string {
@@ -94,12 +95,12 @@ class UrlController {
             this.getUrlPara('title') + '=' + document.title +
             '&' + this.getUrlPara('shadows') + '=' + cesiumViewer.shadows +
             '&' + this.getUrlPara('terrainShadows') + '=' + (isNaN(cesiumViewer.terrainShadows) ? 0 : cesiumViewer.terrainShadows) +
-            '&' + this.getUrlPara('latitude') + '=' + cameraPosition.latitude +
-            '&' + this.getUrlPara('longitude') + '=' + cameraPosition.longitude +
-            '&' + this.getUrlPara('height') + '=' + cameraPosition.height +
-            '&' + this.getUrlPara('heading') + '=' + cameraPosition.heading +
-            '&' + this.getUrlPara('pitch') + '=' + cameraPosition.pitch +
-            '&' + this.getUrlPara('roll') + '=' + cameraPosition.roll +
+            '&' + this.getUrlPara('latitude') + '=' + Math.round(cameraPosition.latitude * 1e6) / 1e6 +
+            '&' + this.getUrlPara('longitude') + '=' + Math.round(cameraPosition.longitude * 1e6) / 1e6 +
+            '&' + this.getUrlPara('height') + '=' + Math.round(cameraPosition.height * 1e3) / 1e3 +
+            '&' + this.getUrlPara('heading') + '=' + Math.round(cameraPosition.heading * 1e2) / 1e2 +
+            '&' + this.getUrlPara('pitch') + '=' + Math.round(cameraPosition.pitch * 1e2) / 1e2 +
+            '&' + this.getUrlPara('roll') + '=' + Math.round(cameraPosition.roll * 1e2) / 1e2 +
             '&' + this.layersToQuery(webMap, Cesium);
         let basemap = this.basemapToQuery(addWmsViewModel, cesiumViewer, Cesium);
         if (basemap != null) {
@@ -111,7 +112,7 @@ class UrlController {
             projectLink = projectLink + '&' + terrain;
         }
 
-        let splashWindow = this.splashWindowToQuery(addSplashWindowModel, Cesium);
+        let splashWindow = this.splashWindowToQuery(addSplashWindowModel, splashController, Cesium);
         if (splashWindow != null) {
             projectLink = projectLink + '&' + splashWindow;
         }
@@ -147,11 +148,11 @@ class UrlController {
     }
 
     private layersToQuery(webMap: any, Cesium: any): string {
-        var layerGroupObject = new Object();
-        var layers = webMap._layers;
-        for (var i = 0; i < layers.length; i++) {
-            var layer = layers[i];
-            var layerConfig = {};
+        let layerGroupObject = new Object();
+        let layers = webMap._layers;
+        for (let i = 0; i < layers.length; i++) {
+            let layer = layers[i];
+            let layerConfig = {};
             layerConfig[this.getUrlPara('url')] = Cesium.defaultValue(layer.url, "");
             layerConfig[this.getUrlPara('name')] = Cesium.defaultValue(layer.name, "");
             layerConfig[this.getUrlPara('layerDataType')] = Cesium.defaultValue(layer.layerDataType, "");
@@ -178,10 +179,10 @@ class UrlController {
     }
 
     private basemapToQuery(addWmsViewModel: any, cesiumViewer: any, Cesium: any): string {
-        var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-        var baseLayerProviderFunc = baseLayerPickerViewModel.selectedImagery.creationCommand();
+        let baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+        let baseLayerProviderFunc = baseLayerPickerViewModel.selectedImagery.creationCommand();
         if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider) {
-            var basemapObject = {};
+            let basemapObject = {};
             basemapObject[this.getUrlPara('basemap')] = Cesium.objectToQuery(addWmsViewModel);
             return Cesium.objectToQuery(basemapObject);
         } else {
@@ -190,13 +191,13 @@ class UrlController {
     }
 
     private terrainToQuery(addTerrainViewModel: any, cesiumViewer: any, Cesium: any): string {
-        var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-        var baseLayerProviderFunc = baseLayerPickerViewModel.selectedTerrain.creationCommand();
+        let baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+        let baseLayerProviderFunc = baseLayerPickerViewModel.selectedTerrain.creationCommand();
         if (baseLayerProviderFunc instanceof Cesium.CesiumTerrainProvider) {
             if (baseLayerPickerViewModel.selectedTerrain.name.indexOf('Cesium World Terrain') !== -1) {
                 return this.getUrlPara('cesiumWorldTerrain') + '=true';
             }
-            var terrainObject = {};
+            let terrainObject = {};
             terrainObject[this.getUrlPara('terrain')] = Cesium.objectToQuery(addTerrainViewModel);
             return Cesium.objectToQuery(terrainObject);
         } else {
@@ -204,22 +205,31 @@ class UrlController {
         }
     }
 
-    private splashWindowToQuery(addSplashWindowModel: any, Cesium: any): string {
+    private splashWindowToQuery(addSplashWindowModel: any, splashController: SplashController, Cesium: any): string {
         if (addSplashWindowModel.url) {
-            var splashObject = {};
-            splashObject[this.getUrlPara('splashWindow')] = Cesium.objectToQuery(addSplashWindowModel);
+            let splashObjectTmp: any = {}
+            let default_obj = splashController.getDefaultAddSplashWindowModel();
+            // only export info that are not the same as default
+            if (addSplashWindowModel.url !== default_obj.url) {
+                splashObjectTmp.url = addSplashWindowModel.url;
+            }
+            if (addSplashWindowModel.showOnStart !== default_obj.showOnStart) {
+                splashObjectTmp.showOnStart = addSplashWindowModel.showOnStart;
+            }
+            let splashObject = {};
+            splashObject[this.getUrlPara('splashWindow')] = Cesium.objectToQuery(splashObjectTmp);
             return Cesium.objectToQuery(splashObject);
         }
         return null;
     }
 
     public getLayersFromUrl(CitydbUtil: any, CitydbKmlLayer: any, Cesium3DTilesDataLayer: any, Cesium: any): any {
-        var index = 0;
-        var nLayers = [];
-        var layerConfigString = CitydbUtil.parse_query_string(this.getUrlPara('layer_') + index, window.location.href);
+        let index = 0;
+        let nLayers = [];
+        let layerConfigString = CitydbUtil.parse_query_string(this.getUrlPara('layer_') + index, window.location.href);
         while (layerConfigString) {
-            var layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);
-            var options = {
+            let layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);
+            let options = {
                 url: layerConfig[this.getUrlPara('url')],
                 name: layerConfig[this.getUrlPara('name')],
                 layerDataType: Cesium.defaultValue(layerConfig[this.getUrlPara('layerDataType')], "COLLADA/KML/glTF"),

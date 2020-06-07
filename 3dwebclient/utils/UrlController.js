@@ -60,7 +60,7 @@ var UrlController = /** @class */ (function () {
         var value = this._urlDictionary[parameter];
         return value ? value : parameter;
     };
-    UrlController.prototype.generateLink = function (webMap, addWmsViewModel, addTerrainViewModel, addSplashWindowModel, signInController, googleClientId, cesiumViewer, Cesium) {
+    UrlController.prototype.generateLink = function (webMap, addWmsViewModel, addTerrainViewModel, addSplashWindowModel, signInController, googleClientId, splashController, cesiumViewer, Cesium) {
         var cameraPosition = this.getCurrentCameraPostion(cesiumViewer, Cesium);
         var projectLink = location.protocol + '//' + location.host + location.pathname + '?';
         var clock = cesiumViewer.cesiumWidget.clock;
@@ -74,12 +74,12 @@ var UrlController = /** @class */ (function () {
             this.getUrlPara('title') + '=' + document.title +
             '&' + this.getUrlPara('shadows') + '=' + cesiumViewer.shadows +
             '&' + this.getUrlPara('terrainShadows') + '=' + (isNaN(cesiumViewer.terrainShadows) ? 0 : cesiumViewer.terrainShadows) +
-            '&' + this.getUrlPara('latitude') + '=' + cameraPosition.latitude +
-            '&' + this.getUrlPara('longitude') + '=' + cameraPosition.longitude +
-            '&' + this.getUrlPara('height') + '=' + cameraPosition.height +
-            '&' + this.getUrlPara('heading') + '=' + cameraPosition.heading +
-            '&' + this.getUrlPara('pitch') + '=' + cameraPosition.pitch +
-            '&' + this.getUrlPara('roll') + '=' + cameraPosition.roll +
+            '&' + this.getUrlPara('latitude') + '=' + Math.round(cameraPosition.latitude * 1e6) / 1e6 +
+            '&' + this.getUrlPara('longitude') + '=' + Math.round(cameraPosition.longitude * 1e6) / 1e6 +
+            '&' + this.getUrlPara('height') + '=' + Math.round(cameraPosition.height * 1e3) / 1e3 +
+            '&' + this.getUrlPara('heading') + '=' + Math.round(cameraPosition.heading * 1e2) / 1e2 +
+            '&' + this.getUrlPara('pitch') + '=' + Math.round(cameraPosition.pitch * 1e2) / 1e2 +
+            '&' + this.getUrlPara('roll') + '=' + Math.round(cameraPosition.roll * 1e2) / 1e2 +
             '&' + this.layersToQuery(webMap, Cesium);
         var basemap = this.basemapToQuery(addWmsViewModel, cesiumViewer, Cesium);
         if (basemap != null) {
@@ -89,7 +89,7 @@ var UrlController = /** @class */ (function () {
         if (terrain != null) {
             projectLink = projectLink + '&' + terrain;
         }
-        var splashWindow = this.splashWindowToQuery(addSplashWindowModel, Cesium);
+        var splashWindow = this.splashWindowToQuery(addSplashWindowModel, splashController, Cesium);
         if (splashWindow != null) {
             projectLink = projectLink + '&' + splashWindow;
         }
@@ -173,10 +173,19 @@ var UrlController = /** @class */ (function () {
             return null;
         }
     };
-    UrlController.prototype.splashWindowToQuery = function (addSplashWindowModel, Cesium) {
+    UrlController.prototype.splashWindowToQuery = function (addSplashWindowModel, splashController, Cesium) {
         if (addSplashWindowModel.url) {
+            var splashObjectTmp = {};
+            var default_obj = splashController.getDefaultAddSplashWindowModel();
+            // only export info that are not the same as default
+            if (addSplashWindowModel.url !== default_obj.url) {
+                splashObjectTmp.url = addSplashWindowModel.url;
+            }
+            if (addSplashWindowModel.showOnStart !== default_obj.showOnStart) {
+                splashObjectTmp.showOnStart = addSplashWindowModel.showOnStart;
+            }
             var splashObject = {};
-            splashObject[this.getUrlPara('splashWindow')] = Cesium.objectToQuery(addSplashWindowModel);
+            splashObject[this.getUrlPara('splashWindow')] = Cesium.objectToQuery(splashObjectTmp);
             return Cesium.objectToQuery(splashObject);
         }
         return null;
