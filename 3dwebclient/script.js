@@ -27,6 +27,9 @@
 
 /**-----------------------------------------Separate Line-------------------------------------------------**/
 
+// URL handler
+var urlController = new UrlController();
+
 /*---------------------------------  set globe variables  ----------------------------------------*/
 // BingMapsAPI Key for Bing Imagery Layers and Geocoder
 // If this is not valid, the Bing Imagery Layers will be removed and the Bing Geocoder will be replaced with OSM Nominatim
@@ -41,8 +44,8 @@ var clock = new Cesium.Clock({
 });
 
 // create 3Dcitydb-web-map instance
-var shadows = CitydbUtil.parse_query_string('shadows', window.location.href);
-var terrainShadows = CitydbUtil.parse_query_string('terrainShadows', window.location.href);
+var shadows = CitydbUtil.parse_query_string(urlController.getUrlPara('shadows'), window.location.href);
+var terrainShadows = CitydbUtil.parse_query_string(urlController.getUrlPara('terrainShadows'), window.location.href);
 
 var cesiumViewerOptions = {
     selectedImageryProviderViewModel: Cesium.createDefaultImageryProviderViewModels()[1],
@@ -55,7 +58,7 @@ var cesiumViewerOptions = {
 }
 
 // If neither BingMapsAPI key nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
-var ionToken = CitydbUtil.parse_query_string('ionToken', window.location.href);
+var ionToken = CitydbUtil.parse_query_string(urlController.getUrlPara('ionToken'), window.location.href);
 if (Cesium.defined(ionToken) && ionToken !== "") {
     Cesium.Ion.defaultAccessToken = ionToken;
 }
@@ -155,14 +158,14 @@ function initClient() {
     creditDisplay.addDefaultCredit(tumCreditLogo);
 
     // activate debug mode
-    var debugStr = CitydbUtil.parse_query_string('debug', window.location.href);
+    var debugStr = CitydbUtil.parse_query_string(urlController.getUrlPara('debug'), window.location.href);
     if (debugStr == "true") {
         cesiumViewer.extend(Cesium.viewerCesiumInspectorMixin);
         cesiumViewer.cesiumInspector.viewModel.dropDownVisible = false;
     }
 
     // set title of the web page
-    var titleStr = CitydbUtil.parse_query_string('title', window.location.href);
+    var titleStr = CitydbUtil.parse_query_string(urlController.getUrlPara('title'), window.location.href);
     if (titleStr) {
         document.title = titleStr;
     }
@@ -191,10 +194,10 @@ function initClient() {
 
     // Zoom to desired camera position and load layers if encoded in the url...	
     zoomToDefaultCameraPosition().then(function (info) {
-        var layers = getLayersFromUrl();
+        var layers = urlController.getLayersFromUrl(CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium);
         loadLayerGroup(layers);
 
-        var basemapConfigString = CitydbUtil.parse_query_string('basemap', window.location.href);
+        var basemapConfigString = CitydbUtil.parse_query_string(urlController.getUrlPara('basemap'), window.location.href);
         if (basemapConfigString) {
             var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(basemapConfigString))[0]);
             for (key in viewMoModel) {
@@ -203,14 +206,14 @@ function initClient() {
             addWebMapServiceProvider();
         }
         
-        var cesiumWorldTerrainString = CitydbUtil.parse_query_string('cesiumWorldTerrain', window.location.href);
+        var cesiumWorldTerrainString = CitydbUtil.parse_query_string(urlController.getUrlPara('cesiumWorldTerrain'), window.location.href);
         if(cesiumWorldTerrainString === "true") {
             // if the Cesium World Terrain is given in the URL --> activate, else other terrains
             cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
             var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
             baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[1];
         } else {
-            var terrainConfigString = CitydbUtil.parse_query_string('terrain', window.location.href);
+            var terrainConfigString = CitydbUtil.parse_query_string(urlController.getUrlPara('terrain'), window.location.href);
             if (terrainConfigString) {
                 var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(terrainConfigString))[0]);
                 for (key in viewMoModel) {
@@ -222,7 +225,7 @@ function initClient() {
     });
 
     // jump to a timepoint
-    var dayTimeStr = CitydbUtil.parse_query_string('dayTime', window.location.href);
+    var dayTimeStr = CitydbUtil.parse_query_string(urlController.getUrlPara('dayTime'), window.location.href);
     if (dayTimeStr) {
         var julianDate = Cesium.JulianDate.fromIso8601(decodeURIComponent(dayTimeStr));
         var clock = cesiumViewer.cesiumWidget.clock;
@@ -383,45 +386,6 @@ function inspectTileStatus() {
             loadingTilesInspector.style.display = 'none';
         }
     }, 200);
-}
-
-function getLayersFromUrl() {
-    var index = 0;
-    var nLayers = new Array();
-    var layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
-    while (layerConfigString) {
-        var layerConfig = Cesium.queryToObject(Object.keys(Cesium.queryToObject(layerConfigString))[0]);
-        var options = {
-            url: layerConfig.url,
-            name: layerConfig.name,
-            layerDataType: Cesium.defaultValue(layerConfig.layerDataType, "COLLADA/KML/glTF"),
-            layerProxy: Cesium.defined(layerConfig.layerProxy) ? layerConfig.layerProxy === "true" : false,
-            layerClampToGround: Cesium.defined(layerConfig.layerProxy) ? layerConfig.layerClampToGround === "true" : true,
-            gltfVersion: Cesium.defaultValue(layerConfig.gltfVersion, "2.0"),
-            thematicDataUrl: Cesium.defaultValue(layerConfig.spreadsheetUrl, ""),
-            thematicDataSource: Cesium.defaultValue(layerConfig.thematicDataSource, "GoogleSheets"),
-            tableType: Cesium.defaultValue(layerConfig.tableType, "Horizontal"),
-            // googleSheetsApiKey: Cesium.defaultValue(layerConfig.googleSheetsApiKey, ""),
-            // googleSheetsRanges: Cesium.defaultValue(layerConfig.googleSheetsRanges, ""),
-            // googleSheetsClientId: Cesium.defaultValue(layerConfig.googleSheetsClientId, ""),
-            cityobjectsJsonUrl: Cesium.defaultValue(layerConfig.cityobjectsJsonUrl, ""),
-            active: (layerConfig.active == "true"),
-            minLodPixels: Cesium.defaultValue(layerConfig.minLodPixels, 140),
-            maxLodPixels: Cesium.defaultValue(layerConfig.maxLodPixels == -1 ? Number.MAX_VALUE : layerConfig.maxLodPixels, Number.MAX_VALUE),
-            maxSizeOfCachedTiles: layerConfig.maxSizeOfCachedTiles,
-            maxCountOfVisibleTiles: layerConfig.maxCountOfVisibleTiles
-        }
-
-        if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(layerConfig.url)) > -1 && options.layerDataType === "COLLADA/KML/glTF") {
-            nLayers.push(new CitydbKmlLayer(options));
-        } else {
-            nLayers.push(new Cesium3DTilesDataLayer(options));
-        }
-
-        index++;
-        layerConfigString = CitydbUtil.parse_query_string('layer_' + index, window.location.href);
-    }
-    return nLayers;
 }
 
 function listHighlightedObjects() {
@@ -659,12 +623,12 @@ function addEventListeners(layer) {
 
 function zoomToDefaultCameraPosition() {
     var deferred = Cesium.when.defer();
-    var latitudeStr = CitydbUtil.parse_query_string('latitude', window.location.href);
-    var longitudeStr = CitydbUtil.parse_query_string('longitude', window.location.href);
-    var heightStr = CitydbUtil.parse_query_string('height', window.location.href);
-    var headingStr = CitydbUtil.parse_query_string('heading', window.location.href);
-    var pitchStr = CitydbUtil.parse_query_string('pitch', window.location.href);
-    var rollStr = CitydbUtil.parse_query_string('roll', window.location.href);
+    var latitudeStr = CitydbUtil.parse_query_string(urlController.getUrlPara('latitude'), window.location.href);
+    var longitudeStr = CitydbUtil.parse_query_string(urlController.getUrlPara('longitude'), window.location.href);
+    var heightStr = CitydbUtil.parse_query_string(urlController.getUrlPara('height'), window.location.href);
+    var headingStr = CitydbUtil.parse_query_string(urlController.getUrlPara('heading'), window.location.href);
+    var pitchStr = CitydbUtil.parse_query_string(urlController.getUrlPara('pitch'), window.location.href);
+    var rollStr = CitydbUtil.parse_query_string(urlController.getUrlPara('roll'), window.location.href);
 
     if (latitudeStr && longitudeStr && heightStr && headingStr && pitchStr && rollStr) {
         var cameraPostion = {
@@ -686,8 +650,8 @@ function zoomToDefaultCameraPosition() {
 function zoomToDefaultCameraPosition_expired() {
     var deferred = Cesium.when.defer();
     var cesiumCamera = cesiumViewer.scene.camera;
-    var latstr = CitydbUtil.parse_query_string('lat', window.location.href);
-    var lonstr = CitydbUtil.parse_query_string('lon', window.location.href);
+    var latstr = CitydbUtil.parse_query_string(urlController.getUrlPara('lat'), window.location.href);
+    var lonstr = CitydbUtil.parse_query_string(urlController.getUrlPara('lon'), window.location.href);
 
     if (latstr && lonstr) {
         var lat = parseFloat(latstr);
@@ -697,19 +661,19 @@ function zoomToDefaultCameraPosition_expired() {
         var tilt = 49;
         var altitude = 40;
 
-        var rangestr = CitydbUtil.parse_query_string('range', window.location.href);
+        var rangestr = CitydbUtil.parse_query_string(urlController.getUrlPara('range'), window.location.href);
         if (rangestr)
             range = parseFloat(rangestr);
 
-        var headingstr = CitydbUtil.parse_query_string('heading', window.location.href);
+        var headingstr = CitydbUtil.parse_query_string(urlController.getUrlPara('heading'), window.location.href);
         if (headingstr)
             heading = parseFloat(headingstr);
 
-        var tiltstr = CitydbUtil.parse_query_string('tilt', window.location.href);
+        var tiltstr = CitydbUtil.parse_query_string(urlController.getUrlPara('tilt'), window.location.href);
         if (tiltstr)
             tilt = parseFloat(tiltstr);
 
-        var altitudestr = CitydbUtil.parse_query_string('altitude', window.location.href);
+        var altitudestr = CitydbUtil.parse_query_string(urlController.getUrlPara('altitude'), window.location.href);
         if (altitudestr)
             altitude = parseFloat(altitudestr);
 
@@ -758,138 +722,17 @@ function flyToCameraPosition(cameraPosition) {
 
 // Creation of a scene link for sharing with other people..
 function showSceneLink() {
-    var sceneLink = generateLink();
+    var sceneLink = urlController.generateLink(
+        webMap,
+        addWmsViewModel,
+        addTerrainViewModel,
+        addSplashWindowModel,
+        signInController,
+        googleClientId,
+        cesiumViewer,
+        Cesium
+    );
     CitydbUtil.showAlertWindow("OK", "Scene Link", '<a href="' + sceneLink + '" style="color:#c0c0c0" target="_blank">' + sceneLink + '</a>');
-}
-
-function generateLink() {
-    var cameraPosition = getCurrentCameraPostion();
-    var projectLink = location.protocol + '//' + location.host + location.pathname + '?';
-
-    var clock = cesiumViewer.cesiumWidget.clock;
-    if (!clock.shouldAnimate) {
-        var currentJulianDate = clock.currentTime;
-        projectLink = projectLink + Cesium.objectToQuery({"dayTime": Cesium.JulianDate.toIso8601(currentJulianDate, 0)}) + '&';
-    }
-
-    projectLink = projectLink +
-            'title=' + document.title +
-            '&shadows=' + cesiumViewer.shadows +
-            '&terrainShadows=' + (isNaN(cesiumViewer.terrainShadows) ? 0 : cesiumViewer.terrainShadows) +
-            '&latitude=' + cameraPosition.latitude +
-            '&longitude=' + cameraPosition.longitude +
-            '&height=' + cameraPosition.height +
-            '&heading=' + cameraPosition.heading +
-            '&pitch=' + cameraPosition.pitch +
-            '&roll=' + cameraPosition.roll +
-            '&' + layersToQuery();
-    var basemap = basemapToQuery();
-    if (basemap != null) {
-        projectLink = projectLink + '&' + basemap;
-    }
-
-    var terrain = terrainToQuery();
-    if (terrain != null) {
-        projectLink = projectLink + '&' + terrain;
-    }
-
-    var splashWindow = splashWindowToQuery();
-    if (splashWindow != null) {
-        projectLink = projectLink + '&' + splashWindow;
-    }
-
-    // only export client ID if user is logged in
-    if ((signInController && signInController.clientID && signInController.isSignIn())) {
-        projectLink = projectLink + '&googleClientId=' + (signInController.clientID ? signInController.clientID : googleClientId);
-    }
-
-    return projectLink;
-}
-
-function getCurrentCameraPostion() {
-    var cesiumCamera = cesiumViewer.scene.camera;
-    var position = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cesiumCamera.position);
-    var latitude = Cesium.Math.toDegrees(position.latitude);
-    var longitude = Cesium.Math.toDegrees(position.longitude);
-    var height = position.height;
-    var heading = Cesium.Math.toDegrees(cesiumCamera.heading);
-    var pitch = Cesium.Math.toDegrees(cesiumCamera.pitch);
-    var roll = Cesium.Math.toDegrees(cesiumCamera.roll);
-    return {
-        latitude: latitude,
-        longitude: longitude,
-        height: height,
-        heading: heading,
-        pitch: pitch,
-        roll: roll
-    }
-}
-
-function layersToQuery() {
-    var layerGroupObject = new Object();
-    var layers = webMap._layers;
-    for (var i = 0; i < layers.length; i++) {
-        var layer = layers[i];
-        var layerConfig = {
-            url: layer.url,
-            name: layer.name,
-            layerDataType: layer.layerDataType,
-            layerProxy: layer.layerProxy,
-            layerClampToGround: layer.layerClampToGround,
-            gltfVersion: layer.gltfVersion,
-            active: layer.active,
-            spreadsheetUrl: layer.thematicDataUrl,
-            thematicDataSource: layer.thematicDataSource,
-            tableType: layer.tableType,
-            // googleSheetsApiKey: layer.googleSheetsApiKey,
-            // googleSheetsRanges: layer.googleSheetsRanges,
-            // googleSheetsClientId: layer.googleSheetsClientId,
-            cityobjectsJsonUrl: layer.cityobjectsJsonUrl,
-            minLodPixels: layer.minLodPixels,
-            maxLodPixels: layer.maxLodPixels == -1 ? Number.MAX_VALUE : layer.maxLodPixels,
-            maxSizeOfCachedTiles: layer.maxSizeOfCachedTiles,
-            maxCountOfVisibleTiles: layer.maxCountOfVisibleTiles,
-        }
-        layerGroupObject["layer_" + i] = Cesium.objectToQuery(layerConfig);
-    }
-
-    return Cesium.objectToQuery(layerGroupObject)
-}
-
-function basemapToQuery() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var baseLayerProviderFunc = baseLayerPickerViewModel.selectedImagery.creationCommand();
-    if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider) {
-        return Cesium.objectToQuery({
-            basemap: Cesium.objectToQuery(addWmsViewModel)
-        });
-    } else {
-        return null;
-    }
-}
-
-function terrainToQuery() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var baseLayerProviderFunc = baseLayerPickerViewModel.selectedTerrain.creationCommand();
-    if (baseLayerProviderFunc instanceof Cesium.CesiumTerrainProvider) {
-        if (baseLayerPickerViewModel.selectedTerrain.name.indexOf("Cesium World Terrain") !== -1) {
-            return "cesiumWorldTerrain=true";
-        }
-        return Cesium.objectToQuery({
-            terrain: Cesium.objectToQuery(addTerrainViewModel)
-        });
-    } else {
-        return null;
-    }
-}
-
-function splashWindowToQuery() {
-    if (addSplashWindowModel.url) {
-        return Cesium.objectToQuery({
-            splashWindow: Cesium.objectToQuery(addSplashWindowModel)
-        });
-    }
-    return null;
 }
 
 // Clear Highlighting effect of all highlighted objects
@@ -902,7 +745,6 @@ function clearhighlight() {
     }
     cesiumViewer.selectedEntity = undefined;
 }
-;
 
 // hide the selected objects
 function hideSelectedObjects() {
@@ -915,7 +757,6 @@ function hideSelectedObjects() {
         }
     }
 }
-;
 
 // show the hidden objects
 function showHiddenObjects() {
@@ -926,7 +767,6 @@ function showHiddenObjects() {
         }
     }
 }
-;
 
 function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
     gmlId = gmlId.trim();
@@ -992,7 +832,6 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
         }
     }
 }
-;
 
 function flyToMapLocation(lat, lon, callBackFunc) {
     var cesiumWidget = webMap._cesiumViewerInstance.cesiumWidget;
@@ -1262,7 +1101,7 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var kvp = {};
     var deferred = Cesium.when.defer();
 
-    var tableID = CitydbUtil.parse_query_string('docid', thematicDataUrl);
+    var tableID = CitydbUtil.parse_query_string(urlController.getUrlPara('docid'), thematicDataUrl);
     var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
     var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
     var queryLink = "https://www.googleapis.com/fusiontables/v2/query";
@@ -1282,7 +1121,6 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     });
     return deferred.promise;
 }
-
 
 function showInExternalMaps() {
     var mapOptionList = document.getElementById('citydb_showinexternalmaps');
@@ -1385,7 +1223,7 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
 }
 
 // Sign in utilities
-var googleClientId = CitydbUtil.parse_query_string('googleClientId', window.location.href);
+var googleClientId = CitydbUtil.parse_query_string(urlController.getUrlPara('googleClientId'), window.location.href);
 if (googleClientId) {
     var signInController = new SigninController(googleClientId);
 }
