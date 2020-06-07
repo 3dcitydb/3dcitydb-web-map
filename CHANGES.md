@@ -3,6 +3,7 @@
 ### 1.8.4 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.4/3dwebclient/index.html)
 
 ##### CHANGES
+* The ``SplashController`` has been refactored to be a separate class for modular use (see [`e7a5a74`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e7a5a7430dcbe333cca8d43daa65a2d6baf91314)).
 * Added a URL controller to export and parse project URLs (see 
 [`ff07d0c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ff07d0ca5ea001758e48d14e6d31380b53450295) and 
 [`f076322`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f076322cc37aad8d831fb8e4bfb96a57f8972446)):
