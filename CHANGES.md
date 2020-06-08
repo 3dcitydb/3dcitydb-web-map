@@ -2,6 +2,25 @@
 
 ### 1.8.4 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.4/3dwebclient/index.html)
 
+##### NEW
+* Added own parser for thematic `ExtendedData` 
+(see [`1e78886`](https://github.com/3dcitydb/3dcitydb-web-map/commit/1e788861d760da0f428c0d3e3259aece31510655))
+besides simple `Data` in KML covered in `v1.8.3`:
+  + An example of a KML document with thematic `ExtendedData`:
+  ```xml
+  ...
+  <Placemark>
+    ...
+    <ExtendedData>
+      <SchemaData schemaUrl="#some_schema">
+          <SimpleData name="A">Text</SimpleData>
+          <SimpleData name="B">Text</SimpleData>
+      </SchemaData>
+    </ExtendedData>
+  </Placemark>  
+  ```
+  + Note that the parser will not check the structural validity of the used `ExtendedData`.
+  This should be ensured by the provider.
 ##### CHANGES
 * The ``SplashController`` has been refactored to be a separate class for modular use (see [`e7a5a74`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e7a5a7430dcbe333cca8d43daa65a2d6baf91314)).
 * Added a URL controller to export and parse project URLs (see 
