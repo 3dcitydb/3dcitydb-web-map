@@ -474,7 +474,6 @@ function saveLayerSettings() {
         var layerOption = nodes[i];
         if (layerOption.id == activeLayer.id) {
             layerOption.childNodes[2].innerHTML = activeLayer.name;
-            thematicDataSourceAndTableTypeDropdownOnchange();
         }
     }
 
@@ -511,6 +510,8 @@ function loadLayerGroup(_layers) {
         var promise = webMap.addLayer(_layers[index]);
         Cesium.when(promise, function (addedLayer) {
             console.log(addedLayer);
+            var options = getDataSourceControllerOptions(addedLayer);
+            addedLayer.dataSourceController = new DataSourceController(addedLayer.thematicDataSource, signInController, options);
             addEventListeners(addedLayer);
             addLayerToList(addedLayer);
             if (index < (_layers.length - 1)) {
@@ -579,7 +580,6 @@ function addLayerToList(layer) {
 
     var layerlistpanel = document.getElementById("citydb_layerlistpanel")
     layerlistpanel.appendChild(layerOption);
-    thematicDataSourceAndTableTypeDropdownOnchange();
 }
 
 function addEventListeners(layer) {
@@ -1174,16 +1174,24 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
     //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
     // }
 
+    var options = getDataSourceControllerOptions(webMap._activeLayer);
+    // Mashup Data Source Service
+    if (webMap && webMap._activeLayer) {
+        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
+    }
+}
+
+function getDataSourceControllerOptions(layer) {
     var dataSourceUri = addLayerViewModel.thematicDataUrl === "" ? addLayerViewModel.url : addLayerViewModel.thematicDataUrl;
     var options = {
         // name: "",
         // type: "",
         // provider: "",
         uri: dataSourceUri,
-        tableType: selectedTableType,
+        tableType: addLayerViewModel.tableType,
         thirdPartyHandler: {
             type: "Cesium",
-            handler: webMap._activeLayer ? webMap._activeLayer._citydbKmlDataSource : undefined
+            handler: layer ? layer._citydbKmlDataSource : undefined
         },
         // ranges: addLayerViewModel.googleSheetsRanges,
         // apiKey: addLayerViewModel.googleSheetsApiKey,
@@ -1191,10 +1199,7 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         clientId: googleClientId ? googleClientId : "",
         proxyPrefix: addLayerViewModel.layerProxy ? CitydbUtil.getProxyPrefix(dataSourceUri) : ""
     };
-    // Mashup Data Source Service
-    if (webMap && webMap._activeLayer) {
-        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
-    }
+    return options;
 }
 
 // Sign in utilities
