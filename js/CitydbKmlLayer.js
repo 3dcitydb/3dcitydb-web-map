@@ -453,7 +453,7 @@
         }
     }
 
-    function checkProxyUrl(obj, url) {
+    CitydbKmlLayer.prototype.checkProxyUrl = function(obj, url) {
         if (obj._layerProxy === true || obj._layerProxy === "true") {
 
             var domain = (new URL(window.location.href )).hostname;
