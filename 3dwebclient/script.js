@@ -1172,12 +1172,18 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
     //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
     // }
 
+    // check proxy for KML
+    var proxyUrl = addLayerViewModel.url;
+    if (webMap._activeLayer instanceof CitydbKmlLayer && addLayerViewModel.layerProxy) {
+        proxyUrl = webMap._activeLayer.checkProxyUrl(webMap._activeLayer, addLayerViewModel.url);
+    }
+
     var options = {
         // name: "",
         // type: "",
         // provider: "",
         uri: addLayerViewModel.thematicDataUrl,
-        layerUrl: addLayerViewModel.url,
+        layerUrl: proxyUrl,
         tableType: selectedTableType,
         thirdPartyHandler: {
             type: "Cesium",
