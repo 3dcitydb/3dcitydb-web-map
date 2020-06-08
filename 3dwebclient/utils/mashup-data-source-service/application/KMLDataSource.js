@@ -14,9 +14,14 @@ var __extends = (this && this.__extends) || (function () {
 var KMLDataSource = /** @class */ (function (_super) {
     __extends(KMLDataSource, _super);
     function KMLDataSource(signInController, options) {
-        return _super.call(this, signInController, options) || this;
+        var _this = _super.call(this, signInController, options) || this;
+        _this._useOwnKmlParser = false;
+        return _this;
     }
     KMLDataSource.prototype.responseToKvp = function (response) {
+        if (this._useOwnKmlParser) {
+            return this.responseOwnToKvp(response);
+        }
         if (this._thirdPartyHandler) {
             switch (this._thirdPartyHandler.type) {
                 case ThirdPartyHandler.Cesium: {
@@ -33,7 +38,7 @@ var KMLDataSource = /** @class */ (function (_super) {
         }
     };
     KMLDataSource.prototype.responseCesiumToKvp = function (response) {
-        // response is already in JSON
+        // response is a list of JSON elements
         // only support Data https://cesium.com/docs/cesiumjs-ref-doc/KmlFeatureData.html
         var result = new Map();
         /*  <Data name="">
@@ -53,8 +58,22 @@ var KMLDataSource = /** @class */ (function (_super) {
         return result;
     };
     KMLDataSource.prototype.responseOwnToKvp = function (response) {
-        // TODO
-        return null;
+        // response is a list of XML DOM element
+        var result = new Map();
+        /* read extended data, only works for the following structure
+        <ExtendedData>
+            <SchemaData schemaUrl="#some_schema">
+                <SimpleData name="A">Text</SimpleData>
+                <SimpleData name="B">Text</SimpleData>
+            </SchemaData>
+        </ExtendedData>
+        TODO more general implementation?
+         */
+        for (var i = 0; i < response.length; i++) {
+            var simpleData = response[i];
+            result[simpleData.getAttribute('name')] = simpleData.textContent;
+        }
+        return result;
     };
     KMLDataSource.prototype.countFromResult = function (res) {
         return res.getSize();
@@ -88,7 +107,15 @@ var KMLDataSource = /** @class */ (function (_super) {
                     var entities = this._thirdPartyHandler.handler.entities;
                     var entity = entities.getById(id);
                     // entity is Cesium.KMLFeatureData
-                    callback(entity.kml.extendedData);
+                    var extendedData = entity.kml.extendedData;
+                    if (typeof extendedData === "undefined"
+                        || (Object.keys(extendedData).length === 0 && extendedData.constructor === Object)) {
+                        // empty response -> use custom implementation
+                        this.queryUsingIdCustom(id, callback);
+                    }
+                    else {
+                        callback(extendedData);
+                    }
                     break;
                 }
                 default: {
@@ -100,8 +127,27 @@ var KMLDataSource = /** @class */ (function (_super) {
         }
         else {
             // using own implementation
-            // TODO
+            this.queryUsingIdCustom(id, callback);
         }
+    };
+    KMLDataSource.prototype.queryUsingIdCustom = function (id, callback, limit) {
+        this._useOwnKmlParser = true;
+        // read KML file
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var xmlParser = new DOMParser();
+                var xmlDoc = xmlParser.parseFromString(xhttp.responseText, "text/xml");
+                var placemark = xmlDoc.getElementById(id);
+                var extendedData = placemark.getElementsByTagName('ExtendedData')[0];
+                var schemaData = extendedData.getElementsByTagName('SchemaData')[0];
+                var simpleDataList = schemaData.getElementsByTagName('SimpleData');
+                // return XML DOM element
+                callback(simpleDataList);
+            }
+        };
+        xhttp.open("GET", this._layerUrl, true);
+        xhttp.send();
     };
     KMLDataSource.prototype.queryUsingSql = function (sql, callback, limit) {
         // TODO
@@ -123,5 +169,15 @@ var KMLDataSource = /** @class */ (function (_super) {
         // TODO
         return null;
     };
+    Object.defineProperty(KMLDataSource.prototype, "useOwnKmlParser", {
+        get: function () {
+            return this._useOwnKmlParser;
+        },
+        set: function (value) {
+            this._useOwnKmlParser = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     return KMLDataSource;
 }(XMLDataSource));

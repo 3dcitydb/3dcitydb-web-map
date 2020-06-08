@@ -1177,6 +1177,7 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         // type: "",
         // provider: "",
         uri: addLayerViewModel.thematicDataUrl,
+        layerUrl: addLayerViewModel.url,
         tableType: selectedTableType,
         thirdPartyHandler: {
             type: "Cesium",
