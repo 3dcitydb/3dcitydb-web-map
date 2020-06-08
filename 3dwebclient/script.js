@@ -474,6 +474,7 @@ function saveLayerSettings() {
         var layerOption = nodes[i];
         if (layerOption.id == activeLayer.id) {
             layerOption.childNodes[2].innerHTML = activeLayer.name;
+            thematicDataSourceAndTableTypeDropdownOnchange();
         }
     }
 
@@ -578,6 +579,7 @@ function addLayerToList(layer) {
 
     var layerlistpanel = document.getElementById("citydb_layerlistpanel")
     layerlistpanel.appendChild(layerOption);
+    thematicDataSourceAndTableTypeDropdownOnchange();
 }
 
 function addEventListeners(layer) {
