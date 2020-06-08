@@ -453,13 +453,13 @@
         }
     }
 
-    CitydbKmlLayer.prototype.checkProxyUrl = function(obj, url) {
+    CitydbKmlLayer.prototype.checkProxyUrl = function (obj, url) {
         var proxyPrefix = "";
         if (obj._layerProxy === true || obj._layerProxy === "true") {
             proxyPrefix = CitydbUtil.getProxyPrefix(url);
         }
 
-        return proxyPrefix + url;
+        return (url.indexOf(proxyPrefix) >= 0 ? "" : proxyPrefix) + url;
     }
 
     /**
