@@ -8,9 +8,9 @@ class UrlController {
             "shadows": "s",
             "terrainShadows": "ts",
             "latitude": "la",
-            "lat" : "la_",
+            "lat": "la_",
             "longitude": "lo",
-            "lon" : "lo_",
+            "lon": "lo_",
             "height": "h",
             "heading": "hd",
             "pitch": "p",
@@ -296,7 +296,11 @@ class UrlController {
 
             if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1
                 && options.layerDataType === "COLLADA/KML/glTF") {
-                nLayers.push(new CitydbKmlLayer(options));
+                let newLayer = new CitydbKmlLayer(options);
+                if (newLayer.layerProxy) {
+                    newLayer.url = newLayer.checkProxyUrl(newLayer, newLayer.url);
+                }
+                nLayers.push(newLayer);
             } else {
                 nLayers.push(new Cesium3DTilesDataLayer(options));
             }
