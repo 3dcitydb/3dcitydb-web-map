@@ -3,10 +3,10 @@
 ### 1.8.4 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.4/3dwebclient/index.html)
 
 ##### NEW
-* Added own parser for thematic `ExtendedData` 
+* Added own parser for thematic `SchemaData` 
 (see [`1e78886`](https://github.com/3dcitydb/3dcitydb-web-map/commit/1e788861d760da0f428c0d3e3259aece31510655))
 besides simple `Data` in KML covered in `v1.8.3`:
-  + An example of a KML document with thematic `ExtendedData`:
+  + An example of a KML document with thematic `SchemaData`:
   ```xml
   ...
   <Placemark>
@@ -19,7 +19,7 @@ besides simple `Data` in KML covered in `v1.8.3`:
     </ExtendedData>
   </Placemark>  
   ```
-  + Note that the parser will not check the structural validity of the used `ExtendedData`.
+  + Note that the parser will not check the structural validity of the used `SchemaData`.
   This should be ensured by the provider.
 ##### CHANGES
 * The ``SplashController`` has been refactored to be a separate class for modular use (see [`e7a5a74`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e7a5a7430dcbe333cca8d43daa65a2d6baf91314)).
