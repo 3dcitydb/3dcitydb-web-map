@@ -8,8 +8,7 @@ var DataSource = /** @class */ (function () {
         this._name = !options.name ? "Data Source" : options.name;
         this._provider = !options.provider ? "Data Provider" : options.provider;
         this._type = !options.type ? "Data Type" : options.type;
-        this._layerUrl = !options.layerUrl ? "" : options.layerUrl;
-        this._uri = !options.uri ? options.layerUrl : options.uri;
+        this._uri = !options.uri ? "" : options.uri;
         this._capabilities = !options.capabilities ? undefined : options.capabilities;
         this._tableType = !options.tableType ? TableTypes.Horizontal : options.tableType;
         this._thirdPartyHandler = !options.thirdPartyHandler ? undefined : options.thirdPartyHandler;
@@ -41,16 +40,6 @@ var DataSource = /** @class */ (function () {
         },
         set: function (value) {
             this._type = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(DataSource.prototype, "layerUrl", {
-        get: function () {
-            return this._layerUrl;
-        },
-        set: function (value) {
-            this._layerUrl = value;
         },
         enumerable: true,
         configurable: true

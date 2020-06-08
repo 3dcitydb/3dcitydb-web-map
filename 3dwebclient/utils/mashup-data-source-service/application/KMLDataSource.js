@@ -146,7 +146,7 @@ var KMLDataSource = /** @class */ (function (_super) {
                 callback(simpleDataList);
             }
         };
-        xhttp.open("GET", this._layerUrl, true);
+        xhttp.open("GET", this._uri, true);
         xhttp.send();
     };
     KMLDataSource.prototype.queryUsingSql = function (sql, callback, limit) {

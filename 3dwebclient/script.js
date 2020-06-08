@@ -1172,6 +1172,17 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
     //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
     // }
 
+    var proxyThematicDataUrl = "";
+    if (webMap._activeLayer instanceof CitydbKmlLayer) {
+        // set themati data URL to layer URL if empty
+        if (typeof addLayerViewModel.thematicDataUrl === "undefined" || addLayerViewModel.thematicDataUrl === "") {
+            addLayerViewModel.thematicDataUrl = addLayerViewModel.url;
+        }
+        // add proxy prefix if proxy is set
+        if (addLayerViewModel.layerProxy) {
+            addLayerViewModel.thematicDataUrl = webMap._activeLayer.checkProxyUrl(webMap._activeLayer, addLayerViewModel.thematicDataUrl);
+        }
+    }
     var options = {
         // name: "",
         // type: "",
