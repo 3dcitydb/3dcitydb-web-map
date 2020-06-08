@@ -368,7 +368,7 @@
 
     function loadMasterJSON(that, isFirstLoad) {
         var deferred = Cesium.when.defer();
-        var jsonUrl = checkProxyUrl(that, that._url);
+        var jsonUrl = this.checkProxyUrl(that, that._url);
         new Cesium.Resource({url: jsonUrl}).fetch({responseType: 'json'}).then(function (json) {
             that._jsonLayerInfo = json;
             that._layerType = json.displayform;
@@ -504,7 +504,7 @@
                 canvas: cesiumViewer.scene.canvas
             });
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
@@ -516,7 +516,7 @@
         } else if (this._urlSuffix == 'czml') {
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
@@ -898,7 +898,7 @@
                 canvas: this._cesiumViewer.scene.canvas
             });
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 that._cesiumViewer.dataSources.add(dataSource);
                 deferred.resolve(that);
@@ -908,7 +908,7 @@
         } else if (this._urlSuffix == 'czml') {
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 cesiumViewer.dataSources.add(dataSource);
                 deferred.resolve(that);
