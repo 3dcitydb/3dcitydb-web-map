@@ -146,7 +146,8 @@ var KMLDataSource = /** @class */ (function (_super) {
                 callback(simpleDataList);
             }
         };
-        xhttp.open("GET", this._uri, true);
+        // TODO enable proxy for other Data Sources?
+        xhttp.open("GET", this._proxyPrefix + this._uri, true);
         xhttp.send();
     };
     KMLDataSource.prototype.queryUsingSql = function (sql, callback, limit) {

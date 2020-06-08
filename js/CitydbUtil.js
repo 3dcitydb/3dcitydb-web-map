@@ -185,6 +185,26 @@ var CitydbUtil = {
         var showErrorPaneElement = document.getElementsByClassName('cesium-widget-errorPanel-content')[0];
         showErrorPaneElement.style.width = '400px';
         mobileController.setDialogSize();
+    },
+
+    getProxyPrefix: function (url) {
+        var domain = (new URL(window.location.href)).hostname;
+        var validDomain =
+            domain === "www.3dcitydb.org"
+            || domain === "www.3dcitydb.net"
+            || domain === "www.3dcitydb.de"
+            || domain === "3dcitydb.org"
+            || domain === "3dcitydb.net"
+            || domain === "3dcitydb.de";
+
+        if (!validDomain) {
+            console.warn("Proxy must be enabled by this domain " + domain + "!");
+            return "";
+        }
+
+        var ssl = url.substring(0, 5) === "https";
+        var result = (ssl ? "https" : "http") + "://" + domain + "/proxy/?";
+        return result;
     }
 };
 

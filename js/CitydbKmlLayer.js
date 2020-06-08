@@ -454,30 +454,12 @@
     }
 
     CitydbKmlLayer.prototype.checkProxyUrl = function(obj, url) {
+        var proxyPrefix = "";
         if (obj._layerProxy === true || obj._layerProxy === "true") {
-
-            var domain = (new URL(window.location.href )).hostname;
-            var validDomain =
-                domain === "www.3dcitydb.org"
-                || domain === "www.3dcitydb.net"
-                || domain === "www.3dcitydb.de"
-                || domain === "3dcitydb.org"
-                || domain === "3dcitydb.net"
-                || domain === "3dcitydb.de";
-
-            if (!validDomain) {
-                console.warn("Proxy must be enabled by this domain " + domain + "!");
-                return url;
-            }
-
-            var ssl = url.substring(0, 5) === "https";
-
-            var result = (ssl ? "https" : "http") + "://" + domain + "/proxy/?" + url;
-
-            return result;
+            proxyPrefix = CitydbUtil.getProxyPrefix(url);
         }
 
-        return url;
+        return proxyPrefix + url;
     }
 
     /**

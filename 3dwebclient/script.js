@@ -1172,11 +1172,12 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
     //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
     // }
 
+    var dataSourceUri = addLayerViewModel.thematicDataUrl === "" ? addLayerViewModel.url : addLayerViewModel.thematicDataUrl;
     var options = {
         // name: "",
         // type: "",
         // provider: "",
-        uri: addLayerViewModel.thematicDataUrl === "" ? addLayerViewModel.url : addLayerViewModel.thematicDataUrl,
+        uri: dataSourceUri,
         tableType: selectedTableType,
         thirdPartyHandler: {
             type: "Cesium",
@@ -1185,7 +1186,8 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         // ranges: addLayerViewModel.googleSheetsRanges,
         // apiKey: addLayerViewModel.googleSheetsApiKey,
         // clientId: addLayerViewModel.googleSheetsClientId
-        clientId: googleClientId ? googleClientId : ""
+        clientId: googleClientId ? googleClientId : "",
+        proxyPrefix: addLayerViewModel.layerProxy ? CitydbUtil.getProxyPrefix(dataSourceUri) : ""
     };
     // Mashup Data Source Service
     if (webMap && webMap._activeLayer) {

@@ -13,6 +13,7 @@ var DataSource = /** @class */ (function () {
         this._tableType = !options.tableType ? TableTypes.Horizontal : options.tableType;
         this._thirdPartyHandler = !options.thirdPartyHandler ? undefined : options.thirdPartyHandler;
         this._signInController = signInController;
+        this._proxyPrefix = !options.proxyPrefix ? "" : options.proxyPrefix;
     }
     Object.defineProperty(DataSource.prototype, "name", {
         get: function () {
@@ -100,6 +101,16 @@ var DataSource = /** @class */ (function () {
         },
         set: function (value) {
             this._signInController = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DataSource.prototype, "proxyPrefix", {
+        get: function () {
+            return this._proxyPrefix;
+        },
+        set: function (value) {
+            this._proxyPrefix = value;
         },
         enumerable: true,
         configurable: true
