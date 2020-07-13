@@ -21,6 +21,10 @@ besides simple `Data` in KML covered in `v1.8.3`:
   ```
   + Note that the parser will not check the structural validity of the used `SchemaData`.
   This should be ensured by the provider.
+  
+* URLs in the thematic info table (when an object has been clicked) 
+are now clickable, see[`dab83ee`](https://github.com/3dcitydb/3dcitydb-web-map/commit/dab83ee7202da8fef6c97737034e8734e3aff491).
+ 
 ##### CHANGES
 * The ``SplashController`` has been refactored to be a separate class for modular use (see [`e7a5a74`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e7a5a7430dcbe333cca8d43daa65a2d6baf91314)).
 * Added a URL controller to export and parse project URLs (see 
