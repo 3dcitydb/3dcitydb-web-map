@@ -1002,6 +1002,17 @@ function toggleTerrainShadows() {
     }
 }
 
+// source https://stackoverflow.com/a/5717133
+function isValidUrl(str) {
+    var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+    return !!pattern.test(str);
+}
+
 function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
     var thematicDataUrl = citydbLayer.thematicDataUrl;
     cesiumEntity.description = "Loading feature information...";
@@ -1013,7 +1024,12 @@ function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
             console.log(kvp);
             var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
             for (var key in kvp) {
-                html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
+                var iValue = kvp[key];
+                // check if this value is a valid URL
+                if (isValidUrl(iValue)) {
+                    iValue = '<a href="' + iValue + '" target="_blank">Click here';
+                }
+                html += '<tr><td>' + key + '</td><td>' + iValue + '</td></tr>';
             }
             html += '</tbody></table>';
 
