@@ -1027,7 +1027,7 @@ function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
                 var iValue = kvp[key];
                 // check if this value is a valid URL
                 if (isValidUrl(iValue)) {
-                    iValue = '<a href="' + iValue + '" target="_blank">Click here';
+                    iValue = '<a href="' + iValue + '" target="_blank">' + iValue + '</a>';
                 }
                 html += '<tr><td>' + key + '</td><td>' + iValue + '</td></tr>';
             }
