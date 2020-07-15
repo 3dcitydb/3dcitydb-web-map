@@ -368,7 +368,7 @@
 
     function loadMasterJSON(that, isFirstLoad) {
         var deferred = Cesium.when.defer();
-        var jsonUrl = this.checkProxyUrl(that, that._url);
+        var jsonUrl = that.checkProxyUrl(that, that._url);
         new Cesium.Resource({url: jsonUrl}).fetch({responseType: 'json'}).then(function (json) {
             that._jsonLayerInfo = json;
             that._layerType = json.displayform;
