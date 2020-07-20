@@ -164,6 +164,7 @@ var UrlController = /** @class */ (function () {
             layerConfig[this.getUrlParaForward('gltfVersion')] = Cesium.defaultValue(layer.gltfVersion, "");
             layerConfig[this.getUrlParaForward('active')] = Cesium.defaultValue(layer.active, "");
             layerConfig[this.getUrlParaForward('spreadsheetUrl')] = Cesium.defaultValue(layer.spreadsheetUrl, "");
+            layerConfig[this.getUrlParaForward('thematicDataUrl')] = Cesium.defaultValue(layer.thematicDataUrl, "");
             layerConfig[this.getUrlParaForward('thematicDataSource')] = Cesium.defaultValue(layer.thematicDataSource, "");
             layerConfig[this.getUrlParaForward('tableType')] = Cesium.defaultValue(layer.tableType, "");
             // layerConfig[this.getUrlParaForward('googleSheetsApiKey')] = Cesium.defaultValue(layer.googleSheetsApiKey, "");
