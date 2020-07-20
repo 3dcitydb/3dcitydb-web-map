@@ -25,7 +25,6 @@ class UrlController {
             "layerClampToGround": "lc",
             "gltfVersion": "gv",
             "active": "a",
-            "spreadsheetUrl": "tu",
             "thematicDataUrl": "tdu",
             "thematicDataSource": "ds",
             "tableType": "tt",
@@ -194,7 +193,6 @@ class UrlController {
             layerConfig[this.getUrlParaForward('layerClampToGround')] = Cesium.defaultValue(layer.layerClampToGround, "");
             layerConfig[this.getUrlParaForward('gltfVersion')] = Cesium.defaultValue(layer.gltfVersion, "");
             layerConfig[this.getUrlParaForward('active')] = Cesium.defaultValue(layer.active, "");
-            layerConfig[this.getUrlParaForward('spreadsheetUrl')] = Cesium.defaultValue(layer.spreadsheetUrl, "");
             layerConfig[this.getUrlParaForward('thematicDataUrl')] = Cesium.defaultValue(layer.thematicDataUrl, "");
             layerConfig[this.getUrlParaForward('thematicDataSource')] = Cesium.defaultValue(layer.thematicDataSource, "");
             layerConfig[this.getUrlParaForward('tableType')] = Cesium.defaultValue(layer.tableType, "");
@@ -282,7 +280,7 @@ class UrlController {
                 layerProxy: this.getValueFromObject('layerProxy', layerConfig, false, Cesium) === "true",
                 layerClampToGround: this.getValueFromObject('layerClampToGround', layerConfig, true, Cesium) === "true",
                 gltfVersion: this.getValueFromObject('gltfVersion', layerConfig, '2.0', Cesium),
-                thematicDataUrl: this.getValueFromObject('spreadsheetUrl', layerConfig, '', Cesium),
+                thematicDataUrl: this.getValueFromObject('thematicDataUrl', layerConfig, '', Cesium),
                 thematicDataSource: this.getValueFromObject('thematicDataSource', layerConfig, 'GoogleSheets', Cesium),
                 tableType: this.getValueFromObject('tableType', layerConfig, 'Horizontal', Cesium),
                 // googleSheetsApiKey: this.getValueFromObject('googleSheetsApiKey', layerConfig, '', Cesium),
