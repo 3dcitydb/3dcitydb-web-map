@@ -280,7 +280,9 @@ class UrlController {
                 layerProxy: this.getValueFromObject('layerProxy', layerConfig, false, Cesium) === "true",
                 layerClampToGround: this.getValueFromObject('layerClampToGround', layerConfig, true, Cesium) === "true",
                 gltfVersion: this.getValueFromObject('gltfVersion', layerConfig, '2.0', Cesium),
-                thematicDataUrl: this.getValueFromObject('thematicDataUrl', layerConfig, '', Cesium),
+                thematicDataUrl: layerConfig['spreadsheetUrl']
+                    ? this.getValueFromObject('spreadsheetUrl', layerConfig, '', Cesium)
+                    : this.getValueFromObject('thematicDataUrl', layerConfig, '', Cesium),
                 thematicDataSource: this.getValueFromObject('thematicDataSource', layerConfig, 'GoogleSheets', Cesium),
                 tableType: this.getValueFromObject('tableType', layerConfig, 'Horizontal', Cesium),
                 // googleSheetsApiKey: this.getValueFromObject('googleSheetsApiKey', layerConfig, '', Cesium),
