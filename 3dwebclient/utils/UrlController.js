@@ -23,6 +23,7 @@ var UrlController = /** @class */ (function () {
             "gltfVersion": "gv",
             "active": "a",
             "spreadsheetUrl": "tu",
+            "thematicDataUrl": "tdu",
             "thematicDataSource": "ds",
             "tableType": "tt",
             // "googleSheetsApiKey": "gk",
