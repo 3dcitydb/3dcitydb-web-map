@@ -260,6 +260,8 @@ If no corresponding parameters exist or are found in the URL, the camera shall f
 add your own token as a string paramter in the client's URL, such as
 `&bingToken=<your_bing_token>` or `&ionToken=<your_ion_token`.
 Note that the given token(s) must be valid.
+While Cesium's ion features can be accessed using the parameter ``ionToken``,
+Bing features require both the ``ionToken`` and ``bingToken``. 
 * If a valid ion token is available,
 you can force the client to use the Cesium World Terrain on loading
 using the string paramater `&cesiumWorldTerrain=<true|false>`
