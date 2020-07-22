@@ -69,11 +69,11 @@ var PostgreSQL = /** @class */ (function (_super) {
         // TODO
         return null;
     };
-    PostgreSQL.prototype.queryUsingId = function (id, callback, limit) {
+    PostgreSQL.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
         // TODO use column number instead of column name (such as gmlid here)
         this.queryUsingSql("?" + this.idColName + "=eq." + id, callback, !limit ? Number.MAX_VALUE : limit);
     };
-    PostgreSQL.prototype.queryUsingSql = function (sql, callback, limit) {
+    PostgreSQL.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
         // TODO handle limit
         var baseUrl = this._uri;
         var xmlHttp = new XMLHttpRequest();

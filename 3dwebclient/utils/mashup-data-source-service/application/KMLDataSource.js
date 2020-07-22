@@ -98,7 +98,7 @@ var KMLDataSource = /** @class */ (function (_super) {
         // TODO
         return null;
     };
-    KMLDataSource.prototype.queryUsingId = function (id, callback, limit) {
+    KMLDataSource.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
         if (this._thirdPartyHandler) {
             // prioritize the implementation of the provided 3rd-party handler
             switch (this._thirdPartyHandler.type) {
@@ -111,7 +111,7 @@ var KMLDataSource = /** @class */ (function (_super) {
                     if (typeof extendedData === "undefined"
                         || (Object.keys(extendedData).length === 0 && extendedData.constructor === Object)) {
                         // empty response -> use custom implementation
-                        this.queryUsingIdCustom(id, callback);
+                        this.queryUsingIdCustom(id, callback, limit, clickedObject);
                     }
                     else {
                         callback(extendedData);
@@ -130,7 +130,7 @@ var KMLDataSource = /** @class */ (function (_super) {
             this.queryUsingIdCustom(id, callback);
         }
     };
-    KMLDataSource.prototype.queryUsingIdCustom = function (id, callback, limit) {
+    KMLDataSource.prototype.queryUsingIdCustom = function (id, callback, limit, clickedObject) {
         this._useOwnKmlParser = true;
         // read KML file
         var xhttp = new XMLHttpRequest();
@@ -139,6 +139,20 @@ var KMLDataSource = /** @class */ (function (_super) {
                 var xmlParser = new DOMParser();
                 var xmlDoc = xmlParser.parseFromString(xhttp.responseText, "text/xml");
                 var placemark = xmlDoc.getElementById(id);
+                if (placemark == null) {
+                    var placemarkNameSearch = clickedObject._name;
+                    // the placemarks in the KML file probably do not have IDs
+                    // search for its name values instead
+                    var placemarks = xmlDoc.getElementsByTagName("Placemark");
+                    for (var i = 0; i < placemarks.length; i++) {
+                        var iPlacemark = placemarks[i];
+                        var placemarkName = iPlacemark.getElementsByTagName("name")[0];
+                        if (placemarkName != null && placemarkName.textContent === placemarkNameSearch) {
+                            placemark = iPlacemark;
+                            break;
+                        }
+                    }
+                }
                 var extendedData = placemark.getElementsByTagName('ExtendedData')[0];
                 var schemaData = extendedData.getElementsByTagName('SchemaData')[0];
                 var simpleDataList = schemaData.getElementsByTagName('SimpleData');
@@ -150,7 +164,7 @@ var KMLDataSource = /** @class */ (function (_super) {
         xhttp.open("GET", (this._uri.indexOf(this._proxyPrefix) >= 0 ? "" : this._proxyPrefix) + this._uri, true);
         xhttp.send();
     };
-    KMLDataSource.prototype.queryUsingSql = function (sql, callback, limit) {
+    KMLDataSource.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
         // TODO
         return;
     };

@@ -103,10 +103,10 @@ var GoogleSheets = /** @class */ (function (_super) {
         // TODO
         return null;
     };
-    GoogleSheets.prototype.queryUsingId = function (id, callback, limit) {
-        this.queryUsingSql("SELECT * WHERE A='" + id + "'", callback, !limit ? Number.MAX_VALUE : limit);
+    GoogleSheets.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
+        this.queryUsingSql("SELECT * WHERE A='" + id + "'", callback, !limit ? Number.MAX_VALUE : limit, clickedObject);
     };
-    GoogleSheets.prototype.queryUsingSql = function (sql, callback, limit) {
+    GoogleSheets.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
         // TODO handle limit
         var baseUrl = "https://docs.google.com/spreadsheets/d/";
         var xmlHttp = new XMLHttpRequest();
@@ -122,7 +122,9 @@ var GoogleSheets = /** @class */ (function (_super) {
             }
         };
         xmlHttp.open("GET", baseUrl + this._spreadsheetId + "/gviz/tq?tq=" + encodeURI(sql), true); // true for asynchronous
-        xmlHttp.setRequestHeader('Authorization', 'Bearer ' + this._signInController.accessToken);
+        if (this._signInController != null) {
+            xmlHttp.setRequestHeader('Authorization', 'Bearer ' + this._signInController.accessToken);
+        }
         xmlHttp.send(null);
     };
     // This function is implemented using gapi

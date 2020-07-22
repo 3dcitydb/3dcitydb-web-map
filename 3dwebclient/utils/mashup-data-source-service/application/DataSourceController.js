@@ -27,11 +27,11 @@ var DataSourceController = /** @class */ (function () {
             scope._dataSource = new KMLDataSource(signInController, scope._options);
         }
     }
-    DataSourceController.prototype.fetchData = function (id, callback, limit) {
+    DataSourceController.prototype.fetchData = function (id, callback, limit, clickedObject) {
         var scope = this;
         scope._dataSource.queryUsingId(id, function (result) {
             callback(scope._dataSource.responseToKvp(result));
-        }, limit);
+        }, limit, clickedObject);
     };
     Object.defineProperty(DataSourceController.prototype, "dataSource", {
         get: function () {

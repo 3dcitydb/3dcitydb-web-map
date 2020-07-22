@@ -615,10 +615,8 @@ function addEventListeners(layer) {
     }
 
     layer.registerEventHandler("CLICK", function (object) {
-        var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-        var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
         var res = auxClickEventListener(object);
-        createInfoTable(selectedThematicDataSource === "KML" ? res[1]._id : res[0], res[1], layer);
+        createInfoTable(res, layer);
     });
 
     layer.registerEventHandler("CTRLCLICK", function (object) {
@@ -1008,7 +1006,12 @@ function isValidUrl(str) {
     return regexp.test(str);
 }
 
-function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
+function createInfoTable(res, citydbLayer) {
+    var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    var gmlid = selectedThematicDataSource === "KML" ? res[1]._id : res[0];
+    var cesiumEntity = res[1];
+
     var thematicDataUrl = citydbLayer.thematicDataUrl;
     cesiumEntity.description = "Loading feature information...";
 
@@ -1030,7 +1033,7 @@ function createInfoTable(gmlid, cesiumEntity, citydbLayer) {
 
             cesiumEntity.description = html;
         }
-    }, 1000);
+    }, 1000, cesiumEntity);
 
     // fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl).then(function (kvp) {
     //     console.log(kvp);
