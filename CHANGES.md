@@ -22,8 +22,13 @@ besides simple `Data` in KML covered in `v1.8.3`:
   + Note that the parser will not check the structural validity of the used `SchemaData`.
   This should be ensured by the provider.
   
+  + The thematic data are found using the IDs of the placemarks in the KML file.
+  If the placemarks do not have IDs, their `name` will be used for lookup instead, 
+  see [`95b5086`](https://github.com/3dcitydb/3dcitydb-web-map/commit/95b508696689975ddaee72f433004314f38149ff).
+  
 * URLs in the thematic info table (when an object has been clicked) 
-are now clickable, see[`dab83ee`](https://github.com/3dcitydb/3dcitydb-web-map/commit/dab83ee7202da8fef6c97737034e8734e3aff491).
+are now clickable, see [`dab83ee`](https://github.com/3dcitydb/3dcitydb-web-map/commit/dab83ee7202da8fef6c97737034e8734e3aff491)
+and [`3dc8d33`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3dc8d33efb8b696c966cae7ea2179e7ac0e29458).
  
 ##### CHANGES
 * The ``SplashController`` has been refactored to be a separate class for modular use (see [`e7a5a74`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e7a5a7430dcbe333cca8d43daa65a2d6baf91314)).
