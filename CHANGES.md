@@ -42,7 +42,10 @@ and [`3dc8d33`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3dc8d33efb8b
 
 ##### FIXES
 
-* Fix a bug that prevented loading of Cesium 3D Tiles,
++ Fixed loading options of data sources, 
+see [`df2c1f2`](https://github.com/3dcitydb/3dcitydb-web-map/commit/df2c1f23d24e6cefb207d32157118316517fc548).
+
+* Fixed a bug that prevented loading of Cesium 3D Tiles,
 see [`9966228`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9966228394acc86c51578e40e322c9c699617e6a).
 
 ### 1.8.3 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
