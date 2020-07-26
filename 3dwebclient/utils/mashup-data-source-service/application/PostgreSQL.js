@@ -71,7 +71,7 @@ var PostgreSQL = /** @class */ (function (_super) {
     };
     PostgreSQL.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
         // TODO use column number instead of column name (such as gmlid here)
-        this.queryUsingSql("?" + this.idColName + "=eq." + id, callback, !limit ? Number.MAX_VALUE : limit);
+        this.queryUsingSql("?" + this.idColName + "=eq." + id, callback, !limit ? Number.MAX_VALUE : limit, clickedObject);
     };
     PostgreSQL.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
         // TODO handle limit
