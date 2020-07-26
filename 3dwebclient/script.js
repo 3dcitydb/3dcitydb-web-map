@@ -1169,34 +1169,34 @@ function layerDataTypeDropdownOnchange() {
 }
 
 function thematicDataSourceAndTableTypeDropdownOnchange() {
-    var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
-
-    var tableTypeDropdown = document.getElementById("tableTypeDropdown");
-    var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
-
-    addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
-    addLayerViewModel["tableType"] = selectedTableType;
-
-    // if (selectedThematicDataSource == "GoogleSheets") {
-    //     document.getElementById("rowGoogleSheetsApiKey").style.display = "table-row";
-    //     document.getElementById("rowGoogleSheetsRanges").style.display = "table-row";
-    //     document.getElementById("rowGoogleSheetsClientId").style.display = "table-row";
-    // } else {
-    //     document.getElementById("rowGoogleSheetsApiKey").style.display = "none";
-    //     document.getElementById("rowGoogleSheetsRanges").style.display = "none";
-    //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
-    // }
-
-    var options = getDataSourceControllerOptions(webMap._activeLayer);
-    // Mashup Data Source Service
     if (webMap && webMap._activeLayer) {
+        var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+        var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+
+        var tableTypeDropdown = document.getElementById("tableTypeDropdown");
+        var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
+
+        addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
+        addLayerViewModel["tableType"] = selectedTableType;
+
+        // if (selectedThematicDataSource == "GoogleSheets") {
+        //     document.getElementById("rowGoogleSheetsApiKey").style.display = "table-row";
+        //     document.getElementById("rowGoogleSheetsRanges").style.display = "table-row";
+        //     document.getElementById("rowGoogleSheetsClientId").style.display = "table-row";
+        // } else {
+        //     document.getElementById("rowGoogleSheetsApiKey").style.display = "none";
+        //     document.getElementById("rowGoogleSheetsRanges").style.display = "none";
+        //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
+        // }
+
+        var options = getDataSourceControllerOptions(webMap._activeLayer);
+        // Mashup Data Source Service
         webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
     }
 }
 
 function getDataSourceControllerOptions(layer) {
-    var dataSourceUri = addLayerViewModel.thematicDataUrl === "" ? addLayerViewModel.url : addLayerViewModel.thematicDataUrl;
+    var dataSourceUri = layer.thematicDataUrl === "" ? layer.url : layer.thematicDataUrl;
     var options = {
         // name: "",
         // type: "",
