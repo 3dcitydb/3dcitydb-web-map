@@ -42,6 +42,9 @@ and [`3dc8d33`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3dc8d33efb8b
 
 ##### FIXES
 
++ Fixed loading data sources when table type (vertical/horizontal) has been changed,
+see [`670c4c5`](https://github.com/3dcitydb/3dcitydb-web-map/commit/670c4c573db532f1c206ddd518485603a907d0f1).
+
 + Fixed loading options of data sources, 
 see [`df2c1f2`](https://github.com/3dcitydb/3dcitydb-web-map/commit/df2c1f23d24e6cefb207d32157118316517fc548).
 
