@@ -1202,7 +1202,7 @@ function getDataSourceControllerOptions(layer) {
         // type: "",
         // provider: "",
         uri: dataSourceUri,
-        tableType: addLayerViewModel.tableType,
+        tableType: layer.tableType,
         thirdPartyHandler: {
             type: "Cesium",
             handler: layer ? layer._citydbKmlDataSource : undefined
@@ -1211,7 +1211,7 @@ function getDataSourceControllerOptions(layer) {
         // apiKey: addLayerViewModel.googleSheetsApiKey,
         // clientId: addLayerViewModel.googleSheetsClientId
         clientId: googleClientId ? googleClientId : "",
-        proxyPrefix: addLayerViewModel.layerProxy ? CitydbUtil.getProxyPrefix(dataSourceUri) : ""
+        proxyPrefix: layer.layerProxy ? CitydbUtil.getProxyPrefix(dataSourceUri) : ""
     };
     return options;
 }
