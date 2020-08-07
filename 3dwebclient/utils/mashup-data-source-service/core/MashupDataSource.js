@@ -51,7 +51,7 @@ var MashupDataSource = /** @class */ (function () {
         // TODO
         return null;
     };
-    MashupDataSource.prototype.queryUsingId = function (id, callback, limit) {
+    MashupDataSource.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
         // TODO
     };
     MashupDataSource.prototype.queryUsingIds = function (ids) {
@@ -62,7 +62,7 @@ var MashupDataSource = /** @class */ (function () {
         // TODO
         return null;
     };
-    MashupDataSource.prototype.queryUsingSql = function (sql, callback, limit) {
+    MashupDataSource.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
         // TODO
     };
     MashupDataSource.prototype.queryUsingTypes = function (types, limit) {

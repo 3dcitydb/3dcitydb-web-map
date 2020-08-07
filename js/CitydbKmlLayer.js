@@ -368,7 +368,7 @@
 
     function loadMasterJSON(that, isFirstLoad) {
         var deferred = Cesium.when.defer();
-        var jsonUrl = checkProxyUrl(that, that._url);
+        var jsonUrl = that.checkProxyUrl(that, that._url);
         new Cesium.Resource({url: jsonUrl}).fetch({responseType: 'json'}).then(function (json) {
             that._jsonLayerInfo = json;
             that._layerType = json.displayform;
@@ -453,31 +453,13 @@
         }
     }
 
-    function checkProxyUrl(obj, url) {
+    CitydbKmlLayer.prototype.checkProxyUrl = function (obj, url) {
+        var proxyPrefix = "";
         if (obj._layerProxy === true || obj._layerProxy === "true") {
-
-            var domain = (new URL(window.location.href )).hostname;
-            var validDomain =
-                domain === "www.3dcitydb.org"
-                || domain === "www.3dcitydb.net"
-                || domain === "www.3dcitydb.de"
-                || domain === "3dcitydb.org"
-                || domain === "3dcitydb.net"
-                || domain === "3dcitydb.de";
-
-            if (!validDomain) {
-                console.warn("Proxy must be enabled by this domain " + domain + "!");
-                return url;
-            }
-
-            var ssl = url.substring(0, 5) === "https";
-
-            var result = (ssl ? "https" : "http") + "://" + domain + "/proxy/?" + url;
-
-            return result;
+            proxyPrefix = CitydbUtil.getProxyPrefix(url);
         }
 
-        return url;
+        return (url.indexOf(proxyPrefix) >= 0 ? "" : proxyPrefix) + url;
     }
 
     /**
@@ -504,7 +486,7 @@
                 canvas: cesiumViewer.scene.canvas
             });
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
@@ -516,7 +498,7 @@
         } else if (this._urlSuffix == 'czml') {
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
@@ -898,7 +880,7 @@
                 canvas: this._cesiumViewer.scene.canvas
             });
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 that._cesiumViewer.dataSources.add(dataSource);
                 deferred.resolve(that);
@@ -908,7 +890,7 @@
         } else if (this._urlSuffix == 'czml') {
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
-            this._citydbKmlDataSource.load(checkProxyUrl(this, this._url)).then(function (dataSource) {
+            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 cesiumViewer.dataSources.add(dataSource);
                 deferred.resolve(that);

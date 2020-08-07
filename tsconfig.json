@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "sourceMap": false,
+    "outDir": "3dwebclient/utils",
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "es2015.collection"
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "ts/*"
+  ]
+}

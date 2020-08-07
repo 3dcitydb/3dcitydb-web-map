@@ -1,10 +1,63 @@
 # Change Log
 
-### 1.8.4 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.4/3dwebclient/index.html)
+### 1.9.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.0/3dwebclient/index.html)
+
+##### NEW
+* Added own parser for thematic `SchemaData` 
+(see [`1e78886`](https://github.com/3dcitydb/3dcitydb-web-map/commit/1e788861d760da0f428c0d3e3259aece31510655))
+besides simple `Data` in KML covered in `v1.8.3`:
+  + An example of a KML document with thematic `SchemaData`:
+  ```xml
+  ...
+  <Placemark>
+    ...
+    <ExtendedData>
+      <SchemaData schemaUrl="#some_schema">
+          <SimpleData name="A">Text</SimpleData>
+          <SimpleData name="B">Text</SimpleData>
+      </SchemaData>
+    </ExtendedData>
+  </Placemark>  
+  ```
+  + Note that the parser will not check the structural validity of the used `SchemaData`.
+  This should be ensured by the provider.
+  
+  + The thematic data are found using the IDs of the placemarks in the KML file.
+  If the placemarks do not have IDs, their `name` will be used for lookup instead, 
+  see [`95b5086`](https://github.com/3dcitydb/3dcitydb-web-map/commit/95b508696689975ddaee72f433004314f38149ff).
+  
+* URLs in the thematic info table (when an object has been clicked) 
+are now clickable, see [`dab83ee`](https://github.com/3dcitydb/3dcitydb-web-map/commit/dab83ee7202da8fef6c97737034e8734e3aff491)
+and [`3dc8d33`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3dc8d33efb8b696c966cae7ea2179e7ac0e29458).
+ 
+##### CHANGES
+* The ``SplashController`` has been refactored to be a separate class for modular use (see [`e7a5a74`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e7a5a7430dcbe333cca8d43daa65a2d6baf91314)).
+
+* Added a URL controller to export and parse project URLs (see 
+[`ff07d0c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ff07d0ca5ea001758e48d14e6d31380b53450295) and 
+[`f076322`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f076322cc37aad8d831fb8e4bfb96a57f8972446)):
+  + The URL parameters and its values are now kept compact;
+  + For the list of the abbreviations used for the URL parameters, please refer to [this list](3dwebclient/utils/UrlController.js):
+  + Backwards compatibility is enabled to also parse URLs generated from older versions;
+  + To convert older URLs to newer ones, simply open them using the newest version of the 3DCityDB Web Map Client and then export the scene link again.
 
 ##### FIXES
+* Fixed handling of ion and Bing token (see [`52aa4f9`](https://github.com/3dcitydb/3dcitydb-web-map/commit/52aa4f9c8769a33f6153348b4c57eb6c41ba09ad)):
+  + An ion access token is required for the Cesium World Terrain, please refer to Cesium to acquire this access token.
+  + A Bing access token is required for all Bing Maps, please refer to Microsoft to acquire this access token.
+  + Both the tokens can be inserted in the project URL using the following parameters 
+    + ``&ionToken=<your_token>`` (or short ``&it=<your_token>``) for the Cesium World Terrain
+    + ``&bingToken=<your_token>`` (or short ``&bt=<your_token>``) for all Bing Maps
+  + **NOTE:** Cesium ion uses Bing Imagery by default, which means you do not need to provide a Bing access token if an ion access token is already available.
+  On the other hand, a Bing access token alone does not suffice. It requires an ion access token additionally.
 
-* Fix a bug that prevented loading of Cesium 3D Tiles,
+* Fixed loading data sources when table type (vertical/horizontal) has been changed,
+see [`670c4c5`](https://github.com/3dcitydb/3dcitydb-web-map/commit/670c4c573db532f1c206ddd518485603a907d0f1).
+
+* Fixed loading options of data sources, 
+see [`df2c1f2`](https://github.com/3dcitydb/3dcitydb-web-map/commit/df2c1f23d24e6cefb207d32157118316517fc548).
+
+* Fixed a bug that prevented loading of Cesium 3D Tiles,
 see [`9966228`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9966228394acc86c51578e40e322c9c699617e6a).
 
 ### 1.8.3 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.3/3dwebclient/index.html)
@@ -227,6 +280,8 @@ If no corresponding parameters exist or are found in the URL, the camera shall f
 add your own token as a string paramter in the client's URL, such as
 `&bingToken=<your_bing_token>` or `&ionToken=<your_ion_token`.
 Note that the given token(s) must be valid.
+While Cesium's ion features can be accessed using the parameter ``ionToken``,
+Bing features require both the ``ionToken`` and ``bingToken``. 
 * If a valid ion token is available,
 you can force the client to use the Cesium World Terrain on loading
 using the string paramater `&cesiumWorldTerrain=<true|false>`
