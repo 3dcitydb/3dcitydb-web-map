@@ -3,20 +3,12 @@
 
 News
 -------
-#### Version [v1.8.3](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.8.3) released (*May 15, 2020*)
-#### Version [v1.8.2](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.8.2) released (*Jan 17, 2020*)
-#### Version [v1.8.1](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.8.1) released (*Dec 2, 2019*)
+#### Version [v1.9.0](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.9.0) released (*August, 2020*)
+#### Version [v1.8.3](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.8.3) released (*May, 2020*)
+
 In preparation of Google Fusion Tables being shut down by Google: Extend the 3DCityDB Web Client to support further data sources such as Google Spreadsheets (using Google Sheets API v4) and directly from PostgreSQL (using PostgREST API).
 
 See [changelogs](CHANGES.md) for the list of changes occurred in this version as well as previous versions.
-
-<!--**[Mar 1, 2019]** Version [v1.7.1](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.7.1) released! Read the change logs [here](CHANGES.md).-->
-
-<!--**[Sep 15, 2018]** The current 3DCityDB Web Map Client version v1.6.1 is included in the newest major release v4.0 of the [3DCityDB](https://github.com/3dcitydb/3dcitydb).-->
-
-<!--**[Mar 28, 2018]** Docker images for the 3DCityDB are now available under [Web-Map-Client](https://github.com/tum-gis/3dcitydb-web-map-docker), [3DCityDB PostGIS](https://github.com/tum-gis/3dcitydb-docker-postgis), [Web Feature Service (WFS)](https://github.com/tum-gis/3dcitydb-wfs-docker) and [Service orchestration](https://github.com/tum-gis/3dcitydb-docker-compose).-->
-
-<!--**[Sep 5, 2017]** Mobile support has been implemented to the web client. </i></b> <a href="https://github.com/3dcitydb/3dcitydb-web-map#mobile-support-extension">Read more...</a>-->
 
 Introduction
 -------
