@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.8.4 - Active [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.8.4/3dwebclient/index.html)
+### 1.9.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.0/3dwebclient/index.html)
 
 ##### NEW
 * Added own parser for thematic `SchemaData` 
@@ -32,6 +32,7 @@ and [`3dc8d33`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3dc8d33efb8b
  
 ##### CHANGES
 * The ``SplashController`` has been refactored to be a separate class for modular use (see [`e7a5a74`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e7a5a7430dcbe333cca8d43daa65a2d6baf91314)).
+
 * Added a URL controller to export and parse project URLs (see 
 [`ff07d0c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ff07d0ca5ea001758e48d14e6d31380b53450295) and 
 [`f076322`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f076322cc37aad8d831fb8e4bfb96a57f8972446)):
@@ -41,11 +42,19 @@ and [`3dc8d33`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3dc8d33efb8b
   + To convert older URLs to newer ones, simply open them using the newest version of the 3DCityDB Web Map Client and then export the scene link again.
 
 ##### FIXES
+* Fixed handling of ion and Bing token (see [`52aa4f9`](https://github.com/3dcitydb/3dcitydb-web-map/commit/52aa4f9c8769a33f6153348b4c57eb6c41ba09ad)):
+  + An ion access token is required for the Cesium World Terrain, please refer to Cesium to acquire this access token.
+  + A Bing access token is required for all Bing Maps, please refer to Microsoft to acquire this access token.
+  + Both the tokens can be inserted in the project URL using the following parameters 
+    + ``&ionToken=<your_token>`` (or short ``&it=<your_token>``) for the Cesium World Terrain
+    + ``&bingToken=<your_token>`` (or short ``&bt=<your_token>``) for all Bing Maps
+  + **NOTE:** Cesium ion uses Bing Imagery by default, which means you do not need to provide a Bing access token if an ion access token is already available.
+  On the other hand, a Bing access token alone does not suffice. It requires an ion access token additionally.
 
-+ Fixed loading data sources when table type (vertical/horizontal) has been changed,
+* Fixed loading data sources when table type (vertical/horizontal) has been changed,
 see [`670c4c5`](https://github.com/3dcitydb/3dcitydb-web-map/commit/670c4c573db532f1c206ddd518485603a907d0f1).
 
-+ Fixed loading options of data sources, 
+* Fixed loading options of data sources, 
 see [`df2c1f2`](https://github.com/3dcitydb/3dcitydb-web-map/commit/df2c1f23d24e6cefb207d32157118316517fc548).
 
 * Fixed a bug that prevented loading of Cesium 3D Tiles,
