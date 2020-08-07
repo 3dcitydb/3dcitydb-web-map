@@ -61,6 +61,7 @@ class UrlController {
             "showOnStart": "ss",
 
             "ionToken": "it",
+            "bingToken": "bt",
             "debug": "db",
             "googleClientId": "gid"
         };
@@ -94,7 +95,7 @@ class UrlController {
     // return the value defined by the URL parameter
     public getUrlParaValue(parameter: string, url: string, CitydbUtil: any): string {
         let result: any = CitydbUtil.parse_query_string(this.getUrlParaForward(parameter), url);
-        if (typeof result === "undefined" || result === "") {
+        if (result == null || result === "") {
             // reverse mapping
             // result = CitydbUtil.parse_query_string(this.getUrlParaAuxReverse(parameter), url);
             result = CitydbUtil.parse_query_string(parameter, url);
@@ -107,6 +108,7 @@ class UrlController {
         addWmsViewModel: any,
         addTerrainViewModel: any,
         addSplashWindowModel: any,
+        tokens: any,
         signInController: any,
         googleClientId: any,
         splashController: SplashController,
@@ -136,18 +138,26 @@ class UrlController {
             '&' + this.getUrlParaForward('roll') + '=' + Math.round(cameraPosition.roll * 1e2) / 1e2 +
             '&' + this.layersToQuery(webMap, Cesium);
         let basemap = this.basemapToQuery(addWmsViewModel, cesiumViewer, Cesium);
-        if (basemap != null) {
+        if (basemap != null && basemap !== "") {
             projectLink = projectLink + '&' + basemap;
         }
 
         let terrain = this.terrainToQuery(addTerrainViewModel, cesiumViewer, Cesium);
-        if (terrain != null) {
+        if (terrain != null && terrain !== "") {
             projectLink = projectLink + '&' + terrain;
         }
 
         let splashWindow = this.splashWindowToQuery(addSplashWindowModel, splashController, Cesium);
-        if (splashWindow != null) {
+        if (splashWindow != null && splashWindow !== "") {
             projectLink = projectLink + '&' + splashWindow;
+        }
+
+        // export ion and Bing token if available
+        if (tokens.ionToken != null && tokens.ionToken !== "") {
+            projectLink = projectLink + '&' + this.getUrlParaForward('ionToken') + '=' + tokens.ionToken;
+        }
+        if (tokens.bingToken != null && tokens.bingToken !== "") {
+            projectLink = projectLink + '&' + this.getUrlParaForward('bingToken') + '=' + tokens.bingToken;
         }
 
         // only export client ID if user is logged in

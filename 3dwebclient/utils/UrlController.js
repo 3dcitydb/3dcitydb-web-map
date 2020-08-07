@@ -54,6 +54,7 @@ var UrlController = /** @class */ (function () {
             // "url": "u",
             "showOnStart": "ss",
             "ionToken": "it",
+            "bingToken": "bt",
             "debug": "db",
             "googleClientId": "gid"
         };
@@ -85,14 +86,14 @@ var UrlController = /** @class */ (function () {
     // return the value defined by the URL parameter
     UrlController.prototype.getUrlParaValue = function (parameter, url, CitydbUtil) {
         var result = CitydbUtil.parse_query_string(this.getUrlParaForward(parameter), url);
-        if (typeof result === "undefined" || result === "") {
+        if (result == null || result === "") {
             // reverse mapping
             // result = CitydbUtil.parse_query_string(this.getUrlParaAuxReverse(parameter), url);
             result = CitydbUtil.parse_query_string(parameter, url);
         }
         return result;
     };
-    UrlController.prototype.generateLink = function (webMap, addWmsViewModel, addTerrainViewModel, addSplashWindowModel, signInController, googleClientId, splashController, cesiumViewer, Cesium) {
+    UrlController.prototype.generateLink = function (webMap, addWmsViewModel, addTerrainViewModel, addSplashWindowModel, tokens, signInController, googleClientId, splashController, cesiumViewer, Cesium) {
         var cameraPosition = this.getCurrentCameraPostion(cesiumViewer, Cesium);
         var projectLink = location.protocol + '//' + location.host + location.pathname + '?';
         var clock = cesiumViewer.cesiumWidget.clock;
@@ -114,16 +115,23 @@ var UrlController = /** @class */ (function () {
             '&' + this.getUrlParaForward('roll') + '=' + Math.round(cameraPosition.roll * 1e2) / 1e2 +
             '&' + this.layersToQuery(webMap, Cesium);
         var basemap = this.basemapToQuery(addWmsViewModel, cesiumViewer, Cesium);
-        if (basemap != null) {
+        if (basemap != null && basemap !== "") {
             projectLink = projectLink + '&' + basemap;
         }
         var terrain = this.terrainToQuery(addTerrainViewModel, cesiumViewer, Cesium);
-        if (terrain != null) {
+        if (terrain != null && terrain !== "") {
             projectLink = projectLink + '&' + terrain;
         }
         var splashWindow = this.splashWindowToQuery(addSplashWindowModel, splashController, Cesium);
-        if (splashWindow != null) {
+        if (splashWindow != null && splashWindow !== "") {
             projectLink = projectLink + '&' + splashWindow;
+        }
+        // export ion and Bing token if available
+        if (tokens.ionToken != null && tokens.ionToken !== "") {
+            projectLink = projectLink + '&' + this.getUrlParaForward('ionToken') + '=' + tokens.ionToken;
+        }
+        if (tokens.bingToken != null && tokens.bingToken !== "") {
+            projectLink = projectLink + '&' + this.getUrlParaForward('bingToken') + '=' + tokens.bingToken;
         }
         // only export client ID if user is logged in
         if ((signInController && signInController.clientID && signInController.isSignIn())) {

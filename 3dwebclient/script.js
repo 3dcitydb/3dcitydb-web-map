@@ -33,7 +33,7 @@ var urlController = new UrlController();
 /*---------------------------------  set globe variables  ----------------------------------------*/
 // BingMapsAPI Key for Bing Imagery Layers and Geocoder
 // If this is not valid, the Bing Imagery Layers will be removed and the Bing Geocoder will be replaced with OSM Nominatim
-var bingToken = CitydbUtil.parse_query_string('bingToken', window.location.href);
+var bingToken = urlController.getUrlParaValue('bingToken', window.location.href, CitydbUtil);
 if (Cesium.defined(bingToken) && bingToken !== "") {
     Cesium.BingMapsApi.defaultKey = bingToken;
 }
@@ -313,44 +313,51 @@ function observeActiveLayer() {
 }
 
 function adjustIonFeatures() {
-    // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
-    if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
-        var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
-        var i = 0;
-        while (i < imageryProviders.length) {
-            if (imageryProviders[i].name.indexOf("Bing Maps") !== -1) {
-                //imageryProviders[i]._creationCommand.canExecute = false;
-                imageryProviders.remove(imageryProviders[i]);
+    // If ion token is not available, remove Cesium World Terrain from the Terrain Providers
+    if (!Cesium.defined(ionToken) || ionToken === "") {
+        var terrainProviders = cesiumViewer.baseLayerPicker.viewModel.terrainProviderViewModels;
+        i = 0;
+        while (i < terrainProviders.length) {
+            if (terrainProviders[i].name.indexOf("Cesium World Terrain") !== -1) {
+                //terrainProviders[i]._creationCommand.canExecute = false;
+                terrainProviders.remove(terrainProviders[i]);
             } else {
                 i++;
             }
         }
-        console.warn("Please enter your Bing Maps API token using the URL-parameter \"bingToken=<your-token>\" and refresh the page if you wish to use Bing Maps.");
 
-        // Set default imagery to ESRI World Imagery
-        cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
+        // Set default imagery to an open-source terrain
+        cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
+        console.warn("Due to invalid or missing ion access token from user, Cesium World Terrain has been removed. Please enter your ion access token using the URL-parameter \"ionToken=<your-token>\" and refresh the page if you wish to use ion features.");
 
-        // Disable auto-complete of OSM Geocoder due to OSM usage limitations
-        // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
-        cesiumViewer._geocoder._viewModel.autoComplete = false;
+        // Cesium ion uses Bing Maps by default -> no need to insert Bing token if an ion token is already available
+
+        // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
+        if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
+            var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
+            var i = 0;
+            while (i < imageryProviders.length) {
+                if (imageryProviders[i].name.indexOf("Bing Maps") !== -1) {
+                    //imageryProviders[i]._creationCommand.canExecute = false;
+                    imageryProviders.remove(imageryProviders[i]);
+                } else {
+                    i++;
+                }
+            }
+
+            // Set default imagery to ESRI World Imagery
+            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
+
+            // Disable auto-complete of OSM Geocoder due to OSM usage limitations
+            // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
+            cesiumViewer._geocoder._viewModel.autoComplete = false;
+
+            console.warn("Due to invalid or missing Bing access token from user, all Bing Maps have been removed. Please enter your Bing Maps API token using the URL-parameter \"bingToken=<your-token>\" and refresh the page if you wish to use Bing Maps.");
+        } else {
+            console.error("A Bing token has been detected. This requires an ion token to display the terrain correctly. Please either remove the Bing token in the URL to use the default terrain and imagery, or insert an ion token in addition to the existing Bing token to use Cesium World Terrain and Bing Maps.")
+            CitydbUtil.showAlertWindow("OK", "Error loading terrain", "A Bing token has been detected. This requires an ion token to display the terrain correctly. Please either remove the Bing token in the URL to use the default terrain and imagery, or insert an ion token in addition to the existing Bing token to use Cesium World Terrain and Bing Maps. Please refer to <a href='https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.9.0' target='_blank'>https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.9.0</a> for more information.");
+        }
     }
-
-    // Remove Cesium World Terrain from the Terrain Providers
-//        var terrainProviders = cesiumViewer.baseLayerPicker.viewModel.terrainProviderViewModels;
-//        i = 0;
-//        while (i < terrainProviders.length) {
-//            if (terrainProviders[i].name.indexOf("Cesium World Terrain") !== -1) {
-//                //terrainProviders[i]._creationCommand.canExecute = false;
-//                terrainProviders.remove(terrainProviders[i]);
-//            } else {
-//                i++;
-//            }
-//        }
-//        console.log("Due to invalid or missing ion access token from user, Cesium World Terrain has been removed.");
-
-    // Set default imagery to an open-source terrain
-    // cesiumViewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviders[0];
-    console.warn("Please enter your ion access token using the URL-parameter \"ionToken=<your-token>\" and refresh the page if you wish to use ion features.");
 }
 
 /*---------------------------------  methods and functions  ----------------------------------------*/
@@ -725,11 +732,16 @@ function flyToCameraPosition(cameraPosition) {
 
 // Creation of a scene link for sharing with other people..
 function showSceneLink() {
+    var tokens = {
+        ionToken: ionToken,
+        bingToken: bingToken
+    }
     var sceneLink = urlController.generateLink(
         webMap,
         addWmsViewModel,
         addTerrainViewModel,
         addSplashWindowModel,
+        tokens,
         signInController,
         googleClientId,
         splashController,
