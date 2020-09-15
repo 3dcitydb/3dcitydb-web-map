@@ -1,4 +1,3 @@
-// import * as request from "request-promise-native";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -12,14 +11,27 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var GoogleSheets = /** @class */ (function (_super) {
+var GoogleSheets = (function (_super) {
     __extends(GoogleSheets, _super);
     function GoogleSheets(signInController, options, gapi) {
-        var _this = _super.call(this, signInController, options) || this;
+        var _this = _super.call(this, options) || this;
+        _this._signInController = signInController;
+        var capabilitiesOptions = new DataSourceCapabilities({
+            webCapabilities: {
+                restAPI: true
+            },
+            dbTransactionCapabilities: {
+                read: true,
+                insert: true,
+                delete: true,
+                update: true
+            },
+            securityCapabilities: {
+                oauth: true
+            }
+        });
+        _this._capabilities = capabilitiesOptions;
         _this._spreadsheetId = options.uri.replace(/.+?(spreadsheets\/d\/)/, "").replace(/(?=\/edit).+/, "");
-        // take the entire first sheet using default name 'Sheet1' if no range is provided
-        // more information on the A1 notation:
-        // https://developers.google.com/sheets/api/guides/concepts#a1_notation
         _this._ranges = !options.ranges ? (["'Sheet1'"]) : options.ranges;
         _this._apiKey = options.apiKey;
         _this._clientId = !options.clientId ? '' : options.clientId;
@@ -29,15 +41,24 @@ var GoogleSheets = /** @class */ (function (_super) {
         _this._signInController = signInController;
         return _this;
     }
+    GoogleSheets.prototype.fetchAttributeValuesFromId = function (id) {
+        throw new Error("Method not implemented.");
+    };
+    GoogleSheets.prototype.fetchAttributeNamesFromId = function (id) {
+        throw new Error("Method not implemented.");
+    };
+    GoogleSheets.prototype.fetchIdsFromQBE = function (qbe, limit) {
+        throw new Error("Method not implemented.");
+    };
+    GoogleSheets.prototype.aggregateByIds = function (ids, aggregateOperator, attributeName) {
+        return Promise.resolve(0);
+    };
     GoogleSheets.prototype.responseToKvp = function (response) {
         var result = new Map();
         var rows = response.table.rows;
         var cols = response.table.cols;
         if (rows[0] && rows[0].c) {
-            // Structure of the JSON response from Google Visualization API
-            // https://developers.google.com/chart/interactive/docs/reference#dataparam
-            // Ignore the first column (containing ID) --> start i with 1 instead of 0
-            if (this.tableType == TableTypes.Horizontal) {
+            if (this.dataStructureType == 0) {
                 for (var i = 1; i < rows[0].c.length; i++) {
                     var key = cols[i].label;
                     var value = rows[0].c[i] ? rows[0].c[i].v : undefined;
@@ -45,13 +66,7 @@ var GoogleSheets = /** @class */ (function (_super) {
                 }
             }
             else {
-                // one attribute per row
-                // only store id once
-                // (because the vertical table has multiple lines of the same id)
-                // assuming id is in the first column
-                // result[this.idColName] = rows[0].c[0].v;
                 for (var i = 1; i < rows.length; i++) {
-                    // TODO generic implemetation for fields id (c[0]) attribute (c[1]) and value (c[2])
                     var key = rows[i].c[1].v;
                     var value = rows[i].c[2].v;
                     result[key] = value;
@@ -60,12 +75,8 @@ var GoogleSheets = /** @class */ (function (_super) {
         }
         return result;
     };
-    // This function is implemented for handling response from Google Sheets API
     GoogleSheets.prototype.responseToKvp_OLD = function (response) {
-        // TODO refactor
         var result = new Map();
-        // momentarily consider all sheets of this spreadsheet
-        // TODO look at this._ranges and find the declared sheets and ranges
         for (var i = 0; i < response.sheets.length; i++) {
             var sheetData = response.sheets[i].data;
             for (var j = 0; j < sheetData.length; j++) {
@@ -80,57 +91,25 @@ var GoogleSheets = /** @class */ (function (_super) {
         }
         return result;
     };
-    GoogleSheets.prototype.countFromResult = function (res) {
-        return res.getSize();
-    };
-    GoogleSheets.prototype.deleteDataRecordUsingId = function (id) {
-        // TODO
-        return null;
-    };
-    GoogleSheets.prototype.fetchIdsFromResult = function (res) {
-        // TODO
-        return null;
-    };
-    GoogleSheets.prototype.insertDataRecord = function (record) {
-        // TODO
-        return null;
-    };
-    GoogleSheets.prototype.queryUsingIds = function (ids) {
-        // TODO
-        return null;
-    };
-    GoogleSheets.prototype.queryUsingNames = function (names, limit) {
-        // TODO
-        return null;
-    };
     GoogleSheets.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
         this.queryUsingSql("SELECT * WHERE A='" + id + "'", callback, !limit ? Number.MAX_VALUE : limit, clickedObject);
     };
     GoogleSheets.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
-        // TODO handle limit
         var baseUrl = "https://docs.google.com/spreadsheets/d/";
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = function () {
             if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
                 var queryResult = xmlHttp.responseText;
-                // The response is in JSON but contains the following string:
-                // "/*O_o*/google.visualization.Query.setResponse({status:ok, ...})"
-                // https://developers.google.com/chart/interactive/docs/dev/implementing_data_source#jsondatatable
-                // The Google Visualization API is used here for querying data from Google Spreadsheets
-                // https://developers.google.com/chart/interactive/docs/querylanguage#setting-the-query-in-the-data-source-url
                 callback(JSON.parse(queryResult.replace("/*O_o*/", "").replace(/(google\.visualization\.Query\.setResponse\(|\);$)/g, "")));
             }
         };
-        xmlHttp.open("GET", baseUrl + this._spreadsheetId + "/gviz/tq?tq=" + encodeURI(sql), true); // true for asynchronous
+        xmlHttp.open("GET", baseUrl + this._spreadsheetId + "/gviz/tq?tq=" + encodeURI(sql), true);
         if (this._signInController != null) {
             xmlHttp.setRequestHeader('Authorization', 'Bearer ' + this._signInController.accessToken);
         }
         xmlHttp.send(null);
     };
-    // This function is implemented using gapi
     GoogleSheets.prototype.queryUsingSql_OLD = function (sql, limit, callback) {
-        // TODO refactor
-        // TODO handle sql query and limit
         var scope = this;
         handleClientLoad(callback);
         function handleClientLoad(callback) {
@@ -143,12 +122,10 @@ var GoogleSheets = /** @class */ (function (_super) {
                     'discoveryDocs': [scope._uri],
                 }).then(function () {
                     if (scope._gapi.auth2.getAuthInstance() && scope._gapi.auth2.getAuthInstance().isSignedIn) {
-                        // OAuth credentials available
                         scope._gapi.auth2.getAuthInstance().isSignedIn.listen(updateSignInStatus);
                         updateSignInStatus(scope._gapi.auth2.getAuthInstance().isSignedIn.get());
                     }
                     else {
-                        // no sign-in required?
                         makeApiCall();
                     }
                 });
@@ -159,25 +136,17 @@ var GoogleSheets = /** @class */ (function (_super) {
                 }
                 function makeApiCall() {
                     var params = {
-                        // The spreadsheet to request.
                         "spreadsheetId": scope._spreadsheetId,
                         "requests": [
                             {
                                 "addFilterView": {
                                     "filter": {
-                                        // "filterViewId": 1234567890,
                                         "title": "A Filter",
                                         "range": {
                                             "sheetId": 0,
                                             "startRowIndex": 0,
-                                            //"endRowIndex": 5,
                                             "startColumnIndex": 0,
                                         },
-                                        // "namedRangeId": string,
-                                        // 'sortSpecs': [{
-                                        //     'dimensionIndex': 3,
-                                        //     'sortOrder': 'ASCENDING'
-                                        // }],
                                         "criteria": {
                                             0: {
                                                 "condition": {
@@ -195,13 +164,7 @@ var GoogleSheets = /** @class */ (function (_super) {
                             }
                         ],
                         "includeSpreadsheetInResponse": true,
-                        // "responseRanges": ["'Sheet1'!A1:C5"],
                         "responseIncludeGridData": true
-                        // The ranges to retrieve from the spreadsheet.
-                        // "ranges": scope._ranges,
-                        // True if grid data should be returned.
-                        // This parameter is ignored if a field mask was set in the request.
-                        // includeGridData: true
                     };
                     var request = scope._gapi.client.sheets.spreadsheets.batchUpdate(params);
                     request.then(function (response) {
@@ -213,30 +176,6 @@ var GoogleSheets = /** @class */ (function (_super) {
             }
         }
     };
-    GoogleSheets.prototype.handleSignInClick = function (event) {
-        // TODO consider for OAuth
-        this._gapi.auth2.getAuthInstance().signIn();
-    };
-    GoogleSheets.prototype.handleSignOutClick = function (event) {
-        // TODO consider for OAuth
-        this._gapi.auth2.getAuthInstance().signOut();
-    };
-    GoogleSheets.prototype.queryUsingTypes = function (types, limit) {
-        // TODO
-        return null;
-    };
-    GoogleSheets.prototype.sumFromResultByColIndex = function (res, colIndex) {
-        // TODO
-        return null;
-    };
-    GoogleSheets.prototype.sumFromResultByName = function (res, name) {
-        // TODO
-        return null;
-    };
-    GoogleSheets.prototype.updateDataRecordUsingId = function (id, newRecord) {
-        // TODO
-        return null;
-    };
     Object.defineProperty(GoogleSheets.prototype, "spreadsheetId", {
         get: function () {
             return this._spreadsheetId;
@@ -244,7 +183,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         set: function (value) {
             this._spreadsheetId = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(GoogleSheets.prototype, "ranges", {
@@ -254,7 +193,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         set: function (value) {
             this._ranges = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(GoogleSheets.prototype, "apiKey", {
@@ -264,7 +203,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         set: function (value) {
             this._apiKey = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(GoogleSheets.prototype, "clientId", {
@@ -274,7 +213,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         set: function (value) {
             this._clientId = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(GoogleSheets.prototype, "scope", {
@@ -284,7 +223,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         set: function (value) {
             this._scope = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(GoogleSheets.prototype, "gapi", {
@@ -294,7 +233,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         set: function (value) {
             this._gapi = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(GoogleSheets.prototype, "signInController", {
@@ -304,8 +243,41 @@ var GoogleSheets = /** @class */ (function (_super) {
         set: function (value) {
             this._signInController = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
+    GoogleSheets.prototype.deleteAttributeOfId = function (id, attributeName) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.deleteAttributesUsingQBE = function (qbe, attributeNames) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.deleteObjectOfId = function (id) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.deleteObjectsUsingQBE = function (qbe) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.insertAttributeOfId = function (id, attributeName, attributeValue) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.insertAttributesUsingQBE = function (qbe, newAttributes) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.insertNewObject = function (kvp) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.login = function (credentials) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.logout = function () {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.updateAttributeValueOfId = function (id, attributeName, newValue) {
+        return Promise.resolve(false);
+    };
+    GoogleSheets.prototype.updateAttributeValuesUsingQBE = function (qbe, newAttributeValues) {
+        return Promise.resolve(false);
+    };
     return GoogleSheets;
 }(SQLDataSource));

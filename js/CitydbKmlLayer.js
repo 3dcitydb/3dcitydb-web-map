@@ -50,12 +50,12 @@
         // extended variables for CitydbKmlLayer	
         this._cesiumViewer = undefined;
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
-        this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
+        this._thematicDataSourceType = Cesium.defaultValue(options.thematicDataSourceType, "");
         this._tableType = Cesium.defaultValue(options.tableType, "");
-        var dataSourceControllerOptions = {};
-        dataSourceControllerOptions.uri = this._thematicDataUrl;
-        dataSourceControllerOptions.tableType = this._tableType;
-        this._dataSourceController = new DataSourceController(this._thematicDataSource, signInController, dataSourceControllerOptions);
+        var thematicDataSourceOptions = {};
+        thematicDataSourceOptions.uri = this._thematicDataUrl;
+        thematicDataSourceOptions.dataStructureType = this._tableType;
+        this._thematicDataSource = DataSourceController.createDataSource(this._thematicDataSourceType, thematicDataSourceOptions);
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._cityobjectsJsonData = new Object();
@@ -90,6 +90,7 @@
             "gltfVersion": this.gltfVersion,
             "thematicDataUrl": this.thematicDataUrl,
             "thematicDataSource": this.thematicDataSource,
+            "thematicDataSourceType": this.thematicDataSourceType,
             "tableType": this.tableType,
             "thematicDataProvider": this._thematicDataProvider,
             "cityobjectsJsonUrl": this.cityobjectsJsonUrl,
@@ -194,12 +195,12 @@
             }
         },
 
-        dataSourceController: {
+        thematicDataSourceType: {
             get: function () {
-                return this._dataSourceController;
+                return this._thematicDataSourceType;
             },
             set: function (value) {
-                this._dataSourceController = value;
+                this._thematicDataSourceType = value;
             }
         },
 

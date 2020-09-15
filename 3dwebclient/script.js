@@ -85,7 +85,7 @@ var addLayerViewModel = {
     layerClampToGround: true,
     gltfVersion: "",
     thematicDataUrl: "",
-    thematicDataSource: "",
+    thematicDataSourceType: "",
     tableType: "",
     // googleSheetsApiKey: "",
     // googleSheetsRanges: "",
@@ -299,7 +299,7 @@ function observeActiveLayer() {
         addLayerViewModel.layerClampToGround = selectedLayer.layerClampToGround;
         addLayerViewModel.gltfVersion = selectedLayer.gltfVersion;
         addLayerViewModel.thematicDataUrl = selectedLayer.thematicDataUrl;
-        addLayerViewModel.thematicDataSource = selectedLayer.thematicDataSource;
+        addLayerViewModel.thematicDataSourceType = selectedLayer.thematicDataSourceType;
         addLayerViewModel.tableType = selectedLayer.tableType;
         // addLayerViewModel.googleSheetsApiKey = selectedLayer.googleSheetsApiKey;
         // addLayerViewModel.googleSheetsRanges = selectedLayer.googleSheetsRanges;
@@ -460,7 +460,7 @@ function saveLayerSettings() {
     applySaving('layerClampToGround', activeLayer);
     applySaving('gltfVersion', activeLayer);
     applySaving('thematicDataUrl', activeLayer);
-    applySaving('thematicDataSource', activeLayer);
+    applySaving('thematicDataSourceType', activeLayer);
     applySaving('tableType', activeLayer);
     // applySaving('googleSheetsApiKey', activeLayer);
     // applySaving('googleSheetsRanges', activeLayer);
@@ -517,8 +517,8 @@ function loadLayerGroup(_layers) {
         var promise = webMap.addLayer(_layers[index]);
         Cesium.when(promise, function (addedLayer) {
             console.log(addedLayer);
-            var options = getDataSourceControllerOptions(addedLayer);
-            addedLayer.dataSourceController = new DataSourceController(addedLayer.thematicDataSource, signInController, options);
+            var options = getThematicDataSourceOptions(addedLayer);
+            addedLayer.thematicDataSource = DataSourceController.createDataSource(addedLayer.thematicDataSourceType, options);
             addEventListeners(addedLayer);
             addLayerToList(addedLayer);
             if (index < (_layers.length - 1)) {
@@ -803,7 +803,7 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
         } else {
             // TODO
             var thematicDataUrl = webMap.activeLayer.thematicDataUrl;
-            webmap._activeLayer.dataSourceController.fetchData(gmlId, function (result) {
+            webmap._activeLayer.thematicDataSource.fetchAttributeValuesFromId(gmlId).then(function (result) {
                 if (!result) {
                     if (Cesium.defined(errorCallbackFunc)) {
                         errorCallbackFunc.call(this);
@@ -821,26 +821,12 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
                         }
                     }
                 }
-            }, 1000);
-
-            // var promise = fetchDataFromGoogleFusionTable(gmlId, thematicDataUrl);
-            // Cesium.when(promise, function (result) {
-            //     var centroid = result["CENTROID"];
-            //     if (centroid) {
-            //         var res = centroid.match(/\(([^)]+)\)/)[1].split(",");
-            //         var lon = parseFloat(res[0]);
-            //         var lat = parseFloat(res[1]);
-            //         flyToMapLocation(lat, lon, callBackFunc);
-            //     } else {
-            //         if (Cesium.defined(errorCallbackFunc)) {
-            //             errorCallbackFunc.call(this);
-            //         }
-            //     }
-            // }, function () {
-            //     if (Cesium.defined(errorCallbackFunc)) {
-            //         errorCallbackFunc.call(this);
-            //     }
-            // });
+            })
+            .catch(function (error) {
+                if (Cesium.defined(errorCallbackFunc)) {
+                    errorCallbackFunc.call(this);
+                }
+            });
         }
     } else {
         if (Cesium.defined(errorCallbackFunc)) {
@@ -885,7 +871,7 @@ function addNewLayer() {
         layerClampToGround: (addLayerViewModel.layerClampToGround === true),
         gltfVersion: addLayerViewModel.gltfVersion.trim(),
         thematicDataUrl: addLayerViewModel.thematicDataUrl.trim(),
-        thematicDataSource: addLayerViewModel.thematicDataSource.trim(),
+        thematicDataSourceType: addLayerViewModel.thematicDataSourceType.trim(),
         tableType: addLayerViewModel.tableType.trim(),
         // googleSheetsApiKey: addLayerViewModel.googleSheetsApiKey.trim(),
         // googleSheetsRanges: addLayerViewModel.googleSheetsRanges.trim(),
@@ -1020,14 +1006,15 @@ function isValidUrl(str) {
 
 function createInfoTable(res, citydbLayer) {
     var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
-    var gmlid = selectedThematicDataSource === "KML" ? res[1]._id : res[0];
+    var selectedThematicDataSourceType = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    var gmlid = selectedThematicDataSourceType === "KML" ? res[1]._id : res[0];
     var cesiumEntity = res[1];
 
     var thematicDataUrl = citydbLayer.thematicDataUrl;
     cesiumEntity.description = "Loading feature information...";
 
-    citydbLayer.dataSourceController.fetchData(gmlid, function (kvp) {
+    citydbLayer.thematicDataSource.fetchAttributeValuesFromId(gmlid).then(function (result) {
+        var kvp = DataSourceUtil.convertFetchResultSetToKVPs(result, citydbLayer.tableType);
         if (!kvp) {
             cesiumEntity.description = 'No feature information found';
         } else {
@@ -1045,80 +1032,10 @@ function createInfoTable(res, citydbLayer) {
 
             cesiumEntity.description = html;
         }
-    }, 1000, cesiumEntity);
-
-    // fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl).then(function (kvp) {
-    //     console.log(kvp);
-    //     var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
-    //     for (var key in kvp) {
-    //         html += '<tr><td>' + key + '</td><td>' + kvp[key] + '</td></tr>';
-    //     }
-    //     html += '</tbody></table>';
-    //
-    //     cesiumEntity.description = html;
-    // }).otherwise(function (error) {
-    //     cesiumEntity.description = 'No feature information found';
-    // });
-}
-
-function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
-    var kvp = {};
-    var deferred = Cesium.when.defer();
-
-    var spreadsheetKey = thematicDataUrl.split("/")[5];
-    var metaLink = 'https://spreadsheets.google.com/feeds/worksheets/' + spreadsheetKey + '/public/full?alt=json-in-script';
-
-    Cesium.jsonp(metaLink).then(function (meta) {
-        console.log(meta);
-        var feedCellUrl = meta.feed.entry[0].link[1].href;
-        feedCellUrl += '?alt=json-in-script&min-row=1&max-row=1';
-        Cesium.jsonp(feedCellUrl).then(function (cellData) {
-            var feedListUrl = meta.feed.entry[0].link[0].href;
-            feedListUrl += '?alt=json-in-script&sq=gmlid%3D';
-            feedListUrl += gmlid;
-            Cesium.jsonp(feedListUrl).then(function (listData) {
-                for (var i = 1; i < cellData.feed.entry.length; i++) {
-                    var key = cellData.feed.entry[i].content.$t;
-                    var value = listData.feed.entry[0]['gsx$' + key.toLowerCase().replace(/_/g, '')].$t;
-                    kvp[key] = value;
-                }
-                deferred.resolve(kvp);
-            }).otherwise(function (error) {
-                deferred.reject(error);
-            });
-        }).otherwise(function (error) {
-            deferred.reject(error);
-        });
-    }).otherwise(function (error) {
-        deferred.reject(error);
+    })
+    .catch(function (error) {
+        console.error("No thematic data retrieved...")
     });
-
-    return deferred.promise;
-}
-
-function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
-    var kvp = {};
-    var deferred = Cesium.when.defer();
-
-    var tableID = urlController.getUrlParaValue('docid', thematicDataUrl, CitydbUtil);
-    var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
-    var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
-    var queryLink = "https://www.googleapis.com/fusiontables/v2/query";
-    new Cesium.Resource({url: queryLink, queryParameters: {sql: sql, key: apiKey}}).fetch({responseType: 'json'}).then(function (data) {
-        console.log(data);
-        var columns = data.columns;
-        var rows = data.rows;
-        for (var i = 0; i < columns.length; i++) {
-            var key = columns[i];
-            var value = rows[0][i];
-            kvp[key] = value;
-        }
-        console.log(kvp);
-        deferred.resolve(kvp);
-    }).otherwise(function (error) {
-        deferred.reject(error);
-    });
-    return deferred.promise;
 }
 
 function showInExternalMaps() {
@@ -1188,7 +1105,7 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         var tableTypeDropdown = document.getElementById("tableTypeDropdown");
         var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
 
-        addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
+        addLayerViewModel["thematicDataSourceType"] = selectedThematicDataSource;
         addLayerViewModel["tableType"] = selectedTableType;
 
         // if (selectedThematicDataSource == "GoogleSheets") {
@@ -1201,29 +1118,20 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
         // }
 
-        var options = getDataSourceControllerOptions(webMap._activeLayer);
+        var options = getThematicDataSourceOptions(webMap._activeLayer);
         // Mashup Data Source Service
-        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
+        webMap._activeLayer.thematicDataSource = DataSourceController.createDataSource(selectedThematicDataSource, options);
     }
 }
 
-function getDataSourceControllerOptions(layer) {
-    var dataSourceUri = layer.thematicDataUrl === "" ? layer.url : layer.thematicDataUrl;
+function getThematicDataSourceOptions(layer) {
+    var thematicDataSourceUri = layer.thematicDataUrl === "" ? layer.url : layer.thematicDataUrl;
     var options = {
         // name: "",
-        // type: "",
         // provider: "",
-        uri: dataSourceUri,
-        tableType: layer.tableType,
-        thirdPartyHandler: {
-            type: "Cesium",
-            handler: layer ? layer._citydbKmlDataSource : undefined
-        },
-        // ranges: addLayerViewModel.googleSheetsRanges,
-        // apiKey: addLayerViewModel.googleSheetsApiKey,
-        // clientId: addLayerViewModel.googleSheetsClientId
-        clientId: googleClientId ? googleClientId : "",
-        proxyPrefix: layer.layerProxy ? CitydbUtil.getProxyPrefix(dataSourceUri) : ""
+        uri: thematicDataSourceUri,
+        dataStructureType: layer.tableType,
+        proxyPrefix: layer.layerProxy ? CitydbUtil.getProxyPrefix(thematicDataSourceUri) : ""
     };
     return options;
 }

@@ -1,5 +1,20 @@
-var MashupDataSource = /** @class */ (function () {
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var MashupDataSource = (function (_super) {
+    __extends(MashupDataSource, _super);
     function MashupDataSource() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Object.defineProperty(MashupDataSource.prototype, "mashupDataSources", {
         get: function () {
@@ -8,78 +23,8 @@ var MashupDataSource = /** @class */ (function () {
         set: function (value) {
             this._mashupDataSources = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
-    MashupDataSource.prototype.getCapabilities = function () {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.getMostCommonCapabilities = function () {
-        // TOTO
-        return null;
-    };
-    MashupDataSource.prototype.getNames = function () {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.getProviders = function () {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.getTypes = function () {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.getUris = function () {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.countFromResult = function (res) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.deleteDataRecordUsingId = function (id) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.fetchIdsFromResult = function (res) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.insertDataRecord = function (record) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
-        // TODO
-    };
-    MashupDataSource.prototype.queryUsingIds = function (ids) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.queryUsingNames = function (names, limit) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
-        // TODO
-    };
-    MashupDataSource.prototype.queryUsingTypes = function (types, limit) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.sumFromResultByColIndex = function (res, colIndex) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.sumFromResultByName = function (res, name) {
-        // TODO
-        return null;
-    };
-    MashupDataSource.prototype.updateDataRecordUsingId = function (id, newRecord) {
-        // TODO
-        return null;
-    };
     return MashupDataSource;
-}());
+}(DataSource));

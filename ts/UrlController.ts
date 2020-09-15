@@ -26,7 +26,7 @@ class UrlController {
             "gltfVersion": "gv",
             "active": "a",
             "thematicDataUrl": "tdu",
-            "thematicDataSource": "ds",
+            "thematicDataSourceType": "ds",
             "tableType": "tt",
             // "googleSheetsApiKey": "gk",
             // "googleSheetsRanges": "gr",
@@ -204,7 +204,7 @@ class UrlController {
             layerConfig[this.getUrlParaForward('gltfVersion')] = Cesium.defaultValue(layer.gltfVersion, "");
             layerConfig[this.getUrlParaForward('active')] = Cesium.defaultValue(layer.active, "");
             layerConfig[this.getUrlParaForward('thematicDataUrl')] = Cesium.defaultValue(layer.thematicDataUrl, "");
-            layerConfig[this.getUrlParaForward('thematicDataSource')] = Cesium.defaultValue(layer.thematicDataSource, "");
+            layerConfig[this.getUrlParaForward('thematicDataSourceType')] = Cesium.defaultValue(layer.thematicDataSourceType, "");
             layerConfig[this.getUrlParaForward('tableType')] = Cesium.defaultValue(layer.tableType, "");
             // layerConfig[this.getUrlParaForward('googleSheetsApiKey')] = Cesium.defaultValue(layer.googleSheetsApiKey, "");
             // layerConfig[this.getUrlParaForward('googleSheetsRanges')] = Cesium.defaultValue(layer.googleSheetsRanges, "");
@@ -293,7 +293,9 @@ class UrlController {
                 thematicDataUrl: layerConfig['spreadsheetUrl']
                     ? this.getValueFromObject('spreadsheetUrl', layerConfig, '', Cesium)
                     : this.getValueFromObject('thematicDataUrl', layerConfig, '', Cesium),
-                thematicDataSource: this.getValueFromObject('thematicDataSource', layerConfig, 'GoogleSheets', Cesium),
+                thematicDataSourceType: layerConfig['thematicDataSource']
+                    ? this.getValueFromObject('thematicDataSource', layerConfig, 'PostgreSQL', Cesium)
+                    : this.getValueFromObject('thematicDataSourceType', layerConfig, 'PostgreSQL', Cesium),
                 tableType: this.getValueFromObject('tableType', layerConfig, 'Horizontal', Cesium),
                 // googleSheetsApiKey: this.getValueFromObject('googleSheetsApiKey', layerConfig, '', Cesium),
                 // googleSheetsRanges: this.getValueFromObject('googleSheetsRanges', layerConfig, '', Cesium),
