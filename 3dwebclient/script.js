@@ -1014,7 +1014,7 @@ function createInfoTable(res, citydbLayer) {
     cesiumEntity.description = "Loading feature information...";
 
     citydbLayer.thematicDataSource.fetchAttributeValuesFromId(gmlid).then(function (result) {
-        var kvp = DataSourceUtil.convertFetchResultSetToKVPs(result, citydbLayer.tableType);
+        var kvp = result.toKVP(citydbLayer.tableType);
         if (!kvp) {
             cesiumEntity.description = 'No feature information found';
         } else {

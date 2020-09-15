@@ -11,6 +11,29 @@ var FetchResultSet = (function () {
             this._data = undefined;
         }
     }
+    FetchResultSet.prototype.toKVP = function (dataStructureType) {
+        var kvpResult = {};
+        if (dataStructureType === 0) {
+            var row = this.data[0];
+            var count = 0;
+            for (var k in Object.keys(row)) {
+                if (count++ === 0) {
+                    continue;
+                }
+                kvpResult[k] = row[k];
+            }
+        }
+        else {
+            for (var i = 0; i < this.data.length; i++) {
+                var row = this.data[i];
+                var keys = Object.keys(row);
+                var attributeName = row[keys[1]];
+                var attributeValue = row[keys[2]];
+                kvpResult[attributeName] = attributeValue;
+            }
+        }
+        return kvpResult;
+    };
     FetchResultSet.prototype.getNrOfRows = function () {
         return this._data.length;
     };
