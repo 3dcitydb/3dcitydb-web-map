@@ -55,7 +55,7 @@
         var thematicDataSourceOptions = {};
         thematicDataSourceOptions.uri = this._thematicDataUrl;
         thematicDataSourceOptions.dataStructureType = this._tableType;
-        this._thematicDataSource = DataSourceController.createDataSource(this._thematicDataSourceType, thematicDataSourceOptions);
+        this._thematicDataSource = DataGaga.createDataSource(this._thematicDataSourceType, thematicDataSourceOptions);
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._cityobjectsJsonData = new Object();

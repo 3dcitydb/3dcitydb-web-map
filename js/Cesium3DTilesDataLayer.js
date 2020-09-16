@@ -45,14 +45,14 @@
         this._hiddenObjects = [];
         this._cameraPosition = {};
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
-        this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
-        var dataSourceControllerOptions = {};
-        dataSourceControllerOptions.uri = this._thematicDataUrl;
-        dataSourceControllerOptions.tableType = this._tableType;
-        this._dataSourceController = new DataSourceController(this._thematicDataSource, signInController, dataSourceControllerOptions);
+        this._thematicDataSourceType = Cesium.defaultValue(options.thematicDataSourceType, "");
         this._tableType = Cesium.defaultValue(options.tableType, "");
-        this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
+        var thematicDataSourceOptions = {};
+        thematicDataSourceOptions.uri = this._thematicDataUrl;
+        thematicDataSourceOptions.dataStructureType = this._tableType;
+        this._thematicDataSource = DataGaga.createDataSource(this._thematicDataSourceType, thematicDataSourceOptions);
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
+        this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._cesiumViewer = undefined;
         this._tileset = undefined;
 
@@ -194,12 +194,12 @@
             }
         },
 
-        dataSourceController: {
+        thematicDataSourceType: {
             get: function () {
-                return this._dataSourceController;
+                return this._thematicDataSourceType;
             },
             set: function (value) {
-                this._dataSourceController = value;
+                this._thematicDataSourceType = value;
             }
         },
 
