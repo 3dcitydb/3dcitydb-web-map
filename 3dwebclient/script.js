@@ -518,7 +518,7 @@ function loadLayerGroup(_layers) {
         Cesium.when(promise, function (addedLayer) {
             console.log(addedLayer);
             var options = getThematicDataSourceOptions(addedLayer);
-            addedLayer.thematicDataSource = DataSourceController.createDataSource(addedLayer.thematicDataSourceType, options);
+            addedLayer.thematicDataSource = DataGaga.createDataSource(addedLayer.thematicDataSourceType, options);
             addEventListeners(addedLayer);
             addLayerToList(addedLayer);
             if (index < (_layers.length - 1)) {
@@ -1120,7 +1120,7 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
 
         var options = getThematicDataSourceOptions(webMap._activeLayer);
         // Mashup Data Source Service
-        webMap._activeLayer.thematicDataSource = DataSourceController.createDataSource(selectedThematicDataSource, options);
+        webMap._activeLayer.thematicDataSource = DataGaga.createDataSource(selectedThematicDataSource, options);
     }
 }
 
