@@ -18,7 +18,6 @@ var DataSource = (function () {
         DataSourceUtil.initAttribute(this, "_dataSourceType", options.provider, DataSourceType.PostgreSQL);
         DataSourceUtil.initAttribute(this, "_uri", options.uri, "");
         DataSourceUtil.initAttribute(this, "_capabilities", options.capabilities, undefined);
-        DataSourceUtil.initAttribute(this, "_dataStructureType", options.dataStructureType, "Horizontal");
     }
     Object.defineProperty(DataSource.prototype, "name", {
         get: function () {
@@ -70,7 +69,16 @@ var DataSource = (function () {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(DataSource.prototype, "dataStructureType", {
+    return DataSource;
+}());
+var SQLDataSource = (function (_super) {
+    __extends(SQLDataSource, _super);
+    function SQLDataSource(options) {
+        var _this = _super.call(this, options) || this;
+        DataSourceUtil.initAttribute(_this, "_dataStructureType", options.dataStructureType, "Horizontal");
+        return _this;
+    }
+    Object.defineProperty(SQLDataSource.prototype, "dataStructureType", {
         get: function () {
             return this._dataStructureType;
         },
@@ -80,13 +88,6 @@ var DataSource = (function () {
         enumerable: false,
         configurable: true
     });
-    return DataSource;
-}());
-var SQLDataSource = (function (_super) {
-    __extends(SQLDataSource, _super);
-    function SQLDataSource(options) {
-        return _super.call(this, options) || this;
-    }
     return SQLDataSource;
 }(DataSource));
 var GoogleSheets = (function (_super) {
@@ -156,8 +157,11 @@ var GoogleSheets = (function (_super) {
     GoogleSheets.prototype.fetchIdsFromQBE = function (qbe, limit) {
         throw new Error("Method not implemented.");
     };
+    GoogleSheets.prototype.fetchIdsFromQBEs = function (qbes, limit) {
+        throw new Error("Method not implemented.");
+    };
     GoogleSheets.prototype.aggregateByIds = function (ids, aggregateOperator, attributeName) {
-        return Promise.resolve(0);
+        throw new Error("Method not implemented.");
     };
     Object.defineProperty(GoogleSheets.prototype, "spreadsheetId", {
         get: function () {
@@ -170,37 +174,37 @@ var GoogleSheets = (function (_super) {
         configurable: true
     });
     GoogleSheets.prototype.deleteAttributeOfId = function (id, attributeName) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.deleteAttributesUsingQBE = function (qbe, attributeNames) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.deleteObjectOfId = function (id) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.deleteObjectsUsingQBE = function (qbe) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.insertAttributeOfId = function (id, attributeName, attributeValue) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.insertAttributesUsingQBE = function (qbe, newAttributes) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.insertNewObject = function (kvp) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.login = function (credentials) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.logout = function () {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.updateAttributeValueOfId = function (id, attributeName, newValue) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.prototype.updateAttributeValuesUsingQBE = function (qbe, newAttributeValues) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     GoogleSheets.apiUrlPrefix = "https://sheets.googleapis.com/v4/spreadsheets/";
     return GoogleSheets;
@@ -231,162 +235,211 @@ var KML = (function (_super) {
             }
         });
         _this._capabilities = capabilitiesOptions;
-        _this._useOwnKmlParser = false;
+        _this.proxyPrefix = options.proxyPrefix;
         return _this;
     }
     KML.prototype.getMetaData = function () {
-        return Promise.resolve(undefined);
+        throw new Error("Method not implemented.");
     };
-    Object.defineProperty(KML.prototype, "proxyPrefix", {
-        get: function () {
-            return this._proxyPrefix;
-        },
-        set: function (value) {
-            this._proxyPrefix = value;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    KML.prototype.responseToKvp = function (response) {
-        if (this._useOwnKmlParser) {
-            return this.responseOwnToKvp(response);
-        }
-        if (this._thirdPartyHandler) {
-            switch (this._thirdPartyHandler.type) {
-                case "Cesium": {
-                    return this.responseCesiumToKvp(response);
-                    break;
-                }
-                default: {
-                    return this.responseOwnToKvp(response);
-                    break;
-                }
-            }
-        }
+    KML.prototype.aggregateByIds = function (ids, aggregateOperator, attributeName) {
+        throw new Error("Method not implemented.");
     };
-    KML.prototype.responseCesiumToKvp = function (response) {
-        var result = new Map();
-        for (var key in response) {
-            if (response[key] && response[key].displayName) {
-                result[response[key].displayName] = response[key].value;
-            }
-            else {
-                result[key] = response[key].value;
-            }
-        }
-        return result;
+    KML.prototype.fetchAttributeNamesFromId = function (id) {
+        throw new Error("Method not implemented.");
     };
-    KML.prototype.responseOwnToKvp = function (response) {
-        var result = new Map();
-        for (var i = 0; i < response.length; i++) {
-            var simpleData = response[i];
-            result[simpleData.getAttribute('name')] = simpleData.textContent;
-        }
-        return result;
-    };
-    KML.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
-        if (this._thirdPartyHandler) {
-            switch (this._thirdPartyHandler.type) {
-                case "Cesium": {
-                    var entities = this._thirdPartyHandler.handler.entities;
-                    var entity = entities.getById(id);
-                    var extendedData = entity.kml.extendedData;
-                    if (typeof extendedData === "undefined"
-                        || (Object.keys(extendedData).length === 0 && extendedData.constructor === Object)) {
-                        this.queryUsingIdCustom(id, callback, limit, clickedObject);
-                    }
-                    else {
-                        callback(extendedData);
-                    }
-                    break;
-                }
-                default: {
-                    callback(null);
-                    break;
-                }
-            }
-        }
-        else {
-            this.queryUsingIdCustom(id, callback);
-        }
-    };
-    KML.prototype.queryUsingIdCustom = function (id, callback, limit, clickedObject) {
-        this._useOwnKmlParser = true;
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
+    KML.prototype.fetchAttributeValuesFromId = function (id) {
+        var scope = this;
+        return new Promise(function (resolve, reject) {
+            WebUtil.httpGet((scope._uri.indexOf(scope.proxyPrefix) >= 0 ? "" : scope.proxyPrefix) + scope._uri).then(function (result) {
                 var xmlParser = new DOMParser();
-                var xmlDoc = xmlParser.parseFromString(xhttp.responseText, "text/xml");
+                var xmlDoc = xmlParser.parseFromString(result, "text/xml");
                 var placemark = xmlDoc.getElementById(id);
                 if (placemark == null) {
-                    var placemarkNameSearch = clickedObject._name;
-                    var placemarks = xmlDoc.getElementsByTagName("Placemark");
-                    for (var i = 0; i < placemarks.length; i++) {
-                        var iPlacemark = placemarks[i];
-                        var placemarkName = iPlacemark.getElementsByTagName("name")[0];
-                        if (placemarkName != null && placemarkName.textContent === placemarkNameSearch) {
-                            placemark = iPlacemark;
-                            break;
-                        }
-                    }
+                    reject("KML Placemark with ID = " + id + " does not exist!");
+                    return;
                 }
                 var extendedData = placemark.getElementsByTagName('ExtendedData')[0];
                 var schemaData = extendedData.getElementsByTagName('SchemaData')[0];
                 var simpleDataList = schemaData.getElementsByTagName('SimpleData');
-                callback(simpleDataList);
-            }
-        };
-        xhttp.open("GET", (this._uri.indexOf(this._proxyPrefix) >= 0 ? "" : this._proxyPrefix) + this._uri, true);
-        xhttp.send();
+                var array = [];
+                var kvp = {};
+                kvp["id"] = id;
+                for (var i = 0; i < simpleDataList.length; i++) {
+                    var key = simpleDataList[i].getAttribute("name");
+                    var value = simpleDataList[i].textContent;
+                    kvp[key] = value;
+                }
+                array.push(kvp);
+                var fetchResultSet = new FetchResultSet(array);
+                resolve(fetchResultSet);
+            }).catch(function (error) {
+                reject(error);
+            });
+        });
     };
-    Object.defineProperty(KML.prototype, "useOwnKmlParser", {
-        get: function () {
-            return this._useOwnKmlParser;
-        },
-        set: function (value) {
-            this._useOwnKmlParser = value;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    KML.prototype.aggregateByIds = function (ids, aggregateOperator, attributeName) {
-        return Promise.resolve(undefined);
-    };
-    KML.prototype.deleteAttributeOfId = function (id, attributeName) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.deleteAttributesUsingQBE = function (qbe, attributeNames) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.deleteObjectOfId = function (id) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.deleteObjectsUsingQBE = function (qbe) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.fetchAttributeNamesFromId = function (id) {
-        return Promise.resolve([]);
-    };
-    KML.prototype.fetchAttributeValuesFromId = function (id) {
-        return Promise.resolve(undefined);
+    KML.prototype.fetchAttributeValuesFromName = function (name) {
+        var scope = this;
+        return new Promise(function (resolve, reject) {
+            WebUtil.httpGet((scope._uri.indexOf(scope.proxyPrefix) >= 0 ? "" : scope.proxyPrefix) + scope._uri).then(function (result) {
+                var xmlParser = new DOMParser();
+                var xmlDoc = xmlParser.parseFromString(result, "text/xml");
+                var placemarks = xmlDoc.getElementsByTagName("Placemark");
+                for (var i = 0; i < placemarks.length; i++) {
+                    var iPlacemark = placemarks[i];
+                    var placemarkName = iPlacemark.getElementsByTagName("name")[0];
+                    if (placemarkName.textContent === name) {
+                        var extendedData = iPlacemark.getElementsByTagName('ExtendedData')[0];
+                        var schemaData = extendedData.getElementsByTagName('SchemaData')[0];
+                        var simpleDataList = schemaData.getElementsByTagName('SimpleData');
+                        var array = [];
+                        var kvp = {};
+                        kvp["id"] = name;
+                        for (var i_1 = 0; i_1 < simpleDataList.length; i_1++) {
+                            var key = simpleDataList[i_1].getAttribute("name");
+                            var value = simpleDataList[i_1].textContent;
+                            kvp[key] = value;
+                        }
+                        array.push(kvp);
+                        var fetchResultSet = new FetchResultSet(array);
+                        resolve(fetchResultSet);
+                    }
+                }
+            }).catch(function (error) {
+                reject(error);
+            });
+        });
     };
     KML.prototype.fetchIdsFromQBE = function (qbe, limit) {
-        return Promise.resolve([]);
+        var scope = this;
+        if (limit == null) {
+            limit = Number.MAX_VALUE;
+        }
+        return new Promise(function (resolve, reject) {
+            WebUtil.httpGet((scope._uri.indexOf(scope.proxyPrefix) >= 0 ? "" : scope.proxyPrefix) + scope._uri).then(function (result) {
+                var xmlParser = new DOMParser();
+                var xmlDoc = xmlParser.parseFromString(result, "text/xml");
+                var array = new Set();
+                var count = 0;
+                var placemarks = xmlDoc.getElementsByTagName("Placemark");
+                switch (qbe.attributeName) {
+                    case "id":
+                        array = new Set();
+                        count = 0;
+                        if (++count <= limit) {
+                            array.add(qbe.value);
+                        }
+                        resolve(array);
+                        break;
+                    case "name":
+                        array = new Set();
+                        count = 0;
+                        for (var i = 0; i < placemarks.length; i++) {
+                            var iPlacemark = placemarks[i];
+                            var placemarkName = iPlacemark.getElementsByTagName("name")[0];
+                            if (placemarkName != null && qbe.assert(placemarkName.textContent)) {
+                                if (++count <= limit) {
+                                    var tmpId = iPlacemark.getAttribute("id");
+                                    if (tmpId == null) {
+                                        tmpId = iPlacemark.getElementsByTagName("name")[0].textContent;
+                                    }
+                                    array.add(tmpId);
+                                }
+                            }
+                        }
+                        resolve(array);
+                        break;
+                    case "visibility":
+                        array = new Set();
+                        count = 0;
+                        for (var i = 0; i < placemarks.length; i++) {
+                            var iPlacemark = placemarks[i];
+                            var placemarkVisibility = iPlacemark.getElementsByTagName("visibility")[0];
+                            if (placemarkVisibility != null && qbe.assert(placemarkVisibility.textContent)) {
+                                if (++count <= limit) {
+                                    var tmpId = iPlacemark.getAttribute("id");
+                                    if (tmpId == null) {
+                                        tmpId = iPlacemark.getElementsByTagName("name")[0].textContent;
+                                    }
+                                    array.add(tmpId);
+                                }
+                            }
+                        }
+                        resolve(array);
+                        break;
+                    case "simpledata_name":
+                        array = new Set();
+                        count = 0;
+                        for (var i = 0; i < placemarks.length; i++) {
+                            var iPlacemark = placemarks[i];
+                            var extendedData = iPlacemark.getElementsByTagName('ExtendedData')[0];
+                            var schemaData = extendedData.getElementsByTagName('SchemaData')[0];
+                            var simpleDataList = schemaData.getElementsByTagName('SimpleData');
+                            for (var i_2 = 0; i_2 < simpleDataList.length; i_2++) {
+                                var key = simpleDataList[i_2].getAttribute("name");
+                                if (qbe.assert(key)) {
+                                    if (++count <= limit) {
+                                        var tmpId = iPlacemark.getAttribute("id");
+                                        if (tmpId == null) {
+                                            tmpId = iPlacemark.getElementsByTagName("name")[0].textContent;
+                                        }
+                                        array.add(tmpId);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        resolve(array);
+                        break;
+                    case "simpledata_value":
+                        array = new Set();
+                        count = 0;
+                        for (var i = 0; i < placemarks.length; i++) {
+                            var iPlacemark = placemarks[i];
+                            var extendedData = iPlacemark.getElementsByTagName('ExtendedData')[0];
+                            var schemaData = extendedData.getElementsByTagName('SchemaData')[0];
+                            var simpleDataList = schemaData.getElementsByTagName('SimpleData');
+                            for (var i_3 = 0; i_3 < simpleDataList.length; i_3++) {
+                                var value = simpleDataList[i_3].textContent;
+                                if (qbe.assert(value)) {
+                                    if (++count <= limit) {
+                                        var tmpId = iPlacemark.getAttribute("id");
+                                        if (tmpId == null) {
+                                            tmpId = iPlacemark.getElementsByTagName("name")[0].textContent;
+                                        }
+                                        array.add(tmpId);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        resolve(array);
+                        break;
+                    default:
+                        reject("Could not assert " + qbe.toString() + ".");
+                }
+                reject("Could not assert " + qbe.toString() + ".");
+            }).catch(function (error) {
+                reject(error);
+            });
+        });
     };
-    KML.prototype.insertAttributeOfId = function (id, attributeName, attributeValue) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.insertAttributesUsingQBE = function (qbe, newAttributes) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.insertNewObject = function (kvp) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.updateAttributeValueOfId = function (id, attributeName, newValue) {
-        return Promise.resolve(false);
-    };
-    KML.prototype.updateAttributeValuesUsingQBE = function (qbe, newAttributeValues) {
-        return Promise.resolve(false);
+    KML.prototype.fetchIdsFromQBEs = function (qbes, limit) {
+        var scope = this;
+        if (limit == null) {
+            limit = Number.MAX_VALUE;
+        }
+        return new Promise(function (resolve, reject) {
+            var array = new Set();
+            for (var _i = 0, qbes_1 = qbes; _i < qbes_1.length; _i++) {
+                var qbe = qbes_1[_i];
+                scope.fetchIdsFromQBE(qbe).then(function (result) {
+                    result.forEach(array.add, array);
+                }).catch(function (error) {
+                    reject(error);
+                });
+            }
+            resolve(new Set(array));
+        });
     };
     return KML;
 }(XMLDataSource));
@@ -414,25 +467,25 @@ var PostgreSQL = (function (_super) {
         return _this;
     }
     PostgreSQL.prototype.getMetaData = function () {
-        return Promise.resolve(undefined);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.aggregateByIds = function (ids, aggregateOperator, attributeName) {
-        return Promise.resolve(0);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.deleteAttributeOfId = function (id, attributeName) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.deleteAttributesUsingQBE = function (qbe, attributeNames) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.deleteObjectOfId = function (id) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.deleteObjectsUsingQBE = function (qbe) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.fetchAttributeNamesFromId = function (id) {
-        return Promise.resolve([]);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.fetchAttributeValuesFromId = function (id) {
         var scope = this;
@@ -446,22 +499,25 @@ var PostgreSQL = (function (_super) {
         });
     };
     PostgreSQL.prototype.fetchIdsFromQBE = function (qbe, limit) {
-        return Promise.resolve([]);
+        throw new Error("Method not implemented.");
+    };
+    PostgreSQL.prototype.fetchIdsFromQBEs = function (qbes, limit) {
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.insertAttributeOfId = function (id, attributeName, attributeValue) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.insertAttributesUsingQBE = function (qbe, newAttributes) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.insertNewObject = function (kvp) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.updateAttributeValueOfId = function (id, attributeName, newValue) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     PostgreSQL.prototype.updateAttributeValuesUsingQBE = function (qbe, newAttributeValues) {
-        return Promise.resolve(false);
+        throw new Error("Method not implemented.");
     };
     return PostgreSQL;
 }(SQLDataSource));
@@ -505,8 +561,8 @@ var FetchResultSet = (function () {
     };
     FetchResultSet.prototype.toKVP = function (dataStructureType) {
         var kvpResult = {};
-        if (dataStructureType == "Horizontal") {
-            var row = this.data[0];
+        if (dataStructureType == "Horizontal" || this._data.length === 1) {
+            var row = this._data[0];
             var count = 0;
             for (var k in row) {
                 if (count++ === 0) {
@@ -516,8 +572,8 @@ var FetchResultSet = (function () {
             }
         }
         else {
-            for (var i = 0; i < this.data.length; i++) {
-                var row = this.data[i];
+            for (var i = 0; i < this._data.length; i++) {
+                var row = this._data[i];
                 var keys = Object.keys(row);
                 var attributeName = row[keys[1]];
                 var attributeValue = row[keys[2]];
@@ -664,6 +720,96 @@ var DataSourceUtil = (function () {
         return typeof object === "boolean";
     };
     return DataSourceUtil;
+}());
+var QBE = (function () {
+    function QBE(attributeName, comparisonOperator, value) {
+        this._attributeName = attributeName;
+        this._comparisonOperator = comparisonOperator;
+        this._value = value;
+    }
+    QBE.prototype.assert = function (value, caseSensitive) {
+        var otherNumValue = Number(value);
+        var thisNumValue = Number(this._value);
+        if (!isNaN(thisNumValue) && !isNaN(otherNumValue)) {
+            switch (this._comparisonOperator) {
+                case "==":
+                    return otherNumValue == thisNumValue;
+                case ">":
+                    return otherNumValue > thisNumValue;
+                case ">=":
+                    return otherNumValue >= thisNumValue;
+                case "<":
+                    return otherNumValue < thisNumValue;
+                case "<=":
+                    return otherNumValue <= thisNumValue;
+                default:
+                    return false;
+            }
+        }
+        else {
+            var otherTextValue = value;
+            var thisTextValue = this._value;
+            if (caseSensitive != null && caseSensitive) {
+                otherTextValue = value.toLowerCase();
+                thisTextValue = this._value.toLowerCase();
+            }
+            switch (this._comparisonOperator) {
+                case "==":
+                    return otherTextValue.localeCompare(thisTextValue) === 0;
+                case ">":
+                    return otherTextValue.localeCompare(thisTextValue) > 0;
+                case ">=":
+                    return otherTextValue.localeCompare(thisTextValue) >= 0;
+                case "<":
+                    return otherTextValue.localeCompare(thisTextValue) < 0;
+                case "<=":
+                    return otherTextValue.localeCompare(thisTextValue) <= 0;
+                default:
+                    return false;
+            }
+        }
+    };
+    QBE.prototype.toJSON = function () {
+        var result = {};
+        result["attributeName"] = this._attributeName;
+        result["comparisonOperator"] = this._comparisonOperator;
+        result["value"] = this._value;
+        return result;
+    };
+    QBE.prototype.toString = function () {
+        return this.toJSON().toString();
+    };
+    Object.defineProperty(QBE.prototype, "attributeName", {
+        get: function () {
+            return this._attributeName;
+        },
+        set: function (value) {
+            this._attributeName = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(QBE.prototype, "comparisonOperator", {
+        get: function () {
+            return this._comparisonOperator;
+        },
+        set: function (value) {
+            this._comparisonOperator = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(QBE.prototype, "value", {
+        get: function () {
+            return this._value;
+        },
+        set: function (value) {
+            this._value = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return QBE;
 }());
 var WebUtil = (function () {
     function WebUtil() {

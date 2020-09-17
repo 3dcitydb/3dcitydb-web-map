@@ -208,9 +208,9 @@ function initClient() {
             }
             addWebMapServiceProvider();
         }
-        
+
         var cesiumWorldTerrainString = urlController.getUrlParaValue('cesiumWorldTerrain', window.location.href, CitydbUtil);
-        if(cesiumWorldTerrainString === "true") {
+        if (cesiumWorldTerrainString === "true") {
             // if the Cesium World Terrain is given in the URL --> activate, else other terrains
             cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
             var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
@@ -265,7 +265,7 @@ function initClient() {
             clockElement._flatpickr.open();
         }
     });
-    cesiumViewer.timeline.addEventListener("click", function() {
+    cesiumViewer.timeline.addEventListener("click", function () {
         clockElement._flatpickr.setDate(new Date(Cesium.JulianDate.toDate(cesiumViewer.clock.currentTime).toUTCString().substr(0, 25)));
     })
 
@@ -401,7 +401,7 @@ function inspectTileStatus() {
 function listHighlightedObjects() {
     var highlightingListElement = document.getElementById("citydb_highlightinglist");
 
-    emptySelectBox(highlightingListElement, function() {
+    emptySelectBox(highlightingListElement, function () {
         var highlightedObjects = webMap.getAllHighlightedObjects();
         for (var i = 0; i < highlightedObjects.length; i++) {
             var option = document.createElement("option");
@@ -415,7 +415,7 @@ function listHighlightedObjects() {
 function listHiddenObjects() {
     var hidddenListElement = document.getElementById("citydb_hiddenlist");
 
-    emptySelectBox(hidddenListElement, function() {
+    emptySelectBox(hidddenListElement, function () {
         var hiddenObjects = webMap.getAllHiddenObjects();
         for (var i = 0; i < hiddenObjects.length; i++) {
             var option = document.createElement("option");
@@ -618,7 +618,7 @@ function addEventListeners(layer) {
         // Save this clicked object for later use (such as zooming using ID)
         clickedEntities[objectId] = targetEntity;
 
-        return [objectId ,targetEntity];
+        return [objectId, targetEntity];
     }
 
     layer.registerEventHandler("CLICK", function (object) {
@@ -822,11 +822,11 @@ function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
                     }
                 }
             })
-            .catch(function (error) {
-                if (Cesium.defined(errorCallbackFunc)) {
-                    errorCallbackFunc.call(this);
-                }
-            });
+                .catch(function (error) {
+                    if (Cesium.defined(errorCallbackFunc)) {
+                        errorCallbackFunc.call(this);
+                    }
+                });
         }
     } else {
         if (Cesium.defined(errorCallbackFunc)) {
@@ -882,7 +882,7 @@ function addNewLayer() {
         maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
         maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles
     }
-    
+
     // since Cesium 3D Tiles also require name.json in the URL, it must be checked first
     var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
     if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'Cesium 3D Tiles') {
@@ -918,7 +918,10 @@ function addWebMapServiceProvider() {
         tooltip: addWmsViewModel.tooltip.trim(),
         creationFunction: function () {
             return new Cesium.WebMapServiceImageryProvider({
-                url: new Cesium.Resource({url: addWmsViewModel.url.trim(), proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())}),
+                url: new Cesium.Resource({
+                    url: addWmsViewModel.url.trim(),
+                    proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                }),
                 layers: addWmsViewModel.layers.trim(),
                 parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
             });
@@ -963,9 +966,9 @@ function createScreenshot() {
     var imageUri = cesiumViewer.canvas.toDataURL();
     var imageWin = window.open("");
     imageWin.document.write("<html><head>" +
-            "<title>" + imageUri + "</title></head><body>" +
-            '<img src="' + imageUri + '"width="100%">' +
-            "</body></html>");
+        "<title>" + imageUri + "</title></head><body>" +
+        '<img src="' + imageUri + '"width="100%">' +
+        "</body></html>");
     return imageWin;
 }
 
@@ -991,50 +994,64 @@ function toggleTerrainShadows() {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.ENABLED;
         if (!cesiumViewer.shadows) {
             CitydbUtil.showAlertWindow("OK", "Switching on terrain shadows now", 'Please note that shadows for 3D models will also be switched on.',
-                    function () {
-                        toggleShadows();
-                    });
+                function () {
+                    toggleShadows();
+                });
         }
     }
 }
 
 // source https://www.w3resource.com/javascript-exercises/javascript-regexp-exercise-9.php
 function isValidUrl(str) {
-    regexp =  /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+    regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
     return regexp.test(str);
 }
 
 function createInfoTable(res, citydbLayer) {
     var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-    var selectedThematicDataSourceType = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    var selectedThematicDataSourceType = citydbLayer.thematicDataSourceType;
     var gmlid = selectedThematicDataSourceType === "KML" ? res[1]._id : res[0];
     var cesiumEntity = res[1];
 
     var thematicDataUrl = citydbLayer.thematicDataUrl;
     cesiumEntity.description = "Loading feature information...";
 
-    citydbLayer.thematicDataSource.fetchAttributeValuesFromId(gmlid).then(function (result) {
-        var kvp = result.toKVP(citydbLayer.tableType);
-        if (!kvp) {
-            cesiumEntity.description = 'No feature information found';
-        } else {
-            console.log(kvp);
-            var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
-            for (var key in kvp) {
-                var iValue = kvp[key];
-                // check if this value is a valid URL
-                if (isValidUrl(iValue)) {
-                    iValue = '<a href="' + iValue + '" target="_blank">' + iValue + '</a>';
+    function parseResult(result) {
+        if (Cesium.defined(result)) {
+            var kvp = result.toKVP(citydbLayer.tableType);
+            if (!kvp) {
+                cesiumEntity.description = 'No feature information found';
+            } else {
+                console.log(kvp);
+                var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
+                for (var key in kvp) {
+                    var iValue = kvp[key];
+                    // check if this value is a valid URL
+                    if (isValidUrl(iValue)) {
+                        iValue = '<a href="' + iValue + '" target="_blank">' + iValue + '</a>';
+                    }
+                    html += '<tr><td>' + key + '</td><td>' + iValue + '</td></tr>';
                 }
-                html += '<tr><td>' + key + '</td><td>' + iValue + '</td></tr>';
-            }
-            html += '</tbody></table>';
+                html += '</tbody></table>';
 
-            cesiumEntity.description = html;
+                cesiumEntity.description = html;
+            }
         }
-    })
-    .catch(function (error) {
-        console.error("No thematic data retrieved...")
+    }
+
+    citydbLayer.thematicDataSource.fetchAttributeValuesFromId(gmlid).then(function (result) {
+        parseResult(result);
+    }).catch(function (error) {
+        if (selectedThematicDataSourceType === "KML") {
+            // Instead of seaching by IDs, now search using placemark names
+            citydbLayer.thematicDataSource.fetchAttributeValuesFromName(res[0]).then(function (result) {
+                parseResult(result);
+            }).catch(function (error) {
+                console.error("No thematic data retrieved...")
+            });
+        } else {
+            console.error("No thematic data retrieved...")
+        }
     });
 }
 
