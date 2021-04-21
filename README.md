@@ -10,6 +10,12 @@ In preparation of Google Fusion Tables being shut down by Google: Extend the 3DC
 
 See [changelogs](CHANGES.md) for the list of changes occurred in this version as well as previous versions.
 
+Documentation
+-------------
+A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client 
+is installed with the 3DCityDB Importer/Exporter 
+and is also available [online](https://3dcitydb-docs.readthedocs.io/en/latest/webmap/index.html).
+
 Introduction
 -------
 The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of **arbitrarily large semantic 3D city models in CityGML**. It utilizes the [Cesium Virtual Globe](http://cesiumjs.org/index.html) as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
@@ -58,10 +64,6 @@ The 3DCityDB-Web-Map-Client has been successfully tested on (but is not limited 
 * Opera 
 
 For best performance, it is recommended to use Google Chrome.
-
-Documentation
--------------
-A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client is installed with the 3DCityDB Importer/Exporter and is also available [online](https://www.3dcitydb.org/3dcitydb/documentation/).
 
 Contributing
 ------------
