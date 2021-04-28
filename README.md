@@ -74,13 +74,13 @@ Developers
 
 The 3DCityDB-Web-Map-Client has been developed by: 
 
-* Zhihang Yao, Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
+* Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
 <br>[Chair of Geoinformatics, Technical University of Munich](https://www.gis.bgu.tum.de/)
 
 and with the support from the following cooperation partners:
 
-* Jannes Bolling, Lucas van Walstijn, and Claus Nagel 
-<br>[virtualcitySYSTEMS GmbH, Berlin](https://www.virtualcitysystems.de/)
+* Zhihang Yao, Jannes Bolling, Lucas van Walstijn, and Claus Nagel 
+<br>[Virtual City Systems, Berlin](https://vc.systems/)
 
 
 Demos
