@@ -2,10 +2,10 @@
  * 3DCityDB-Web-Map
  * http://www.3dcitydb.org/
  * 
- * Copyright 2015 - 2017
+ * Copyright 2015 - 2020
  * Chair of Geoinformatics
  * Technical University of Munich, Germany
- * https://www.gis.bgu.tum.de/
+ * https://www.gis.lrg.tum.de/
  * 
  * The 3DCityDB-Web-Map is jointly developed with the following
  * cooperation partners:
