@@ -1,5 +1,12 @@
 # Change Log
 
+### Pending
+
+##### FIXES
+* Fixed inconsistent documentation of the response of PostgREST 
+  regarding the use of ``attribute`` and ``value_name`` for vertical tables.
+  The name ``attribute`` shall be used.
+
 ### 1.9.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.0/3dwebclient/index.html)
 
 ##### NEW
@@ -189,8 +196,8 @@ parsing project URLs, see [`05e692d`](https://github.com/3dcitydb/3dcitydb-web-m
         + Each record in vertical mode only has exactly 3 elements: `gmlid`, attribute name and attribute value. The `gmlids` here can be duplicated in other records, but the combination of these 3 elements must be unique.
            ```
            [
-              { gmlid : "id1", value_name : "value_name", value : "value" },
-              { gmlid : "id2", value_name : "value_name", value : "value" },
+              { gmlid : "id1", attribute : "value_name", value : "value" },
+              { gmlid : "id2", attribute : "value_name", value : "value" },
               ...
            ]
            ```
