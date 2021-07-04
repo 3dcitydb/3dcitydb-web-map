@@ -45,6 +45,9 @@ Latest release
 --------------
 All releases are available from the [releases section](https://github.com/3dcitydb/3dcitydb-web-map/releases).
 
+This project is also available in Docker, see [repository](https://github.com/tum-gis/3dcitydb-web-map-docker) 
+and [images](https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated).
+
 For convenient use, there is an official [web link](https://www.3dcitydb.org/3dcitydb-web-map/latest/3dwebclient/index.html) available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. 
 
 
