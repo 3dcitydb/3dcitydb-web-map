@@ -1,12 +1,6 @@
 3DCityDB-Web-Map-Client
 ==================================
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/3dcitydb/3dcitydb-web-map?style=flat)
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/tumgis/3dcitydb-web-map?style=flat)
-![Docker Pulls](https://img.shields.io/docker/pulls/tumgis/3dcitydb-web-map?style=flat)
-
-[comment]: <> (![GitHub commits since latest release &#40;by date&#41;]&#40;https://img.shields.io/github/commits-since/tum-gis/citygml-change-detection/latest?style=for-the-badge&#41;)
-
 News
 -------
 #### Version [v1.9.0](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v1.9.0) released
