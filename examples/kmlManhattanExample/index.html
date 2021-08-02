@@ -2,7 +2,7 @@
  * 3DCityDB-Web-Map
  * http://www.3dcitydb.org/
  * 
- * Copyright 2015 - 2017
+ * Copyright 2015 - 2021
  * Chair of Geoinformatics
  * Technical University of Munich, Germany
  * https://www.gis.bgu.tum.de/
@@ -27,111 +27,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Use correct character set. -->
-  <meta charset="utf-8">
-  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-  <link rel="icon" type="image/png" href="../../theme/img/favicon.png" sizes="16x16">
-  <title>New York City demo</title>
-  
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script src="../../ThirdParty/Cesium/Cesium.js"></script> 
-  <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
-  <script src="../../js/3dcitydb-web-map.js"></script>  
-  <script src="../../js/CitydbUtil.js"></script>  
-  <script src="../../js/CitydbWebworker.js"></script>
-  <script src="../../js/CitydbSceneTransforms.js"></script> 
-  <script src="../../js/CitydbKmlHighlightingManager.js"></script>   
-  <script src="../../js/CitydbKmlTilingManager.js"></script>  
-  <script src="../../js/CitydbKmlDataSource.js"></script>    
-  <script src="../../js/Cesium3DTilesDataLayer.js"></script>  
-  <script src="../../js/CitydbKmlLayer.js"></script> 
-  
-  <style>
-     @import url(../../ThirdParty/Cesium/Widgets/widgets.css);
-      html, body, #cesiumContainer {
-          top: 0px;
-          left: 0px;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-          z-index: -1;
-      }
-      #uiMenu {
-          border-radius:5px;
-          padding: 10px;
-          position:absolute;
-          left: 20px;
-          font-family: "Arial";
-          z-index: 99999;
-      }
-  </style>
+    <!-- Use correct character set. -->
+    <meta charset="utf-8">
+    <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>3DCityDB-Web-Map-Client</title>
+    <link rel="icon" type="image/png" href="../../theme/img/favicon.png" sizes="16x16">
+    <script src="../../ThirdParty/jquery-3.3.1.min.js"></script>
+    <!-- Load jquery ui datepicker FLATPICKR -->
+    <link rel="stylesheet" type="text/css" href="../../ThirdParty/flatpickrv4.5.1.css">
+    <script type="text/javascript" src="../../ThirdParty/flatpickrv4.5.1.js"></script>
+    <!-- CesiumJS -->
+    <script src="../../ThirdParty/Cesium/Cesium.js"></script>
+    <script src="../../ThirdParty/Intersection/IntersectionAPI.js"></script>
+    <script src="../../ThirdParty/Cesium-Navigation/Cesium-Navigation.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../ThirdParty/Cesium-Navigation/Cesium-Navigation.css"/>
+    <script src="../../js/3dcitydb-web-map.js"></script>
+    <script src="../../js/CitydbUtil.js"></script>
+    <script src="../../js/CitydbWebworker.js"></script>
+    <script src="../../js/CitydbSceneTransforms.js"></script>
+    <script src="../../js/CitydbKmlHighlightingManager.js"></script>
+    <script src="../../js/CitydbKmlTilingManager.js"></script>
+    <script src="../../js/CitydbKmlDataSource.js"></script>
+    <script src="../../js/CitydbKmlLayer.js"></script>
+    <script src="../../js/Cesium3DTilesDataLayer.js"></script>
+    <!-- Sign in utilities -->
+    <script type="text/javascript" src="https://apis.google.com/js/api:client.js?onLoad=onGoogleScriptLoaded"></script>
+    <script src="../../3dwebclient/utils/SigninController.js"></script>
+    <!-- GPS geolocation with device orientation in real-time -->
+    <script src="../../3dwebclient/utils/GPSController.js"></script>
+    <!-- Mobile utilities -->
+    <script src="../../3dwebclient/utils/MobileController.js"></script>
+    <!-- OpenStreetMap GeoCoder Nominatim -->
+    <script src="../../3dwebclient/utils/OpenStreetMapNominatimGeocoder.js"></script>
+    <!-- Splash Controller-->
+    <script src="../../3dwebclient/utils/SplashController.js"></script>
+    <!-- Mashup Data Source Service -->
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/DataRecord.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/DataSourceCapability.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/QueryResult.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/ReadableDataSource.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/WritableDataSource.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/DataSource.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/SQLDataSource.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/XMLDataSource.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/application/GoogleSheets.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/application/PostgreSQL.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/application/KMLDataSource.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/core/MashupDataSource.js"></script>
+    <script src="../../3dwebclient/utils/mashup-data-source-service/application/DataSourceController.js"></script>
+    <!-- URL controller -->
+    <script src="../../3dwebclient/utils/UrlController.js"></script>
+
+    <style>
+        @import url(../../ThirdParty/Cesium/Widgets/widgets.css);
+
+        html, body, #cesiumContainer {
+            top: 0px;
+            left: 0px;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        #uiMenu {
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            left: 20px;
+            font-family: "Arial";
+            z-index: 99999;
+        }
+    </style>
 </head>
 <body>
-  <div id="cesiumContainer"></div>
-   <div id="uiMenu">
+<div id="cesiumContainer"></div>
+<div id="uiMenu">
     <button type="button" onclick="addLayers()">add Data Layers</button>
     <button type="button" onclick="removeLayers()">remove Data Layers</button>
-  </div>
-  <script>
-    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkNGVkNjUzNy1kZTliLTRmZDgtYTg2Mi1jYTE0NjkwNDg4NTMiLCJpZCI6NjE5MDEsImlhdCI6MTYyNjQ0ODc2M30.eQkSWPaD_VAKmlq1ne02DfpLDW0hGzlYbZysW6si-04';
-	
-	var viewer = new Cesium.Viewer('cesiumContainer', {
-		baseLayerPicker : false
-	});
-	var extent = new Cesium.Rectangle.fromDegrees(-74.2554618991863, 40.4984065460536, -73.6992741782758, 40.9147033697977);
-	viewer.camera.setView({destination: extent})
-	
-	var webMap = new WebMap3DCityDB(viewer);
-	
-	// activate Events
-	webMap.activateViewChangedEvent(true);			
-	webMap.activateMouseClickEvents(true);
-	webMap.activateMouseMoveEvents(true);
+</div>
+<script>
+    // URL controller
+    var urlController = new UrlController();
 
-	
-	var buildingLayer;
-	var lotLayer;
-	var streetLayer;
-	
-	var addLayers = function() {
-		buildingLayer = new Cesium3DTilesDataLayer({
-			url : 'https://cesiumjs.org/NewYork/3DTilesGml/'
-		});
-		
-		lotLayer = new CitydbKmlLayer({
-			url : './data/Lots/NYC_Manhattan_Lots_footprint_MasterJSON.json'
-		});
-		
-		streetLayer = new CitydbKmlLayer({
-			url : './data/Streets/NYC_Manhattan_Streets_footprint_MasterJSON.json'
-		});
-		
-		subwayLayer = new CitydbKmlLayer({
-			url : './data/subway/new_york_subway.kml'
-		});
-		
-		webMap.addLayer(subwayLayer);
-		webMap.addLayer(buildingLayer);
-		webMap.addLayer(lotLayer);
-		var promise = webMap.addLayer(streetLayer);
-				
-		Cesium.when(promise, function(loadedcitydbLayer){
-			loadedcitydbLayer.zoomToStartPosition();
-		});	
-	};
-	
-	var removeLayers = function() {
-		webMap.removeLayer(buildingLayer.id);
-		webMap.removeLayer(lotLayer.id);
-		webMap.removeLayer(streetLayer.id);
-		webMap.removeLayer(subwayLayer.id);
-	};	
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkNGVkNjUzNy1kZTliLTRmZDgtYTg2Mi1jYTE0NjkwNDg4NTMiLCJpZCI6NjE5MDEsImlhdCI6MTYyNjQ0ODc2M30.eQkSWPaD_VAKmlq1ne02DfpLDW0hGzlYbZysW6si-04';
+
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+        baseLayerPicker: false
+    });
+    var extent = new Cesium.Rectangle.fromDegrees(-74.2554618991863, 40.4984065460536, -73.6992741782758, 40.9147033697977);
+    viewer.camera.setView({destination: extent})
+
+    var webMap = new WebMap3DCityDB(viewer);
+
+    // activate Events
+    webMap.activateViewChangedEvent(true);
+    webMap.activateMouseClickEvents(true);
+    webMap.activateMouseMoveEvents(true);
+
+
+    var buildingLayer;
+    var lotLayer;
+    var streetLayer;
+
+    var addLayers = function () {
+        buildingLayer = new Cesium3DTilesDataLayer({
+            url: 'https://cesiumjs.org/NewYork/3DTilesGml/'
+        });
+
+        lotLayer = new CitydbKmlLayer({
+            url: './data/Lots/NYC_Manhattan_Lots_footprint_MasterJSON.json'
+        });
+
+        streetLayer = new CitydbKmlLayer({
+            url: './data/Streets/NYC_Manhattan_Streets_footprint_MasterJSON.json'
+        });
+
+        subwayLayer = new CitydbKmlLayer({
+            url: './data/subway/new_york_subway.kml'
+        });
+
+        webMap.addLayer(subwayLayer);
+        webMap.addLayer(buildingLayer);
+        webMap.addLayer(lotLayer);
+        var promise = webMap.addLayer(streetLayer);
+
+        Cesium.when(promise, function (loadedcitydbLayer) {
+            loadedcitydbLayer.zoomToStartPosition();
+        });
+    };
+
+    var removeLayers = function () {
+        webMap.removeLayer(buildingLayer.id);
+        webMap.removeLayer(lotLayer.id);
+        webMap.removeLayer(streetLayer.id);
+        webMap.removeLayer(subwayLayer.id);
+    };
+
+    // Sign in utilities
+    var googleClientId = urlController.getUrlParaValue('googleClientId', window.location.href, CitydbUtil);
+    if (googleClientId) {
+        var signInController = new SigninController(googleClientId);
+    }
+
+    // Mobile layouts and functionalities
+    var mobileController = new MobileController();
 </script>
 </body>
 </html>
