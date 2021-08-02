@@ -3,6 +3,8 @@
 ### Pending
 
 ##### FIXES
+* Fixed outdated scripts for [examples](https://github.com/3dcitydb/3dcitydb-web-map/tree/master/examples),
+  see [`867821e`](https://github.com/3dcitydb/3dcitydb-web-map/commit/867821e5c41c5820273228e89111a73786a8db2e).
 * Fixed inconsistent documentation of the response of PostgREST 
   regarding the use of ``attribute`` and ``value_name`` for vertical tables.
   The name ``attribute`` shall be used.
