@@ -1,6 +1,6 @@
 # Change Log
 
-### Pending
+### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
 ##### FIXES
 * Fixed outdated scripts for [examples](https://github.com/3dcitydb/3dcitydb-web-map/tree/master/examples),
