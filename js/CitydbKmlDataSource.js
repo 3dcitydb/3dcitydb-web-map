@@ -2171,6 +2171,33 @@
         }
     }
 
+    function loadCzml(dataSource, entityCollection, czml, sourceUri) {
+        entityCollection.removeAll();
+
+        var promises = [];
+        var name = czml[0].name;
+        if (!defined(name) && defined(sourceUri)) {
+            name = getFilenameFromUri(sourceUri);
+        }
+
+        // Only set the name from the root document
+        if (!defined(dataSource._name)) {
+            dataSource._name = name;
+        }
+
+        return when.all(promises).then(function () {
+            var czmlEntities;
+            (new Cesium.CzmlDataSource()).load(sourceUri).then(function (dataSource) {
+                czmlEntities = dataSource.entities;
+                for (let i = 0; i < czmlEntities.values.length; i++) {
+                    entityCollection.add(czmlEntities.values[i]);
+                }
+                cesiumViewer.dataSources.add(dataSource);
+            });
+            return czmlEntities.values;
+        });
+    }
+
     function loadKml(dataSource, entityCollection, kml, sourceUri, uriResolver, context) {
         entityCollection.removeAll();
 
@@ -2285,6 +2312,20 @@
                                 return loadKmz(dataSource, entityCollection, dataToLoad, sourceUri);
                             }
                             return readBlobAsText(dataToLoad).then(function (text) {
+                                var isJSONString = function(str) {
+                                    try {
+                                        JSON.parse(str);
+                                    } catch (e) {
+                                        return false;
+                                    }
+                                    return true;
+                                }
+
+                                if (isJSONString(text)) {
+                                    var czml = JSON.parse(text);
+                                    return loadCzml(dataSource, entityCollection, czml, sourceUri);
+                                }
+
                                 //There's no official way to validate if a parse was successful.
                                 //The following check detects the error on various browsers.
 
