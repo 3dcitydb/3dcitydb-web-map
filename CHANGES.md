@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.9.2 - Pending [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.2/3dwebclient/index.html)
+
+##### NEW
+* Added support for tiled CZML files using a master JSON file (similar to 3DCityDB tiled KML) (see [`506022b`](https://github.com/3dcitydb/3dcitydb-web-map/commit/506022b18369cdd82f223997be18a716fa24002b)).
+
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
 ##### FIXES
