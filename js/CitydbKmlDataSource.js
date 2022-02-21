@@ -2193,8 +2193,11 @@
                     entityCollection.add(czmlEntities.values[i]);
                 }
                 cesiumViewer.dataSources.add(dataSource);
+
+                return when.all(promises).then(function () {
+                    return czmlEntities.values;
+                });
             });
-            return czmlEntities.values;
         });
     }
 
