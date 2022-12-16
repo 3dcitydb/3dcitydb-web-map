@@ -1,5 +1,21 @@
 # Change Log
 
+### 2.0.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html)
+
+This is a major release.
+
+##### UPDATES
+* Updated Cesium from `v1.53` to `v1.100`.
+* Updated jquery from `v3.3.1` to `v3.6.1`.
+
+##### CHANGES
+* The library `autolinker` is now included separately from Cesium.
+* Added Cesium Navigation Mixin as a separate plugin.
+
+##### FIXES
+* Fixed `geocoder` for Bing Maps (breaking change in Cesium [`v1.73`](https://github.com/CesiumGS/cesium/blob/main/CHANGES.md#breaking-changes-mega-14)).
+* Fixed Cesium `defer` accordingly to native `Promise` API
+
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
 ##### FIXES
