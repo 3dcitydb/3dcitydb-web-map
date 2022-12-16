@@ -66,7 +66,6 @@
     var HorizontalOrigin = Cesium.HorizontalOrigin;
     var LabelStyle = Cesium.LabelStyle;
     var SceneMode = Cesium.SceneMode;
-    var Autolinker = Cesium.Autolinker;
     var Uri = Cesium.Uri;
     var when = Cesium.when;
     var zip = Cesium.zip;
