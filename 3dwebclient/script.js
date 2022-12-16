@@ -71,7 +71,8 @@ var cesiumViewer = new Cesium.Viewer('cesiumContainer', cesiumViewerOptions);
 
 adjustIonFeatures();
 
-navigationInitialization('cesiumContainer', cesiumViewer);
+//navigationInitialization('cesiumContainer', cesiumViewer);
+cesiumViewer.extend(Cesium.viewerCesiumNavigationMixin, {});
 
 var cesiumCamera = cesiumViewer.scene.camera;
 var webMap = new WebMap3DCityDB(cesiumViewer);
