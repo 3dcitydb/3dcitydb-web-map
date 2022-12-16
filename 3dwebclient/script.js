@@ -31,11 +31,18 @@
 var urlController = new UrlController();
 
 /*---------------------------------  set globe variables  ----------------------------------------*/
-// BingMapsAPI Key for Bing Imagery Layers and Geocoder
+// Bing Token for Bing Imagery Layers and Geocoder
 // If this is not valid, the Bing Imagery Layers will be removed and the Bing Geocoder will be replaced with OSM Nominatim
 var bingToken = urlController.getUrlParaValue('bingToken', window.location.href, CitydbUtil);
 if (Cesium.defined(bingToken) && bingToken !== "") {
-    Cesium.BingMapsApi.defaultKey = bingToken;
+    new Cesium.BingMapsImageryProvider({
+        url: 'https://dev.virtualearth.net',
+        key: bingToken,
+        mapStyle: Cesium.BingMapsStyle.AERIAL
+    });
+    new Cesium.BingMapsGeocoderService({
+        key: bingToken
+    });
 }
 
 // Define clock to be animated per default
@@ -57,12 +64,12 @@ var cesiumViewerOptions = {
     clockViewModel: new Cesium.ClockViewModel(clock)
 }
 
-// If neither BingMapsAPI key nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
+// If neither Bing Token nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
 var ionToken = urlController.getUrlParaValue('ionToken', window.location.href, CitydbUtil);
 if (Cesium.defined(ionToken) && ionToken !== "") {
     Cesium.Ion.defaultAccessToken = ionToken;
 }
-if ((!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "")
+if ((!Cesium.defined(bingToken) || bingToken === "")
     && (!Cesium.defined(ionToken) || ionToken === "")) {
     cesiumViewerOptions.geocoder = new OpenStreetMapNominatimGeocoder();
 }
@@ -209,9 +216,9 @@ function initClient() {
             }
             addWebMapServiceProvider();
         }
-        
+
         var cesiumWorldTerrainString = urlController.getUrlParaValue('cesiumWorldTerrain', window.location.href, CitydbUtil);
-        if(cesiumWorldTerrainString === "true") {
+        if (cesiumWorldTerrainString === "true") {
             // if the Cesium World Terrain is given in the URL --> activate, else other terrains
             cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
             var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
@@ -266,7 +273,7 @@ function initClient() {
             clockElement._flatpickr.open();
         }
     });
-    cesiumViewer.timeline.addEventListener("click", function() {
+    cesiumViewer.timeline.addEventListener("click", function () {
         clockElement._flatpickr.setDate(new Date(Cesium.JulianDate.toDate(cesiumViewer.clock.currentTime).toUTCString().substr(0, 25)));
     })
 
@@ -333,8 +340,8 @@ function adjustIonFeatures() {
 
         // Cesium ion uses Bing Maps by default -> no need to insert Bing token if an ion token is already available
 
-        // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
-        if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
+        // If neither Bing Token nor ion access token is present, remove Bing Maps from the Imagery Providers
+        if (!Cesium.defined(bingToken) || bingToken === "") {
             var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
             var i = 0;
             while (i < imageryProviders.length) {
@@ -347,7 +354,7 @@ function adjustIonFeatures() {
             }
 
             // Set default imagery to ESRI World Imagery
-            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
+            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[0];
 
             // Disable auto-complete of OSM Geocoder due to OSM usage limitations
             // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
@@ -402,7 +409,7 @@ function inspectTileStatus() {
 function listHighlightedObjects() {
     var highlightingListElement = document.getElementById("citydb_highlightinglist");
 
-    emptySelectBox(highlightingListElement, function() {
+    emptySelectBox(highlightingListElement, function () {
         var highlightedObjects = webMap.getAllHighlightedObjects();
         for (var i = 0; i < highlightedObjects.length; i++) {
             var option = document.createElement("option");
@@ -416,7 +423,7 @@ function listHighlightedObjects() {
 function listHiddenObjects() {
     var hidddenListElement = document.getElementById("citydb_hiddenlist");
 
-    emptySelectBox(hidddenListElement, function() {
+    emptySelectBox(hidddenListElement, function () {
         var hiddenObjects = webMap.getAllHiddenObjects();
         for (var i = 0; i < hiddenObjects.length; i++) {
             var option = document.createElement("option");
