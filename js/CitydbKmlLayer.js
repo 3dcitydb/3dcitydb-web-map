@@ -25,10 +25,10 @@
  * limitations under the License.
  */
 /**
- * 
- * This JavaScript class implements the interface Layer3DCityDB defined in "3dcitydb-layer.js"  
- * for processing KML/KMZ/glTF data exported by 3DCityDB-Importer-Exporter-Tool (version 3.1.0 or higher), 
- * 
+ *
+ * This JavaScript class implements the interface Layer3DCityDB defined in "3dcitydb-layer.js"
+ * for processing KML/KMZ/glTF data exported by 3DCityDB-Importer-Exporter-Tool (version 3.1.0 or higher),
+ *
  */
 (function () {
     function CitydbKmlLayer(options) {
@@ -367,7 +367,7 @@
     });
 
     function loadMasterJSON(that, isFirstLoad) {
-        var deferred = Cesium.when.defer();
+        var deferred = Cesium.defer();
         var jsonUrl = that.checkProxyUrl(that, that._url);
         new Cesium.Resource({url: jsonUrl}).fetch({responseType: 'json'}).then(function (json) {
             that._jsonLayerInfo = json;
@@ -399,13 +399,13 @@
                 new Cesium.Resource({url: cityobjectsJsonUrl}).fetch({responseType: 'json'}).then(function (data) {
                     deferred.resolve(that);
                     that._cityobjectsJsonData = data;
-                }).otherwise(function () {
+                }, function () {
                     deferred.resolve(that);
                 });
             } else {
                 deferred.resolve(that);
             }
-        }).otherwise(function (error) {
+        }, function (error) {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + jsonUrl));
         });
 
@@ -425,7 +425,7 @@
 
     /**
      * Support both old and new version of glTF
-     * 
+     *
      * @param {type} material
      * @returns {unresolved}
      */
@@ -439,7 +439,7 @@
 
     /**
      * Support both old and new version of glTF
-     * 
+     *
      * @param {type} material
      * @param {type} value
      * @returns {undefined}
@@ -470,7 +470,7 @@
         this._cesiumViewer = cesiumViewer;
         this._urlSuffix = CitydbUtil.get_suffix_from_filename(this._url);
         var that = this;
-        var deferred = Cesium.when.defer();
+        var deferred = Cesium.defer();
         if (this._urlSuffix == 'json') {
             this._citydbKmlDataSource = new CitydbKmlDataSource({
                 layerId: this._id,
@@ -492,7 +492,7 @@
                     cesiumViewer.dataSources.add(dataSource);
                 }
                 deferred.resolve(that);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
         } else if (this._urlSuffix == 'czml') {
@@ -504,7 +504,7 @@
                     cesiumViewer.dataSources.add(dataSource);
                 }
                 deferred.resolve(that);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
         } else {
@@ -718,7 +718,7 @@
 
     /**
      * showObjects, to undo hideObjects
-     * @param {Array<String>} A list of Object Ids which will be unhidden. 
+     * @param {Array<String>} A list of Object Ids which will be unhidden.
      */
     CitydbKmlLayer.prototype.showObjects = function (toUnhide) {
         for (var k = 0; k < toUnhide.length; k++) {
@@ -863,7 +863,7 @@
             } else {
             }
         }
-        var deferred = Cesium.when.defer();
+        var deferred = Cesium.defer();
         var that = this;
         if (this._urlSuffix == 'json') {
             this._citydbKmlDataSource = new CitydbKmlDataSource({
@@ -884,7 +884,7 @@
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 that._cesiumViewer.dataSources.add(dataSource);
                 deferred.resolve(that);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
         } else if (this._urlSuffix == 'czml') {
@@ -894,7 +894,7 @@
                 assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
                 cesiumViewer.dataSources.add(dataSource);
                 deferred.resolve(that);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
         } else {

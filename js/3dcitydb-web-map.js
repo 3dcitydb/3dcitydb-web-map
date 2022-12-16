@@ -109,7 +109,6 @@
         }
         this._layers.push(layer);
         return layer.addToCesium(this._cesiumViewerInstance);
-        ;
     };
 
     /**

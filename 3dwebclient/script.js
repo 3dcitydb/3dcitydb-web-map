@@ -493,13 +493,12 @@ function saveLayerSettings() {
     }
 
     document.getElementById('loadingIndicator').style.display = 'block';
-    var promise = activeLayer.reActivate();
-    Cesium.when(promise, function (result) {
+    Promise.resolve(activeLayer.reActivate()).then((result) => {
         document.getElementById('loadingIndicator').style.display = 'none';
-    }, function (error) {
+    }, (error) => {
         CitydbUtil.showAlertWindow("OK", "Error", error.message);
         document.getElementById('loadingIndicator').style.display = 'none';
-    })
+    });
 
     function applySaving(propertyName, activeLayer) {
         var newValue = addLayerViewModel[propertyName];
@@ -522,8 +521,7 @@ function loadLayerGroup(_layers) {
     _loadLayer(0);
 
     function _loadLayer(index) {
-        var promise = webMap.addLayer(_layers[index]);
-        Cesium.when(promise, function (addedLayer) {
+        Promise.resolve(webMap.addLayer(_layers[index])).then((addedLayer) => {
             console.log(addedLayer);
             var options = getDataSourceControllerOptions(addedLayer);
             addedLayer.dataSourceController = new DataSourceController(addedLayer.thematicDataSource, signInController, options);
@@ -541,7 +539,7 @@ function loadLayerGroup(_layers) {
 
                 thematicDataSourceAndTableTypeDropdownOnchange();
             }
-        }).otherwise(function (error) {
+        }, (error) => {
             CitydbUtil.showAlertWindow("OK", "Error", error.message);
             console.log(error.stack);
             document.getElementById('loadingIndicator').style.display = 'none';
@@ -626,7 +624,7 @@ function addEventListeners(layer) {
         // Save this clicked object for later use (such as zooming using ID)
         clickedEntities[objectId] = targetEntity;
 
-        return [objectId ,targetEntity];
+        return [objectId, targetEntity];
     }
 
     layer.registerEventHandler("CLICK", function (object) {
@@ -640,7 +638,7 @@ function addEventListeners(layer) {
 }
 
 function zoomToDefaultCameraPosition() {
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
     var latitudeStr = urlController.getUrlParaValue('latitude', window.location.href, CitydbUtil);
     var longitudeStr = urlController.getUrlParaValue('longitude', window.location.href, CitydbUtil);
     var heightStr = urlController.getUrlParaValue('height', window.location.href, CitydbUtil);
@@ -666,7 +664,7 @@ function zoomToDefaultCameraPosition() {
 }
 
 function zoomToDefaultCameraPosition_expired() {
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
     var cesiumCamera = cesiumViewer.scene.camera;
     var latstr = urlController.getUrlParaValue('lat', window.location.href, CitydbUtil);
     var lonstr = urlController.getUrlParaValue('lon', window.location.href, CitydbUtil);
@@ -713,13 +711,12 @@ function zoomToDefaultCameraPosition_expired() {
     } else {
         // default camera postion
         deferred.resolve("fly to the default camera position");
-        ;
     }
     return deferred;
 }
 
 function flyToCameraPosition(cameraPosition) {
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
     var cesiumCamera = cesiumViewer.scene.camera;
     var longitude = cameraPosition.longitude;
     var latitude = cameraPosition.latitude;
@@ -904,7 +901,7 @@ function addNewLayer() {
         maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
         maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles
     }
-    
+
     // since Cesium 3D Tiles also require name.json in the URL, it must be checked first
     var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
     if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'Cesium 3D Tiles') {
@@ -940,7 +937,10 @@ function addWebMapServiceProvider() {
         tooltip: addWmsViewModel.tooltip.trim(),
         creationFunction: function () {
             return new Cesium.WebMapServiceImageryProvider({
-                url: new Cesium.Resource({url: addWmsViewModel.url.trim(), proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())}),
+                url: new Cesium.Resource({
+                    url: addWmsViewModel.url.trim(),
+                    proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                }),
                 layers: addWmsViewModel.layers.trim(),
                 parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
             });
@@ -985,9 +985,9 @@ function createScreenshot() {
     var imageUri = cesiumViewer.canvas.toDataURL();
     var imageWin = window.open("");
     imageWin.document.write("<html><head>" +
-            "<title>" + imageUri + "</title></head><body>" +
-            '<img src="' + imageUri + '"width="100%">' +
-            "</body></html>");
+        "<title>" + imageUri + "</title></head><body>" +
+        '<img src="' + imageUri + '"width="100%">' +
+        "</body></html>");
     return imageWin;
 }
 
@@ -1013,16 +1013,16 @@ function toggleTerrainShadows() {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.ENABLED;
         if (!cesiumViewer.shadows) {
             CitydbUtil.showAlertWindow("OK", "Switching on terrain shadows now", 'Please note that shadows for 3D models will also be switched on.',
-                    function () {
-                        toggleShadows();
-                    });
+                function () {
+                    toggleShadows();
+                });
         }
     }
 }
 
 // source https://www.w3resource.com/javascript-exercises/javascript-regexp-exercise-9.php
 function isValidUrl(str) {
-    regexp =  /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+    regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
     return regexp.test(str);
 }
 
@@ -1071,7 +1071,7 @@ function createInfoTable(res, citydbLayer) {
 
 function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
     var kvp = {};
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
 
     var spreadsheetKey = thematicDataUrl.split("/")[5];
     var metaLink = 'https://spreadsheets.google.com/feeds/worksheets/' + spreadsheetKey + '/public/full?alt=json-in-script';
@@ -1091,13 +1091,13 @@ function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
                     kvp[key] = value;
                 }
                 deferred.resolve(kvp);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(error);
             });
-        }).otherwise(function (error) {
+        }, function (error) {
             deferred.reject(error);
         });
-    }).otherwise(function (error) {
+    }, function (error) {
         deferred.reject(error);
     });
 
@@ -1106,7 +1106,7 @@ function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
 
 function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var kvp = {};
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
 
     var tableID = urlController.getUrlParaValue('docid', thematicDataUrl, CitydbUtil);
     var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
@@ -1123,7 +1123,7 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
         }
         console.log(kvp);
         deferred.resolve(kvp);
-    }).otherwise(function (error) {
+    }, function (error) {
         deferred.reject(error);
     });
     return deferred.promise;
