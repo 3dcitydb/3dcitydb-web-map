@@ -15,6 +15,7 @@ This is a major release.
 ##### FIXES
 * Fixed `geocoder` for Bing Maps (breaking change in Cesium [`v1.73`](https://github.com/CesiumGS/cesium/blob/main/CHANGES.md#breaking-changes-mega-14)).
 * Fixed Cesium `defer` accordingly to native `Promise` API
+* Fixed highlighting due to breaking changes in Cesium
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
