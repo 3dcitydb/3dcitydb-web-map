@@ -72,8 +72,8 @@
         this._urlSuffix = undefined;
         this._viewChangedEvent = new Cesium.Event();
 
-        this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
-        this._mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
+        this._highlightColor = Cesium.Color.YELLOW;
+        this._mouseOverhighlightColor = Cesium.Color.YELLOW;
 
         this._layerDataType = options.layerDataType;
         this._layerProxy = options.layerProxy;
@@ -430,11 +430,11 @@
      * @returns {unresolved}
      */
     function _getEmissiveFactor(material) {
-        var testObj = material.getValue('emissiveFactor');
+        var testObj = material['emissiveFactor'];
         if (Cesium.defined(testObj)) {
             return testObj;
         }
-        return material.getValue('emission');
+        return material['emission'];
     }
 
     /**
@@ -445,11 +445,11 @@
      * @returns {undefined}
      */
     function _setEmissiveFactor(material, value) {
-        var testObj = material.getValue('emissiveFactor');
+        var testObj = material['emissiveFactor'];
         if (Cesium.defined(testObj)) {
-            material.setValue('emissiveFactor', value);
+            material['emissiveFactor'] = value;
         } else {
-            material.setValue('emission', value);
+            material['emission'] = value;
         }
     }
 
@@ -584,18 +584,15 @@
                 return;
 
             if (primitive instanceof Cesium.Model) {
-                if (!Cesium.defined(targetEntity.originalMaterial)) {
-                    targetEntity.addProperty("originalMaterial");
-                    var materials = primitive._runtime.materialsByName;
-                    for (var materialId in materials) {
-                        targetEntity.originalMaterial = _getEmissiveFactor(materials[materialId]).clone();
-                    }
+                if (!Cesium.defined(targetEntity.originalColor)) {
+                    targetEntity.originalColor = Cesium.Color.clone(primitive.color);
                 }
-                var materials = object.mesh._materials;
-                for (var i = 0; i < materials.length; i++) {
-                    // do mouseOver highlighting
-                    _setEmissiveFactor(materials[i], Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
-                }
+                // Enable highlighting
+                targetEntity.model.color = Cesium.Color.clone(mouseOverhighlightColor);
+                targetEntity.model.colorBlendMode = Cesium.ColorBlendMode.MIX;
+                targetEntity.model.colorBlendAmount = 0.5;
+                scope._cesiumViewer.scene.requestRenderMode = true;
+                scope._cesiumViewer.scene.requestRender();
             } else if (primitive instanceof Cesium.Primitive) {
                 try {
                     var parentEntity = targetEntity._parent;
@@ -623,12 +620,12 @@
                 return;
 
             if (primitive instanceof Cesium.Model) {
-                var materials = object.mesh._materials;
-                for (var i = 0; i < materials.length; i++) {
-                    // dismiss highlighting
-                    console.log(targetEntity.originalMaterial);
-                    _setEmissiveFactor(materials[i], targetEntity.originalMaterial);
-                }
+                // Dismiss highlighting
+                targetEntity.model.color = targetEntity.originalColor;
+                targetEntity.model.colorBlendMode = undefined;
+                targetEntity.model.colorBlendAmount = 0;
+                scope._cesiumViewer.scene.requestRenderMode = true;
+                scope._cesiumViewer.scene.requestRender();
             } else if (primitive instanceof Cesium.Primitive) {
                 try {
                     var parentEntity = targetEntity._parent;
@@ -984,17 +981,15 @@
                 var highlightColor = this._highlightedObjects[object._id._name];
                 if (highlightColor) {
                     var targetEntity = object._id;
-                    if (!Cesium.defined(targetEntity.originalMaterial)) {
-                        targetEntity.addProperty("originalMaterial");
-                        var materials = object._runtime.materialsByName;
-                        for (var materialId in materials) {
-                            targetEntity.originalMaterial = _getEmissiveFactor(materials[materialId]).clone();
-                        }
+                    if (!Cesium.defined(targetEntity.originalColor)) {
+                        targetEntity.originalColor = Cesium.Color.clone(object.primitive.color);
                     }
-                    var materials = object._runtime.materialsByName;
-                    for (var materialId in materials) {
-                        _setEmissiveFactor(materials[materialId], Cesium.Cartesian4.fromColor(highlightColor));
-                    }
+                    // Enable highlighting
+                    targetEntity.model.color = Cesium.Color.clone(highlightColor);
+                    targetEntity.model.colorBlendMode = Cesium.ColorBlendMode.MIX;
+                    targetEntity.model.colorBlendAmount = 0.5;
+                    this._cesiumViewer.scene.requestRenderMode = true;
+                    this._cesiumViewer.scene.requestRender();
                 }
             }
         } else if (object instanceof Array) {
@@ -1015,10 +1010,12 @@
         if (object instanceof Cesium.Model) {
             if (object.ready) {
                 var targetEntity = object._id;
-                var materials = object._runtime.materialsByName;
-                for (var materialId in materials) {
-                    _setEmissiveFactor(materials[materialId], targetEntity.originalMaterial);
-                }
+                // Dismiss highlighting
+                targetEntity.model.color = targetEntity.originalColor;
+                targetEntity.model.colorBlendMode = undefined;
+                targetEntity.model.colorBlendAmount = 0;
+                this._cesiumViewer.scene.requestRenderMode = true;
+                this._cesiumViewer.scene.requestRender();
             }
         } else if (object instanceof Array) {
             if (!this.isHiddenObject(object)) {
