@@ -204,7 +204,7 @@ function initClient() {
     observeActiveLayer();
 
     // Zoom to desired camera position and load layers if encoded in the url...	
-    zoomToDefaultCameraPosition().then(function (info) {
+    Promise.resolve(zoomToDefaultCameraPosition()).then(function (info) {
         var layers = urlController.getLayersFromUrl(window.location.href, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium);
         loadLayerGroup(layers);
 
