@@ -4,6 +4,9 @@
 
 This is a major release.
 
+##### NEW
+* Added support for Index 3D Scene Layers and GeoJSON (using embedded thematic data)
+
 ##### UPDATES
 * Updated Cesium from `v1.53` to `v1.100`.
 * Updated jquery from `v3.3.1` to `v3.6.1`.
