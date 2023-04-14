@@ -205,7 +205,15 @@ function initClient() {
 
     // Zoom to desired camera position and load layers if encoded in the url...	
     Promise.resolve(zoomToDefaultCameraPosition()).then(function (info) {
-        var layers = urlController.getLayersFromUrl(window.location.href, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium);
+        var layers = urlController.getLayersFromUrl(
+            window.location.href,
+            CitydbUtil,
+            CitydbKmlLayer,
+            Cesium3DTilesDataLayer,
+            CitydbI3SLayer,
+            CitydbGeoJSONLayer,
+            Cesium
+        );
         loadLayerGroup(layers);
 
         var basemapConfigString = urlController.getUrlParaValue('basemap', window.location.href, CitydbUtil);
@@ -383,14 +391,20 @@ function inspectTileStatus() {
             var layer = layers[i];
             if (layers[i].active) {
                 if (layer instanceof CitydbKmlLayer) {
-                    numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
-                    numberOfCachedTiles = numberOfCachedTiles + Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
+                    numberOfshowedTiles += Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
+                    numberOfCachedTiles += Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
                     numberOfTasks = numberOfTasks + layers[i].citydbKmlTilingManager.taskNumber;
-                }
-                if (layer instanceof Cesium3DTilesDataLayer) {
-                    numberOfshowedTiles = numberOfshowedTiles + layer._tileset._selectedTiles.length;
-                    numberOfCachedTiles = numberOfCachedTiles + layer._tileset._statistics.numberContentReady;
+                } else if (layer instanceof Cesium3DTilesDataLayer) {
+                    numberOfshowedTiles += layer._tileset._selectedTiles.length;
+                    numberOfCachedTiles += layer._tileset._statistics.numberContentReady;
                     tilesLoaded = layer._tileset._tilesLoaded;
+                } else if (layer instanceof CitydbI3SLayer) {
+                    for (var i = 0; i < layer._i3sProvider._layers.length; i++) {
+                        var iLayer = layer._i3sProvider.layers[i];
+                        numberOfshowedTiles += iLayer._tileset._selectedTiles.length;
+                        numberOfCachedTiles += iLayer._tileset._statistics.numberContentReady;
+                        tilesLoaded += iLayer._tileset._tilesLoaded;
+                    }
                 }
             }
         }
@@ -505,7 +519,7 @@ function saveLayerSettings() {
         if (propertyName === 'maxLodPixels' && newValue == -1) {
             newValue = Number.MAX_VALUE;
         }
-        if (Cesium.isArray(newValue)) {
+        if (Array.isArray(newValue)) {
             activeLayer[propertyName] = newValue[0];
         } else {
             activeLayer[propertyName] = newValue;
@@ -619,6 +633,12 @@ function addEventListeners(layer) {
                 id: objectId
             });
             cesiumViewer.selectedEntity = targetEntity;
+        } else if (layer instanceof CitydbI3SLayer) {
+            console.log(object);
+            // TODO
+        } else if (layer instanceof CitydbGeoJSONLayer) {
+            console.log(object);
+            // TODO
         }
 
         // Save this clicked object for later use (such as zooming using ID)
@@ -906,6 +926,10 @@ function addNewLayer() {
     var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
     if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'Cesium 3D Tiles') {
         _layers.push(new Cesium3DTilesDataLayer(options));
+    } else if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'i3s') {
+        _layers.push(new CitydbI3SLayer(options));
+    } else if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'geojson') {
+        _layers.push(new CitydbGeoJSONLayer(options));
     } else if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
         _layers.push(new CitydbKmlLayer(options));
     }
@@ -1112,7 +1136,10 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
     var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
     var queryLink = "https://www.googleapis.com/fusiontables/v2/query";
-    new Cesium.Resource({url: queryLink, queryParameters: {sql: sql, key: apiKey}}).fetch({responseType: 'json'}).then(function (data) {
+    new Cesium.Resource({
+        url: queryLink,
+        queryParameters: {sql: sql, key: apiKey}
+    }).fetch({responseType: 'json'}).then(function (data) {
         console.log(data);
         var columns = data.columns;
         var rows = data.rows;
@@ -1185,6 +1212,17 @@ function layerDataTypeDropdownOnchange() {
         document.getElementById("gltfVersionDropdownRow").style.display = "";
         document.getElementById("layerProxyAndClampToGround").style.display = "";
     }
+
+    if (["i3s", "geojson"].includes(layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value)) {
+        document.getElementById("thematicDataSourceDropDownDiv").style.display = "none";
+        document.getElementById("thematicTableTypeDropdownDiv").style.display = "none";
+        document.getElementById("thematicDataSourceDropdown").value = "Embedded";
+        document.getElementById("tableTypeDropdown").value = "";
+    } else {
+        document.getElementById("thematicDataSourceDropDownDiv").style.display = "";
+        document.getElementById("thematicTableTypeDropdownDiv").style.display = "";
+    }
+
     addLayerViewModel["layerDataType"] = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
 }
 

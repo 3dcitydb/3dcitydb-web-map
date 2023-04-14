@@ -240,7 +240,7 @@ var UrlController = /** @class */ (function () {
         }
         return Cesium.defaultValue(result, defaultValue);
     };
-    UrlController.prototype.getLayersFromUrl = function (url, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium) {
+    UrlController.prototype.getLayersFromUrl = function (url, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, CitydbI3SLayer, CitydbGeoJSONLayer, Cesium) {
         var index = 0;
         var nLayers = [];
         var layerConfigString = this.getUrlParaValue('layer_' + index, url, CitydbUtil);
@@ -268,9 +268,15 @@ var UrlController = /** @class */ (function () {
                 maxSizeOfCachedTiles: this.getValueFromObject('maxSizeOfCachedTiles', layerConfig, 140, Cesium),
                 maxCountOfVisibleTiles: this.getValueFromObject('maxCountOfVisibleTiles', layerConfig, 140, Cesium),
             };
-            if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1
+            if (options.layerDataType === "geojson") {
+                nLayers.push(new CitydbGeoJSONLayer(options));
+            }
+            else if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1
                 && options.layerDataType === "COLLADA/KML/glTF") {
                 nLayers.push(new CitydbKmlLayer(options));
+            }
+            else if (options.layerDataType === "i3s") {
+                nLayers.push(new CitydbI3SLayer(options));
             }
             else {
                 nLayers.push(new Cesium3DTilesDataLayer(options));
@@ -287,7 +293,7 @@ var UrlController = /** @class */ (function () {
         set: function (value) {
             this._urlDictionary = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return UrlController;

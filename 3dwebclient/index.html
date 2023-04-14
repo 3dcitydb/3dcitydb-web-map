@@ -58,6 +58,8 @@
         <script src="../js/CitydbKmlDataSource.js"></script>
         <script src="../js/CitydbKmlLayer.js"></script>
         <script src="../js/Cesium3DTilesDataLayer.js"></script>
+        <script src="../js/CitydbI3SLayer.js"></script>
+        <script src="../js/CitydbGeoJSONLayer.js"></script>
         <!-- Sign in utilities -->
         <script type="text/javascript" src="https://apis.google.com/js/api:client.js?onLoad=onGoogleScriptLoaded"></script>
         <script src="utils/SigninController.js"></script>
@@ -266,6 +268,8 @@
                                             <select id="layerDataTypeDropdown" data-bind="value: layerDataType" onchange="layerDataTypeDropdownOnchange()">
                                                 <option value="COLLADA/KML/glTF" selected="selected">COLLADA/KML/glTF</option>
                                                 <option value="Cesium 3D Tiles">Cesium 3D Tiles</option>
+                                                <option value="i3s">Indexed 3D Scene Layers</option>
+                                                <option value="geojson">GeoJSON</option>
                                                 <option value="Others">Others</option>
                                             </select>
                                         </td>
@@ -294,17 +298,18 @@
                                             <input type="text" data-bind="value: thematicDataUrl">
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr id="thematicDataSourceDropDownDiv">
                                         <td>> Thematic Data Source</td>
                                         <td>
                                             <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
                                                 <option value="GoogleSheets" selected="selected">Google Sheets API</option>
                                                 <option value="PostgreSQL">PostgreSQL REST API</option>
                                                 <option value="KML">KML Documents</option>
+                                                <option value="Embedded">Embedded</option>
                                             </select>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr id="thematicTableTypeDropdownDiv">
                                         <td>> Table type</td>
                                         <td>
                                             <select id="tableTypeDropdown" data-bind="value: tableType" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
