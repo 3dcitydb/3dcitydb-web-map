@@ -94,7 +94,7 @@
 
     Object.defineProperties(Cesium3DTilesDataLayer.prototype, {
         /**
-         * Gets the active 
+         * Gets the active
          */
         active: {
             get: function () {
@@ -168,7 +168,7 @@
             }
         },
         /**
-         * Gets boundingbox of this layer as an Cesium Rectangle Object with longitude/latitude values in radians. 
+         * Gets boundingbox of this layer as an Cesium Rectangle Object with longitude/latitude values in radians.
          */
         region: {
             get: function () {
@@ -287,7 +287,7 @@
     Cesium3DTilesDataLayer.prototype.addToCesium = function (cesiumViewer) {
         var that = this;
         this._cesiumViewer = cesiumViewer;
-        var deferred = Cesium.when.defer();
+        var deferred = Cesium.defer();
 
         this._tileset = new Cesium.Cesium3DTileset({
             url: this._url
@@ -299,7 +299,7 @@
             that.registerTilesLoadedEventHandler();
             that.registerMouseEventHandlers();
             deferred.resolve(that);
-        }).otherwise(function () {
+        }, function () {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
         });
 
@@ -456,7 +456,7 @@
      */
     Cesium3DTilesDataLayer.prototype.reActivate = function () {
         var that = this;
-        var deferred = Cesium.when.defer();
+        var deferred = Cesium.defer();
         this._highlightedObjects = {};
         this._hiddenObjects = [];
         this._cesiumViewer.scene.primitives.remove(this._tileset);
@@ -469,7 +469,7 @@
             that._cesiumViewer.scene.primitives.add(tileset);
             that.registerTilesLoadedEventHandler();
             deferred.resolve();
-        }).otherwise(function () {
+        }, function () {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
         });
 
