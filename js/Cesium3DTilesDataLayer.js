@@ -313,7 +313,7 @@
             if (tile._content instanceof Cesium.Cesium3DTilePointFeature) {
                 tile._content._pointCloud._pointSize = 3;
             }
-            if (!(tile._content instanceof Cesium.Batched3DModel3DTileContent))
+            if (!(tile._content instanceof Cesium.Cesium3DTileContent))
                 return;
             var features = tile._content._features;
             var featuresLength = tile._content.featuresLength;
