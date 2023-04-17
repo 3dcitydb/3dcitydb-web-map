@@ -310,7 +310,7 @@
         var scope = this;
         var timer = null;
         this._tileset.tileVisible.addEventListener(function (tile) {
-            if (tile._content instanceof Cesium.PointCloud3DTileContent) {
+            if (tile._content instanceof Cesium.Cesium3DTilePointFeature) {
                 tile._content._pointCloud._pointSize = 3;
             }
             if (!(tile._content instanceof Cesium.Batched3DModel3DTileContent))
