@@ -310,7 +310,9 @@
     Cesium3DTilesDataLayer.prototype.configPointCloudShading = function (tileset) {
         tileset.pointCloudShading.attenuation = true;
         tileset.pointCloudShading.maximumAttenuation = 3;
-        tileset.pointCloudShading.eyeDomeLighting = false;
+        tileset.pointCloudShading.eyeDomeLighting = true;
+        tileset.pointCloudShading.eyeDomeLightingStrength = 0.5;
+        tileset.pointCloudShading.eyeDomeLightingRadius = 0.5;
     }
 
     Cesium3DTilesDataLayer.prototype.registerTilesLoadedEventHandler = function () {
