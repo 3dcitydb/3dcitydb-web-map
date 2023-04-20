@@ -296,6 +296,7 @@
         this._tileset.readyPromise.then(function (tileset) {
             cesiumViewer.scene.primitives.add(tileset);
             tileset.show = that._active;
+            that.configPointCloudShading(tileset);
             that.registerTilesLoadedEventHandler();
             that.registerMouseEventHandlers();
             deferred.resolve(that);
@@ -304,6 +305,14 @@
         });
 
         return deferred.promise;
+    }
+
+    Cesium3DTilesDataLayer.prototype.configPointCloudShading = function (tileset) {
+        tileset.pointCloudShading.attenuation = true;
+        tileset.pointCloudShading.maximumAttenuation = 10;
+        tileset.pointCloudShading.eyeDomeLighting = true;
+        tileset.pointCloudShading.eyeDomeLightingStrength = 1;
+        tileset.pointCloudShading.eyeDomeLightingRadius = 1;
     }
 
     Cesium3DTilesDataLayer.prototype.registerTilesLoadedEventHandler = function () {
@@ -467,6 +476,7 @@
 
         this._tileset.readyPromise.then(function (tileset) {
             that._cesiumViewer.scene.primitives.add(tileset);
+            that.configPointCloudShading(tileset);
             that.registerTilesLoadedEventHandler();
             deferred.resolve();
         }, function () {
