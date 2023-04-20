@@ -1207,10 +1207,14 @@ function layerDataTypeDropdownOnchange() {
     var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
     if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "COLLADA/KML/glTF") {
         document.getElementById("gltfVersionDropdownRow").style.display = "none";
-        document.getElementById("layerProxyAndClampToGround").style.display = "none";
     } else {
         document.getElementById("gltfVersionDropdownRow").style.display = "";
+    }
+
+    if (["COLLADA/KML/glTF", "geojson"].includes(layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value)) {
         document.getElementById("layerProxyAndClampToGround").style.display = "";
+    } else {
+        document.getElementById("layerProxyAndClampToGround").style.display = "none";
     }
 
     if (["i3s", "geojson"].includes(layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value)) {
@@ -1232,7 +1236,8 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
 
         var tableTypeDropdown = document.getElementById("tableTypeDropdown");
-        var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
+        var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex] == null ? ""
+            : tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
 
         addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
         addLayerViewModel["tableType"] = selectedTableType;

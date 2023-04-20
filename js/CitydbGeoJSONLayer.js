@@ -389,7 +389,8 @@
             stroke: Cesium.Color.HOTPINK,
             fill: Cesium.Color.PINK,
             strokeWidth: 3,
-            markerSymbol: '?'
+            markerSymbol: '?',
+            clampToGround: this._layerClampToGround
         })).then(datasSource => {
             that._citydbGeoJSONDataSource = datasSource;
             deferred.resolve(that);
@@ -712,7 +713,8 @@
             stroke: Cesium.Color.HOTPINK,
             fill: Cesium.Color.PINK,
             strokeWidth: 3,
-            markerSymbol: '?'
+            markerSymbol: '?',
+            clampToGround: this._layerClampToGround
         })).then(datasSource => {
             that._citydbGeoJSONDataSource = datasSource;
             deferred.resolve(that);
