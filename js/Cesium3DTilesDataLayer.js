@@ -53,6 +53,7 @@
         this._tableType = Cesium.defaultValue(options.tableType, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
+        this._maximumScreenSpaceError = Cesium.defaultValue(options.maximumScreenSpaceError, "");
         this._cesiumViewer = undefined;
         this._tileset = undefined;
 
@@ -67,7 +68,8 @@
             "url": this.url,
             "layerDataType": this.layerDataType,
             "thematicDataUrl": this.thematicDataUrl,
-            "thematicDataProvider": this._thematicDataProvider
+            "thematicDataProvider": this._thematicDataProvider,
+            "maximumScreenSpaceError": this._maximumScreenSpaceError,
         }
 
         /**
@@ -261,7 +263,18 @@
             get: function () {
                 return this._configParameters;
             }
-        }
+        },
+        /**
+         * Gets the maximumScreenSpaceError of the Cesium 3D Tiles
+         */
+        maximumScreenSpaceError: {
+            get: function () {
+                return this._maximumScreenSpaceError;
+            },
+            set: function (value) {
+                this._maximumScreenSpaceError = value;
+            }
+        },
     });
 
     /**
@@ -290,7 +303,8 @@
         var deferred = Cesium.defer();
 
         this._tileset = new Cesium.Cesium3DTileset({
-            url: this._url
+            url: this._url,
+            maximumScreenSpaceError: this._maximumScreenSpaceError
         });
 
         this._tileset.readyPromise.then(function (tileset) {
@@ -471,7 +485,8 @@
         this._cesiumViewer.scene.primitives.remove(this._tileset);
 
         this._tileset = new Cesium.Cesium3DTileset({
-            url: this.autofillUrl(this._url)
+            url: this.autofillUrl(this._url),
+            maximumScreenSpaceError: this._maximumScreenSpaceError
         });
 
         this._tileset.readyPromise.then(function (tileset) {

@@ -102,7 +102,8 @@ var addLayerViewModel = {
     minLodPixels: "",
     maxLodPixels: "",
     maxSizeOfCachedTiles: 200,
-    maxCountOfVisibleTiles: 200
+    maxCountOfVisibleTiles: 200,
+    maximumScreenSpaceError: 16
 };
 Cesium.knockout.track(addLayerViewModel);
 Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
@@ -325,6 +326,7 @@ function observeActiveLayer() {
         addLayerViewModel.maxLodPixels = selectedLayer.maxLodPixels;
         addLayerViewModel.maxSizeOfCachedTiles = selectedLayer.maxSizeOfCachedTiles;
         addLayerViewModel.maxCountOfVisibleTiles = selectedLayer.maxCountOfVisibleTiles;
+        addLayerViewModel.maximumScreenSpaceError = selectedLayer.maximumScreenSpaceError;
     }
 }
 
@@ -492,6 +494,7 @@ function saveLayerSettings() {
     applySaving('maxLodPixels', activeLayer);
     applySaving('maxSizeOfCachedTiles', activeLayer);
     applySaving('maxCountOfVisibleTiles', activeLayer);
+    applySaving('maximumScreenSpaceError', activeLayer);
     console.log(activeLayer);
 
     // Update Data Source
@@ -919,7 +922,8 @@ function addNewLayer() {
         minLodPixels: addLayerViewModel.minLodPixels,
         maxLodPixels: addLayerViewModel.maxLodPixels == -1 ? Number.MAX_VALUE : addLayerViewModel.maxLodPixels,
         maxSizeOfCachedTiles: addLayerViewModel.maxSizeOfCachedTiles,
-        maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles
+        maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles,
+        maximumScreenSpaceError: addLayerViewModel.maximumScreenSpaceError
     }
 
     // since Cesium 3D Tiles also require name.json in the URL, it must be checked first
@@ -1225,6 +1229,12 @@ function layerDataTypeDropdownOnchange() {
     } else {
         document.getElementById("thematicDataSourceDropDownDiv").style.display = "";
         document.getElementById("thematicTableTypeDropdownDiv").style.display = "";
+    }
+
+    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "Cesium 3D Tiles") {
+        document.getElementById("maximumScreenSpaceError").style.display = "none";
+    } else {
+        document.getElementById("maximumScreenSpaceError").style.display = "";
     }
 
     addLayerViewModel["layerDataType"] = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
