@@ -101,14 +101,14 @@
      * adds a 3DCityDBLayer to the cesiumViewer
      * @param {3DCityDBLayer} layer
      */
-    WebMap3DCityDB.prototype.addLayer = function (layer) {
+    WebMap3DCityDB.prototype.addLayer = function (layer, fnInfoTable) {
         for (var i = 0; i < this._layers.length; i++) {
             if (layer.id == this._layers[i].id) {
                 return;
             }
         }
         this._layers.push(layer);
-        return layer.addToCesium(this._cesiumViewerInstance);
+        return layer.addToCesium(this._cesiumViewerInstance, fnInfoTable);
     };
 
     /**
@@ -187,11 +187,11 @@
             var _dirZ = currentCamera.direction.z;
 
             if (Math.abs(posX - _posX) > posD ||
-                    Math.abs(posY - _posY) > posD ||
-                    Math.abs(posZ - _posZ) > posD ||
-                    Math.abs(dirX - _dirX) > dirD ||
-                    Math.abs(dirY - _dirY) > dirD ||
-                    Math.abs(dirZ - _dirZ) > dirD) {
+                Math.abs(posY - _posY) > posD ||
+                Math.abs(posZ - _posZ) > posD ||
+                Math.abs(dirX - _dirX) > dirD ||
+                Math.abs(dirY - _dirY) > dirD ||
+                Math.abs(dirZ - _dirZ) > dirD) {
                 console.log('view changed');
                 posX = _posX;
                 posY = _posY;
@@ -245,10 +245,10 @@
             this._eventHandler.setInputAction(function (event) {
                 // When camera is moved do not trigger any other events
                 if (that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.LEFT_DRAG) ||
-                        that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.MIDDLE_DRAG) ||
-                        that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.PINCH) ||
-                        that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.RIGHT_DRAG) ||
-                        that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.WHEEL)) {
+                    that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.MIDDLE_DRAG) ||
+                    that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.PINCH) ||
+                    that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.RIGHT_DRAG) ||
+                    that._cameraEventAggregator.isButtonDown(Cesium.CameraEventType.WHEEL)) {
                     return;
                 }
                 if (pickingInProgress)

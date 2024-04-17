@@ -545,11 +545,10 @@ function loadLayerGroup(_layers) {
     _loadLayer(0);
 
     function _loadLayer(index) {
-        Promise.resolve(webMap.addLayer(_layers[index])).then((addedLayer) => {
+        Promise.resolve(webMap.addLayer(_layers[index], createInfoTable)).then((addedLayer) => {
             console.log(addedLayer);
             var options = getDataSourceControllerOptions(addedLayer);
             addedLayer.dataSourceController = new DataSourceController(addedLayer.thematicDataSource, signInController, options);
-            addEventListeners(addedLayer);
             addLayerToList(addedLayer);
             if (index < (_layers.length - 1)) {
                 index++;
@@ -1061,21 +1060,22 @@ function isValidUrl(str) {
 }
 
 function createInfoTable(res, citydbLayer) {
-    var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
-    var gmlid = selectedThematicDataSource === "KML" ? res[1]._id : res[0];
     var cesiumEntity = res[1];
-
-    var thematicDataUrl = citydbLayer.thematicDataUrl;
     cesiumEntity.description = "Loading feature information...";
 
-    citydbLayer.dataSourceController.fetchData(gmlid, function (kvp) {
+    var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+
+    function displayKvp(kvp) {
         if (!kvp) {
             cesiumEntity.description = 'No feature information found';
         } else {
             console.log(kvp);
+            const keyGmlid = "gml:id";
             var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
+            html += '<tr><td>' + keyGmlid + '</td><td>' + kvp[keyGmlid] + '</td></tr>';
             for (var key in kvp) {
+                if (key === keyGmlid) continue;
                 var iValue = kvp[key];
                 // check if this value is a valid URL
                 if (isValidUrl(iValue)) {
@@ -1087,7 +1087,19 @@ function createInfoTable(res, citydbLayer) {
 
             cesiumEntity.description = html;
         }
-    }, 1000, cesiumEntity);
+    }
+
+    var gmlid = selectedThematicDataSource === "KML" ? res[1]._id : res[0];
+    if (selectedThematicDataSource === "Embedded") {
+        if (Cesium.defined(res[2])) {
+            displayKvp(res[2]); // embedded properties are stored here
+        } else {
+            cesiumEntity.description = "Could not load embedded thematic data";
+        }
+    } else {
+        var thematicDataUrl = citydbLayer.thematicDataUrl;
+        citydbLayer.dataSourceController.fetchData(gmlid, displayKvp, 1000, cesiumEntity);
+    }
 
     // fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl).then(function (kvp) {
     //     console.log(kvp);
