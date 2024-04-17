@@ -280,34 +280,38 @@
     };
 
     /**
-     * get highlighted objects from all layers
+     * get highlighted objects from active layer
      * @returns {Array}
      */
     WebMap3DCityDB.prototype.getAllHighlightedObjects = function () {
-        var results = [];
-        var count = 0;
-        var layers = this._layers;
+        let scope = this;
+        var results = {};
+        var layers = scope._layers;
         for (var i = 0; i < layers.length; i++) {
-            var curLayer = this._layers[i];
-            for (var obj in curLayer._highlightedObjects) {
-                results[count++] = obj;
+            var curLayer = scope._layers[i];
+            if (!curLayer.active) continue;
+            let highlightedObjects = curLayer.getAllHighlightedObjects();
+            for (var key in highlightedObjects) {
+                results[key] = highlightedObjects[key];
             }
         }
         return results;
     };
 
     /**
-     * get hidden objects from all layers
+     * get hidden objects from active layer
      * @returns {Array}
      */
     WebMap3DCityDB.prototype.getAllHiddenObjects = function () {
-        var results = [];
-        var count = 0;
-        var layers = this._layers;
+        let scope = this;
+        var results = {};
+        var layers = scope._layers;
         for (var i = 0; i < layers.length; i++) {
-            var curLayer = this._layers[i];
-            for (var j = 0; j < curLayer._hiddenObjects.length; j++) {
-                results[count++] = curLayer._hiddenObjects[j];
+            var curLayer = scope._layers[i];
+            if (!curLayer.active) continue;
+            let hiddenObjects = curLayer.getAllHiddenObjects();
+            for (var key in hiddenObjects) {
+                results[key] = hiddenObjects[key];
             }
         }
         return results;

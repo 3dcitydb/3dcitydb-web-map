@@ -422,31 +422,37 @@ function inspectTileStatus() {
     }, 200);
 }
 
+let highlightedIdObjects = {};
+
 function listHighlightedObjects() {
-    var highlightingListElement = document.getElementById("citydb_highlightinglist");
+    const highlightingListElement = document.getElementById("citydb_highlightinglist");
 
     emptySelectBox(highlightingListElement, function () {
-        var highlightedObjects = webMap.getAllHighlightedObjects();
-        for (var i = 0; i < highlightedObjects.length; i++) {
+        highlightedIdObjects = webMap.getAllHighlightedObjects();
+        for (let key in highlightedIdObjects) {
             var option = document.createElement("option");
-            option.text = highlightedObjects[i];
+            option.text = key;
+            option.value = key;
             highlightingListElement.add(option);
-            highlightingListElement.selectedIndex = 0;
         }
+        highlightingListElement.selectedIndex = 0;
     });
 }
 
+let hiddenIdObjects = {};
+
 function listHiddenObjects() {
-    var hidddenListElement = document.getElementById("citydb_hiddenlist");
+    const hidddenListElement = document.getElementById("citydb_hiddenlist");
 
     emptySelectBox(hidddenListElement, function () {
-        var hiddenObjects = webMap.getAllHiddenObjects();
-        for (var i = 0; i < hiddenObjects.length; i++) {
+        hiddenIdObjects = webMap.getAllHiddenObjects();
+        for (let key in hiddenIdObjects) {
             var option = document.createElement("option");
-            option.text = hiddenObjects[i];
+            option.text = key;
+            option.value = key;
             hidddenListElement.add(option);
-            hidddenListElement.selectedIndex = 0;
         }
+        hidddenListElement.selectedIndex = 0;
     });
 }
 
@@ -458,21 +464,22 @@ function emptySelectBox(selectElement, callback) {
     callback();
 }
 
-function flyToClickedObject(obj) {
-    // The web client stores clicked or ctrlclicked entities in a dictionary clickedEntities with {id, entity} as KVP.
-    // The function flyTo from Cesium Viewer will be first employed to fly to the selected entity.
-    // NOTE: This flyTo function will fail if the target entity has been unloaded (e.g. user has moved camera away).
-    // In this case, the function zoomToObjectById shall be used instead.
-    // NOTE: This zoomToObjectById function requires a JSON file containing the IDs and coordinates of objects.
-    cesiumViewer.flyTo(clickedEntities[obj.value]).then(function (result) {
-        if (!result) {
-            zoomToObjectById(obj.value);
-        }
-    }).otherwise(function (error) {
-        zoomToObjectById(obj.value);
+function flyToHighlightedObject() {
+    const highlightingListElement = document.getElementById("citydb_highlightinglist");
+    const selectedValue = highlightingListElement.value;
+    let feature = highlightedIdObjects[selectedValue];
+    cesiumViewer.camera.flyToBoundingSphere(feature._storedBoundingSphere, {
+        orientation: feature._storedOrientation
     });
+}
 
-    obj.selectedIndex = 0;
+function flyToHiddenObject() {
+    const hidddenListElement = document.getElementById("citydb_hiddenlist");
+    const selectedValue = hidddenListElement.value;
+    let feature = hiddenIdObjects[selectedValue];
+    cesiumViewer.camera.flyToBoundingSphere(feature._storedBoundingSphere, {
+        orientation: feature._storedOrientation
+    });
 }
 
 function saveLayerSettings() {
@@ -796,8 +803,7 @@ function hideSelectedObjects() {
     var objectIds;
     for (var i = 0; i < layers.length; i++) {
         if (layers[i].active) {
-            objectIds = Object.keys(layers[i].highlightedObjects);
-            layers[i].hideObjects(objectIds);
+            layers[i].hideSelected();
         }
     }
 }
