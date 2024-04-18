@@ -922,14 +922,14 @@
     CitydbKmlLayer.prototype.getEntitiesById = function (objectId) {
         var primitives = this._cesiumViewer.scene.primitives;
 
-        function getEntitiesByIdFromPrimitiveCollection (primitiveCollection, layerId) {
+        function getEntitiesByIdFromPrimitiveCollection(primitiveCollection, layerId) {
             for (var i = 0; i < primitiveCollection.length; i++) {
                 var primitive = primitiveCollection.get(i);
 
                 if (primitive instanceof Cesium.PrimitiveCollection) {
                     var entity = getEntitiesByIdFromPrimitiveCollection(primitiveCollection.get(i), layerId);
 
-                    if(entity) {
+                    if (entity) {
                         return entity;
                     }
                 } else if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
@@ -1081,8 +1081,7 @@
     };
 
     CitydbKmlLayer.prototype.hideObject = function (object) {
-        if (object == null)
-            return;
+        if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
                 var nodes = object._runtime.nodesByName;
@@ -1101,8 +1100,7 @@
     };
 
     CitydbKmlLayer.prototype.showObject = function (object) {
-        if (object == null)
-            return;
+        if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
                 var nodes = object._runtime.nodesByName;
@@ -1196,6 +1194,23 @@
             geometryGraphic = object.point;
         }
         return geometryGraphic.material
+    };
+
+    CitydbKmlLayer.prototype.getAllHighlightedObjects = function () {
+        let scope = this;
+        let result = {}
+        for (let h in scope._highlightedObjects) {
+            let objects = scope.getObjectById(h);
+            if (Cesium.defined(objects) && objects.length !== 0) {
+                let o = objects[0]; // a 3D model may have multiple surfaces -> use one to represent all
+                result[o._id] = o;
+            }
+        }
+        return result;
+    };
+
+    CitydbKmlLayer.prototype.getAllHiddenObjects = function () {
+
     };
 
     window.CitydbKmlLayer = CitydbKmlLayer;
