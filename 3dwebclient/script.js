@@ -465,21 +465,35 @@ function emptySelectBox(selectElement, callback) {
 }
 
 function flyToHighlightedObject() {
-    const highlightingListElement = document.getElementById("citydb_highlightinglist");
-    const selectedValue = highlightingListElement.value;
-    let feature = highlightedIdObjects[selectedValue];
-    cesiumViewer.camera.flyToBoundingSphere(feature._storedBoundingSphere, {
-        orientation: feature._storedOrientation
-    });
+    flyToObject(true);
 }
 
 function flyToHiddenObject() {
-    const hidddenListElement = document.getElementById("citydb_hiddenlist");
-    const selectedValue = hidddenListElement.value;
-    let feature = hiddenIdObjects[selectedValue];
-    cesiumViewer.camera.flyToBoundingSphere(feature._storedBoundingSphere, {
-        orientation: feature._storedOrientation
-    });
+    flyToObject(false);
+}
+
+function flyToObject(highlighted) {
+    let listElement;
+    if (highlighted) {
+        listElement = document.getElementById("citydb_highlightinglist");
+    } else {
+        listElement = document.getElementById("citydb_hiddenlist");
+    }
+    const selectedValue = listElement.value;
+    let object = highlightedIdObjects[selectedValue];
+    if (object instanceof Cesium.Entity) {
+        var curCameraHeight = cesiumViewer.camera.positionCartographic.height;
+        var curCameraHeading = cesiumViewer.camera.heading;
+        var curCameraPitch = cesiumViewer.camera.pitch;
+        var curCameraRoll = cesiumViewer.camera.roll;
+        cesiumViewer.flyTo(object, {
+            offset: new Cesium.HeadingPitchRange(curCameraHeading, curCameraPitch, curCameraHeight)
+        });
+    } else if (object instanceof Cesium.Cesium3DTileFeature) {
+        cesiumViewer.camera.flyToBoundingSphere(object._storedBoundingSphere, {
+            orientation: object._storedOrientation
+        });
+    }
 }
 
 function saveLayerSettings() {
