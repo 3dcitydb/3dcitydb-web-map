@@ -698,19 +698,14 @@
         this._highlightedObjects = this._highlightedObjects;
     };
 
-    /**
-     * hideObjects
-     * @param {Array<String>} A list of Object Ids which will be hidden
-     */
-    CitydbKmlLayer.prototype.hideObjects = function (toHide) {
-        for (var i = 0; i < toHide.length; i++) {
-            var objectId = toHide[i];
+    CitydbKmlLayer.prototype.hideSelected = function () {
+        let scope = this;
+        for (let objectId in scope._highlightedObjects) {
             if (!this.isInHiddenList(objectId)) {
                 this._hiddenObjects.push(objectId);
             }
             this.hideObject(this.getObjectById(objectId));
         }
-        this._hiddenObjects = this._hiddenObjects;
     };
 
     /**
@@ -974,8 +969,7 @@
     };
 
     CitydbKmlLayer.prototype.highlightObject = function (object) {
-        if (object == null)
-            return;
+        if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
                 var highlightColor = this._highlightedObjects[object._id._name];
@@ -990,6 +984,15 @@
                     targetEntity.model.colorBlendAmount = 0.5;
                     this._cesiumViewer.scene.requestRenderMode = true;
                     this._cesiumViewer.scene.requestRender();
+                    // Store camera position
+                    let boundingSphere = new Cesium.BoundingSphere();
+                    this._cesiumViewer.dataSourceDisplay.getBoundingSphere(targetEntity, false, boundingSphere);
+                    targetEntity._storedBoundingSphere = boundingSphere;
+                    targetEntity._storedHeadingPitchRange = new Cesium.HeadingPitchRange(
+                        this._cesiumViewer.camera.heading,
+                        this._cesiumViewer.camera.pitch,
+                        this._cesiumViewer.camera.positionCartographic.height
+                    )
                 }
             }
         } else if (object instanceof Array) {
@@ -1000,13 +1003,21 @@
                 }
                 childEntity.originalMaterial = this.getObjectMaterial(childEntity);
                 this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name]);
+                // Store camera position
+                let boundingSphere = new Cesium.BoundingSphere();
+                this._cesiumViewer.dataSourceDisplay.getBoundingSphere(childEntity, false, boundingSphere);
+                childEntity._storedBoundingSphere = boundingSphere;
+                childEntity._storedHeadingPitchRange = new Cesium.HeadingPitchRange(
+                    this._cesiumViewer.camera.heading,
+                    this._cesiumViewer.camera.pitch,
+                    this._cesiumViewer.camera.positionCartographic.height
+                )
             }
         }
     };
 
     CitydbKmlLayer.prototype.unHighlightObject = function (object) {
-        if (object == null)
-            return;
+        if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
                 var targetEntity = object._id;
@@ -1210,7 +1221,16 @@
     };
 
     CitydbKmlLayer.prototype.getAllHiddenObjects = function () {
-
+        let scope = this;
+        let result = {};
+        for (let objectId of scope._hiddenObjects) {
+            let objects = scope.getObjectById(objectId);
+            if (Cesium.defined(objects) && objects.length !== 0) {
+                let o = objects[0]; // a 3D model may have multiple surfaces -> use one to represent all
+                result[o._id] = o;
+            }
+        }
+        return result;
     };
 
     window.CitydbKmlLayer = CitydbKmlLayer;

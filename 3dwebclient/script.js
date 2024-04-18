@@ -473,21 +473,23 @@ function flyToHiddenObject() {
 }
 
 function flyToObject(highlighted) {
-    let listElement;
+    let object;
     if (highlighted) {
-        listElement = document.getElementById("citydb_highlightinglist");
+        let listElement = document.getElementById("citydb_highlightinglist");
+        const selectedValue = listElement.value;
+        object = highlightedIdObjects[selectedValue];
     } else {
-        listElement = document.getElementById("citydb_hiddenlist");
+        let listElement = document.getElementById("citydb_hiddenlist");
+        const selectedValue = listElement.value;
+        object = hiddenIdObjects[selectedValue];
     }
-    const selectedValue = listElement.value;
-    let object = highlightedIdObjects[selectedValue];
+
+    // flyTo function only executes for shown entities
+    // -> hidden entities will not be flown to
+    // -> store camera position when entites were clicked
     if (object instanceof Cesium.Entity) {
-        var curCameraHeight = cesiumViewer.camera.positionCartographic.height;
-        var curCameraHeading = cesiumViewer.camera.heading;
-        var curCameraPitch = cesiumViewer.camera.pitch;
-        var curCameraRoll = cesiumViewer.camera.roll;
-        cesiumViewer.flyTo(object, {
-            offset: new Cesium.HeadingPitchRange(curCameraHeading, curCameraPitch, curCameraHeight)
+        cesiumViewer.camera.flyToBoundingSphere(object._storedBoundingSphere, {
+            offset: object._storedHeadingPitchRange
         });
     } else if (object instanceof Cesium.Cesium3DTileFeature) {
         cesiumViewer.camera.flyToBoundingSphere(object._storedBoundingSphere, {

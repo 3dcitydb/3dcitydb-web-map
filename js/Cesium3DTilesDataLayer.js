@@ -554,8 +554,9 @@
 
     Cesium3DTilesDataLayer.prototype.hideObjects = function (toHideFeatures) {
         let scope = this;
+        if (!Cesium.defined(scope._hiddenObjects)) return;
         for (let feature of toHideFeatures) {
-            if (Cesium.defined(scope._hiddenObjects) && !scope._hiddenObjects.includes(feature)) {
+            if (!scope._hiddenObjects.includes(feature)) {
                 scope._hiddenObjects.push(feature);
             }
             feature.show = false;
@@ -571,7 +572,7 @@
         for (let feature of scope._hiddenObjects) {
             feature.show = true;
         }
-        scope._hiddenObjects = {};
+        scope._hiddenObjects = [];
     };
 
     Cesium3DTilesDataLayer.prototype.unHighlightAllObjects = function () {
