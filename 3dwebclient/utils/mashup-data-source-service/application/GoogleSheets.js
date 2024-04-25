@@ -2,18 +2,27 @@
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            ({__proto__: []} instanceof Array && function (d, b) {
+                d.__proto__ = b;
+            }) ||
+            function (d, b) {
+                for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+            };
         return extendStatics(d, b);
     };
     return function (d, b) {
         extendStatics(d, b);
-        function __() { this.constructor = d; }
+
+        function __() {
+            this.constructor = d;
+        }
+
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
 var GoogleSheets = /** @class */ (function (_super) {
     __extends(GoogleSheets, _super);
+
     function GoogleSheets(signInController, options, gapi) {
         var _this = _super.call(this, signInController, options) || this;
         _this._spreadsheetId = options.uri.replace(/.+?(spreadsheets\/d\/)/, "").replace(/(?=\/edit).+/, "");
@@ -29,6 +38,7 @@ var GoogleSheets = /** @class */ (function (_super) {
         _this._signInController = signInController;
         return _this;
     }
+
     GoogleSheets.prototype.responseToKvp = function (response) {
         var result = new Map();
         var rows = response.table.rows;
@@ -43,8 +53,7 @@ var GoogleSheets = /** @class */ (function (_super) {
                     var value = rows[0].c[i] ? rows[0].c[i].v : undefined;
                     result[key] = value;
                 }
-            }
-            else {
+            } else {
                 // one attribute per row
                 // only store id once
                 // (because the vertical table has multiple lines of the same id)
@@ -103,8 +112,9 @@ var GoogleSheets = /** @class */ (function (_super) {
         // TODO
         return null;
     };
-    GoogleSheets.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
-        this.queryUsingSql("SELECT * WHERE A='" + id + "'", callback, !limit ? Number.MAX_VALUE : limit, clickedObject);
+    GoogleSheets.prototype.queryUsingId = function (gmlid, callback, limit, clickedObject) {
+        // gmlid = {"key" : ..., "value": ...}
+        this.queryUsingSql("SELECT * WHERE A='" + gmlid["value"] + "'", callback, !limit ? Number.MAX_VALUE : limit, clickedObject);
     };
     GoogleSheets.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
         // TODO handle limit
@@ -133,8 +143,10 @@ var GoogleSheets = /** @class */ (function (_super) {
         // TODO handle sql query and limit
         var scope = this;
         handleClientLoad(callback);
+
         function handleClientLoad(callback) {
             scope._gapi.load('client:auth2', initClient);
+
             function initClient() {
                 scope._gapi.client.init({
                     'apiKey': scope._apiKey,
@@ -146,17 +158,18 @@ var GoogleSheets = /** @class */ (function (_super) {
                         // OAuth credentials available
                         scope._gapi.auth2.getAuthInstance().isSignedIn.listen(updateSignInStatus);
                         updateSignInStatus(scope._gapi.auth2.getAuthInstance().isSignedIn.get());
-                    }
-                    else {
+                    } else {
                         // no sign-in required?
                         makeApiCall();
                     }
                 });
+
                 function updateSignInStatus(isSignedIn) {
                     if (isSignedIn) {
                         makeApiCall();
                     }
                 }
+
                 function makeApiCall() {
                     var params = {
                         // The spreadsheet to request.

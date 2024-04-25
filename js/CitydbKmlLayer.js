@@ -80,6 +80,8 @@
         this._layerClampToGround = options.layerClampToGround;
         this._gltfVersion = options.gltfVersion;
 
+        this._fnInfoTable = undefined;
+
         this._configParameters = {
             "id": this.id,
             "url": this.url,
@@ -359,6 +361,15 @@
             }
         },
 
+        fnInfoTable: {
+            get: function () {
+                return this._fnInfoTable;
+            },
+            set: function (value) {
+                this._fnInfoTable = value;
+            }
+        },
+
         configParameters: {
             get: function () {
                 return this._configParameters;
@@ -466,12 +477,13 @@
      * adds this layer to the given Cesium viewer
      * @param {CesiumViewer} cesiumViewer
      */
-    CitydbKmlLayer.prototype.addToCesium = function (cesiumViewer) {
+    CitydbKmlLayer.prototype.addToCesium = function (cesiumViewer, fnInfoTable) {
         this._cesiumViewer = cesiumViewer;
+        this._fnInfoTable = fnInfoTable;
         this._urlSuffix = CitydbUtil.get_suffix_from_filename(this._url);
         var that = this;
         var deferred = Cesium.defer();
-        if (this._urlSuffix == 'json') {
+        if (this._urlSuffix === 'json') {
             this._citydbKmlDataSource = new CitydbKmlDataSource({
                 layerId: this._id,
                 camera: cesiumViewer.scene.camera,
@@ -480,7 +492,7 @@
             });
             this.registerMouseEventHandlers();
             return loadMasterJSON(that, true);
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
+        } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
                 camera: cesiumViewer.scene.camera,
                 canvas: cesiumViewer.scene.canvas
@@ -495,7 +507,7 @@
             }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
-        } else if (this._urlSuffix == 'czml') {
+        } else if (this._urlSuffix === 'czml') {
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
             this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
@@ -514,12 +526,12 @@
         this.registerMouseEventHandlers();
 
         Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function () {
-            if (that._urlSuffix == 'json')
+            if (that._urlSuffix === 'json')
                 that._citydbKmlTilingManager.clearCaching();
         });
 
         Cesium.knockout.getObservable(this, '_hiddenObjects').subscribe(function () {
-            if (that._urlSuffix == 'json')
+            if (that._urlSuffix === 'json')
                 that._citydbKmlTilingManager.clearCaching();
         });
 
@@ -540,7 +552,7 @@
             var primitive = object.primitive;
             var objectId = targetEntity.name;
 
-            if (objectId == "Tile border")
+            if (objectId === "Tile border")
                 return;
 
             if (scope.isInHighlightedList(objectId))
@@ -551,6 +563,8 @@
 
             highlightThis[objectId] = highlightColor;
             scope.highlight(highlightThis);
+
+            scope._fnInfoTable([targetEntity, {}], scope);
         });
 
         // CtrlclickEvent Handler for Multi-Selection and Highlighting...
@@ -560,7 +574,7 @@
 
             var objectId = targetEntity.name;
 
-            if (objectId == "Tile border")
+            if (objectId === "Tile border")
                 return;
 
             if (scope.isInHighlightedList(objectId)) {

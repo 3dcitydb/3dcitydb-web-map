@@ -44,11 +44,11 @@
         this._cameraPosition = {};
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
         this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
+        this._tableType = Cesium.defaultValue(options.tableType, "");
         var dataSourceControllerOptions = {};
         dataSourceControllerOptions.uri = this._thematicDataUrl;
         dataSourceControllerOptions.tableType = this._tableType;
         this._dataSourceController = new DataSourceController(this._thematicDataSource, signInController, dataSourceControllerOptions);
-        this._tableType = Cesium.defaultValue(options.tableType, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._maximumScreenSpaceError = Cesium.defaultValue(options.maximumScreenSpaceError, "");
@@ -460,11 +460,7 @@
                     const key = propertyIds[i];
                     entityContent[key] = pickedFeature.getProperty(key);
                 }
-                const gmlid = pickedFeature.getProperty("gml:id");
-                scope._fnInfoTable([gmlid, scope._selectedEntity, entityContent], scope);
-
-                // Set gmlid as tile of the info table
-                scope._selectedEntity.name = gmlid;
+                scope._fnInfoTable([scope._selectedEntity, entityContent], scope);
             },
             Cesium.ScreenSpaceEventType.LEFT_CLICK
         );

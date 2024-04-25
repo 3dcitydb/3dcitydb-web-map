@@ -1071,28 +1071,52 @@ function toggleTerrainShadows() {
 
 // source https://www.w3resource.com/javascript-exercises/javascript-regexp-exercise-9.php
 function isValidUrl(str) {
-    regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+    const regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
     return regexp.test(str);
 }
 
 function createInfoTable(res, citydbLayer) {
-    var cesiumEntity = res[1];
+    const cesiumEntity = res[0];
     cesiumEntity.description = "Loading feature information...";
 
-    var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    const kvp = res[1];
 
-    function displayKvp(kvp) {
-        if (!kvp) {
+    const thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+    const selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+
+    function getGmlid(kvp) {
+        // Search for gmlid in the result, accounting for all key names, case-insensitive
+        const keys = ["gmlid", "gml_id", "gml:id", "gml-id", "id"];
+        let gmlid = {};
+        for (const key in kvp) {
+            if (!keys.includes(key.toLowerCase())) continue;
+            gmlid["key"] = key;
+            gmlid["value"] = kvp[key];
+            break;
+        }
+        return gmlid;
+    }
+
+    function displayKvp(kvp, gmlid) {
+        if (!Cesium.defined(kvp)) {
             cesiumEntity.description = 'No feature information found';
         } else {
             console.log(kvp);
-            const keyGmlid = "gml:id";
-            var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
-            html += '<tr><td>' + keyGmlid + '</td><td>' + kvp[keyGmlid] + '</td></tr>';
-            for (var key in kvp) {
-                if (key === keyGmlid) continue;
-                var iValue = kvp[key];
+
+            // Set title of infotable
+            if (cesiumEntity.name !== gmlid["value"] && Cesium.defined(gmlid["value"])) {
+                cesiumEntity.name = gmlid["value"];
+            }
+
+            // Content to display
+            let html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
+            if (Cesium.defined(gmlid["key"]) && Cesium.defined(gmlid["value"])) {
+                html += '<tr><td>' + gmlid["key"] + '</td><td>' + gmlid["value"] + '</td></tr>';
+            }
+            for (const key in kvp) {
+                if (key === gmlid["key"]) continue;
+                if (!Cesium.defined(key) || key.trim() === "") continue;
+                let iValue = kvp[key];
                 // check if this value is a valid URL
                 if (isValidUrl(iValue)) {
                     iValue = '<a href="' + iValue + '" target="_blank">' + iValue + '</a>';
@@ -1105,10 +1129,14 @@ function createInfoTable(res, citydbLayer) {
         }
     }
 
-    var gmlid = selectedThematicDataSource === "KML" ? res[1]._id : res[0];
+    let gmlid = getGmlid(kvp);
+    if (!Cesium.defined(gmlid) || !Cesium.defined(gmlid["key"]) || !Cesium.defined(gmlid["value"])) {
+        gmlid["key"] = "gml_id"; // default
+        gmlid["value"] = cesiumEntity.name; // for KML
+    }
     if (selectedThematicDataSource === "Embedded") {
-        if (Cesium.defined(res[2])) {
-            displayKvp(res[2]); // embedded properties are stored here
+        if (Cesium.defined(res[1])) {
+            displayKvp(res[1], gmlid); // embedded properties are stored here
         } else {
             cesiumEntity.description = "Could not load embedded thematic data";
         }
