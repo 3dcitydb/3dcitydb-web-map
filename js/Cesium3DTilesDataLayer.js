@@ -450,6 +450,9 @@
                 viewer.selectedEntity = scope._selectedEntity;
                 pickedFeature.color = scope._highlightColor;
 
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, scope._selectedEntity);
+
                 // Info table
                 let entityContent = {};
                 const propertyIds = pickedFeature.getPropertyIds();
@@ -488,6 +491,9 @@
                 // Highlight newly selected feature
                 viewer.selectedEntity = scope._selectedEntity;
                 pickedFeature.color = scope._highlightColor;
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, scope._selectedEntity);
             },
             Cesium.ScreenSpaceEventType.LEFT_CLICK,
             Cesium.KeyboardEventModifier.CTRL

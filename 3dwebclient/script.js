@@ -1195,28 +1195,33 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
 }
 
 function showInExternalMaps() {
-    var mapOptionList = document.getElementById('citydb_showinexternalmaps');
-    var selectedIndex = mapOptionList.selectedIndex;
+    const mapOptionList = document.getElementById('citydb_showinexternalmaps');
+    const selectedIndex = mapOptionList.selectedIndex;
     mapOptionList.selectedIndex = 0;
 
-    var selectedEntity = cesiumViewer.selectedEntity;
+    const selectedEntity = cesiumViewer.selectedEntity;
     if (!Cesium.defined(selectedEntity))
         return;
 
-    var selectedEntityPosition = selectedEntity.position;
-    var wgs84OCoordinate;
+    const selectedEntityPosition = selectedEntity.position;
+    let wgs84OCoordinate;
 
+    let selectedEntityBoundingSphere;
     if (!Cesium.defined(selectedEntityPosition)) {
-        var boundingSphereScratch = new Cesium.BoundingSphere();
-        cesiumViewer._dataSourceDisplay.getBoundingSphere(selectedEntity, false, boundingSphereScratch);
-        wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(boundingSphereScratch.center);
+        selectedEntityBoundingSphere = selectedEntity._storedBoundingSphere; // From Cesium 3D tiles feature
+        if (!Cesium.defined(selectedEntityBoundingSphere)) {
+            const boundingSphereScratch = new Cesium.BoundingSphere();
+            cesiumViewer._dataSourceDisplay.getBoundingSphere(selectedEntity, false, boundingSphereScratch);
+            selectedEntityBoundingSphere = boundingSphereScratch;
+        }
+        wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityBoundingSphere.center);
     } else {
         wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityPosition._value);
 
     }
-    var lat = Cesium.Math.toDegrees(wgs84OCoordinate.latitude);
-    var lon = Cesium.Math.toDegrees(wgs84OCoordinate.longitude);
-    var mapLink = "";
+    const lat = Cesium.Math.toDegrees(wgs84OCoordinate.latitude);
+    const lon = Cesium.Math.toDegrees(wgs84OCoordinate.longitude);
+    let mapLink = "";
 
     switch (selectedIndex) {
         case 1:
