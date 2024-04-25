@@ -14,6 +14,10 @@ This is a major release.
 * Thematic data embedded inside 3D tiles can now be displayed in the info table when a 3D tile feature is clicked,
   see [`ef098ad`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ef098ad970b0fe07a46efbd1ef09b080ba84297b)
   and [`9036497`](https://github.com/3dcitydb/3dcitydb-web-map/commit/903649701bd05e469ad2d0d5de2ab816ee97d385).
+* Thematic data sources like PostgREST and Google Spreadsheets can now also be used for Cesium 3D Tiles,
+  see [`06a0c1b`](https://github.com/3dcitydb/3dcitydb-web-map/commit/06a0c1be09ea9fd9a5eacf462769322ccd1f56f6).
+* Cesium 3D Tiles can now be nagivated together with Google Street View, Dual Map View, etc.,
+  see [`a4e6bf3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a4e6bf32476747c3c318207dae155e955af446dd).
 
 ##### UPDATES
 
