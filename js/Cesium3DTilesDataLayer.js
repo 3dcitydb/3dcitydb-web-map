@@ -520,11 +520,14 @@
      * @param undefined
      */
     Cesium3DTilesDataLayer.prototype.reActivate = function () {
-        var that = this;
-        var deferred = Cesium.defer();
-        this._prevSelectedFeatures = {};
-        this._hiddenObjects = [];
-        this._cesiumViewer.scene.primitives.remove(this._tileset);
+        const scope = this;
+        const deferred = Cesium.defer();
+        scope._prevSelectedFeatures = [];
+        scope._prevSelectedColors = [];
+        scope._prevHoveredFeature = undefined;
+        scope._prevHoveredColor = undefined;
+        scope._hiddenObjects = [];
+        scope._cesiumViewer.scene.primitives.remove(this._tileset);
 
         this._tileset = new Cesium.Cesium3DTileset({
             url: this.autofillUrl(this._url),
@@ -532,12 +535,12 @@
         });
 
         this._tileset.readyPromise.then(function (tileset) {
-            that._cesiumViewer.scene.primitives.add(tileset);
-            that.configPointCloudShading(tileset);
-            that.registerTilesLoadedEventHandler();
+            scope._cesiumViewer.scene.primitives.add(tileset);
+            scope.configPointCloudShading(tileset);
+            scope.registerTilesLoadedEventHandler();
             deferred.resolve();
         }, function () {
-            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });
 
         return deferred.promise;
