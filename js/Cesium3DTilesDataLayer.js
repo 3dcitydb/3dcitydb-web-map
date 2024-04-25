@@ -459,6 +459,9 @@
                 }
                 const gmlid = pickedFeature.getProperty("gml:id");
                 scope._fnInfoTable([gmlid, scope._selectedEntity, entityContent], scope);
+
+                // Set gmlid as tile of the info table
+                scope._selectedEntity.name = gmlid;
             },
             Cesium.ScreenSpaceEventType.LEFT_CLICK
         );
