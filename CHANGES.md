@@ -16,6 +16,10 @@ This is a major release.
   and [`9036497`](https://github.com/3dcitydb/3dcitydb-web-map/commit/903649701bd05e469ad2d0d5de2ab816ee97d385).
 * Thematic data sources like PostgREST and Google Spreadsheets can now also be used for Cesium 3D Tiles,
   see [`06a0c1b`](https://github.com/3dcitydb/3dcitydb-web-map/commit/06a0c1be09ea9fd9a5eacf462769322ccd1f56f6).
+    * This also supports different identifier names, such as `gml:id`, `gml_id`, `gmlid`, `gml-id`, `id`, etc.,
+      regardless whether the letters are given in uppercase or lowercase.
+    * The same also applies to the column name of the identifiers in PostgREST and Google Spreadsheets,
+      as long as the column names are valid.
 * Cesium 3D Tiles can now be nagivated together with Google Street View, Dual Map View, etc.,
   see [`a4e6bf3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a4e6bf32476747c3c318207dae155e955af446dd).
 
@@ -239,7 +243,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute1 | attribute2 | attribute3 | attribute4 |
-                                            | ------------- | ------------- | ------------- | ------------- | ------------- |
+                                                  | ------------- | ------------- | ------------- | ------------- | ------------- |
       | gmlid1  | value1  | value2  | value3  | value4  |
       | gmlid2  | value1  | value2  | value3  | value4  |
 
@@ -251,7 +255,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute | value |
-                                            | ------------- | ------------- | ------------- |
+                                                  | ------------- | ------------- | ------------- |
       | gmlid1  | attribute1  | value1  |
       | gmlid1  | attribute2  | value2  |
       | gmlid1  | attribute3  | value3  |
@@ -312,7 +316,7 @@ This is a major release.
   where:
 
   | Parameter        | Description           | Allowed values  | Default Value |
-                | ------------- |-------------| -----| ----|
+                  | ------------- |-------------| -----| ----|
   | `url`      | A valid path to the HTML file | An absolute path if the HTML file is located in another domain or a relative path if the HTML file is located in the same project folder as the web client | `splash/SplashWindow.html` |
   | `showOnStart`     | A boolean that determines whether the splash window should be shown upon start or not      |   `true` or `false` | `true` |
 
