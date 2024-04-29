@@ -292,7 +292,7 @@
                                             </select>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr id="thematicDataUrlDiv">
                                         <td>thematicDataUrl</td>
                                         <td>
                                             <input type="text" data-bind="value: thematicDataUrl">
@@ -304,7 +304,6 @@
                                             <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
                                                 <option value="GoogleSheets" selected="selected">Google Sheets API</option>
                                                 <option value="PostgreSQL">PostgreSQL REST API</option>
-                                                <option value="KML">KML Documents</option>
                                                 <option value="Embedded">Embedded</option>
                                             </select>
                                         </td>

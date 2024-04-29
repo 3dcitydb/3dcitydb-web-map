@@ -1308,12 +1308,21 @@ function layerDataTypeDropdownOnchange() {
 }
 
 function thematicDataSourceAndTableTypeDropdownOnchange() {
-    if (webMap && webMap._activeLayer) {
-        var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-        var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    const thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+    const thematicTableTypeDropdownDiv = document.getElementById("thematicTableTypeDropdownDiv");
+    const thematicDataUrlDiv = document.getElementById("thematicDataUrlDiv");
+    if (thematicDataSourceDropdown.value === "Embedded") {
+        thematicTableTypeDropdownDiv.style = "display: none;";
+        thematicDataUrlDiv.style = "display: none;";
+    } else {
+        thematicTableTypeDropdownDiv.style = "";
+        thematicDataUrlDiv.style = "";
+    }
 
-        var tableTypeDropdown = document.getElementById("tableTypeDropdown");
-        var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex] == null ? ""
+    if (webMap && webMap._activeLayer) {
+        const selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+        const tableTypeDropdown = document.getElementById("tableTypeDropdown");
+        const selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex] == null ? ""
             : tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
 
         addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
@@ -1329,19 +1338,21 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
         // }
 
-        var options = getDataSourceControllerOptions(webMap._activeLayer);
+        const options = getDataSourceControllerOptions(webMap._activeLayer);
         // Mashup Data Source Service
         webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
     }
 }
 
 function getDataSourceControllerOptions(layer) {
-    var dataSourceUri = layer.thematicDataUrl === "" ? layer.url : layer.thematicDataUrl;
-    var options = {
+    const dataSourceUri = layer.thematicDataUrl === "" ? layer.url : layer.thematicDataUrl;
+    const layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    const options = {
         // name: "",
         // type: "",
         // provider: "",
         uri: dataSourceUri,
+        layerType: layerDataTypeDropdown.value,
         tableType: layer.tableType,
         thirdPartyHandler: {
             type: "Cesium",
