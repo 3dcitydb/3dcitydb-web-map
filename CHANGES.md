@@ -22,6 +22,8 @@ This is a major release.
       as long as the column names are valid.
 * Cesium 3D Tiles can now be nagivated together with Google Street View, Dual Map View, etc.,
   see [`a4e6bf3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a4e6bf32476747c3c318207dae155e955af446dd).
+* WMS and terrain layers without an icon will be assigned with default ones,
+  see[`c3b6c02`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c3b6c0221e04448dbb964e9b8ba7a3c080dbb264).
 
 ##### UPDATES
 
@@ -39,8 +41,10 @@ This is a major release.
 
 * Fixed `geocoder` for Bing Maps (breaking change in
   Cesium [`v1.73`](https://github.com/CesiumGS/cesium/blob/main/CHANGES.md#breaking-changes-mega-14)).
-* Fixed Cesium `defer` accordingly to native `Promise` API
-* Fixed highlighting due to breaking changes in Cesium
+* Fixed Cesium `defer` accordingly to native `Promise` API.
+* Fixed highlighting due to breaking changes in Cesium.
+* Fixed insertion and removal of WMS and terrain layers,
+  see[`c3b6c02`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c3b6c0221e04448dbb964e9b8ba7a3c080dbb264).
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
@@ -243,7 +247,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute1 | attribute2 | attribute3 | attribute4 |
-                                                  | ------------- | ------------- | ------------- | ------------- | ------------- |
+                                                        | ------------- | ------------- | ------------- | ------------- | ------------- |
       | gmlid1  | value1  | value2  | value3  | value4  |
       | gmlid2  | value1  | value2  | value3  | value4  |
 
@@ -255,7 +259,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute | value |
-                                                  | ------------- | ------------- | ------------- |
+                                                        | ------------- | ------------- | ------------- |
       | gmlid1  | attribute1  | value1  |
       | gmlid1  | attribute2  | value2  |
       | gmlid1  | attribute3  | value3  |
@@ -316,7 +320,7 @@ This is a major release.
   where:
 
   | Parameter        | Description           | Allowed values  | Default Value |
-                  | ------------- |-------------| -----| ----|
+                    | ------------- |-------------| -----| ----|
   | `url`      | A valid path to the HTML file | An absolute path if the HTML file is located in another domain or a relative path if the HTML file is located in the same project folder as the web client | `splash/SplashWindow.html` |
   | `showOnStart`     | A boolean that determines whether the splash window should be shown upon start or not      |   `true` or `false` | `true` |
 
