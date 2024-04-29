@@ -979,52 +979,74 @@ function removeSelectedLayer() {
 }
 
 function addWebMapServiceProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var wmsProviderViewModel = new Cesium.ProviderViewModel({
-        name: addWmsViewModel.name.trim(),
-        iconUrl: addWmsViewModel.iconUrl.trim(),
-        tooltip: addWmsViewModel.tooltip.trim(),
-        creationFunction: function () {
-            return new Cesium.WebMapServiceImageryProvider({
-                url: new Cesium.Resource({
-                    url: addWmsViewModel.url.trim(),
-                    proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
-                }),
-                layers: addWmsViewModel.layers.trim(),
-                parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
-            });
+    function update(callback) {
+        removeImageryProvider();
+        callback();
+    }
+
+    update(function () {
+        const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+        let iconUrl = addWmsViewModel.iconUrl.trim();
+        if (!Cesium.defined(iconUrl) || iconUrl === "") {
+            iconUrl = "images/icon_wms.png";
         }
+        const wmsProviderViewModel = new Cesium.ProviderViewModel({
+            name: addWmsViewModel.name.trim(),
+            iconUrl: iconUrl,
+            tooltip: addWmsViewModel.tooltip.trim(),
+            creationFunction: function () {
+                return new Cesium.WebMapServiceImageryProvider({
+                    url: new Cesium.Resource({
+                        url: addWmsViewModel.url.trim(),
+                        proxy: addWmsViewModel.proxyUrl.trim().length === 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                    }),
+                    layers: addWmsViewModel.layers.trim(),
+                    parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
+                });
+            }
+        });
+        baseLayerPickerViewModel.imageryProviderViewModels.push(wmsProviderViewModel);
+        baseLayerPickerViewModel.selectedImagery = wmsProviderViewModel;
     });
-    baseLayerPickerViewModel.imageryProviderViewModels.push(wmsProviderViewModel);
-    baseLayerPickerViewModel.selectedImagery = wmsProviderViewModel;
 }
 
 function removeImageryProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var selectedImagery = baseLayerPickerViewModel.selectedImagery;
+    const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+    const selectedImagery = baseLayerPickerViewModel.selectedImagery;
     baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
     baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
 }
 
 function addTerrainProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var demProviderViewModel = new Cesium.ProviderViewModel({
-        name: addTerrainViewModel.name.trim(),
-        iconUrl: addTerrainViewModel.iconUrl.trim(),
-        tooltip: addTerrainViewModel.tooltip.trim(),
-        creationFunction: function () {
-            return new Cesium.CesiumTerrainProvider({
-                url: addTerrainViewModel.url.trim()
-            });
+    function update(callback) {
+        removeTerrainProvider();
+        callback();
+    }
+
+    update(function () {
+        let iconUrl = addTerrainViewModel.iconUrl.trim();
+        if (!Cesium.defined(iconUrl) || iconUrl === "") {
+            iconUrl = "images/icon_terrain.png";
         }
-    })
-    baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
-    baseLayerPickerViewModel.selectedTerrain = demProviderViewModel;
+        const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+        const demProviderViewModel = new Cesium.ProviderViewModel({
+            name: addTerrainViewModel.name.trim(),
+            iconUrl: iconUrl,
+            tooltip: addTerrainViewModel.tooltip.trim(),
+            creationFunction: function () {
+                return new Cesium.CesiumTerrainProvider({
+                    url: addTerrainViewModel.url.trim()
+                });
+            }
+        });
+        baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
+        baseLayerPickerViewModel.selectedTerrain = demProviderViewModel;
+    });
 }
 
 function removeTerrainProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
+    const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+    const selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
     baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
     baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
 }
