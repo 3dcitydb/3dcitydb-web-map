@@ -6,7 +6,8 @@ This is a major release.
 
 ##### NEW
 
-* Added support for Index 3D Scene Layers and GeoJSON (using embedded thematic data).
+* Added support for Index 3D Scene (i3s) layers.
+* Added support for GeoJSON (using embedded thematic data).
 * Added option for maximum screen space error in 3D tiles,
   see [`bd54bed`](https://github.com/3dcitydb/3dcitydb-web-map/commit/bd54bede7c393917fdb8c5bb43eaad3fb9110555).
 * Selecting an entity from the lists of highlighted or hidden objects will fly to its corresponding 3D model,
@@ -247,7 +248,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute1 | attribute2 | attribute3 | attribute4 |
-                                                        | ------------- | ------------- | ------------- | ------------- | ------------- |
+      | ------------- | ------------- | ------------- | ------------- | ------------- |
       | gmlid1  | value1  | value2  | value3  | value4  |
       | gmlid2  | value1  | value2  | value3  | value4  |
 
@@ -259,7 +260,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute | value |
-                                                        | ------------- | ------------- | ------------- |
+      | ------------- | ------------- | ------------- |
       | gmlid1  | attribute1  | value1  |
       | gmlid1  | attribute2  | value2  |
       | gmlid1  | attribute3  | value3  |
@@ -320,7 +321,7 @@ This is a major release.
   where:
 
   | Parameter        | Description           | Allowed values  | Default Value |
-                    | ------------- |-------------| -----| ----|
+  | ------------- |-------------| -----| ----|
   | `url`      | A valid path to the HTML file | An absolute path if the HTML file is located in another domain or a relative path if the HTML file is located in the same project folder as the web client | `splash/SplashWindow.html` |
   | `showOnStart`     | A boolean that determines whether the splash window should be shown upon start or not      |   `true` or `false` | `true` |
 
