@@ -1108,7 +1108,7 @@ function createInfoTable(res, citydbLayer) {
 
     function getGmlid(kvp) {
         // Search for gmlid in the result, accounting for all key names, case-insensitive
-        const keys = ["gmlid", "gml_id", "gml:id", "gml-id", "id"];
+        const keys = ["gmlid", "gml_id", "gml:id", "gml-id", "objectid", "object_id", "object-id", "id"];
         let gmlid = {};
         for (const key in kvp) {
             if (!keys.includes(key.toLowerCase())) continue;
@@ -1297,20 +1297,21 @@ function showInExternalMaps() {
 }
 
 function layerDataTypeDropdownOnchange() {
-    var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
-    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "COLLADA/KML/glTF") {
+    const layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    const selectedValue = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
+    if (selectedValue !== "COLLADA/KML/glTF") {
         document.getElementById("gltfVersionDropdownRow").style.display = "none";
     } else {
         document.getElementById("gltfVersionDropdownRow").style.display = "";
     }
 
-    if (["COLLADA/KML/glTF", "geojson"].includes(layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value)) {
+    if (["COLLADA/KML/glTF", "geojson"].includes(selectedValue)) {
         document.getElementById("layerProxyAndClampToGround").style.display = "";
     } else {
         document.getElementById("layerProxyAndClampToGround").style.display = "none";
     }
 
-    if (["i3s", "geojson"].includes(layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value)) {
+    if (["i3s", "geojson"].includes(selectedValue)) {
         document.getElementById("thematicDataSourceDropDownDiv").style.display = "none";
         document.getElementById("thematicTableTypeDropdownDiv").style.display = "none";
         document.getElementById("thematicDataSourceDropdown").value = "Embedded";
@@ -1320,13 +1321,13 @@ function layerDataTypeDropdownOnchange() {
         document.getElementById("thematicTableTypeDropdownDiv").style.display = "";
     }
 
-    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "Cesium 3D Tiles") {
+    if (selectedValue !== "Cesium 3D Tiles" && selectedValue !== "i3s") {
         document.getElementById("maximumScreenSpaceError").style.display = "none";
     } else {
         document.getElementById("maximumScreenSpaceError").style.display = "";
     }
 
-    addLayerViewModel["layerDataType"] = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
+    addLayerViewModel["layerDataType"] = selectedValue;
 }
 
 function thematicDataSourceAndTableTypeDropdownOnchange() {
