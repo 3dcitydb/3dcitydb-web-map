@@ -1311,7 +1311,7 @@ function layerDataTypeDropdownOnchange() {
         document.getElementById("layerProxyAndClampToGround").style.display = "none";
     }
 
-    if (["i3s", "geojson"].includes(selectedValue)) {
+    if (["geojson"].includes(selectedValue)) {
         document.getElementById("thematicDataSourceDropDownDiv").style.display = "none";
         document.getElementById("thematicTableTypeDropdownDiv").style.display = "none";
         document.getElementById("thematicDataSourceDropdown").value = "Embedded";
