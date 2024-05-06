@@ -2,15 +2,15 @@
  * 3DCityDB-Web-Map
  * http://www.3dcitydb.org/
  * 
- * Copyright 2015 - 2017
+ * Copyright 2015 - 2024
  * Chair of Geoinformatics
  * Technical University of Munich, Germany
- * https://www.gis.bgu.tum.de/
+ https://www.asg.ed.tum.de/en/gis
  * 
  * The 3DCityDB-Web-Map is jointly developed with the following
  * cooperation partners:
  * 
- * virtualcitySYSTEMS GmbH, Berlin <http://www.virtualcitysystems.de/>
+ * virtualcitySYSTEMS GmbH, Berlin <https://vc.systems/>
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,8 @@
             "layerDataType": this.layerDataType,
             "thematicDataUrl": this.thematicDataUrl,
             "thematicDataProvider": this._thematicDataProvider,
-            "maximumScreenSpaceError": this._maximumScreenSpaceError,
-        }
+            "maximumScreenSpaceError": this._maximumScreenSpaceError
+        };
 
         /**
          * handles ClickEvents
@@ -258,9 +258,6 @@
             }
         },
 
-        /**
-         * Gets the maximumScreenSpaceError of the Cesium 3D Tiles
-         */
         maximumScreenSpaceError: {
             get: function () {
                 return this._maximumScreenSpaceError;
@@ -268,7 +265,7 @@
             set: function (value) {
                 this._maximumScreenSpaceError = value;
             }
-        },
+        }
     });
 
     /**
