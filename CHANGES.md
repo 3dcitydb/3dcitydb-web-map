@@ -7,6 +7,8 @@ This is a major release.
 ##### NEW
 
 * Added support for Index 3D Scene (i3s) layers.
+* Add support for embedded thematic data in Index 3D Scene (i3s) layers
+  see [`04d8221`](https://github.com/3dcitydb/3dcitydb-web-map/commit/04d82218730bb2bb4164519c7c01ccbf6508f51c).
 * Added support for GeoJSON (using embedded thematic data).
 * Added option for maximum screen space error in 3D tiles,
   see [`bd54bed`](https://github.com/3dcitydb/3dcitydb-web-map/commit/bd54bede7c393917fdb8c5bb43eaad3fb9110555).
@@ -25,6 +27,10 @@ This is a major release.
   see [`a4e6bf3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a4e6bf32476747c3c318207dae155e955af446dd).
 * WMS and terrain layers without an icon will be assigned with default ones,
   see[`c3b6c02`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c3b6c0221e04448dbb964e9b8ba7a3c080dbb264).
+* Added support for OGC Feature API as thematic data source,
+  see [`2a0b810`](https://github.com/3dcitydb/3dcitydb-web-map/commit/2a0b810ac8a0cef8703682cbb6b0417edac52ca0).
+* Added special handling for OGC Feature API for Hamburg and NRW,
+  see [`2a0b810`](https://github.com/3dcitydb/3dcitydb-web-map/commit/2a0b810ac8a0cef8703682cbb6b0417edac52ca0).
 
 ##### UPDATES
 
@@ -248,7 +254,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute1 | attribute2 | attribute3 | attribute4 |
-      | ------------- | ------------- | ------------- | ------------- | ------------- |
+            | ------------- | ------------- | ------------- | ------------- | ------------- |
       | gmlid1  | value1  | value2  | value3  | value4  |
       | gmlid2  | value1  | value2  | value3  | value4  |
 
@@ -260,7 +266,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute | value |
-      | ------------- | ------------- | ------------- |
+            | ------------- | ------------- | ------------- |
       | gmlid1  | attribute1  | value1  |
       | gmlid1  | attribute2  | value2  |
       | gmlid1  | attribute3  | value3  |
@@ -321,7 +327,7 @@ This is a major release.
   where:
 
   | Parameter        | Description           | Allowed values  | Default Value |
-  | ------------- |-------------| -----| ----|
+    | ------------- |-------------| -----| ----|
   | `url`      | A valid path to the HTML file | An absolute path if the HTML file is located in another domain or a relative path if the HTML file is located in the same project folder as the web client | `splash/SplashWindow.html` |
   | `showOnStart`     | A boolean that determines whether the splash window should be shown upon start or not      |   `true` or `false` | `true` |
 
