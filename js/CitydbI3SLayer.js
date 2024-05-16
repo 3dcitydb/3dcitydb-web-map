@@ -293,19 +293,23 @@
         const cesium3dTilesetOptions = {
             skipLevelOfDetail: false,
             debugShowBoundingVolume: false,
+            maximumScreenSpaceError: scope._maximumScreenSpaceError
         };
         const i3sOptions = {
             url: scope._url,
-            traceFetches: false, // for tracing I3S fetches
-            geoidTiledTerrainProvider: geoidService, // pass the geoid service
+            //geoidTiledTerrainProvider: geoidService, // pass the geoid service
             cesium3dTilesetOptions: cesium3dTilesetOptions, // options for internal Cesium3dTileset
-            maximumScreenSpaceError: scope._maximumScreenSpaceError
+            adjustMaterialAlphaMode: true, // force the alpha mode to be set for transparent geometry
+            showFeatures: true, // creates 3D object for each feature and allows to apply attributes filter
+            applySymbology: true, // applies outlines based on the I3S layer renderer details
+            calculateNormals: true // generates flat normals if they are missing in I3S buffers
         };
 
         // Create I3S data provider
         scope._i3sProvider = new Cesium.I3SDataProvider(i3sOptions);
 
         scope._i3sProvider.readyPromise.then(function (i3sProvider) {
+            Cesium.I3SBuildingSceneLayerExplorer("toolbar", i3sProvider);
             // Add the i3s layer provider as a primitive data type
             scope._cesiumViewer.scene.primitives.add(scope._i3sProvider);
             scope._i3sProvider.show = scope._active;
@@ -330,7 +334,7 @@
     CitydbI3SLayer.prototype.registerTilesLoadedEventHandler = function () {
         var scope = this;
         var timer = null;
-        scope._tileset.tileVisible.addEventListener(function (tile) {
+        scope._i3sProvider.tileVisible.addEventListener(function (tile) {
             if (tile._content instanceof Cesium.Cesium3DTilePointFeature) {
                 tile._content._pointCloud._pointSize = 3;
             }
@@ -372,10 +376,6 @@
             Cesium.ScreenSpaceEventType.LEFT_CLICK
         );
 
-        function isEqual(feature1, feature2) {
-            return feature1._batchId === feature2._batchId;
-        }
-
         function storeCameraPosition(viewer, movement, feature) {
             const cartesian = viewer.scene.pickPosition(movement.position);
             let destination = Cesium.Cartographic.fromCartesian(cartesian);
@@ -398,7 +398,7 @@
                 if (!Cesium.defined(pickedFeature)) return;
 
                 // Do not change the highlighting if the mouse is still on the same feature
-                if (Cesium.defined(scope._prevHoveredFeature) && isEqual(scope._prevHoveredFeature, pickedFeature)) return;
+                if (Cesium.defined(scope._prevHoveredFeature) && Object.is(scope._prevHoveredFeature, pickedFeature)) return;
 
                 // Unhighlight previous feature
                 if (Cesium.defined(scope._prevHoveredFeature)) {
@@ -533,7 +533,7 @@
      * @param {Boolean} value
      */
     CitydbI3SLayer.prototype.activate = function (active) {
-        this._tileset.show = active;
+        this._i3sProvider.show = active;
         this._active = active;
     }
 
@@ -549,14 +549,14 @@
         scope._prevHoveredFeature = undefined;
         scope._prevHoveredColor = undefined;
         scope._hiddenObjects = [];
-        scope._cesiumViewer.scene.primitives.remove(this._tileset);
+        scope._cesiumViewer.scene.primitives.remove(this._i3sProvider);
 
-        this._tileset = new Cesium.Cesium3DTileset({
+        this._i3sProvider = new Cesium.Cesium3DTileset({
             url: this._url,
             maximumScreenSpaceError: this._maximumScreenSpaceError
         });
 
-        this._tileset.readyPromise.then(function (tileset) {
+        this._i3sProvider.readyPromise.then(function (tileset) {
             scope._cesiumViewer.scene.primitives.add(tileset);
             scope.configPointCloudShading(tileset);
             scope.registerTilesLoadedEventHandler();
