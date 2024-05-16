@@ -1,6 +1,6 @@
 # Change Log
 
-### 2.0.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html)
+### 2.0.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html)
 
 This is a major release.
 
@@ -254,7 +254,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute1 | attribute2 | attribute3 | attribute4 |
-            | ------------- | ------------- | ------------- | ------------- | ------------- |
+      | ------------- | ------------- | ------------- | ------------- | ------------- |
       | gmlid1  | value1  | value2  | value3  | value4  |
       | gmlid2  | value1  | value2  | value3  | value4  |
 
@@ -266,7 +266,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute | value |
-            | ------------- | ------------- | ------------- |
+      | ------------- | ------------- | ------------- |
       | gmlid1  | attribute1  | value1  |
       | gmlid1  | attribute2  | value2  |
       | gmlid1  | attribute3  | value3  |
@@ -327,7 +327,7 @@ This is a major release.
   where:
 
   | Parameter        | Description           | Allowed values  | Default Value |
-    | ------------- |-------------| -----| ----|
+  | ------------- |-------------| -----| ----|
   | `url`      | A valid path to the HTML file | An absolute path if the HTML file is located in another domain or a relative path if the HTML file is located in the same project folder as the web client | `splash/SplashWindow.html` |
   | `showOnStart`     | A boolean that determines whether the splash window should be shown upon start or not      |   `true` or `false` | `true` |
 
