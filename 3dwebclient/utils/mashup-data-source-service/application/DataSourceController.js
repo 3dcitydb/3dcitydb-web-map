@@ -2,6 +2,7 @@ var DataSourceTypes;
 (function (DataSourceTypes) {
     DataSourceTypes["GoogleSheets"] = "GoogleSheets";
     DataSourceTypes["PostgreSQL"] = "PostgreSQL";
+    DataSourceTypes["OGCFeatureAPI"] = "OGCFeatureAPI";
     DataSourceTypes["Embedded"] = "Embedded";
 })(DataSourceTypes || (DataSourceTypes = {}));
 var TableTypes;
@@ -21,6 +22,8 @@ var DataSourceController = /** @class */ (function () {
             scope._dataSource = new GoogleSheets(signInController, scope._options);
         } else if (selectedDataSource === DataSourceTypes.PostgreSQL) {
             scope._dataSource = new PostgreSQL(signInController, scope._options);
+        } else if (selectedDataSource === DataSourceTypes.OGCFeatureAPI) {
+            scope._dataSource = new OGCFeatureAPI(signInController, scope._options);
         } else if (selectedDataSource === DataSourceTypes.Embedded && options.layerType === "COLLADA/KML/glTF") {
             scope._dataSource = new KMLDataSource(signInController, scope._options);
         }

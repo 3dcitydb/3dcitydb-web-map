@@ -1337,6 +1337,8 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
     if (thematicDataSourceDropdown.value === "Embedded") {
         thematicTableTypeDropdownDiv.style = "display: none;";
         thematicDataUrlDiv.style = "display: none;";
+    } else if (thematicDataSourceDropdown.value === "OGCFeatureAPI") {
+        thematicTableTypeDropdownDiv.style = "display: none;";
     } else {
         thematicTableTypeDropdownDiv.style = "";
         thematicDataUrlDiv.style = "";

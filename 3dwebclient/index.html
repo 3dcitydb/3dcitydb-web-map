@@ -83,6 +83,7 @@
     <script src="utils/mashup-data-source-service/core/XMLDataSource.js"></script>
     <script src="utils/mashup-data-source-service/application/GoogleSheets.js"></script>
     <script src="utils/mashup-data-source-service/application/PostgreSQL.js"></script>
+    <script src="utils/mashup-data-source-service/application/OGCFeatureAPI.js"></script>
     <script src="utils/mashup-data-source-service/application/KMLDataSource.js"></script>
     <script src="utils/mashup-data-source-service/core/MashupDataSource.js"></script>
     <script src="utils/mashup-data-source-service/application/DataSourceController.js"></script>
@@ -319,6 +320,7 @@
                                         onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
                                     <option value="GoogleSheets" selected="selected">Google Sheets API</option>
                                     <option value="PostgreSQL">PostgreSQL REST API</option>
+                                    <option value="OGCFeatureAPI">OGC Feature API</option>
                                     <option value="Embedded">Embedded</option>
                                 </select>
                             </td>
@@ -629,6 +631,7 @@
                     <option value="dual">DualMaps</option>
                 </select>
             </div>
+            <div id="toolbar"></div>
         </div>
     </div>
 </div>
