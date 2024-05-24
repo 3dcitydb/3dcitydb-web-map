@@ -198,3 +198,12 @@ More information
 [OGC CityGML](https://www.opengeospatial.org/standards/citygml) is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the [Geography Markup Language version 3.1.1 (GML3)](https://www.opengeospatial.org/standards/gml), the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model.
 
 CityGML is an international OGC standard and can be used free of charge.
+
+
+## Acknowledgement
+
+The development of these methods and implementations were supported 
+and partially funded by the company [CADFEM](https://www.cadfem.net/) 
+within a dedicated collaboration project in the context of the 
+[Leonhard Obermeyer Center (LOC)](https://www.ed.tum.de/loc) 
+at the [Technical University of Munich (TUM)](https://www.tum.de).
