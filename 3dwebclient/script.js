@@ -163,11 +163,11 @@ function initClient() {
     // add Copyrights, TUM, 3DCityDB or more...
     var creditDisplay = cesiumViewer.scene.frameState.creditDisplay;
 
-    var citydbCreditLogo = new Cesium.Credit('<a href="https://www.3dcitydb.org/" target="_blank"><img src="https://3dcitydb.org/3dcitydb/fileadmin/public/logos/3dcitydb_logo.png" title="3DCityDB"></a>');
-    creditDisplay.addDefaultCredit(citydbCreditLogo);
+    var citydbCreditLogo = new Cesium.Credit('<a href="https://www.3dcitydb.org/" target="_blank"><img src="https://3dcitydb.org/3dcitydb/fileadmin/public/logos/3dcitydb_logo.png" title="3DCityDB"></a>', true);
+    creditDisplay.addStaticCredit(citydbCreditLogo);
 
-    var tumCreditLogo = new Cesium.Credit('<a href="https://www.gis.bgu.tum.de/en/home/" target="_blank">© 2018 Chair of Geoinformatics, TU Munich</a>');
-    creditDisplay.addDefaultCredit(tumCreditLogo);
+    var tumCreditLogo = new Cesium.Credit('<a href="https://www.asg.ed.tum.de/en/gis/" target="_blank">© 2024 Chair of Geoinformatics, TU Munich</a>', true);
+    creditDisplay.addStaticCredit(tumCreditLogo);
 
     // activate debug mode
     var debugStr = urlController.getUrlParaValue('debug', window.location.href, CitydbUtil);
