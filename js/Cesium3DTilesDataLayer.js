@@ -593,8 +593,14 @@
         let scope = this;
         let result = {};
         for (let feature of scope._prevSelectedFeatures) {
-            const gmlid = feature.getProperty("gml:id");
-            result[gmlid] = feature;
+            const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id"];
+            for (let key of gmlidKeys) {
+                const gmlid = feature.getProperty(key);
+                if (Cesium.defined(gmlid)) {
+                    result[gmlid] = feature;
+                    break;
+                }
+            }
         }
         return result;
     };
@@ -604,8 +610,14 @@
         let result = {};
         if (!Cesium.defined(scope._hiddenObjects)) return;
         for (let feature of scope._hiddenObjects) {
-            const gmlid = feature.getProperty("gml:id");
-            result[gmlid] = feature;
+            const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id"];
+            for (let key of gmlidKeys) {
+                const gmlid = feature.getProperty(key);
+                if (Cesium.defined(gmlid)) {
+                    result[gmlid] = feature;
+                    break;
+                }
+            }
         }
         return result;
     };
