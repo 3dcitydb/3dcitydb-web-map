@@ -263,19 +263,10 @@
                     <table class="citydb_inputtable">
                         <tbody>
                         <tr>
-                            <td WIDTH="25%">URL(*)</td>
-                            <td WIDTH="75%">
-                                <input type="text" data-bind="value: url">
-                            </td>
+                            <td colspan="3" style="border: yellow; color: yellow;"><b>Layer information</b><hr/></td>
                         </tr>
                         <tr>
-                            <td>Name(*)</td>
-                            <td>
-                                <input type="text" data-bind="value: name">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Layer data type</td>
+                            <td>Type</td>
                             <td>
                                 <select id="layerDataTypeDropdown" data-bind="value: layerDataType"
                                         onchange="layerDataTypeDropdownOnchange()">
@@ -287,14 +278,16 @@
                                 </select>
                             </td>
                         </tr>
-                        <tr id="layerProxyAndClampToGround" style="display: none;">
-                            <td>
-                                <label><input type="checkbox" id="layerProxyCheckbox" style="width:auto;"
-                                              data-bind="checked: layerProxy"/> Load via proxy</label>
+                        <tr>
+                            <td WIDTH="25%">URL (*)</td>
+                            <td WIDTH="75%">
+                                <input type="text" data-bind="value: url">
                             </td>
+                        </tr>
+                        <tr>
+                            <td>Name (*)</td>
                             <td>
-                                <label><input type="checkbox" id="layerClampToGroundCheckbox" style="width:auto;"
-                                              data-bind="checked: layerClampToGround"/> Clamp to ground</label>
+                                <input type="text" data-bind="value: name">
                             </td>
                         </tr>
                         <tr id="gltfVersionDropdownRow" style="display: none;">
@@ -307,53 +300,6 @@
                                 </select>
                             </td>
                         </tr>
-                        <tr id="thematicDataUrlDiv">
-                            <td>thematicDataUrl</td>
-                            <td>
-                                <input type="text" data-bind="value: thematicDataUrl">
-                            </td>
-                        </tr>
-                        <tr id="thematicDataSourceDropDownDiv">
-                            <td>> Thematic Data Source</td>
-                            <td>
-                                <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource"
-                                        onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
-                                    <option value="GoogleSheets" selected="selected">Google Sheets API</option>
-                                    <option value="PostgreSQL">PostgreSQL REST API</option>
-                                    <option value="OGCFeatureAPI">OGC Feature API</option>
-                                    <option value="Embedded">Embedded</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr id="thematicTableTypeDropdownDiv">
-                            <td>> Table type</td>
-                            <td>
-                                <select id="tableTypeDropdown" data-bind="value: tableType"
-                                        onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
-                                    <option value="Horizontal" selected="selected">All object attributes in one row
-                                    </option>
-                                    <option value="Vertical">One row per object attribute</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <!--                                    <tr id="rowGoogleSheetsApiKey" style="display: none;">-->
-                        <!--                                        <td>> Google Sheets API Key</td>-->
-                        <!--                                        <td>-->
-                        <!--                                            <input type="text" data-bind="value: googleSheetsApiKey">-->
-                        <!--                                        </td>-->
-                        <!--                                    </tr>-->
-                        <!--                                    <tr id="rowGoogleSheetsRanges" style="display: none;">-->
-                        <!--                                        <td>> Google Sheets Ranges </td>-->
-                        <!--                                        <td>-->
-                        <!--                                            <input type="text" data-bind="value: googleSheetsRanges" placeholder="'Sheet1'!A1:C2;'Sheet2'!A1:D2">-->
-                        <!--                                        </td>-->
-                        <!--                                    </tr>-->
-                        <!--                                    <tr id="rowGoogleSheetsClientId" style="display: none;">-->
-                        <!--                                        <td>> Google Sheets Client ID</td>-->
-                        <!--                                        <td>-->
-                        <!--                                            <input type="text" data-bind="value: googleSheetsClientId" placeholder="Only for OAuth2">-->
-                        <!--                                        </td>-->
-                        <!--                                    </tr>-->
                         <tr>
                             <td>cityobjectsJsonUrl</td>
                             <td>
@@ -390,6 +336,67 @@
                                 <input type="text" data-bind="value: maximumScreenSpaceError">
                             </td>
                         </tr>
+                        <tr id="layerProxyAndClampToGround">
+                            <td>
+                                <label><input type="checkbox" id="layerProxyCheckbox" style="width:auto;"
+                                              data-bind="checked: layerProxy"/> Load via proxy</label>
+                            </td>
+                            <td>
+                                <label><input type="checkbox" id="layerClampToGroundCheckbox" style="width:auto;"
+                                              data-bind="checked: layerClampToGround"/> Clamp to ground</label>
+                            </td>
+                        </tr>
+                        <tr><td></td></tr>
+                        <tr>
+                            <td colspan="3" style="border: yellow; color: yellow;"><b>Thematic data</b><hr/></td>
+                        </tr>
+                        <tr id="thematicDataSourceDropDownDiv">
+                            <td>Type</td>
+                            <td>
+                                <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource"
+                                        onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
+                                    <option value="GoogleSheets" selected="selected">Google Sheets API</option>
+                                    <option value="PostgreSQL">PostgreSQL REST API</option>
+                                    <option value="OGCFeatureAPI">OGC Feature API</option>
+                                    <option value="Embedded">Embedded</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="thematicDataUrlDiv">
+                            <td>URL</td>
+                            <td>
+                                <input type="text" data-bind="value: thematicDataUrl">
+                            </td>
+                        </tr>
+                        <tr id="thematicTableTypeDropdownDiv">
+                            <td>Table structure</td>
+                            <td>
+                                <select id="tableTypeDropdown" data-bind="value: tableType"
+                                        onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
+                                    <option value="Horizontal" selected="selected">All object attributes in one row
+                                    </option>
+                                    <option value="Vertical">One row per object attribute</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <!--                                    <tr id="rowGoogleSheetsApiKey" style="display: none;">-->
+                        <!--                                        <td>> Google Sheets API Key</td>-->
+                        <!--                                        <td>-->
+                        <!--                                            <input type="text" data-bind="value: googleSheetsApiKey">-->
+                        <!--                                        </td>-->
+                        <!--                                    </tr>-->
+                        <!--                                    <tr id="rowGoogleSheetsRanges" style="display: none;">-->
+                        <!--                                        <td>> Google Sheets Ranges </td>-->
+                        <!--                                        <td>-->
+                        <!--                                            <input type="text" data-bind="value: googleSheetsRanges" placeholder="'Sheet1'!A1:C2;'Sheet2'!A1:D2">-->
+                        <!--                                        </td>-->
+                        <!--                                    </tr>-->
+                        <!--                                    <tr id="rowGoogleSheetsClientId" style="display: none;">-->
+                        <!--                                        <td>> Google Sheets Client ID</td>-->
+                        <!--                                        <td>-->
+                        <!--                                            <input type="text" data-bind="value: googleSheetsClientId" placeholder="Only for OAuth2">-->
+                        <!--                                        </td>-->
+                        <!--                                    </tr>-->
                         </tbody>
                     </table>
                     <div class="citydb_short_container">
