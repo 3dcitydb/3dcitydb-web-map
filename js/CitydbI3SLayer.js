@@ -296,7 +296,6 @@
             maximumScreenSpaceError: scope._maximumScreenSpaceError
         };
         const i3sOptions = {
-            url: scope._url,
             //geoidTiledTerrainProvider: geoidService, // pass the geoid service
             cesium3dTilesetOptions: cesium3dTilesetOptions, // options for internal Cesium3dTileset
             adjustMaterialAlphaMode: true, // force the alpha mode to be set for transparent geometry
@@ -306,10 +305,8 @@
         };
 
         // Create I3S data provider
-        scope._i3sProvider = new Cesium.I3SDataProvider(i3sOptions);
-
-        scope._i3sProvider.readyPromise.then(function (i3sProvider) {
-            Cesium.I3SBuildingSceneLayerExplorer("toolbar", i3sProvider);
+        Cesium.I3SDataProvider.fromUrl(scope._url, i3sOptions).then(function (i3sDataProvider) {
+            scope._i3sProvider = i3sDataProvider;
             // Add the i3s layer provider as a primitive data type
             scope._cesiumViewer.scene.primitives.add(scope._i3sProvider);
             scope._i3sProvider.show = scope._active;
@@ -549,18 +546,41 @@
         scope._prevHoveredFeature = undefined;
         scope._prevHoveredColor = undefined;
         scope._hiddenObjects = [];
-        scope._cesiumViewer.scene.primitives.remove(this._i3sProvider);
+        scope._cesiumViewer.scene.primitives.remove(scope._i3sProvider);
 
-        this._i3sProvider = new Cesium.Cesium3DTileset({
-            url: this._url,
-            maximumScreenSpaceError: this._maximumScreenSpaceError
+        // Initialize a terrain provider which provides geoid conversion between gravity related (typically I3S datasets)
+        // and ellipsoidal based height systems (Cesium World Terrain).
+        // If this is not specified, or the URL is invalid no geoid conversion will be applied.
+        // The source data used in this transcoding service was compiled from https://earth-info.nga.mil/#tab_wgs84-data
+        // and is based on EGM2008 Gravity Model
+        const geoidService = new Cesium.ArcGISTiledElevationTerrainProvider({
+            url:
+                "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/EGM2008/ImageServer", // TODO
         });
+        // Create i3s and Cesium3DTileset options to pass optional parameters useful for debugging and visualizing
+        const cesium3dTilesetOptions = {
+            skipLevelOfDetail: false,
+            debugShowBoundingVolume: false,
+            maximumScreenSpaceError: scope._maximumScreenSpaceError
+        };
+        const i3sOptions = {
+            //geoidTiledTerrainProvider: geoidService, // pass the geoid service
+            cesium3dTilesetOptions: cesium3dTilesetOptions, // options for internal Cesium3dTileset
+            adjustMaterialAlphaMode: true, // force the alpha mode to be set for transparent geometry
+            showFeatures: true, // creates 3D object for each feature and allows to apply attributes filter
+            applySymbology: true, // applies outlines based on the I3S layer renderer details
+            calculateNormals: true // generates flat normals if they are missing in I3S buffers
+        };
 
-        this._i3sProvider.readyPromise.then(function (tileset) {
-            scope._cesiumViewer.scene.primitives.add(tileset);
-            scope.configPointCloudShading(tileset);
-            scope.registerTilesLoadedEventHandler();
-            deferred.resolve();
+        // Create I3S data provider
+        Cesium.I3SDataProvider.fromUrl(scope._url, i3sOptions).then(function (i3sDataProvider) {
+            scope._i3sProvider = i3sDataProvider;
+            // Add the i3s layer provider as a primitive data type
+            scope._cesiumViewer.scene.primitives.add(scope._i3sProvider);
+            scope._i3sProvider.show = scope._active;
+            // TODO that.registerTilesLoadedEventHandler();
+            scope.registerMouseEventHandlers();
+            deferred.resolve(scope);
         }, function () {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });

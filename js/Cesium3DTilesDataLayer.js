@@ -289,25 +289,23 @@
      * @param {CesiumViewer} cesiumViewer
      */
     Cesium3DTilesDataLayer.prototype.addToCesium = function (cesiumViewer, fnInfoTable) {
-        var that = this;
+        var scope = this;
         this._cesiumViewer = cesiumViewer;
         this._fnInfoTable = fnInfoTable;
         var deferred = Cesium.defer();
 
-        this._tileset = new Cesium.Cesium3DTileset({
-            url: this._url,
+        Cesium.Cesium3DTileset.fromUrl(scope.autofillUrl(scope._url), {
             maximumScreenSpaceError: this._maximumScreenSpaceError
-        });
-
-        this._tileset.readyPromise.then(function (tileset) {
-            cesiumViewer.scene.primitives.add(tileset);
-            tileset.show = that._active;
-            that.configPointCloudShading(tileset);
-            that.registerTilesLoadedEventHandler();
-            that.registerMouseEventHandlers();
-            deferred.resolve(that);
+        }).then(function (tileset) {
+            scope._tileset = tileset;
+            scope._cesiumViewer.sceneprimitives.add(tileset);
+            scope._tileset.show = scope._active;
+            scope.configPointCloudShading(tileset);
+            scope.registerTilesLoadedEventHandler();
+            scope.registerMouseEventHandlers();
+            deferred.resolve();
         }, function () {
-            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });
 
         return deferred.promise;
@@ -528,12 +526,10 @@
         scope._hiddenObjects = [];
         scope._cesiumViewer.scene.primitives.remove(this._tileset);
 
-        this._tileset = new Cesium.Cesium3DTileset({
-            url: this.autofillUrl(this._url),
+        Cesium.Cesium3DTileset.fromUrl(scope.autofillUrl(scope._url), {
             maximumScreenSpaceError: this._maximumScreenSpaceError
-        });
-
-        this._tileset.readyPromise.then(function (tileset) {
+        }).then(function (tileset) {
+            scope._tileset = tileset;
             scope._cesiumViewer.scene.primitives.add(tileset);
             scope.configPointCloudShading(tileset);
             scope.registerTilesLoadedEventHandler();
