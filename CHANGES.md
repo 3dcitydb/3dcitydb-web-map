@@ -34,7 +34,7 @@ This is a major release.
 
 ##### UPDATES
 
-* Updated Cesium from `v1.53` to `v1.100`.
+* Updated Cesium from `v1.53` to `v1.117`.
 * Updated jquery from `v3.3.1` to `v3.6.1`.
 
 ##### CHANGES
@@ -43,6 +43,9 @@ This is a major release.
 * Added Cesium Navigation Mixin as a separate plugin.
 * The lists of highlighted and hidden objects now only display those of the active layer,
   see [`aaf34d2`](https://github.com/3dcitydb/3dcitydb-web-map/commit/aaf34d215ceeaaafe19c50f351be7ff276ed12ed).
+* The GUI elements for adding layers in the toolbox have been rearranged
+  to provide more clarity and consistency,
+  see [`6897e65`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6897e65cb54e1610f850eac60cfb68a7c2015a26).
 
 ##### FIXES
 
@@ -51,7 +54,9 @@ This is a major release.
 * Fixed Cesium `defer` accordingly to native `Promise` API.
 * Fixed highlighting due to breaking changes in Cesium.
 * Fixed insertion and removal of WMS and terrain layers,
-  see[`c3b6c02`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c3b6c0221e04448dbb964e9b8ba7a3c080dbb264).
+  see [`c3b6c02`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c3b6c0221e04448dbb964e9b8ba7a3c080dbb264).
+* Fixed and updated credits,
+  see [`aca26bf`](https://github.com/3dcitydb/3dcitydb-web-map/commit/aca26bf16671594e1c2f2c44957432d08f7094eb).
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
