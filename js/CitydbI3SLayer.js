@@ -286,8 +286,7 @@
         // The source data used in this transcoding service was compiled from https://earth-info.nga.mil/#tab_wgs84-data
         // and is based on EGM2008 Gravity Model
         const geoidService = new Cesium.ArcGISTiledElevationTerrainProvider({
-            url:
-                "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/EGM2008/ImageServer", // TODO
+            url: "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/EGM2008/ImageServer", // TODO
         });
         // Create i3s and Cesium3DTileset options to pass optional parameters useful for debugging and visualizing
         const cesium3dTilesetOptions = {
@@ -296,12 +295,9 @@
             maximumScreenSpaceError: scope._maximumScreenSpaceError
         };
         const i3sOptions = {
-            //geoidTiledTerrainProvider: geoidService, // pass the geoid service
+            // geoidTiledTerrainProvider: geoidService, // pass the geoid service
             cesium3dTilesetOptions: cesium3dTilesetOptions, // options for internal Cesium3dTileset
-            adjustMaterialAlphaMode: true, // force the alpha mode to be set for transparent geometry
-            showFeatures: true, // creates 3D object for each feature and allows to apply attributes filter
-            applySymbology: true, // applies outlines based on the I3S layer renderer details
-            calculateNormals: true // generates flat normals if they are missing in I3S buffers
+            showFeatures: true // creates 3D object for each feature and allows to apply attributes filter
         };
 
         // Create I3S data provider
@@ -389,6 +385,14 @@
             feature._storedOrientation = orientation;
         }
 
+        function changeColor(feature, newColor) {
+            try {
+                feature.color = newColor;
+            } catch (e) {
+                console.log("Tile feature unloaded");
+            }
+        }
+
         viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
                 // Pick a new feature
                 const pickedFeature = viewer.scene.pick(movement.endPosition);
@@ -401,7 +405,7 @@
                 if (Cesium.defined(scope._prevHoveredFeature)) {
                     // Only when not selected
                     if (!scope._prevSelectedFeatures.includes(scope._prevHoveredFeature)) {
-                        scope._prevHoveredFeature.color = scope._prevHoveredColor;
+                        changeColor(scope._prevHoveredFeature, scope._prevHoveredColor);
                     }
                 }
 
@@ -422,7 +426,7 @@
                 // Empty the selected list when a new object has been clicked
                 if (scope._prevSelectedFeatures.length > 0) {
                     for (let i = 0; i < scope._prevSelectedFeatures.length; i++) {
-                        scope._prevSelectedFeatures[i].color = scope._prevSelectedColors[i]
+                        changeColor(scope._prevSelectedFeatures[i], scope._prevSelectedColors[i]);
                     }
                     scope._prevSelectedFeatures = [];
                     scope._prevSelectedColors = [];
@@ -448,7 +452,7 @@
 
                 // Highlight newly selected feature
                 viewer.selectedEntity = scope._selectedEntity;
-                pickedFeature.color = scope._highlightColor;
+                changeColor(pickedFeature, scope._highlightColor);
 
                 // Store the camera position for camera's flyTo
                 storeCameraPosition(viewer, movement, scope._selectedEntity);
@@ -640,8 +644,16 @@
         let scope = this;
         let result = {};
         for (let feature of scope._prevSelectedFeatures) {
-            const gmlid = feature.getProperty("gml:id");
-            result[gmlid] = feature;
+            const i3sNode = feature.content.tile.i3sNode;
+            const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id", "OBJECTID"];
+            for (let key of gmlidKeys) {
+                const fields = i3sNode.getFieldsForFeature(feature.featureId);
+                const gmlid = fields[key];
+                if (Cesium.defined(gmlid)) {
+                    result[gmlid] = feature;
+                    break;
+                }
+            }
         }
         return result;
     };
@@ -651,8 +663,16 @@
         let result = {};
         if (!Cesium.defined(scope._hiddenObjects)) return;
         for (let feature of scope._hiddenObjects) {
-            const gmlid = feature.getProperty("gml:id");
-            result[gmlid] = feature;
+            const i3sNode = feature.content.tile.i3sNode;
+            const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id", "OBJECTID"];
+            for (let key of gmlidKeys) {
+                const fields = i3sNode.getFieldsForFeature(feature.featureId);
+                const gmlid = fields[key];
+                if (Cesium.defined(gmlid)) {
+                    result[gmlid] = feature;
+                    break;
+                }
+            }
         }
         return result;
     };
