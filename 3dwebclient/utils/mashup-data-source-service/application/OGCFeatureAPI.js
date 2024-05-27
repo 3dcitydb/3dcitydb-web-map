@@ -31,15 +31,20 @@ var OGCFeatureAPI = /** @class */ (function (_super) {
 
     OGCFeatureAPI.prototype.responseToKvp = function (response) {
         // response is just a text -> parse to JSON
+        if (!Cesium.defined(response)) return [];
         const responseJson = JSON.parse(response);
         const result = new Map();
         const scope = this;
 
         let properties;
         if (scope._uri.includes("hamburg.de")) {
-            properties = responseJson["features"][0]["properties"];
+            const responseFeatures = responseJson["features"];
+            if (!Cesium.defined(responseFeatures) || responseFeatures.length !== 1) return [];
+            properties = responseFeatures[0]["properties"];
         } else if (scope._uri.includes("nrw.de")) {
-            properties = responseJson["properties"];
+            const responseProperties = responseJson["properties"];
+            if (!Cesium.defined(responseProperties)) return [];
+            properties = responseProperties;
         } else {
             properties = responseJson["properties"];
         }
@@ -85,7 +90,8 @@ var OGCFeatureAPI = /** @class */ (function (_super) {
                     let req = new XMLHttpRequest();
                     req.open('GET', urls[i]);
                     req.onload = function () {
-                        if (req.status === 200) {
+
+                        if (req.status === 200 && scope.responseToKvp(req.response).length !== 0) {
                             resolve(req.response);
                         } else {
                             i++;
@@ -107,21 +113,20 @@ var OGCFeatureAPI = /** @class */ (function (_super) {
         let baseUrl = this._uri;
         baseUrl += baseUrl.endsWith("/") ? "" : "/";
         const gmlidValue = gmlid["value"];
-        let urls;
+        let urls = [baseUrl + "?id=" + gmlidValue + "&f=json"];
         if (baseUrl.includes("hamburg.de") && gmlidValue.startsWith("DEHH")) {
             // Hamburg -> append "BL" and use oid
             // Only for IDs that start with DEHH, not UUID or others (may be surfaces of a building)
             // e.g.: https://api.hamburg.de/datasets/v1/alkis_vereinfacht/collections/GebaeudeBauwerk/items/?oid=DEHHALKA3AR000BeBL&f=json
-            urls = [baseUrl + "?oid=" + gmlidValue + "BL&f=json"]
+            urls.push(baseUrl + "?oid=" + gmlidValue + "BL&f=json");
         } else if (baseUrl.includes("nrw.de") && gmlidValue.startsWith("DENW")) {
             // NRW -> append "BL" and do not use any id key
             // Only for IDs that start with DENW, not UUID or others (may be surfaces of a building)
             // e.g.: https://www.ldproxy.nrw.de/kataster/collections/gebaeudebauwerk/items/DENW51AL10007kgBBL?f=json
-            urls = [baseUrl + gmlidValue + "BL?f=json"]
-        } else {
-            urls = [baseUrl + "?id=" + gmlidValue + "&f=json"]
+            urls.push(baseUrl + gmlidValue + "BL?f=json");
         }
 
+        const scope = this;
         tryUrls(urls)
             .then(response => callback(response))
             .catch(error => console.log('Error:', error.message));
