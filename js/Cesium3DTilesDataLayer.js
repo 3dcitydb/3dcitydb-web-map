@@ -289,21 +289,21 @@
      * @param {CesiumViewer} cesiumViewer
      */
     Cesium3DTilesDataLayer.prototype.addToCesium = function (cesiumViewer, fnInfoTable) {
-        var scope = this;
+        const scope = this;
         this._cesiumViewer = cesiumViewer;
         this._fnInfoTable = fnInfoTable;
-        var deferred = Cesium.defer();
+        const deferred = Cesium.defer();
 
         Cesium.Cesium3DTileset.fromUrl(scope.autofillUrl(scope._url), {
             maximumScreenSpaceError: this._maximumScreenSpaceError
         }).then(function (tileset) {
             scope._tileset = tileset;
-            scope._cesiumViewer.sceneprimitives.add(tileset);
+            scope._cesiumViewer.scene.primitives.add(tileset);
             scope._tileset.show = scope._active;
             scope.configPointCloudShading(tileset);
             scope.registerTilesLoadedEventHandler();
             scope.registerMouseEventHandlers();
-            deferred.resolve();
+            deferred.resolve(scope);
         }, function () {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });
@@ -533,7 +533,7 @@
             scope._cesiumViewer.scene.primitives.add(tileset);
             scope.configPointCloudShading(tileset);
             scope.registerTilesLoadedEventHandler();
-            deferred.resolve();
+            deferred.resolve(scope);
         }, function () {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });
