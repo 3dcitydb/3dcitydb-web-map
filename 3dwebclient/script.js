@@ -1074,10 +1074,8 @@ function addTerrainProvider() {
             name: addTerrainViewModel.name.trim(),
             iconUrl: iconUrl,
             tooltip: addTerrainViewModel.tooltip.trim(),
-            creationFunction: function () {
-                return new Cesium.CesiumTerrainProvider({
-                    url: addTerrainViewModel.url.trim()
-                });
+            creationFunction: async function () {
+                return await Cesium.CesiumTerrainProvider.fromUrl(addTerrainViewModel.url.trim(), {});
             }
         });
         baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
