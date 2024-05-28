@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        h2, h3 {
+            font-family: arial, bold, sans-serif;
+            padding: 10px;
+        }
+
+        div {
+            font-family: arial, sans-serif;
+            border: 3px solid white;
+            padding: 10px;
+        }
+
+        .firstCol, .iCol {
+            border-collapse: collapse;
+            display: inline-block;
+        }
+
+        .firstCol {
+            background-color: whitesmoke;
+            width: 500px;
+        }
+
+        .iCol {
+            width: fit-content;
+            border-radius: 7px;
+        }
+
+        .info {
+            background-color: deepskyblue;
+        }
+
+        .done {
+            background-color: lightgreen;
+        }
+
+        .pending {
+            background-color: lightsalmon;
+        }
+
+        .clickable {
+            font-family: Verdana, sans-serif;
+        }
+
+        .clickable:hover {
+            background-color: cyan;
+            cursor: pointer;
+        }
+
+        .clickable:active {
+            transform: scale(1.03);
+        }
+    </style>
+
+    <meta charset="UTF-8">
+    <title>Demo / Test Showcase</title>
+</head>
+<body>
+
+<h2>DEMO / TEST SHOWCASE</h2>
+
+<div>
+    For a full list of changes, please refer to the
+    <a href="https://github.com/3dcitydb/3dcitydb-web-map/blob/cesium-1.117/CHANGES.md">CHANGE LOGS</a>.
+</div>
+<div>
+    <div class="iCol done">Dataset</div>
+    : Working demo for the given dataset
+</div>
+<div style="display: inline-block;">
+    <div class="iCol pending">Dataset</div>
+    : Pending for testing for the given dataset
+</div>
+
+<h3>Base Web Client</h3>
+
+<div class="firstCol">Web Client without layers</div>
+<div class="iCol info clickable"
+     onclick="openLink('')">
+    2.0.0-dev
+</div>
+<br/>
+
+<h3>3D Model Layers</h3>
+
+<div class="firstCol">Cesium 3D Tiles with thematic data (Bavaria)</div>
+<div class="iCol done clickable"
+     onclick="openLink('')">
+    Google Spreadsheets
+</div>
+<div class="iCol done clickable"
+     onclick="openLink('')">
+    PostgreSQL / PostgREST
+</div>
+<div class="iCol done clickable"
+     onclick="openLink('')">
+    OGC Feature API
+</div>
+<div class="iCol done clickable"
+     onclick="openLink('')">
+    Embedded
+</div>
+<br/>
+
+<h3>WMS and WMTS</h3>
+
+<div class="firstCol">WMS Imagery Layers</div>
+<div class="iCol done clickable"
+     onclick="openLink('?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.141287&lo=11.585618&h=35931.217&hd=360&p=-90&r=0&&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fgeoservices.bayern.de%252Fwms%252Fv2%252Fogc_dop80_oa.cgi%253F%26name%3DBavaria%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop80c%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&sw=showOnStart%3Dfalse')">
+    Bavaria Orthophoto 80 cm
+</div>
+<br/>
+
+<div class="firstCol">WMTS Imagery Layers</div>
+<div class="iCol done clickable"
+     onclick="openLink('?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=34.253513&lo=22.289328&h=8221190.152&hd=360&p=-89.87&r=0&&bm=imageryType%3Dwmts%26url%3Dhttps%253A%252F%252Fbasemap.nationalmap.gov%252Farcgis%252Frest%252Fservices%252FUSGSShadedReliefOnly%252FMapServer%252FWMTS%26name%3DUSGS%2520Shaded%2520Relief%2520(via%2520WMTS)%26iconUrl%3D%26tooltip%3D%26layers%3DUSGSShadedReliefOnly%26tileStyle%3Ddefault%26tileMatrixSetId%3Ddefault028mm%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&sw=showOnStart%3Dfalse')">
+    USGS Shaded Relief
+</div>
+<br/>
+
+<script>
+    // TODO Update version here
+    const release = "2.0.0-dev"
+    const base = "https://www.3dcitydb.net/3dcitydb-web-map/" + release + "/3dwebclient/index.html";
+
+    function openLink(str) {
+        const url = base + str;
+        window.open(url, '_blank').focus();
+    }
+</script>
+</body>
+</html>
