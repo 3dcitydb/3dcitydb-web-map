@@ -1070,16 +1070,19 @@ function addTerrainProvider() {
             iconUrl = "images/icon_terrain.png";
         }
         const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-        const demProviderViewModel = new Cesium.ProviderViewModel({
-            name: addTerrainViewModel.name.trim(),
-            iconUrl: iconUrl,
-            tooltip: addTerrainViewModel.tooltip.trim(),
-            creationFunction: async function () {
-                return await Cesium.CesiumTerrainProvider.fromUrl(addTerrainViewModel.url.trim(), {});
-            }
-        });
-        baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
-        baseLayerPickerViewModel.selectedTerrain = demProviderViewModel;
+        Cesium.CesiumTerrainProvider.fromUrl(addTerrainViewModel.url.trim(), {})
+            .then(function (terrainProvider) {
+                const demProviderViewModel = new Cesium.ProviderViewModel({
+                    name: addTerrainViewModel.name.trim(),
+                    iconUrl: iconUrl,
+                    tooltip: addTerrainViewModel.tooltip.trim(),
+                    creationFunction: function () {
+                        return terrainProvider;
+                    }
+                });
+                baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
+                baseLayerPickerViewModel.selectedTerrain = demProviderViewModel;
+            });
     });
 }
 
