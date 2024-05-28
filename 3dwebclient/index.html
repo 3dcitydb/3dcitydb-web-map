@@ -279,8 +279,8 @@
                             </td>
                         </tr>
                         <tr>
-                            <td WIDTH="25%">URL (*)</td>
-                            <td WIDTH="75%">
+                            <td style="width: 35%;">URL (*)</td>
+                            <td style="width: 65%;">
                                 <input type="text" data-bind="value: url">
                             </td>
                         </tr>
@@ -416,56 +416,78 @@
                 <!-- add WMS panel -->
                 <div class="citydb_short_container" onclick="showAddWMSPanel()">
                     <select style="width: 100%;" class="cesium-button">
-                        <option>WMS Layer</option>
+                        <option>Imagery Layer</option>
                     </select>
                     <div class="citydb_overSelect"></div>
                 </div>
                 <div class="citydb_short_container">
                     <button type="button" style="width: 100%;" class="cesium-button" onclick="removeImageryProvider()">
-                        Remove WMS layer
+                        Remove imagery layer
                     </button>
                 </div>
                 <div id="citydb_addwmspanel" class="citydb_dynamic_box">
                     <table class="citydb_inputtable">
                         <tbody>
                         <tr>
-                            <td WIDTH="25%">name(*)</td>
-                            <td WIDTH="75%">
+                            <td>Type</td>
+                            <td>
+                                <select id="imageryTypeDropdown" data-bind="value: imageryType"
+                                        onchange="imageryTypeDropdownOnchange()">
+                                    <option value="wms" selected="selected">WMS</option>
+                                    <option value="wmts">WMTS</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 35%;">URL (*)</td>
+                            <td style="width: 65%;">
+                                <input type="text" data-bind="value: url">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Name (*)</td>
+                            <td>
                                 <input type="text" data-bind="value: name">
                             </td>
                         </tr>
                         <tr>
-                            <td>iconUrl(*)</td>
+                            <td>Sub-layers (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: layers">
+                            </td>
+                        </tr>
+                        <tr id="wmtsStyleRow" style="display: none;">
+                            <td>Style (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: tileStyle">
+                            </td>
+                        </tr>
+                        <tr id="wmtsMatrixSetIdRow" style="display: none;">
+                            <td>tileMatrixSetID (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: tileMatrixSetId">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Icon URL</td>
                             <td>
                                 <input type="text" data-bind="value: iconUrl">
                             </td>
                         </tr>
                         <tr>
-                            <td>tooltip(*)</td>
+                            <td>Tooltip</td>
                             <td>
                                 <input type="text" data-bind="value: tooltip">
                             </td>
                         </tr>
-                        <tr>
-                            <td>url(*)</td>
-                            <td>
-                                <input type="text" data-bind="value: url">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>layers(*)</td>
-                            <td>
-                                <input type="text" data-bind="value: layers">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>additionalParameters</td>
+                        <tr id="additionalParametersRow">
+                            <td>Other parameters</td>
                             <td>
                                 <input type="text" data-bind="value: additionalParameters">
                             </td>
                         </tr>
                         <tr>
-                            <td>proxyUrl</td>
+                            <td>Proxy URL</td>
                             <td>
                                 <input type="text" data-bind="value: proxyUrl">
                             </td>
@@ -474,7 +496,7 @@
                     </table>
                     <div class="citydb_long_container">
                         <button id="addWMSButton" style="width: 100%;" type="button" class="cesium-button"
-                                onclick="addWebMapServiceProvider()">Add / Update WMS layer
+                                onclick="addWebMapServiceProvider()">Add / Update Imagery Layer
                         </button>
                     </div>
                 </div>
@@ -490,7 +512,7 @@
                 </div>
                 <div class="citydb_short_container">
                     <button type="button" style="width: 100%;" class="cesium-button" onclick="removeTerrainProvider()">
-                        Remove Terrain layer
+                        Remove terrain layer
                     </button>
                 </div>
                 <div id="citydb_addterrainpanel" class="citydb_dynamic_box">

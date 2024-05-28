@@ -46,6 +46,8 @@ class UrlController {
             "layers": "ls",
             "additionalParameters": "ap",
             "proxyUrl": "pu",
+            "tileStyle": "tst",
+            "tileMatrixSetId": "tmsi",
 
             // terrain infos
             "cesiumWorldTerrain": "ct",
@@ -224,7 +226,8 @@ class UrlController {
     private basemapToQuery(addWmsViewModel: any, cesiumViewer: any, Cesium: any): string {
         let baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
         let baseLayerProviderFunc = baseLayerPickerViewModel.selectedImagery.creationCommand();
-        if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider) {
+        if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider
+            || baseLayerProviderFunc instanceof Cesium.WebMapTileServiceImageryProvider) {
             let basemapObject = {};
             basemapObject[this.getUrlParaForward('basemap')] = Cesium.objectToQuery(addWmsViewModel);
             return Cesium.objectToQuery(basemapObject);

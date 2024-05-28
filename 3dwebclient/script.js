@@ -109,13 +109,16 @@ Cesium.knockout.track(addLayerViewModel);
 Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
 
 var addWmsViewModel = {
-    name: '',
-    iconUrl: '',
-    tooltip: '',
-    url: '',
-    layers: '',
-    additionalParameters: '',
-    proxyUrl: '/proxy/'
+    imageryType: "",
+    url: "",
+    name: "",
+    iconUrl: "",
+    tooltip: "",
+    layers: "",
+    tileStyle: "",
+    tileMatrixSetId: "",
+    additionalParameters: "",
+    proxyUrl: "/proxy/"
 };
 Cesium.knockout.track(addWmsViewModel);
 Cesium.knockout.applyBindings(addWmsViewModel, document.getElementById('citydb_addwmspanel'));
@@ -990,23 +993,45 @@ function addWebMapServiceProvider() {
         if (!Cesium.defined(iconUrl) || iconUrl === "") {
             iconUrl = "images/icon_wms.png";
         }
-        const wmsProviderViewModel = new Cesium.ProviderViewModel({
-            name: addWmsViewModel.name.trim(),
-            iconUrl: iconUrl,
-            tooltip: addWmsViewModel.tooltip.trim(),
-            creationFunction: function () {
-                return new Cesium.WebMapServiceImageryProvider({
-                    url: new Cesium.Resource({
-                        url: addWmsViewModel.url.trim(),
-                        proxy: addWmsViewModel.proxyUrl.trim().length === 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
-                    }),
-                    layers: addWmsViewModel.layers.trim(),
-                    parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
-                });
-            }
-        });
-        baseLayerPickerViewModel.imageryProviderViewModels.push(wmsProviderViewModel);
-        baseLayerPickerViewModel.selectedImagery = wmsProviderViewModel;
+
+        let providerViewModel;
+        if (addWmsViewModel.imageryType === "wms") {
+            providerViewModel = new Cesium.ProviderViewModel({
+                name: addWmsViewModel.name.trim(),
+                iconUrl: iconUrl,
+                tooltip: addWmsViewModel.tooltip.trim(),
+                creationFunction: function () {
+                    return new Cesium.WebMapServiceImageryProvider({
+                        url: new Cesium.Resource({
+                            url: addWmsViewModel.url.trim(),
+                            proxy: addWmsViewModel.proxyUrl.trim().length === 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                        }),
+                        layers: addWmsViewModel.layers.trim(),
+                        parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
+                    });
+                }
+            });
+        } else if (addWmsViewModel.imageryType === "wmts") {
+            providerViewModel = new Cesium.ProviderViewModel({
+                name: addWmsViewModel.name.trim(),
+                iconUrl: iconUrl,
+                tooltip: addWmsViewModel.tooltip.trim(),
+                creationFunction: function () {
+                    return new Cesium.WebMapTileServiceImageryProvider({
+                        url: new Cesium.Resource({
+                            url: addWmsViewModel.url.trim(),
+                            proxy: addWmsViewModel.proxyUrl.trim().length === 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                        }),
+                        layer: addWmsViewModel.layers.trim(),
+                        style: addWmsViewModel.tileStyle.trim(),
+                        tileMatrixSetID: addWmsViewModel.tileMatrixSetId.trim()
+                    });
+                }
+            });
+        }
+
+        baseLayerPickerViewModel.imageryProviderViewModels.push(providerViewModel);
+        baseLayerPickerViewModel.selectedImagery = providerViewModel;
     });
 }
 
@@ -1016,6 +1041,22 @@ function removeImageryProvider() {
     baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
     baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
 }
+
+function imageryTypeDropdownOnchange() {
+    const imageryTypeDropdown = document.getElementById("imageryTypeDropdown");
+    const selectedValue = imageryTypeDropdown.options[imageryTypeDropdown.selectedIndex].value;
+    if (selectedValue === "wmts") {
+        document.getElementById("wmtsStyleRow").style.display = "";
+        document.getElementById("wmtsMatrixSetIdRow").style.display = "";
+        document.getElementById("additionalParametersRow").display = "none";
+    } else {
+        document.getElementById("wmtsStyleRow").style.display = "none";
+        document.getElementById("wmtsMatrixSetIdRow").style.display = "none";
+        document.getElementById("additionalParametersRow").display = "";
+    }
+    addWmsViewModel["imageryType"] = selectedValue;
+}
+
 
 function addTerrainProvider() {
     function update(callback) {
