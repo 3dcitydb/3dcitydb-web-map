@@ -1377,13 +1377,14 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
     const thematicTableTypeDropdownDiv = document.getElementById("thematicTableTypeDropdownDiv");
     const thematicDataUrlDiv = document.getElementById("thematicDataUrlDiv");
     if (thematicDataSourceDropdown.value === "Embedded") {
-        thematicTableTypeDropdownDiv.style = "display: none;";
+        thematicTableTypeDropdownDiv.style.display = "none";
         thematicDataUrlDiv.style = "display: none;";
     } else if (thematicDataSourceDropdown.value === "OGCFeatureAPI") {
-        thematicTableTypeDropdownDiv.style = "display: none;";
+        thematicTableTypeDropdownDiv.style.display = "none";
+        thematicDataUrlDiv.style.display = "";
     } else {
-        thematicTableTypeDropdownDiv.style = "";
-        thematicDataUrlDiv.style = "";
+        thematicTableTypeDropdownDiv.style.display = "";
+        thematicDataUrlDiv.style.display = "";
     }
 
     if (webMap && webMap._activeLayer) {
