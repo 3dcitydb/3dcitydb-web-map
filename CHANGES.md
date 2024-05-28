@@ -31,6 +31,8 @@ This is a major release.
   see [`2a0b810`](https://github.com/3dcitydb/3dcitydb-web-map/commit/2a0b810ac8a0cef8703682cbb6b0417edac52ca0).
 * Added special handling for OGC Feature API for Hamburg and NRW,
   see [`2a0b810`](https://github.com/3dcitydb/3dcitydb-web-map/commit/2a0b810ac8a0cef8703682cbb6b0417edac52ca0).
+* Added support for WMTS imagery layers (besides WMS),
+  see [`72e39dc`](https://github.com/3dcitydb/3dcitydb-web-map/commit/72e39dca99ea3249f4b1a8660106f25435b00c51).
 
 ##### UPDATES
 
