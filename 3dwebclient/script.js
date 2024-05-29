@@ -245,6 +245,11 @@ function initClient() {
                 addTerrainProvider();
             }
         }
+
+        // Adjust GUI based on given values
+        layerDataTypeDropdownOnchange();
+        thematicDataSourceAndTableTypeDropdownOnchange();
+        imageryTypeDropdownOnchange();
     });
 
     // jump to a timepoint
