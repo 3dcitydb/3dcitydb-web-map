@@ -1343,8 +1343,18 @@ function layerDataTypeDropdownOnchange() {
     const selectedValue = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
     if (selectedValue !== "COLLADA/KML/glTF") {
         document.getElementById("gltfVersionDropdownRow").style.display = "none";
+        document.getElementById("cityobjectsJsonUrlRow").style.display = "none";
+        document.getElementById("minLodPixelsRow").style.display = "none";
+        document.getElementById("maxLodPixelsRow").style.display = "none";
+        document.getElementById("maxCountOfVisibleTilesRow").style.display = "none";
+        document.getElementById("maxSizeOfCachedTilesRow").style.display = "none";
     } else {
         document.getElementById("gltfVersionDropdownRow").style.display = "";
+        document.getElementById("cityobjectsJsonUrlRow").style.display = "";
+        document.getElementById("minLodPixelsRow").style.display = "";
+        document.getElementById("maxLodPixelsRow").style.display = "";
+        document.getElementById("maxCountOfVisibleTilesRow").style.display = "";
+        document.getElementById("maxSizeOfCachedTilesRow").style.display = "";
     }
 
     if (["COLLADA/KML/glTF", "geojson"].includes(selectedValue)) {
