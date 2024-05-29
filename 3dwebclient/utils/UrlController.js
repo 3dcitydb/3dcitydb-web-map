@@ -184,6 +184,7 @@ var UrlController = /** @class */ (function () {
             layerConfig[this.getUrlParaForward('maxLodPixels')] = Cesium.defaultValue(layer.maxLodPixels, "");
             layerConfig[this.getUrlParaForward('maxSizeOfCachedTiles')] = Cesium.defaultValue(layer.maxSizeOfCachedTiles, "");
             layerConfig[this.getUrlParaForward('maxCountOfVisibleTiles')] = Cesium.defaultValue(layer.maxCountOfVisibleTiles, "");
+            layerConfig[this.getUrlParaForward('maximumScreenSpaceError')] = Cesium.defaultValue(layer.maximumScreenSpaceError, 16);
             layerGroupObject[this.getUrlParaForward('layer_') + i] = Cesium.objectToQuery(layerConfig);
         }
         return Cesium.objectToQuery(layerGroupObject);
@@ -270,6 +271,7 @@ var UrlController = /** @class */ (function () {
                 maxLodPixels: this.getValueFromObject('maxLodPixels', layerConfig, Number.MAX_VALUE, Cesium) === -1 ? Number.MAX_VALUE : this.getValueFromObject('maxLodPixels', layerConfig, Number.MAX_VALUE, Cesium),
                 maxSizeOfCachedTiles: this.getValueFromObject('maxSizeOfCachedTiles', layerConfig, 140, Cesium),
                 maxCountOfVisibleTiles: this.getValueFromObject('maxCountOfVisibleTiles', layerConfig, 140, Cesium),
+                maximumScreenSpaceError: this.getValueFromObject('maximumScreenSpaceError', layerConfig, 16, Cesium)
             };
             if (options.layerDataType === "geojson") {
                 nLayers.push(new CitydbGeoJSONLayer(options));
