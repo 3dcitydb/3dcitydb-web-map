@@ -394,13 +394,13 @@
 
             if (isFirstLoad) {
                 if (!that._minLodPixels)
-                    that._minLodPixels = json.minLodPixels == -1 ? Number.MIN_VALUE : json.minLodPixels;
+                    that._minLodPixels = json.minLodPixels === -1 ? Number.MIN_VALUE : json.minLodPixels;
                 if (!that._maxLodPixels)
-                    that._maxLodPixels = json.maxLodPixels == -1 ? Number.MAX_VALUE : json.maxLodPixels;
+                    that._maxLodPixels = json.maxLodPixels === -1 ? Number.MAX_VALUE : json.maxLodPixels;
             }
 
             if (that._active) {
-                if (that._urlSuffix == 'json')
+                if (that._urlSuffix === 'json')
                     that._citydbKmlTilingManager.doStart();
                 that._cesiumViewer.dataSources.add(that._citydbKmlDataSource);
             }
@@ -744,15 +744,15 @@
      */
     CitydbKmlLayer.prototype.activate = function (active) {
         this._active = active;
-        if (this._urlSuffix == 'json') {
-            if (active == false) {
+        if (this._urlSuffix === 'json') {
+            if (active === false) {
                 this._citydbKmlTilingManager.doTerminate();
                 this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
             } else {
                 this._citydbKmlTilingManager.doStart();
                 this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);
             }
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
+        } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz' || this._urlSuffix === 'czml') {
             if (active == false) {
                 this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
             } else {
@@ -767,7 +767,7 @@
      * zooms to the layer cameraPostion
      */
     CitydbKmlLayer.prototype.zoomToStartPosition = function () {
-        if (this._urlSuffix == 'json') {
+        if (this._urlSuffix === 'json') {
             var that = this;
             var lat = this._cameraPosition.lat;
             var lon = this._cameraPosition.lon;
@@ -782,12 +782,12 @@
                     cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
                     cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY);
                     setTimeout(function () {
-                        if (this._urlSuffix == 'json')
+                        if (this._urlSuffix === 'json')
                             that._citydbKmlTilingManager.triggerWorker();
                     }, 3000)
                 }
             })
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
+        } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz' || this._urlSuffix === 'czml') {
             this._cesiumViewer.flyTo(this._citydbKmlDataSource);
         } else {
 
@@ -800,15 +800,15 @@
      * @param {function} callback function to be called
      */
     CitydbKmlLayer.prototype.removeEventHandler = function (event, callback) {
-        if (event == "CLICK") {
+        if (event === "CLICK") {
             this._clickEvent.removeEventListener(callback, this);
-        } else if (event == "CTRLCLICK") {
+        } else if (event === "CTRLCLICK") {
             this._ctrlClickEvent.removeEventListener(callback, this);
-        } else if (event == "MOUSEIN") {
+        } else if (event === "MOUSEIN") {
             this._mouseInEvent.removeEventListener(callback, this);
-        } else if (event == "MOUSEOUT") {
+        } else if (event === "MOUSEOUT") {
             this._mouseOutEvent.removeEventListener(callback, this);
-        } else if (event == "VIEWCHANGED") {
+        } else if (event === "VIEWCHANGED") {
             this._viewChangedEvent.removeEventListener(callback, this);
         }
     }
@@ -820,15 +820,15 @@
      * @return {String} id of the event Handler, can be used to remove the event Handler
      */
     CitydbKmlLayer.prototype.registerEventHandler = function (event, callback) {
-        if (event == "CLICK") {
+        if (event === "CLICK") {
             this._clickEvent.addEventListener(callback, this);
-        } else if (event == "CTRLCLICK") {
+        } else if (event === "CTRLCLICK") {
             this._ctrlClickEvent.addEventListener(callback, this)
-        } else if (event == "MOUSEIN") {
+        } else if (event === "MOUSEIN") {
             this._mouseInEvent.addEventListener(callback, this);
-        } else if (event == "MOUSEOUT") {
+        } else if (event === "MOUSEOUT") {
             this._mouseOutEvent.addEventListener(callback, this);
-        } else if (event == "VIEWCHANGED") {
+        } else if (event === "VIEWCHANGED") {
             this._viewChangedEvent.addEventListener(callback, this);
         }
     }
@@ -839,15 +839,15 @@
      * @param {*} arguments, any number of arguments
      */
     CitydbKmlLayer.prototype.triggerEvent = function (event, object) {
-        if (event == "CLICK") {
+        if (event === "CLICK") {
             this._clickEvent.raiseEvent(object);
-        } else if (event == "CTRLCLICK") {
+        } else if (event === "CTRLCLICK") {
             this._ctrlClickEvent.raiseEvent(object);
-        } else if (event == "MOUSEIN") {
+        } else if (event === "MOUSEIN") {
             this._mouseInEvent.raiseEvent(object);
-        } else if (event == "MOUSEOUT") {
+        } else if (event === "MOUSEOUT") {
             this._mouseOutEvent.raiseEvent(object);
-        } else if (event == "VIEWCHANGED") {
+        } else if (event === "VIEWCHANGED") {
             this._viewChangedEvent.raiseEvent(object);
         }
     }
@@ -861,17 +861,17 @@
         this._hiddenObjects = [];
         this._cityobjectsJsonData = {};
         if (this._active) {
-            if (this._urlSuffix == 'json') {
+            if (this._urlSuffix === 'json') {
                 this._citydbKmlTilingManager.doTerminate();
                 this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
-            } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
+            } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz' || this._urlSuffix === 'czml') {
                 this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
             } else {
             }
         }
         var deferred = Cesium.defer();
         var that = this;
-        if (this._urlSuffix == 'json') {
+        if (this._urlSuffix === 'json') {
             this._citydbKmlDataSource = new CitydbKmlDataSource({
                 layerId: this._id,
                 camera: this._cesiumViewer.scene.camera,
@@ -880,7 +880,7 @@
             });
             this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
             return loadMasterJSON(this, false);
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
+        } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
                 camera: this._cesiumViewer.scene.camera,
                 canvas: this._cesiumViewer.scene.canvas
@@ -893,7 +893,7 @@
             }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
-        } else if (this._urlSuffix == 'czml') {
+        } else if (this._urlSuffix === 'czml') {
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
             this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
@@ -912,7 +912,7 @@
 
     CitydbKmlLayer.prototype.getObjectById = function (objectId) {
         var primitives = this._cesiumViewer.scene.primitives;
-        if (this._layerType == "collada") {
+        if (this._layerType === "collada") {
             for (var i = 0; i < primitives.length; i++) {
                 var primitive = primitives.get(i);
                 if (primitive instanceof Cesium.Model) {
@@ -1109,12 +1109,7 @@
         if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
-                var nodes = object._runtime.nodesByName;
-                for (var nodeId in nodes) {
-                    var node = nodes[nodeId];
-                    var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-                    publicNode.show = false;
-                }
+                object._id.show = false; // model._id is entity
             }
         } else if (object instanceof Array) {
             for (var i = 0; i < object.length; i++) {
@@ -1128,12 +1123,7 @@
         if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
-                var nodes = object._runtime.nodesByName;
-                for (var nodeId in nodes) {
-                    var node = nodes[nodeId];
-                    var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-                    publicNode.show = true;
-                }
+                object._id.show = true; // model._id is entity
             }
         } else if (object instanceof Array) {
             for (var i = 0; i < object.length; i++) {
@@ -1166,12 +1156,7 @@
     CitydbKmlLayer.prototype.isHiddenObject = function (object) {
         if (object instanceof Cesium.Model) {
             if (object.ready) {
-                var nodes = object._runtime.nodesByName;
-                for (var nodeId in nodes) {
-                    var node = nodes[nodeId];
-                    var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-                    return !publicNode.show;
-                }
+                return object._id.show; // model._id is entity
             }
         } else if (object instanceof Array) {
             for (var i = 0; i < object.length; i++) {
@@ -1224,11 +1209,15 @@
     CitydbKmlLayer.prototype.getAllHighlightedObjects = function () {
         let scope = this;
         let result = {}
-        for (let h in scope._highlightedObjects) {
-            let objects = scope.getObjectById(h);
-            if (Cesium.defined(objects) && objects.length !== 0) {
-                let o = objects[0]; // a 3D model may have multiple surfaces -> use one to represent all
-                result[o._id] = o;
+        for (let objectId in scope._highlightedObjects) {
+            let objects = scope.getObjectById(objectId);
+            if (Cesium.defined(objects)) {
+                const obj = Array.isArray(objects) ? objects[0] : objects; // a 3D model may have multiple surfaces -> use one to represent all
+                if (obj instanceof Cesium.Model) {
+                    result[objectId] = obj._id; // model._id -> entity
+                } else if (obj instanceof Cesium.Entity) {
+                    result[objectId] = obj; // already entity
+                }
             }
         }
         return result;
@@ -1239,9 +1228,13 @@
         let result = {};
         for (let objectId of scope._hiddenObjects) {
             let objects = scope.getObjectById(objectId);
-            if (Cesium.defined(objects) && objects.length !== 0) {
-                let o = objects[0]; // a 3D model may have multiple surfaces -> use one to represent all
-                result[o._id] = o;
+            if (Cesium.defined(objects)) {
+                const obj = Array.isArray(objects) ? objects[0] : objects; // a 3D model may have multiple surfaces -> use one to represent all
+                if (obj instanceof Cesium.Model) {
+                    result[objectId] = obj._id; // model._id -> entity
+                } else if (obj instanceof Cesium.Entity) {
+                    result[objectId] = obj; // already entity
+                }
             }
         }
         return result;
