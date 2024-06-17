@@ -72,12 +72,20 @@
         this._urlSuffix = undefined;
         this._viewChangedEvent = new Cesium.Event();
 
-        this._highlightColor = Cesium.Color.YELLOW;
+        this._highlightColor = Cesium.Color.AQUAMARINE;
         this._mouseOverhighlightColor = Cesium.Color.YELLOW;
+        this._selectedEntity = new Cesium.Entity();
+        this._prevHoveredColor = undefined;
+        this._prevHoveredFeature = undefined;
+        this._prevSelectedFeatures = [];
+        this._prevSelectedColors = [];
+        this._hiddenObjects = []; // kvps, with entry key = gmlid and value = feature
 
         this._layerDataType = options.layerDataType;
         this._layerProxy = options.layerProxy;
         this._layerClampToGround = options.layerClampToGround;
+
+        this._fnInfoTable = undefined;
 
         this._configParameters = {
             "id": this.id,
@@ -97,7 +105,26 @@
             "maxCountOfVisibleTiles": this.maxCountOfVisibleTiles
         }
 
-        Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
+        /**
+         * handles ClickEvents
+         */
+        this._clickEvent = new Cesium.Event();
+
+        this._ctrlClickEvent = new Cesium.Event();
+
+        /**
+         * handles ClickEvents
+         */
+        this._mouseInEvent = new Cesium.Event();
+
+        /**
+         * handles ClickEvents
+         */
+        this._mouseOutEvent = new Cesium.Event();
+
+        this._viewChangedEvent = new Cesium.Event();
+
+        Cesium.knockout.track(this, ['_prevSelectedFeatures', '_hiddenObjects']);
     }
 
     Object.defineProperties(CitydbGeoJSONLayer.prototype, {
@@ -105,24 +132,6 @@
         active: {
             get: function () {
                 return this._active;
-            }
-        },
-
-        highlightedObjects: {
-            get: function () {
-                return this._highlightedObjects;
-            },
-            set: function (value) {
-                this._highlightedObjects = value;
-            }
-        },
-
-        hiddenObjects: {
-            get: function () {
-                return this._hiddenObjects;
-            },
-            set: function (value) {
-                this._hiddenObjects = value;
             }
         },
 
@@ -299,7 +308,7 @@
 
         isHighlightingActivated: {
             get: function () {
-                return this._citydbKmlHighlightingManager == null ? false : true;
+                return this._citydbKmlHighlightingManager != null;
             }
         },
 
@@ -348,6 +357,15 @@
             }
         },
 
+        fnInfoTable: {
+            get: function () {
+                return this._fnInfoTable;
+            },
+            set: function (value) {
+                this._fnInfoTable = value;
+            }
+        },
+
         configParameters: {
             get: function () {
                 return this._configParameters;
@@ -379,33 +397,33 @@
      * adds this layer to the given Cesium viewer
      * @param {CesiumViewer} cesiumViewer
      */
-    CitydbGeoJSONLayer.prototype.addToCesium = function (cesiumViewer) {
-        this._cesiumViewer = cesiumViewer;
-        this._urlSuffix = CitydbUtil.get_suffix_from_filename(this._url);
-        var that = this;
-        var deferred = Cesium.defer();
+    CitydbGeoJSONLayer.prototype.addToCesium = function (cesiumViewer, fnInfoTable) {
+        const scope = this;
+        scope._cesiumViewer = cesiumViewer;
+        scope._fnInfoTable = fnInfoTable;
+        scope._urlSuffix = CitydbUtil.get_suffix_from_filename(scope._url);
+        const deferred = Cesium.defer();
 
-        this._cesiumViewer.dataSources.add(Cesium.GeoJsonDataSource.load(this._url, {
+        scope._cesiumViewer.dataSources.add(Cesium.GeoJsonDataSource.load(scope._url, {
             stroke: Cesium.Color.HOTPINK,
             fill: Cesium.Color.PINK,
             strokeWidth: 3,
             markerSymbol: '?',
             clampToGround: this._layerClampToGround
         })).then(datasSource => {
-            that._citydbGeoJSONDataSource = datasSource;
-            deferred.resolve(that);
+            scope._citydbGeoJSONDataSource = datasSource;
+            scope.registerMouseEventHandlers();
+            deferred.resolve(scope);
         });
 
-        this.registerMouseEventHandlers();
-
-        Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function () {
-            if (that._urlSuffix == 'json')
-                that._citydbKmlTilingManager.clearCaching();
+        Cesium.knockout.getObservable(scope, '_prevSelectedFeatures').subscribe(function () {
+            if (scope._urlSuffix === 'json')
+                scope._citydbKmlTilingManager.clearCaching();
         });
 
-        Cesium.knockout.getObservable(this, '_hiddenObjects').subscribe(function () {
-            if (that._urlSuffix == 'json')
-                that._citydbKmlTilingManager.clearCaching();
+        Cesium.knockout.getObservable(scope, '_hiddenObjects').subscribe(function () {
+            if (scope._urlSuffix === 'json')
+                scope._citydbKmlTilingManager.clearCaching();
         });
 
         return deferred.promise;
@@ -416,9 +434,141 @@
     }
 
     CitydbGeoJSONLayer.prototype.registerMouseEventHandlers = function () {
-        var highlightColor = this._highlightColor;
-        var mouseOverhighlightColor = this._mouseOverhighlightColor;
-        var scope = this;
+        const scope = this;
+        const viewer = scope._cesiumViewer;
+
+        var highlightColor = scope._highlightColor;
+        var mouseOverhighlightColor = scope._mouseOverhighlightColor;
+
+        // Get default left click handler for when a feature is not picked on left click
+        const clickHandler = viewer.screenSpaceEventHandler.getInputAction(
+            Cesium.ScreenSpaceEventType.LEFT_CLICK
+        );
+
+        function storeCameraPosition(viewer, movement, feature) {
+            const cartesian = viewer.scene.pickPosition(movement.position);
+            let destination = Cesium.Cartographic.fromCartesian(cartesian);
+            const boundingSphere = new Cesium.BoundingSphere(
+                Cesium.Cartographic.toCartesian(destination),
+                viewer.camera.positionCartographic.height
+            );
+            const orientation = {
+                heading: viewer.camera.heading,
+                pitch: viewer.camera.pitch,
+                roll: viewer.camera.roll
+            }
+            feature._storedBoundingSphere = boundingSphere;
+            feature._storedOrientation = orientation;
+        }
+
+        viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
+                // Pick a new feature
+                const pickedFeature = viewer.scene.pick(movement.endPosition);
+                if (!Cesium.defined(pickedFeature)) return;
+
+                // Do not change the highlighting if the mouse is still on the same feature
+                if (Cesium.defined(scope._prevHoveredFeature) && scope._prevHoveredFeature === pickedFeature) return;
+
+                // Unhighlight previous feature
+                if (Cesium.defined(scope._prevHoveredFeature)) {
+                    // Only when not selected
+                    if (!scope._prevSelectedFeatures.includes(scope._prevHoveredFeature)) {
+                        scope._prevHoveredFeature.color = scope._prevHoveredColor;
+                    }
+                }
+
+                // Do not highlight if feature has been already selected before
+                if (Cesium.defined(scope._prevSelectedFeatures) && scope._prevSelectedFeatures.includes(pickedFeature)) return;
+
+                // Update references
+                scope._prevHoveredFeature = pickedFeature;
+                scope._prevHoveredColor = pickedFeature.color;
+
+                // Highlight the new feature
+                pickedFeature.color = scope._mouseOverHighlightColor;
+            },
+            Cesium.ScreenSpaceEventType.MOUSE_MOVE
+        );
+
+        viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+                // Empty the selected list when a new object has been clicked
+                if (scope._prevSelectedFeatures.length > 0) {
+                    for (let i = 0; i < scope._prevSelectedFeatures.length; i++) {
+                        scope._prevSelectedFeatures[i].color = scope._prevSelectedColors[i]
+                    }
+                    scope._prevSelectedFeatures = [];
+                    scope._prevSelectedColors = [];
+                }
+
+                // Pick a new feature
+                const pickedFeature = viewer.scene.pick(movement.position);
+                if (!Cesium.defined(pickedFeature)) {
+                    clickHandler(movement);
+                    return;
+                }
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, pickedFeature)
+
+                // Do not highlight if already selected
+                if (scope._prevSelectedFeatures.includes(pickedFeature)) return;
+
+                // Store original feature
+                scope._prevSelectedFeatures.push(pickedFeature);
+                // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
+                scope._prevSelectedColors.push(scope._prevHoveredColor);
+
+                // Highlight newly selected feature
+                viewer.selectedEntity = scope._selectedEntity;
+                pickedFeature.color = scope._highlightColor;
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, scope._selectedEntity);
+
+                // Info table
+                let entityContent = {};
+                const entity = pickedFeature.id;
+                entityContent["gmlid"] = entity.id;
+                const properties = entity._properties;
+                const propertyIds = properties._propertyNames;
+                for (let i = 0; i < propertyIds.length; i++) {
+                    const key = propertyIds[i];
+                    entityContent[key] = properties[key]._value;
+                }
+                scope._fnInfoTable([scope._selectedEntity, entityContent], scope);
+            },
+            Cesium.ScreenSpaceEventType.LEFT_CLICK
+        );
+
+        viewer.screenSpaceEventHandler.setInputAction(function onCtrlLeftClick(movement) {
+                // Pick a new feature
+                const pickedFeature = viewer.scene.pick(movement.position);
+                if (!Cesium.defined(pickedFeature)) {
+                    clickHandler(movement);
+                    return;
+                }
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, pickedFeature)
+
+                // Do not highlight if already selected
+                if (scope._prevSelectedFeatures.includes(pickedFeature)) return;
+
+                // Store original feature
+                scope._prevSelectedFeatures.push(pickedFeature);
+                // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
+                scope._prevSelectedColors.push(scope._prevHoveredColor);
+
+                // Highlight newly selected feature
+                viewer.selectedEntity = scope._selectedEntity;
+                pickedFeature.color = scope._highlightColor;
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, scope._selectedEntity);
+            },
+            Cesium.ScreenSpaceEventType.LEFT_CLICK,
+            Cesium.KeyboardEventModifier.CTRL
+        );
 
         scope.registerEventHandler("CLICK", function (object) {
             var targetEntity = object.id;
@@ -436,6 +586,9 @@
 
             highlightThis[objectId] = highlightColor;
             scope.highlight(highlightThis);
+
+            // info table
+            scope._fnInfoTable([object.id.name, object.id], scope);
         });
 
         // CtrlclickEvent Handler for Multi-Selection and Highlighting...
@@ -598,6 +751,10 @@
         this._hiddenObjects = this._hiddenObjects;
     };
 
+    CitydbGeoJSONLayer.prototype.hideSelected = function () {
+        this.hideObjects(this._highlightedObjects);
+    };
+
     /**
      * showObjects, to undo hideObjects
      * @param {Array<String>} A list of Object Ids which will be unhidden.
@@ -612,6 +769,24 @@
             this.showObject(this.getObjectById(objectId));
         }
         this._hiddenObjects = this._hiddenObjects;
+    };
+
+    CitydbGeoJSONLayer.prototype.getAllHighlightedObjects = function () {
+        let scope = this;
+        let result = {};
+        for (let objectId of scope._highlightedObjects) {
+            result[objectId] = scope.getObjectById(objectId);
+        }
+        return result;
+    };
+
+    CitydbGeoJSONLayer.prototype.getAllHiddenObjects = function () {
+        let scope = this;
+        let result = {};
+        for (let objectId of scope._hiddenObjects) {
+            result[objectId] = scope.getObjectById(objectId);
+        }
+        return result;
     };
 
     /**

@@ -290,8 +290,8 @@
      */
     Cesium3DTilesDataLayer.prototype.addToCesium = function (cesiumViewer, fnInfoTable) {
         const scope = this;
-        this._cesiumViewer = cesiumViewer;
-        this._fnInfoTable = fnInfoTable;
+        scope._cesiumViewer = cesiumViewer;
+        scope._fnInfoTable = fnInfoTable;
         const deferred = Cesium.defer();
 
         Cesium.Cesium3DTileset.fromUrl(scope.autofillUrl(scope._url), {
@@ -356,7 +356,7 @@
     }
 
     Cesium3DTilesDataLayer.prototype.registerMouseEventHandlers = function () {
-        let scope = this;
+        const scope = this;
         const viewer = scope._cesiumViewer;
 
         // Get default left click handler for when a feature is not picked on left click

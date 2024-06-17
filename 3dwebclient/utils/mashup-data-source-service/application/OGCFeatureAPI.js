@@ -115,15 +115,25 @@ var OGCFeatureAPI = /** @class */ (function (_super) {
         const gmlidValue = gmlid["value"];
         let urls = [baseUrl + "?id=" + gmlidValue + "&f=json"];
         if (baseUrl.includes("hamburg.de") && gmlidValue.startsWith("DEHH")) {
-            // Hamburg -> append "BL" and use oid
             // Only for IDs that start with DEHH, not UUID or others (may be surfaces of a building)
-            // e.g.: https://api.hamburg.de/datasets/v1/alkis_vereinfacht/collections/GebaeudeBauwerk/items/?oid=DEHHALKA3AR000BeBL&f=json
-            urls.push(baseUrl + "?oid=" + gmlidValue + "BL&f=json");
+            if (baseUrl.includes("GebaeudeBauwerk")) {
+                // Hamburg -> append "BL" and use oid
+                // e.g.: https://api.hamburg.de/datasets/v1/alkis_vereinfacht/collections/GebaeudeBauwerk/items/?oid=DEHHALKA3AR000BeBL&f=json
+                urls.push(baseUrl + "?oid=" + gmlidValue + "BL&f=json");
+            } else {
+                // e.g.: https://api.hamburg.de/datasets/v1/alkis_vereinfacht/collections/Flurstueck/items/?oid=DEHHALKA3AR000BeBL&f=json
+                urls.push(baseUrl + "?oid=" + gmlidValue + "&f=json");
+            }
         } else if (baseUrl.includes("nrw.de") && gmlidValue.startsWith("DENW")) {
-            // NRW -> append "BL" and do not use any id key
             // Only for IDs that start with DENW, not UUID or others (may be surfaces of a building)
-            // e.g.: https://www.ldproxy.nrw.de/kataster/collections/gebaeudebauwerk/items/DENW51AL10007kgBBL?f=json
-            urls.push(baseUrl + gmlidValue + "BL?f=json");
+            if (baseUrl.includes("gebaeudebauwerk")) {
+                // NRW -> append "BL" and do not use any id key
+                // e.g.: https://www.ldproxy.nrw.de/kataster/collections/gebaeudebauwerk/items/DENW51AL10007kgBBL?f=json
+                urls.push(baseUrl + gmlidValue + "BL?f=json");
+            } else {
+                // e.g.: https://www.ldproxy.nrw.de/kataster/collections/flurstueck/items/DENW51AL10007kgBBL?f=json
+                urls.push(baseUrl + gmlidValue + "?f=json");
+            }
         }
 
         const scope = this;

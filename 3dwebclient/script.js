@@ -1368,16 +1368,6 @@ function layerDataTypeDropdownOnchange() {
         document.getElementById("layerProxyAndClampToGround").style.display = "none";
     }
 
-    if (["geojson"].includes(selectedValue)) {
-        document.getElementById("thematicDataSourceDropDownDiv").style.display = "none";
-        document.getElementById("thematicTableTypeDropdownDiv").style.display = "none";
-        document.getElementById("thematicDataSourceDropdown").value = "Embedded";
-        document.getElementById("tableTypeDropdown").value = "";
-    } else {
-        document.getElementById("thematicDataSourceDropDownDiv").style.display = "";
-        document.getElementById("thematicTableTypeDropdownDiv").style.display = "";
-    }
-
     if (selectedValue !== "Cesium 3D Tiles" && selectedValue !== "i3s") {
         document.getElementById("maximumScreenSpaceError").style.display = "none";
     } else {
