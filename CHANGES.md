@@ -9,7 +9,7 @@ This is a major release.
 * Added support for Index 3D Scene (i3s) layers.
 * Add support for embedded thematic data in Index 3D Scene (i3s) layers
   see [`04d8221`](https://github.com/3dcitydb/3dcitydb-web-map/commit/04d82218730bb2bb4164519c7c01ccbf6508f51c).
-* Added support for GeoJSON (using embedded thematic data).
+* Added support for GeoJSON (with different sources of thematic data).
 * Added option for maximum screen space error in 3D tiles,
   see [`bd54bed`](https://github.com/3dcitydb/3dcitydb-web-map/commit/bd54bede7c393917fdb8c5bb43eaad3fb9110555).
 * Selecting an entity from the lists of highlighted or hidden objects will fly to its corresponding 3D model,
