@@ -33,6 +33,8 @@ This is a major release.
   see [`2a0b810`](https://github.com/3dcitydb/3dcitydb-web-map/commit/2a0b810ac8a0cef8703682cbb6b0417edac52ca0).
 * Added support for WMTS imagery layers (besides WMS),
   see [`72e39dc`](https://github.com/3dcitydb/3dcitydb-web-map/commit/72e39dca99ea3249f4b1a8660106f25435b00c51).
+* Added highlighting for GeoJSON,
+  see [`9e6882a`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9e6882ad6cc00e45aef00ed27f5299736ae9832a).
 
 ##### UPDATES
 
@@ -261,7 +263,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute1 | attribute2 | attribute3 | attribute4 |
-      | ------------- | ------------- | ------------- | ------------- | ------------- |
+            | ------------- | ------------- | ------------- | ------------- | ------------- |
       | gmlid1  | value1  | value2  | value3  | value4  |
       | gmlid2  | value1  | value2  | value3  | value4  |
 
@@ -273,7 +275,7 @@ This is a major release.
       *Example*:
 
       | gmlid  | attribute | value |
-      | ------------- | ------------- | ------------- |
+            | ------------- | ------------- | ------------- |
       | gmlid1  | attribute1  | value1  |
       | gmlid1  | attribute2  | value2  |
       | gmlid1  | attribute3  | value3  |
@@ -334,7 +336,7 @@ This is a major release.
   where:
 
   | Parameter        | Description           | Allowed values  | Default Value |
-  | ------------- |-------------| -----| ----|
+    | ------------- |-------------| -----| ----|
   | `url`      | A valid path to the HTML file | An absolute path if the HTML file is located in another domain or a relative path if the HTML file is located in the same project folder as the web client | `splash/SplashWindow.html` |
   | `showOnStart`     | A boolean that determines whether the splash window should be shown upon start or not      |   `true` or `false` | `true` |
 
