@@ -450,12 +450,16 @@
 
                 // Info table
                 let entityContent = {};
-                const propertyIds = pickedFeature.getPropertyIds();
-                for (let i = 0; i < propertyIds.length; i++) {
-                    const key = propertyIds[i];
-                    entityContent[key] = pickedFeature.getProperty(key);
+                if (pickedFeature instanceof Cesium.Cesium3DTileFeature) {
+                    const propertyIds = pickedFeature.getPropertyIds();
+                    for (let i = 0; i < propertyIds.length; i++) {
+                        const key = propertyIds[i];
+                        entityContent[key] = pickedFeature.getProperty(key);
+                    }
+                    scope._fnInfoTable([scope._selectedEntity, entityContent], scope);
+                } else {
+                    console.error("Object " + typeof pickedFeature + " is not an instance of Cesium3DTileFeature");
                 }
-                scope._fnInfoTable([scope._selectedEntity, entityContent], scope);
             },
             Cesium.ScreenSpaceEventType.LEFT_CLICK
         );

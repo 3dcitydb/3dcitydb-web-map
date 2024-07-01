@@ -533,12 +533,14 @@
                 const entity = pickedFeature.id;
                 entityContent["gmlid"] = entity.id;
                 const properties = entity._properties;
-                const propertyIds = properties._propertyNames;
-                for (let i = 0; i < propertyIds.length; i++) {
-                    const key = propertyIds[i];
-                    entityContent[key] = properties[key]._value;
+                if (Cesium.defined(properties)) {
+                    const propertyIds = properties._propertyNames;
+                    for (let i = 0; i < propertyIds.length; i++) {
+                        const key = propertyIds[i];
+                        entityContent[key] = properties[key]._value;
+                    }
+                    scope._fnInfoTable([scope._selectedEntity, entityContent], scope);
                 }
-                scope._fnInfoTable([scope._selectedEntity, entityContent], scope);
             },
             Cesium.ScreenSpaceEventType.LEFT_CLICK
         );
