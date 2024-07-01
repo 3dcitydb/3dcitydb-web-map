@@ -607,7 +607,7 @@
      * @param {Array<String>} A list of Object Ids which will be hidden
      */
     CitydbGeoJSONLayer.prototype.hideObjects = function (toHideFeatures) {
-        let scope = this;
+        const scope = this;
         if (!Cesium.defined(scope._hiddenObjects)) return;
         for (let feature of toHideFeatures) {
             if (!scope._hiddenObjects.includes(feature)) {
@@ -1003,7 +1003,7 @@
     };
 
     CitydbGeoJSONLayer.prototype.showAllObjects = function () {
-        let scope = this;
+        const scope = this;
         for (let feature of scope._hiddenObjects) {
             feature.id.show = true;
         }
