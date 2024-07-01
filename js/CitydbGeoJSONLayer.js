@@ -64,7 +64,6 @@
         this._citydbGeoJSONDataSource = undefined;
         this._activeHighlighting = Cesium.defaultValue(options.activeHighlighting, true);
         this._citydbKmlHighlightingManager = this._activeHighlighting ? new CitydbKmlHighlightingManager(this) : null;
-        this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
         this._layerType = undefined;
         this._jsonLayerInfo = undefined;
         this._urlSuffix = undefined;
@@ -292,12 +291,6 @@
             }
         },
 
-        citydbKmlTilingManager: {
-            get: function () {
-                return this._citydbKmlTilingManager;
-            }
-        },
-
         citydbKmlHighlightingManager: {
             get: function () {
                 return this._citydbKmlHighlightingManager;
@@ -403,21 +396,11 @@
         const deferred = Cesium.defer();
 
         scope._cesiumViewer.dataSources.add(Cesium.GeoJsonDataSource.load(scope._url, {
-            clampToGround: this._layerClampToGround
+            clampToGround: scope._layerClampToGround
         })).then(datasSource => {
             scope._citydbGeoJSONDataSource = datasSource;
             scope.registerMouseEventHandlers();
             deferred.resolve(scope);
-        });
-
-        Cesium.knockout.getObservable(scope, '_prevSelectedFeatures').subscribe(function () {
-            if (scope._urlSuffix === 'json')
-                scope._citydbKmlTilingManager.clearCaching();
-        });
-
-        Cesium.knockout.getObservable(scope, '_hiddenObjects').subscribe(function () {
-            if (scope._urlSuffix === 'json')
-                scope._citydbKmlTilingManager.clearCaching();
         });
 
         return deferred.promise;
@@ -663,10 +646,8 @@
     CitydbGeoJSONLayer.prototype.activate = function (active) {
         this._active = active;
         if (active === false) {
-            this._citydbKmlTilingManager.doTerminate();
             this._cesiumViewer.dataSources.remove(this._citydbGeoJSONDataSource);
         } else {
-            this._citydbKmlTilingManager.doStart();
             this._cesiumViewer.dataSources.add(this._citydbGeoJSONDataSource);
         }
     }
@@ -741,21 +722,23 @@
     //--------------------------------------------------------------------------------------------------------//
 
     CitydbGeoJSONLayer.prototype.reActivate = function () {
-        this._highlightedObjects = {};
-        this._hiddenObjects = [];
-        this._cityobjectsJsonData = {};
-        if (this._active) {
-            this._citydbKmlTilingManager.doTerminate();
-            this._cesiumViewer.dataSources.remove(this._citydbGeoJSONDataSource);
+        const scope = this;
+        const deferred = Cesium.defer();
+        scope._prevSelectedFeatures = [];
+        scope._prevSelectedColors = [];
+        scope._prevHoveredFeature = undefined;
+        scope._prevHoveredColor = undefined;
+        scope._hiddenObjects = [];
+
+        if (scope._active) {
+            scope._cesiumViewer.dataSources.remove(scope._citydbGeoJSONDataSource);
         }
-        var deferred = Cesium.defer();
-        var that = this;
-        this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
-        this._cesiumViewer.dataSources.add(Cesium.GeoJsonDataSource.load(this._url, {
-            clampToGround: this._layerClampToGround
+
+        scope._cesiumViewer.dataSources.add(Cesium.GeoJsonDataSource.load(scope._url, {
+            clampToGround: scope._layerClampToGround
         })).then(datasSource => {
-            that._citydbGeoJSONDataSource = datasSource;
-            deferred.resolve(that);
+            scope._citydbGeoJSONDataSource = datasSource;
+            deferred.resolve(scope);
         });
 
         return deferred.promise;
