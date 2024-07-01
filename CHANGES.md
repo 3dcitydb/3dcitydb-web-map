@@ -56,7 +56,8 @@ This is a major release.
 * Fixed `geocoder` for Bing Maps (breaking change in
   Cesium [`v1.73`](https://github.com/CesiumGS/cesium/blob/main/CHANGES.md#breaking-changes-mega-14)).
 * Fixed Cesium `defer` accordingly to native `Promise` API.
-* Fixed highlighting due to breaking changes in Cesium.
+* Fixed highlighting due to breaking changes in Cesium, including
+  COLLADA/KML/glTF, Cesium 3D Tiles, i3s, and GeoJSON.
 * Fixed insertion and removal of WMS and terrain layers,
   see [`c3b6c02`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c3b6c0221e04448dbb964e9b8ba7a3c080dbb264).
 * Fixed and updated credits,
