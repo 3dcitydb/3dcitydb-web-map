@@ -39,8 +39,6 @@
         this._id = Cesium.defaultValue(options.id, Cesium.createGuid());
         this._region = options.region;
         this._active = Cesium.defaultValue(options.active, true);
-        this._highlightedObjects = new Object();
-        this._hiddenObjects = new Array();
         this._cameraPosition = new Object();
         this._clickEvent = new Cesium.Event();
         this._ctrlClickEvent = new Cesium.Event();
@@ -479,8 +477,8 @@
                 pitch: viewer.camera.pitch,
                 roll: viewer.camera.roll
             }
-            feature._storedBoundingSphere = boundingSphere;
-            feature._storedOrientation = orientation;
+            feature.id._storedBoundingSphere = boundingSphere;
+            feature.id._storedOrientation = orientation;
         }
 
         viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
@@ -625,51 +623,35 @@
      * hideObjects
      * @param {Array<String>} A list of Object Ids which will be hidden
      */
-    CitydbGeoJSONLayer.prototype.hideObjects = function (toHide) {
-        for (var i = 0; i < toHide.length; i++) {
-            var objectId = toHide[i];
-            if (!this.isInHiddenList(objectId)) {
-                this._hiddenObjects.push(objectId);
+    CitydbGeoJSONLayer.prototype.hideObjects = function (toHideFeatures) {
+        let scope = this;
+        if (!Cesium.defined(scope._hiddenObjects)) return;
+        for (let feature of toHideFeatures) {
+            if (!scope._hiddenObjects.includes(feature)) {
+                scope._hiddenObjects.push(feature);
             }
-            this.hideObject(this.getObjectById(objectId));
+            feature.id.show = false;
         }
-        this._hiddenObjects = this._hiddenObjects;
     };
 
     CitydbGeoJSONLayer.prototype.hideSelected = function () {
-        this.hideObjects(this._highlightedObjects);
-    };
-
-    /**
-     * showObjects, to undo hideObjects
-     * @param {Array<String>} A list of Object Ids which will be unhidden.
-     */
-    CitydbGeoJSONLayer.prototype.showObjects = function (toUnhide) {
-        for (var k = 0; k < toUnhide.length; k++) {
-            var objectId = toUnhide[k];
-            this._hiddenObjects.splice(objectId, 1);
-        }
-        for (var k = 0; k < toUnhide.length; k++) {
-            var objectId = toUnhide[k];
-            this.showObject(this.getObjectById(objectId));
-        }
-        this._hiddenObjects = this._hiddenObjects;
+        this.hideObjects(this._prevSelectedFeatures);
     };
 
     CitydbGeoJSONLayer.prototype.getAllHighlightedObjects = function () {
-        let scope = this;
+        const scope = this;
         let result = {};
-        for (let objectId of scope._highlightedObjects) {
-            result[objectId] = scope.getObjectById(objectId);
+        for (let feature of scope._prevSelectedFeatures) {
+            result[feature.id.id] = feature.id;
         }
         return result;
     };
 
     CitydbGeoJSONLayer.prototype.getAllHiddenObjects = function () {
-        let scope = this;
+        const scope = this;
         let result = {};
-        for (let objectId of scope._hiddenObjects) {
-            result[objectId] = scope.getObjectById(objectId);
+        for (let feature of scope._hiddenObjects) {
+            result[feature.id.id] = feature.id;
         }
         return result;
     };
@@ -1038,12 +1020,11 @@
     };
 
     CitydbGeoJSONLayer.prototype.showAllObjects = function () {
-        for (var k = 0; k < this._hiddenObjects.length; k++) {
-            var objectId = this._hiddenObjects[k];
-            this.showObject(this.getObjectById(objectId));
+        let scope = this;
+        for (let feature of scope._hiddenObjects) {
+            feature.id.show = true;
         }
-        this._hiddenObjects = this._hiddenObjects;
-        this._hiddenObjects = [];
+        scope._hiddenObjects = [];
     };
 
     CitydbGeoJSONLayer.prototype.isInHiddenList = function (objectId) {

@@ -90,7 +90,7 @@ var addLayerViewModel = {
     name: "",
     layerDataType: "",
     layerProxy: false,
-    layerClampToGround: true,
+    layerClampToGround: false,
     gltfVersion: "",
     thematicDataUrl: "",
     thematicDataSource: "",
