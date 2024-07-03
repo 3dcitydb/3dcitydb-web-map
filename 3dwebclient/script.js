@@ -158,9 +158,7 @@ function initClient() {
     // init progress indicator gif
     document.getElementById('loadingIndicator').style.display = 'none';
 
-    // activate mouseClick Events		
-    webMap.activateMouseClickEvents(true);
-    webMap.activateMouseMoveEvents(true);
+    // webMap events
     webMap.activateViewChangedEvent(true);
 
     // add Copyrights, TUM, 3DCityDB or more...
@@ -810,35 +808,19 @@ function showSceneLink() {
 }
 
 // Clear Highlighting effect of all highlighted objects
-function clearhighlight() {
-    var layers = webMap._layers;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].active) {
-            layers[i].unHighlightAllObjects();
-        }
-    }
+function clearHighlight() {
+    webMap.clearSelectedObjects();
     cesiumViewer.selectedEntity = undefined;
 }
 
 // hide the selected objects
 function hideSelectedObjects() {
-    var layers = webMap._layers;
-    var objectIds;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].active) {
-            layers[i].hideSelected();
-        }
-    }
+    webMap.hideSelectedObjects();
 }
 
 // show the hidden objects
 function showHiddenObjects() {
-    var layers = webMap._layers;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].active) {
-            layers[i].showAllObjects();
-        }
-    }
+    webMap.showHiddenObjects();
 }
 
 function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {

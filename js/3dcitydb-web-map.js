@@ -33,13 +33,23 @@
  * @param {CesiumViewer} cesiumViewer
  */
 (function () {
-    function WebMap3DCityDB(cesiumViewer) {
+    function WebMap3DCityDB(cesiumViewer, createInfoTable) {
         this._cesiumViewerInstance = cesiumViewer;
         this._layers = [];
         this._mouseMoveEvents = false;
         this._mouseClickEvents = false;
         this._eventHandler = new Cesium.ScreenSpaceEventHandler(cesiumViewer.scene.canvas);
         this._cameraEventAggregator = new Cesium.CameraEventAggregator(cesiumViewer.scene.canvas);
+
+        this._highlightColor = Cesium.Color.AQUAMARINE;
+        this._mouseOverHighlightColor = Cesium.Color.YELLOW;
+        this._selectedEntity = new Cesium.Entity();
+        this._prevHoveredColor = undefined;
+        this._prevHoveredFeature = undefined;
+        this._prevSelectedFeatures = [];
+        this._prevSelectedColors = [];
+        this._hiddenObjects = []; // kvps, with entry key = gmlid and value = feature
+
         this._activeLayer = undefined;
         Cesium.knockout.track(this, ['_activeLayer']);
     }
@@ -65,6 +75,322 @@
             }
         }
     });
+
+    /**
+     * Compare two features from all layers
+     */
+    WebMap3DCityDB.prototype.isEqual = function (feature1, feature2) {
+        if (!Cesium.defined(feature1) || !Cesium.defined(feature2)) return false;
+
+        // Cesium 3D Tiles and i3s
+        if ((feature1 instanceof Cesium.Cesium3DTileFeature) && (feature2 instanceof Cesium.Cesium3DTileFeature)) {
+            return feature1._batchId === feature2._batchId;
+        }
+
+        // COLLADA/KML/glTF and GeoJSON
+        if (Cesium.defined(feature1.id) && Cesium.defined(feature2.id)) {
+            return feature1.id.id === feature2.id.id;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check whether an element is in an array for all layers
+     */
+    WebMap3DCityDB.prototype.includes = function (array, ele) {
+        const scope = this;
+        for (i of array) {
+            if (scope.isEqual(i, ele)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the original color / color options of a given feature
+     */
+    WebMap3DCityDB.prototype.getColor = function (feature) {
+        if (!Cesium.defined(feature)) return undefined;
+
+        // Cesium 3D Tiles and i3s
+        if (feature instanceof Cesium.Cesium3DTileFeature) {
+            return feature.color;
+        }
+
+        if (Cesium.defined(feature.id)) {
+            if (Cesium.defined(feature.id.kml)) {
+                // COLLADA/KML/glTF
+                return {
+                    color: feature.detail.model.color,
+                    colorBlendAmount: feature.detail.model.colorBlendAmount,
+                    colorBlendMode: feature.detail.model.colorBlendMode
+                };
+            } else {
+                // GeoJSON
+                return feature.id.polygon.material;
+            }
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Set color / color options for a given feature
+     */
+    WebMap3DCityDB.prototype.setColor = function (feature, colorOrFeature, colorOptions = {}) {
+        const scope = this;
+        if (!Cesium.defined(feature)) return;
+
+        // Cesium 3D Tiles and i3s
+        if (feature instanceof Cesium.Cesium3DTileFeature) {
+            if (!Cesium.defined(colorOrFeature)) {
+                feature.color = undefined;
+            } else if (colorOrFeature instanceof Cesium.Color) {
+                feature.color = colorOrFeature;
+            } else {
+                feature.color = scope.getColor(colorOrFeature);
+            }
+            return;
+        }
+
+        if (Cesium.defined(feature.id)) {
+            if (Cesium.defined(feature.id.kml)) {
+                // COLLADA/KML/glTF
+                if (!Cesium.defined(colorOrFeature)) {
+                    feature.id.model.color = undefined;
+                } else if (colorOrFeature instanceof Cesium.Color) {
+                    feature.id.model.color = colorOrFeature;
+                    if (Cesium.defined(colorOptions.colorBlendAmount)) {
+                        feature.id.model.colorBlendAmount = colorOptions.colorBlendAmount;
+                    }
+                    if (Cesium.defined(colorOptions.colorBlendMode)) {
+                        feature.id.model.colorBlendMode = colorOptions.colorBlendMode;
+                    }
+                } else if (Cesium.defined(colorOrFeature.color)
+                    && Cesium.defined(colorOrFeature.colorBlendAmount)
+                    && Cesium.defined(colorOrFeature.colorBlendMode)) {
+                    feature.id.model.color = colorOrFeature.color;
+                    if (Cesium.defined(colorOptions.colorBlendAmount)) {
+                        feature.id.model.colorBlendAmount = colorOptions.colorBlendAmount;
+                    } else {
+                        feature.id.model.colorBlendAmount = colorOrFeature.colorBlendAmount;
+                    }
+                    if (Cesium.defined(colorOptions.colorBlendMode)) {
+                        feature.id.model.colorBlendMode = colorOptions.colorBlendMode;
+                    } else {
+                        feature.id.model.colorBlendMode = colorOrFeature.colorBlendMode;
+                    }
+                } else {
+                    const colorObj = scope.getColor(colorOrFeature);
+                    scope.setColor(feature, colorObj, colorOptions);
+                }
+            } else {
+                // GeoJSON
+                if (!Cesium.defined(colorOrFeature)) {
+                    feature.id.polygon.material = undefined;
+                } else if (colorOrFeature instanceof Cesium.Color) {
+                    feature.id.polygon.material = new Cesium.ColorMaterialProperty(colorOrFeature);
+                } else if (colorOrFeature instanceof Cesium.ColorMaterialProperty) {
+                    feature.id.polygon.material = colorOrFeature;
+                } else {
+                    feature.id.polygon.material = scope.getColor(colorOrFeature);
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle mouse events for different types of layers
+     */
+    WebMap3DCityDB.prototype.registerMouseEventHandlers = function (curLayer, cesiumViewer) {
+        const scope = this;
+        const viewer = cesiumViewer;
+
+        // For COLLADA/KML/glTF
+        const colorBlendOptions = {
+            colorBlendAmount: 0.7,
+            colorBlendMode: Cesium.ColorBlendMode.MIX
+        };
+
+        // Get default left click handler for when a feature is not picked on left click
+        const clickHandler = viewer.screenSpaceEventHandler.getInputAction(
+            Cesium.ScreenSpaceEventType.LEFT_CLICK
+        );
+
+        function storeCameraPosition(viewer, movement, feature) {
+            const cartesian = viewer.scene.pickPosition(movement.position);
+            let destination = Cesium.Cartographic.fromCartesian(cartesian);
+            const boundingSphere = new Cesium.BoundingSphere(
+                Cesium.Cartographic.toCartesian(destination),
+                //viewer.camera.positionCartographic.height
+                40
+            );
+            const orientation = {
+                heading: viewer.camera.heading,
+                pitch: viewer.camera.pitch,
+                roll: viewer.camera.roll
+            };
+
+            if (feature instanceof Cesium.Cesium3DTileFeature) {
+                // Cesium 3D Tiles and i3s
+                feature._storedBoundingSphere = boundingSphere;
+                feature._storedOrientation = orientation;
+            } else if (Cesium.defined(feature.id)) {
+                // // COLLADA/KML/glTF and GeoJSON
+                feature.id._storedBoundingSphere = boundingSphere;
+                feature.id._storedOrientation = orientation;
+            }
+        }
+
+        function setSelected(feature) {
+            if (!Cesium.defined(feature)) return;
+
+            if (feature instanceof Cesium.Cesium3DTileFeature) {
+                // Cesium 3D Tiles and i3s
+                viewer.selectedEntity = curLayer._selectedEntity;
+            } else if (Cesium.defined(feature.id)) {
+                if (Cesium.defined(feature.id.kml)) {
+                    // COLLADA/KML/glTF
+                    viewer.selectedEntity = feature.id;
+                } else {
+                    // GeoJSON
+                    viewer.selectedEntity = curLayer._selectedEntity;
+                }
+            }
+        }
+
+        function getProperties(feature) {
+            let entityContent = {};
+
+            // Cesium 3D Tiles and i3s
+            if (feature instanceof Cesium.Cesium3DTileFeature) {
+                const propertyIds = feature.getPropertyIds();
+                for (let i = 0; i < propertyIds.length; i++) {
+                    const key = propertyIds[i];
+                    entityContent[key] = feature.getProperty(key);
+                }
+                return entityContent;
+            }
+
+            // COLLADA/KML/glTF and GeoJSON
+            if (Cesium.defined(feature.id)) {
+                const entity = feature.id;
+                entityContent["gmlid"] = entity.id;
+                const properties = entity._properties;
+                if (Cesium.defined(properties)) {
+                    const propertyIds = properties._propertyNames;
+                    for (let i = 0; i < propertyIds.length; i++) {
+                        const key = propertyIds[i];
+                        entityContent[key] = properties[key]._value;
+                    }
+                }
+                return entityContent;
+            }
+        }
+
+        viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
+                // Pick a new feature
+                const pickedFeature = viewer.scene.pick(movement.endPosition);
+                if (!Cesium.defined(pickedFeature)) return;
+
+                // Do not change the highlighting if the mouse is still on the same feature
+                if (Cesium.defined(scope._prevHoveredFeature) && scope.isEqual(scope._prevHoveredFeature, pickedFeature)) return;
+
+                // Unhighlight previous feature
+                if (Cesium.defined(scope._prevHoveredFeature)) {
+                    // Only when not selected
+                    if (!scope.includes(scope._prevSelectedFeatures, scope._prevHoveredFeature)) {
+                        scope.setColor(scope._prevHoveredFeature, scope._prevHoveredColor);
+                    }
+                }
+
+                // Do not highlight if feature has been already selected before
+                if (Cesium.defined(scope._prevSelectedFeatures) && scope.includes(scope._prevSelectedFeatures, pickedFeature)) return;
+
+                // Update references
+                scope._prevHoveredFeature = pickedFeature;
+                scope._prevHoveredColor = scope.getColor(pickedFeature);
+
+                // Highlight the new feature
+                scope.setColor(pickedFeature, scope._mouseOverHighlightColor, colorBlendOptions);
+            },
+            Cesium.ScreenSpaceEventType.MOUSE_MOVE
+        );
+
+        viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+                // Empty the selected list when a new object has been clicked
+                if (scope._prevSelectedFeatures.length > 0) {
+                    for (let i = 0; i < scope._prevSelectedFeatures.length; i++) {
+                        scope.setColor(scope._prevSelectedFeatures[i], scope._prevSelectedColors[i]);
+                    }
+                    scope._prevSelectedFeatures = [];
+                    scope._prevSelectedColors = [];
+                }
+
+                // Pick a new feature
+                const pickedFeature = viewer.scene.pick(movement.position);
+                if (!Cesium.defined(pickedFeature)) {
+                    clickHandler(movement);
+                    return;
+                }
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, pickedFeature)
+
+                // Do not highlight if already selected
+                if (scope.includes(scope._prevSelectedFeatures, pickedFeature)) return;
+
+                // Store original feature
+                scope._prevSelectedFeatures.push(pickedFeature);
+                // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
+                scope._prevSelectedColors.push(scope._prevHoveredColor);
+
+                // Highlight newly selected feature
+                setSelected(pickedFeature);
+                scope.setColor(pickedFeature, scope._highlightColor, colorBlendOptions);
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, viewer.selectedEntity);
+
+                // Info table
+                const entityContent = getProperties(pickedFeature);
+                curLayer._fnInfoTable([viewer.selectedEntity, entityContent], curLayer);
+            },
+            Cesium.ScreenSpaceEventType.LEFT_CLICK
+        );
+
+        viewer.screenSpaceEventHandler.setInputAction(function onCtrlLeftClick(movement) {
+                // Pick a new feature
+                const pickedFeature = viewer.scene.pick(movement.position);
+                if (!Cesium.defined(pickedFeature)) {
+                    clickHandler(movement);
+                    return;
+                }
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, pickedFeature)
+
+                // Do not highlight if already selected
+                if (scope.includes(scope._prevSelectedFeatures, pickedFeature)) return;
+
+                // Store original feature
+                scope._prevSelectedFeatures.push(pickedFeature);
+                // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
+                scope._prevSelectedColors.push(scope._prevHoveredColor);
+
+                // Highlight newly selected feature
+                setSelected(pickedFeature);
+                scope.setColor(pickedFeature, scope._highlightColor, colorBlendOptions);
+
+                // Store the camera position for camera's flyTo
+                storeCameraPosition(viewer, movement, viewer.selectedEntity);
+            },
+            Cesium.ScreenSpaceEventType.LEFT_CLICK,
+            Cesium.KeyboardEventModifier.CTRL
+        );
+    };
 
     /**
      * pass the object and modifier to the layer
@@ -108,7 +434,7 @@
             }
         }
         this._layers.push(layer);
-        return layer.addToCesium(this._cesiumViewerInstance, fnInfoTable);
+        return layer.addToCesium(this._cesiumViewerInstance, this, fnInfoTable);
     };
 
     /**
@@ -148,13 +474,24 @@
         return;
     };
 
-    WebMap3DCityDB.prototype.clearHighlight = function (object) {
-        var layers = this._layers;
-        for (var i = 0; i < layers.length; i++) {
-            if (layers[i].active && (object.id && layers[i].id != object.id.layerId)) {
-                layers[i].unHighlightAllObjects();
+    /**
+     * Unhighlight all selected objects from all layers
+     *
+     */
+    WebMap3DCityDB.prototype.clearSelectedObjects = function () {
+        const scope = this;
+        if (!Cesium.defined(scope._prevSelectedFeatures)) return;
+
+        // Empty the selected list, similar to when a new object has been clicked
+        if (scope._prevSelectedFeatures.length > 0) {
+            for (let i = 0; i < scope._prevSelectedFeatures.length; i++) {
+                scope.setColor(scope._prevSelectedFeatures[i], scope._prevSelectedColors[i]);
             }
         }
+
+        // For all layers
+        scope._prevSelectedFeatures = [];
+        scope._prevSelectedColors = [];
     };
 
     /**
@@ -280,41 +617,147 @@
     };
 
     /**
-     * get highlighted objects from active layer
+     * Return all highlighted features from all layers
      * @returns {Array}
      */
     WebMap3DCityDB.prototype.getAllHighlightedObjects = function () {
         let scope = this;
-        var results = {};
-        var layers = scope._layers;
-        for (var i = 0; i < layers.length; i++) {
-            var curLayer = scope._layers[i];
-            if (!curLayer.active) continue;
-            let highlightedObjects = curLayer.getAllHighlightedObjects();
-            for (var key in highlightedObjects) {
-                results[key] = highlightedObjects[key];
+        if (!Cesium.defined(scope._prevSelectedFeatures)) return {};
+
+        let results = {};
+        for (feature of scope._prevSelectedFeatures) {
+            if (feature instanceof Cesium.Cesium3DTileFeature) {
+                if (!Cesium.defined(feature.content.tile.i3sNode)) {
+                    // Cesium 3D Tiles
+                    const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id"];
+                    for (let key of gmlidKeys) {
+                        const gmlid = feature.getProperty(key);
+                        if (Cesium.defined(gmlid)) {
+                            results[gmlid] = feature;
+                            break;
+                        }
+                    }
+                } else {
+                    // i3s
+                    const i3sNode = feature.content.tile.i3sNode;
+                    const fields = i3sNode.getFieldsForFeature(feature.featureId);
+
+                    let set = false;
+                    const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id", "OBJECTID"];
+                    for (let key of gmlidKeys) {
+                        const gmlid = fields[key];
+                        if (Cesium.defined(gmlid)) {
+                            results[gmlid] = feature;
+                            set = true;
+                            break;
+                        }
+                    }
+
+                    if (!set) {
+                        const batchId = feature._batchId;
+                        results[batchId] = feature;
+                    }
+                }
+            } else if (Cesium.defined(feature.id)) {
+                // COLLADA/KML/glTF and  GeoJSON
+                results[feature.id.id] = feature.id;
             }
         }
         return results;
     };
 
     /**
-     * get hidden objects from active layer
+     * Return all hidden objects from all layers
      * @returns {Array}
      */
     WebMap3DCityDB.prototype.getAllHiddenObjects = function () {
         let scope = this;
-        var results = {};
-        var layers = scope._layers;
-        for (var i = 0; i < layers.length; i++) {
-            var curLayer = scope._layers[i];
-            if (!curLayer.active) continue;
-            let hiddenObjects = curLayer.getAllHiddenObjects();
-            for (var key in hiddenObjects) {
-                results[key] = hiddenObjects[key];
+        if (!Cesium.defined(scope._hiddenObjects)) return {};
+
+        let results = {};
+        for (feature of scope._hiddenObjects) {
+            if (feature instanceof Cesium.Cesium3DTileFeature) {
+                if (!Cesium.defined(feature.content.tile.i3sNode)) {
+                    // Cesium 3D Tiles
+                    const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id"];
+                    for (let key of gmlidKeys) {
+                        const gmlid = feature.getProperty(key);
+                        if (Cesium.defined(gmlid)) {
+                            results[gmlid] = feature;
+                            break;
+                        }
+                    }
+                } else {
+                    // i3s
+                    const i3sNode = feature.content.tile.i3sNode;
+                    const fields = i3sNode.getFieldsForFeature(feature.featureId);
+
+                    let set = false;
+                    const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id", "OBJECTID"];
+                    for (let key of gmlidKeys) {
+                        const gmlid = fields[key];
+                        if (Cesium.defined(gmlid)) {
+                            results[gmlid] = feature;
+                            set = true;
+                            break;
+                        }
+                    }
+
+                    if (!set) {
+                        const batchId = feature._batchId;
+                        results[batchId] = feature;
+                    }
+                }
+            } else if (Cesium.defined(feature.id)) {
+                // COLLADA/KML/glTF and  GeoJSON
+                results[feature.id.id] = feature.id;
             }
         }
         return results;
+    };
+
+    /**
+     * Hide all selected objects from all layers
+     */
+    WebMap3DCityDB.prototype.hideSelectedObjects = function () {
+        const scope = this;
+        if (!Cesium.defined(scope._prevSelectedFeatures)) return;
+
+        for (feature of scope._prevSelectedFeatures) {
+            // For all layers
+            if (!scope.includes(scope._hiddenObjects, feature)) {
+                scope._hiddenObjects.push(feature);
+            }
+
+            if (feature instanceof Cesium.Cesium3DTileFeature) {
+                // Cesium 3D Tiles and i3s
+                feature.show = false;
+            } else if (Cesium.defined(feature.id)) {
+                // COLLADA/KML/glTF and  GeoJSON
+                feature.id.show = false;
+            }
+        }
+    };
+
+    /**
+     * Show all hidden objects from all layers
+     */
+    WebMap3DCityDB.prototype.showHiddenObjects = function () {
+        const scope = this;
+        if (!Cesium.defined(scope._hiddenObjects)) return;
+
+        for (feature of scope._hiddenObjects) {
+            if (feature instanceof Cesium.Cesium3DTileFeature) {
+                // Cesium 3D Tiles and i3s
+                feature.show = true;
+            } else if (Cesium.defined(feature.id)) {
+                // COLLADA/KML/glTF and  GeoJSON
+                feature.id.show = true;
+            }
+        }
+
+        // For all layers
+        scope._hiddenObjects = [];
     };
 
     window.WebMap3DCityDB = WebMap3DCityDB;

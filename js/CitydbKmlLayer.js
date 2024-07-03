@@ -87,6 +87,7 @@
         this._gltfVersion = options.gltfVersion;
 
         this._fnInfoTable = undefined;
+        this._webMap = undefined;
 
         this._configParameters = {
             "id": this.id,
@@ -376,6 +377,15 @@
             }
         },
 
+        webMap: {
+            get: function () {
+                return this._webMap;
+            },
+            set: function (value) {
+                this._webMap = value;
+            }
+        },
+
         configParameters: {
             get: function () {
                 return this._configParameters;
@@ -483,9 +493,10 @@
      * adds this layer to the given Cesium viewer
      * @param {CesiumViewer} cesiumViewer
      */
-    CitydbKmlLayer.prototype.addToCesium = function (cesiumViewer, fnInfoTable) {
+    CitydbKmlLayer.prototype.addToCesium = function (cesiumViewer, webMap, fnInfoTable) {
         this._cesiumViewer = cesiumViewer;
         this._fnInfoTable = fnInfoTable;
+        this._webMap = webMap;
         this._urlSuffix = CitydbUtil.get_suffix_from_filename(this._url);
         var that = this;
         var deferred = Cesium.defer();
@@ -552,164 +563,7 @@
         const scope = this;
         const viewer = scope._cesiumViewer;
 
-        // Get default left click handler for when a feature is not picked on left click
-        const clickHandler = viewer.screenSpaceEventHandler.getInputAction(
-            Cesium.ScreenSpaceEventType.LEFT_CLICK
-        );
-
-        const setColor = function (feature, colorOrFeature) {
-            if (!Cesium.defined(colorOrFeature)) {
-                feature.id.model.color = undefined;
-            } else if (colorOrFeature instanceof Cesium.Color) {
-                feature.id.model.color = colorOrFeature;
-            } else {
-                feature.id.model.color = getColor(colorOrFeature);
-            }
-        }
-
-        const getColor = function (feature) {
-            return feature.id.model.color;
-        }
-
-        function isEqual(feature1, feature2) {
-            return feature1.id.id === feature2.id.id;
-        }
-
-        function includes(array, ele) {
-            for (i of array) {
-                if (isEqual(i, ele)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function storeCameraPosition(viewer, movement, feature) {
-            const cartesian = viewer.scene.pickPosition(movement.position);
-            let destination = Cesium.Cartographic.fromCartesian(cartesian);
-            const boundingSphere = new Cesium.BoundingSphere(
-                Cesium.Cartographic.toCartesian(destination),
-                viewer.camera.positionCartographic.height
-            );
-            const orientation = {
-                heading: viewer.camera.heading,
-                pitch: viewer.camera.pitch,
-                roll: viewer.camera.roll
-            }
-            feature.id._storedBoundingSphere = boundingSphere;
-            feature.id._storedOrientation = orientation;
-        }
-
-        viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
-                // Pick a new feature
-                const pickedFeature = viewer.scene.pick(movement.endPosition);
-                if (!Cesium.defined(pickedFeature)) return;
-
-                // Do not change the highlighting if the mouse is still on the same feature
-                if (Cesium.defined(scope._prevHoveredFeature) && isEqual(scope._prevHoveredFeature, pickedFeature)) return;
-
-                // Unhighlight previous feature
-                if (Cesium.defined(scope._prevHoveredFeature)) {
-                    // Only when not selected
-                    if (!includes(scope._prevSelectedFeatures, scope._prevHoveredFeature)) {
-                        setColor(scope._prevHoveredFeature, scope._prevHoveredColor);
-                    }
-                }
-
-                // Do not highlight if feature has been already selected before
-                if (Cesium.defined(scope._prevSelectedFeatures) && includes(scope._prevSelectedFeatures, pickedFeature)) return;
-
-                // Update references
-                scope._prevHoveredFeature = pickedFeature;
-                scope._prevHoveredColor = getColor(pickedFeature);
-
-                // Highlight the new feature
-                setColor(pickedFeature, scope._mouseOverHighlightColor);
-            },
-            Cesium.ScreenSpaceEventType.MOUSE_MOVE
-        );
-
-        viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
-                // Empty the selected list when a new object has been clicked
-                if (scope._prevSelectedFeatures.length > 0) {
-                    for (let i = 0; i < scope._prevSelectedFeatures.length; i++) {
-                        setColor(scope._prevSelectedFeatures[i], scope._prevSelectedColors[i]);
-                    }
-                    scope._prevSelectedFeatures = [];
-                    scope._prevSelectedColors = [];
-                }
-
-                // Pick a new feature
-                const pickedFeature = viewer.scene.pick(movement.position);
-                if (!Cesium.defined(pickedFeature)) {
-                    clickHandler(movement);
-                    return;
-                }
-
-                // Store the camera position for camera's flyTo
-                storeCameraPosition(viewer, movement, pickedFeature)
-
-                // Do not highlight if already selected
-                if (includes(scope._prevSelectedFeatures, pickedFeature)) return;
-
-                // Store original feature
-                scope._prevSelectedFeatures.push(pickedFeature);
-                // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
-                scope._prevSelectedColors.push(scope._prevHoveredColor);
-
-                // Highlight newly selected feature
-                viewer.selectedEntity = pickedFeature.id;
-                setColor(pickedFeature, scope._highlightColor);
-
-                // Store the camera position for camera's flyTo
-                storeCameraPosition(viewer, movement, pickedFeature.id);
-
-                // Info table
-                let entityContent = {};
-                const entity = pickedFeature.id;
-                entityContent["gmlid"] = entity.id;
-                const properties = entity._properties;
-                if (Cesium.defined(properties)) {
-                    const propertyIds = properties._propertyNames;
-                    for (let i = 0; i < propertyIds.length; i++) {
-                        const key = propertyIds[i];
-                        entityContent[key] = properties[key]._value;
-                    }
-                }
-                scope._fnInfoTable([pickedFeature.id, entityContent], scope);
-            },
-            Cesium.ScreenSpaceEventType.LEFT_CLICK
-        );
-
-        viewer.screenSpaceEventHandler.setInputAction(function onCtrlLeftClick(movement) {
-                // Pick a new feature
-                const pickedFeature = viewer.scene.pick(movement.position);
-                if (!Cesium.defined(pickedFeature)) {
-                    clickHandler(movement);
-                    return;
-                }
-
-                // Store the camera position for camera's flyTo
-                storeCameraPosition(viewer, movement, pickedFeature)
-
-                // Do not highlight if already selected
-                if (includes(scope._prevSelectedFeatures, pickedFeature)) return;
-
-                // Store original feature
-                scope._prevSelectedFeatures.push(pickedFeature);
-                // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
-                scope._prevSelectedColors.push(scope._prevHoveredColor);
-
-                // Highlight newly selected feature
-                viewer.selectedEntity = pickedFeature.id;
-                setColor(pickedFeature, scope._highlightColor);
-
-                // Store the camera position for camera's flyTo
-                storeCameraPosition(viewer, movement, pickedFeature.id);
-            },
-            Cesium.ScreenSpaceEventType.LEFT_CLICK,
-            Cesium.KeyboardEventModifier.CTRL
-        );
+        scope._webMap.registerMouseEventHandlers(scope, viewer);
     }
 
     /**
@@ -829,15 +683,7 @@
      * @param {function} callback function to be called
      */
     CitydbKmlLayer.prototype.removeEventHandler = function (event, callback) {
-        if (event === "CLICK") {
-            this._clickEvent.removeEventListener(callback, this);
-        } else if (event === "CTRLCLICK") {
-            this._ctrlClickEvent.removeEventListener(callback, this);
-        } else if (event === "MOUSEIN") {
-            this._mouseInEvent.removeEventListener(callback, this);
-        } else if (event === "MOUSEOUT") {
-            this._mouseOutEvent.removeEventListener(callback, this);
-        } else if (event === "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.removeEventListener(callback, this);
         }
     }
@@ -849,15 +695,7 @@
      * @return {String} id of the event Handler, can be used to remove the event Handler
      */
     CitydbKmlLayer.prototype.registerEventHandler = function (event, callback) {
-        if (event === "CLICK") {
-            this._clickEvent.addEventListener(callback, this);
-        } else if (event === "CTRLCLICK") {
-            this._ctrlClickEvent.addEventListener(callback, this)
-        } else if (event === "MOUSEIN") {
-            this._mouseInEvent.addEventListener(callback, this);
-        } else if (event === "MOUSEOUT") {
-            this._mouseOutEvent.addEventListener(callback, this);
-        } else if (event === "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.addEventListener(callback, this);
         }
     }
@@ -868,15 +706,7 @@
      * @param {*} arguments, any number of arguments
      */
     CitydbKmlLayer.prototype.triggerEvent = function (event, object) {
-        if (event === "CLICK") {
-            this._clickEvent.raiseEvent(object);
-        } else if (event === "CTRLCLICK") {
-            this._ctrlClickEvent.raiseEvent(object);
-        } else if (event === "MOUSEIN") {
-            this._mouseInEvent.raiseEvent(object);
-        } else if (event === "MOUSEOUT") {
-            this._mouseOutEvent.raiseEvent(object);
-        } else if (event === "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.raiseEvent(object);
         }
     }
