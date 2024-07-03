@@ -45,11 +45,15 @@ This is a major release.
 
 * The library `autolinker` is now included separately from Cesium.
 * Added Cesium Navigation Mixin as a separate plugin.
-* The lists of highlighted and hidden objects now only display those of the active layer,
+* The highlighting of all layers (incl. show/hide/clear highlighting)
+  is now managed by a single class `WebMap3DCityDB`,
+  see [`96cc3d4`](https://github.com/3dcitydb/3dcitydb-web-map/commit/96cc3d4093896aa1119264c181c163762bd9460f).
+* The lists of highlighted and hidden objects now only display those of the active layers,
   see [`aaf34d2`](https://github.com/3dcitydb/3dcitydb-web-map/commit/aaf34d215ceeaaafe19c50f351be7ff276ed12ed).
 * The GUI elements for adding layers in the toolbox have been rearranged
   to provide more clarity and consistency,
   see [`6897e65`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6897e65cb54e1610f850eac60cfb68a7c2015a26).
+
 
 ##### FIXES
 
