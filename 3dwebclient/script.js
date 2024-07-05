@@ -541,9 +541,11 @@ function saveLayerSettings() {
     document.getElementById('loadingIndicator').style.display = 'block';
     Promise.resolve(activeLayer.reActivate()).then((result) => {
         document.getElementById('loadingIndicator').style.display = 'none';
+        webMap.clearSelectedObjects();
     }, (error) => {
         CitydbUtil.showAlertWindow("OK", "Error", error.message);
         document.getElementById('loadingIndicator').style.display = 'none';
+        webMap.clearSelectedObjects();
     });
 
     function applySaving(propertyName, activeLayer) {
@@ -614,6 +616,7 @@ function addLayerToList(layer) {
         if (checkbox.checked) {
             console.log("Layer " + citydbLayer.name + " is visible now!");
             citydbLayer.activate(true);
+            webMap.clearSelectedObjects();
         } else {
             console.log("Layer " + citydbLayer.name + " is not visible now!");
             citydbLayer.activate(false);
