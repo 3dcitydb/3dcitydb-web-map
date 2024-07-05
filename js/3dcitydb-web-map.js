@@ -319,6 +319,36 @@
             Cesium.ScreenSpaceEventType.MOUSE_MOVE
         );
 
+        viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
+                // Pick a new feature
+                const pickedFeature = viewer.scene.pick(movement.endPosition);
+                if (!Cesium.defined(pickedFeature)) return;
+
+                // Do not change the highlighting if the mouse is still on the same feature
+                if (Cesium.defined(scope._prevHoveredFeature) && scope.isEqual(scope._prevHoveredFeature, pickedFeature)) return;
+
+                // Unhighlight previous feature
+                if (Cesium.defined(scope._prevHoveredFeature)) {
+                    // Only when not selected
+                    if (!scope.includes(scope._prevSelectedFeatures, scope._prevHoveredFeature)) {
+                        scope.setColor(scope._prevHoveredFeature, scope._prevHoveredColor);
+                    }
+                }
+
+                // Do not highlight if feature has been already selected before
+                if (Cesium.defined(scope._prevSelectedFeatures) && scope.includes(scope._prevSelectedFeatures, pickedFeature)) return;
+
+                // Update references
+                scope._prevHoveredFeature = pickedFeature;
+                scope._prevHoveredColor = scope.getColor(pickedFeature);
+
+                // Highlight the new feature
+                scope.setColor(pickedFeature, scope._mouseOverHighlightColor, colorBlendOptions);
+            },
+            Cesium.ScreenSpaceEventType.MOUSE_MOVE,
+            Cesium.KeyboardEventModifier.CTRL
+        );
+
         viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
                 // Empty the selected list when a new object has been clicked
                 if (scope._prevSelectedFeatures.length > 0) {
