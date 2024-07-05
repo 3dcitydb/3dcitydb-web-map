@@ -53,7 +53,10 @@ This is a major release.
 * The GUI elements for adding layers in the toolbox have been rearranged
   to provide more clarity and consistency,
   see [`6897e65`](https://github.com/3dcitydb/3dcitydb-web-map/commit/6897e65cb54e1610f850eac60cfb68a7c2015a26).
-
+* Clearing highlighting will now also show hidden objects,
+  see [`aa05d5b`](https://github.com/3dcitydb/3dcitydb-web-map/commit/aa05d5bc1f107395fdfa4732912bfe24d68b929d).
+* Highlighting will be cleared when a layer has been updated or reactivated,
+  see [`8475281`](https://github.com/3dcitydb/3dcitydb-web-map/commit/84752817e9c355111b51a069048768b20bac8e12).
 
 ##### FIXES
 
