@@ -133,6 +133,22 @@
             }
         }
 
+        // Color
+        if (feature instanceof Cesium.Color) {
+            return Cesium.clone(feature);
+        }
+
+        // Color blend options
+        if (Cesium.defined(feature.color)
+            && Cesium.defined(feature.colorBlendAmount)
+            && Cesium.defined(feature.colorBlendAmount)) {
+            return {
+                color: Cesium.clone(feature.color),
+                colorBlendAmount: feature.colorBlendAmount,
+                colorBlendMode: feature.colorBlendMode
+            };
+        }
+
         return undefined;
     }
 
@@ -161,7 +177,7 @@
                 if (!Cesium.defined(colorOrFeature)) {
                     feature.id.model.color = undefined;
                 } else if (colorOrFeature instanceof Cesium.Color) {
-                    feature.id.model.color = colorOrFeature;
+                    feature.id.model.color = scope.getColor(colorOrFeature);
                     if (Cesium.defined(colorOptions.colorBlendAmount)) {
                         feature.id.model.colorBlendAmount = colorOptions.colorBlendAmount;
                     }
@@ -171,7 +187,7 @@
                 } else if (Cesium.defined(colorOrFeature.color)
                     && Cesium.defined(colorOrFeature.colorBlendAmount)
                     && Cesium.defined(colorOrFeature.colorBlendMode)) {
-                    feature.id.model.color = colorOrFeature.color;
+                    feature.id.model.color = scope.getColor(colorOrFeature.color);
                     if (Cesium.defined(colorOptions.colorBlendAmount)) {
                         feature.id.model.colorBlendAmount = colorOptions.colorBlendAmount;
                     } else {
@@ -375,7 +391,7 @@
                 // Store original feature
                 scope._prevSelectedFeatures.push(pickedFeature);
                 // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
-                scope._prevSelectedColors.push(scope._prevHoveredColor);
+                scope._prevSelectedColors.push(scope.getColor(scope._prevHoveredColor));
 
                 // Highlight newly selected feature
                 setSelected(pickedFeature);
@@ -408,7 +424,7 @@
                 // Store original feature
                 scope._prevSelectedFeatures.push(pickedFeature);
                 // Mouse click also contains mouse hover event -> Store the color BEFORE mouse hover
-                scope._prevSelectedColors.push(scope._prevHoveredColor);
+                scope._prevSelectedColors.push(scope.getColor(scope._prevHoveredColor));
 
                 // Highlight newly selected feature
                 setSelected(pickedFeature);
