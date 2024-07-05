@@ -538,6 +538,11 @@
         // For all layers
         scope._prevSelectedFeatures = [];
         scope._prevSelectedColors = [];
+
+        // Show hidden objects
+        if (Cesium.defined(scope._hiddenObjects)) {
+            scope.showHiddenObjects();
+        }
     };
 
     /**
