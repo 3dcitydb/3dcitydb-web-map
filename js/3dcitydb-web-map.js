@@ -294,6 +294,12 @@
             if (Cesium.defined(feature.id)) {
                 const entity = feature.id;
                 entityContent["gmlid"] = entity.id;
+                // Remove prefix COLLADA_ from ID
+                const idPrefix = "COLLADA_";
+                if (entityContent["gmlid"].startsWith(idPrefix)) {
+                    entityContent["gmlid"] = entityContent["gmlid"].replace(idPrefix, "");
+                }
+                // Store other properties embedded in the feature
                 const properties = entity._properties;
                 if (Cesium.defined(properties)) {
                     const propertyIds = properties._propertyNames;
