@@ -138,6 +138,11 @@
             return Cesium.clone(feature);
         }
 
+        // ColorMaterialProperty
+        if (feature instanceof Cesium.ColorMaterialProperty) {
+            return feature;
+        }
+
         // Color blend options
         if (Cesium.defined(feature.color)
             && Cesium.defined(feature.colorBlendAmount)
