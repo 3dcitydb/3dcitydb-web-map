@@ -249,7 +249,7 @@ var GlobeTileTaskQueue = {};
                 }
             } else {
                 var newKmlDatasource = new CitydbKmlDataSource({
-                    layerId: scope.citydbKmlLayerInstance.id,
+                    layerId: scope.citydbKmlLayerInstance.layerId,
                     camera: scope.citydbKmlLayerInstance.cesiumViewer.scene.camera,
                     canvas: scope.citydbKmlLayerInstance.cesiumViewer.scene.canvas,
                     gltfVersion: scope.citydbKmlLayerInstance.gltfVersion

@@ -160,6 +160,7 @@ function initClient() {
 
     // webMap events
     webMap.activateViewChangedEvent(true);
+    webMap.registerMouseEventHandlers(cesiumViewer);
 
     // add Copyrights, TUM, 3DCityDB or more...
     var creditDisplay = cesiumViewer.scene.frameState.creditDisplay;
@@ -308,7 +309,7 @@ function observeActiveLayer() {
 
     observable.subscribe(function (selectedLayer) {
         if (Cesium.defined(selectedLayer)) {
-            document.getElementById(selectedLayer.id).childNodes[0].checked = true;
+            document.getElementById(selectedLayer.layerId).childNodes[0].checked = true;
 
             updateAddLayerViewModel(selectedLayer);
         }
@@ -532,8 +533,8 @@ function saveLayerSettings() {
     // update GUI:
     var nodes = document.getElementById('citydb_layerlistpanel').childNodes;
     for (var i = 0; i < nodes.length; i += 3) {
-        var layerOption = nodes[i];
-        if (layerOption.id == activeLayer.id) {
+        const layerOption = nodes[i];
+        if (layerOption.id === activeLayer.layerId) {
             layerOption.childNodes[2].innerHTML = activeLayer.name;
         }
     }
@@ -562,12 +563,13 @@ function saveLayerSettings() {
 }
 
 function loadLayerGroup(_layers) {
-    if (_layers.length == 0)
+    if (_layers.length === 0)
         return;
 
     document.getElementById('loadingIndicator').style.display = 'block';
     _loadLayer(0);
 
+    // Recursive for all layers
     function _loadLayer(index) {
         Promise.resolve(webMap.addLayer(_layers[index], createInfoTable)).then((addedLayer) => {
             console.log(addedLayer);
@@ -601,7 +603,7 @@ function addLayerToList(layer) {
     radio.onchange = function (event) {
         var targetRadio = event.target;
         var layerId = targetRadio.parentNode.id;
-        webMap.activeLayer = webMap.getLayerbyId(layerId);
+        webMap.activeLayer = webMap.getLayerById(layerId);
         console.log(webMap.activeLayer);
     };
 
@@ -612,7 +614,7 @@ function addLayerToList(layer) {
     checkbox.onchange = function (event) {
         var checkbox = event.target;
         var layerId = checkbox.parentNode.id;
-        var citydbLayer = webMap.getLayerbyId(layerId);
+        var citydbLayer = webMap.getLayerById(layerId);
         if (checkbox.checked) {
             console.log("Layer " + citydbLayer.name + " is visible now!");
             citydbLayer.activate(true);
@@ -627,7 +629,7 @@ function addLayerToList(layer) {
     label.appendChild(document.createTextNode(layer.name));
 
     var layerOption = document.createElement('div');
-    layerOption.id = layer.id;
+    layerOption.id = layer.layerId;
     layerOption.appendChild(radio);
     layerOption.appendChild(checkbox);
     layerOption.appendChild(label);
@@ -635,7 +637,7 @@ function addLayerToList(layer) {
     label.ondblclick = function (event) {
         event.preventDefault();
         var layerId = event.target.parentNode.id;
-        var citydbLayer = webMap.getLayerbyId(layerId);
+        var citydbLayer = webMap.getLayerById(layerId);
         citydbLayer.zoomToStartPosition();
     }
 
@@ -813,7 +815,6 @@ function showSceneLink() {
 // Clear Highlighting effect of all highlighted objects
 function clearHighlight() {
     webMap.clearSelectedObjects();
-    cesiumViewer.selectedEntity = undefined;
 }
 
 // hide the selected objects
@@ -918,7 +919,7 @@ function flyToMapLocation(lat, lon, callBackFunc) {
 }
 
 function addNewLayer() {
-    var _layers = new Array();
+    var _layers = [];
     var options = {
         url: addLayerViewModel.url.trim(),
         name: addLayerViewModel.name.trim(),
@@ -958,7 +959,7 @@ function addNewLayer() {
 function removeSelectedLayer() {
     var layer = webMap.activeLayer;
     if (Cesium.defined(layer)) {
-        var layerId = layer.id;
+        const layerId = layer.layerId;
         document.getElementById(layerId).remove();
         webMap.removeLayer(layerId);
         // update active layer of the globe webMap
@@ -1396,10 +1397,15 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
         // }
 
-        const options = getDataSourceControllerOptions(webMap._activeLayer);
         // Mashup Data Source Service
-        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
+        initDataSourceController(selectedThematicDataSource);
     }
+}
+
+function initDataSourceController(selectedThematicDataSource) {
+    if (!webMap._activeLayer.active) return;
+    const options = getDataSourceControllerOptions(webMap._activeLayer);
+    webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
 }
 
 function getDataSourceControllerOptions(layer) {

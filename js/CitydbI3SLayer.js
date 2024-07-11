@@ -34,11 +34,12 @@
         } else {
             proxyUrl = location.protocol + '//' + location.host + '/proxy/'
         }
-        this._defaultProxy = new Cesium.DefaultProxy(proxyUrl)
+        this._defaultProxy = new Cesium.DefaultProxy(proxyUrl);
+
+        this._layerId = Cesium.createGuid();
 
         this._url = options.url;
         this._name = options.name;
-        this._id = Cesium.defaultValue(options.id, Cesium.createGuid());
         this._region = options.region;
         this._active = Cesium.defaultValue(options.active, true);
         this._cameraPosition = {};
@@ -70,7 +71,7 @@
         this._webMap = undefined;
 
         this._configParameters = {
-            "id": this.id,
+            "layerId": this.layerId,
             "name": this.name,
             "url": this.url,
             "layerDataType": this.layerDataType,
@@ -102,6 +103,14 @@
     }
 
     Object.defineProperties(CitydbI3SLayer.prototype, {
+        /**
+         * Gets the index of the layer
+         */
+        layerId: {
+            get: function () {
+                return this._layerId;
+            }
+        },
         /**
          * Gets the active
          */
@@ -141,17 +150,6 @@
             },
             set: function (value) {
                 this._name = value;
-            }
-        },
-        /**
-         * Gets the id of this datasource, the id should be unique.
-         */
-        id: {
-            get: function () {
-                return this._id;
-            },
-            set: function (value) {
-                this._id = value;
             }
         },
         /**
@@ -314,17 +312,142 @@
         // Create I3S data provider
         Cesium.I3SDataProvider.fromUrl(scope._url, i3sOptions).then(function (i3sDataProvider) {
             scope._i3sProvider = i3sDataProvider;
-            // Add the i3s layer provider as a primitive data type
+            for (const layer of scope._i3sProvider.layers) {
+                layer.tileset.layerId = scope.layerId;
+            }
             scope._cesiumViewer.scene.primitives.add(scope._i3sProvider);
             scope._i3sProvider.show = scope._active;
-            // TODO that.registerTilesLoadedEventHandler();
-            scope.registerMouseEventHandlers();
+            // scope.registerTilesLoadedEventHandler();
             deferred.resolve(scope);
         }, function () {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });
 
         return deferred.promise;
+    }
+
+    CitydbI3SLayer.prototype.contains = function (object) {
+        return (object instanceof Cesium.Cesium3DTileFeature)
+            && Cesium.defined(object.primitive)
+            && object.primitive.layerId === this._layerId;
+    }
+
+    CitydbI3SLayer.prototype.getColor = function (colorOrFeature) {
+        if (!Cesium.defined(colorOrFeature)) return undefined;
+        if (this.contains(colorOrFeature)) return colorOrFeature.color;
+        if (colorOrFeature instanceof Cesium.Color) return Cesium.clone(colorOrFeature);
+        if (colorOrFeature instanceof Cesium.ColorMaterialProperty) return colorOrFeature;
+        if (Cesium.defined(colorOrFeature.color)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)) {
+            return {
+                color: Cesium.clone(colorOrFeature.color),
+                colorBlendAmount: colorOrFeature.colorBlendAmount,
+                colorBlendMode: colorOrFeature.colorBlendMode
+            };
+        }
+        return undefined;
+    }
+
+    CitydbI3SLayer.prototype.setColor = function (feature, colorOrFeature, colorOptions = {}) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        if (!Cesium.defined(colorOrFeature)) {
+            feature.color = undefined;
+        } else if (colorOrFeature instanceof Cesium.Color) {
+            try {
+                feature.color = colorOrFeature;
+            } catch (e) {
+                throw e;
+            }
+        } else {
+            feature.color = this.getColor(colorOrFeature);
+        }
+    }
+
+    CitydbI3SLayer.prototype.isEqual = function (feature1, feature2) {
+        if (!this.contains(feature1) || !this.contains(feature2)) return false;
+        return feature1._batchId === feature2._batchId;
+    }
+
+    CitydbI3SLayer.prototype.inArray = function (array, object) {
+        if (!Cesium.defined(array)) return false;
+        for (const i of array) {
+            if (this.isEqual(i, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    CitydbI3SLayer.prototype.setSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        this._cesiumViewer.selectedEntity = this._selectedEntity;
+    }
+
+    CitydbI3SLayer.prototype.storeCameraPosition = function (viewer, movement, feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        const cartesian = viewer.scene.pickPosition(movement.position);
+        let destination = Cesium.Cartographic.fromCartesian(cartesian);
+        const boundingSphere = new Cesium.BoundingSphere(
+            Cesium.Cartographic.toCartesian(destination),
+            //viewer.camera.positionCartographic.height
+            40
+        );
+        const orientation = {
+            heading: viewer.camera.heading,
+            pitch: viewer.camera.pitch,
+            roll: viewer.camera.roll
+        };
+        feature._storedBoundingSphere = boundingSphere;
+        feature._storedOrientation = orientation;
+    }
+
+    CitydbI3SLayer.prototype.getProperties = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        let entityContent = {};
+        const propertyIds = feature.getPropertyIds();
+        for (let i = 0; i < propertyIds.length; i++) {
+            const key = propertyIds[i];
+            entityContent[key] = feature.getProperty(key);
+        }
+        return entityContent;
+    }
+
+    CitydbI3SLayer.prototype.hideSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.show = false;
+    }
+
+    CitydbI3SLayer.prototype.show = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.show = true;
+    }
+
+    CitydbI3SLayer.prototype.getIdObject = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        const i3sNode = feature.content.tile.i3sNode;
+        const fields = i3sNode.getFieldsForFeature(feature.featureId);
+        let res = {};
+
+        let set = false;
+        const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id", "OBJECTID"];
+        for (let key of gmlidKeys) {
+            const gmlid = fields[key];
+            if (Cesium.defined(gmlid)) {
+                res.key = gmlid;
+                res.object = feature;
+                set = true;
+                break;
+            }
+        }
+
+        if (!set) {
+            const batchId = feature._batchId;
+            res.key = batchId;
+            res.object = feature;
+        }
+
+        return res;
     }
 
     CitydbI3SLayer.prototype.configPointCloudShading = function (tileset) {
@@ -369,13 +492,6 @@
                 }
             }
         });
-    }
-
-    CitydbI3SLayer.prototype.registerMouseEventHandlers = function () {
-        const scope = this;
-        const viewer = scope._cesiumViewer;
-
-        scope._webMap.registerMouseEventHandlers(scope, viewer);
     }
 
     CitydbI3SLayer.prototype.zoomToStartPosition = function () {
@@ -465,21 +581,6 @@
             scope._prevSelectedColors.push(feature.color);
             feature.color = scope._highlightColor;
         }
-    }
-
-    CitydbI3SLayer.prototype.hideObjects = function (toHideFeatures) {
-        let scope = this;
-        if (!Cesium.defined(scope._hiddenObjects)) return;
-        for (let feature of toHideFeatures) {
-            if (!scope._hiddenObjects.includes(feature)) {
-                scope._hiddenObjects.push(feature);
-            }
-            feature.show = false;
-        }
-    }
-
-    CitydbI3SLayer.prototype.hideSelected = function () {
-        this.hideObjects(this._prevSelectedFeatures);
     }
 
     CitydbI3SLayer.prototype.showAllObjects = function () {

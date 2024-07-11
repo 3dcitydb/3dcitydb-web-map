@@ -33,10 +33,11 @@
 (function () {
     function CitydbGeoJSONLayer(options) {
 
+        this._layerId = Cesium.createGuid();
+
         // variables defined in the 3dcitydb-layer-Interface
         this._url = options.url;
         this._name = options.name;
-        this._id = Cesium.defaultValue(options.id, Cesium.createGuid());
         this._region = options.region;
         this._active = Cesium.defaultValue(options.active, true);
         this._cameraPosition = new Object();
@@ -86,7 +87,7 @@
         this._webMap = undefined;
 
         this._configParameters = {
-            "id": this.id,
+            "layerId": this.layerId,
             "url": this.url,
             "name": this.name,
             "layerDataType": this.layerDataType,
@@ -127,6 +128,12 @@
 
     Object.defineProperties(CitydbGeoJSONLayer.prototype, {
 
+        layerId: {
+            get: function () {
+                return this._layerId;
+            }
+        },
+
         active: {
             get: function () {
                 return this._active;
@@ -166,12 +173,6 @@
             },
             set: function (value) {
                 this._name = value;
-            }
-        },
-
-        id: {
-            get: function () {
-                return this._id;
             }
         },
 
@@ -409,23 +410,135 @@
         scope._cesiumViewer.dataSources.add(Cesium.GeoJsonDataSource.load(scope._url, {
             clampToGround: scope._layerClampToGround
         })).then(datasSource => {
+            for (const entity of datasSource.entities.values) {
+                entity.layerId = scope._layerId;
+            }
             scope._citydbGeoJSONDataSource = datasSource;
-            scope.registerMouseEventHandlers();
             deferred.resolve(scope);
         });
 
         return deferred.promise;
     }
 
-    CitydbGeoJSONLayer.prototype.removeFromCesium = function (cesiumViewer) {
-        this.activate(false);
+    CitydbGeoJSONLayer.prototype.contains = function (object) {
+        return Cesium.defined(object.id)
+            && object.id.layerId === this._layerId;
     }
 
-    CitydbGeoJSONLayer.prototype.registerMouseEventHandlers = function () {
-        const scope = this;
-        const viewer = scope._cesiumViewer;
+    CitydbGeoJSONLayer.prototype.getColor = function (colorOrFeature) {
+        if (!Cesium.defined(colorOrFeature)) return undefined;
+        if (this.contains(colorOrFeature)) return colorOrFeature.id.polygon.material;
+        if (colorOrFeature instanceof Cesium.Color) return Cesium.clone(colorOrFeature);
+        if (colorOrFeature instanceof Cesium.ColorMaterialProperty) return colorOrFeature;
+        if (Cesium.defined(colorOrFeature.color)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)) {
+            return {
+                color: Cesium.clone(colorOrFeature.color),
+                colorBlendAmount: colorOrFeature.colorBlendAmount,
+                colorBlendMode: colorOrFeature.colorBlendMode
+            };
+        }
+        return undefined;
+    }
 
-        scope._webMap.registerMouseEventHandlers(scope, viewer);
+    CitydbGeoJSONLayer.prototype.setColor = function (feature, colorOrFeature, colorOptions = {}) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        if (Cesium.defined(feature.id)) {
+            if (!Cesium.defined(colorOrFeature)) {
+                feature.id.polygon.material = undefined;
+            } else if (colorOrFeature instanceof Cesium.Color) {
+                feature.id.polygon.material = new Cesium.ColorMaterialProperty(colorOrFeature);
+            } else if (colorOrFeature instanceof Cesium.ColorMaterialProperty) {
+                feature.id.polygon.material = colorOrFeature;
+            } else {
+                feature.id.polygon.material = this.getColor(colorOrFeature);
+            }
+        }
+    }
+
+    CitydbGeoJSONLayer.prototype.isEqual = function (feature1, feature2) {
+        if (!this.contains(feature1) || !this.contains(feature2)) return false;
+        return feature1.id.id === feature2.id.id;
+    }
+
+    CitydbGeoJSONLayer.prototype.inArray = function (array, object) {
+        if (!Cesium.defined(array)) return false;
+        for (const i of array) {
+            if (this.isEqual(i, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    CitydbGeoJSONLayer.prototype.setSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        this._cesiumViewer.selectedEntity = this._selectedEntity;
+    }
+
+    CitydbGeoJSONLayer.prototype.storeCameraPosition = function (viewer, movement, feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        const cartesian = viewer.scene.pickPosition(movement.position);
+        let destination = Cesium.Cartographic.fromCartesian(cartesian);
+        const boundingSphere = new Cesium.BoundingSphere(
+            Cesium.Cartographic.toCartesian(destination),
+            //viewer.camera.positionCartographic.height
+            40
+        );
+        const orientation = {
+            heading: viewer.camera.heading,
+            pitch: viewer.camera.pitch,
+            roll: viewer.camera.roll
+        };
+        feature.id._storedBoundingSphere = boundingSphere;
+        feature.id._storedOrientation = orientation;
+    }
+
+    CitydbGeoJSONLayer.prototype.getProperties = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        let entityContent = {};
+        const entity = feature.id;
+        entityContent["gmlid"] = entity.id;
+        // Remove prefix COLLADA_ from ID
+        const idPrefixes = ["COLLADA_", "KMLGeom_"];
+        for (prefix of idPrefixes) {
+            if (entityContent["gmlid"].startsWith(prefix)) {
+                entityContent["gmlid"] = entityContent["gmlid"].replace(prefix, "");
+            }
+        }
+        // Store other properties embedded in the feature
+        const properties = entity._properties;
+        if (Cesium.defined(properties)) {
+            const propertyIds = properties._propertyNames;
+            for (let i = 0; i < propertyIds.length; i++) {
+                const key = propertyIds[i];
+                entityContent[key] = properties[key]._value;
+            }
+        }
+        return entityContent;
+    }
+
+    CitydbGeoJSONLayer.prototype.hideSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.id.show = false;
+    }
+
+    CitydbGeoJSONLayer.prototype.show = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.id.show = true;
+    }
+
+    CitydbGeoJSONLayer.prototype.getIdObject = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        return {
+            key: feature.id.id,
+            object: feature.id
+        };
+    }
+
+    CitydbGeoJSONLayer.prototype.removeFromCesium = function (cesiumViewer) {
+        this.activate(false);
     }
 
     /**
@@ -454,25 +567,6 @@
             this.unHighlightObject(this.getObjectById(id));
         }
         this._highlightedObjects = this._highlightedObjects;
-    };
-
-    /**
-     * hideObjects
-     * @param {Array<String>} A list of Object Ids which will be hidden
-     */
-    CitydbGeoJSONLayer.prototype.hideObjects = function (toHideFeatures) {
-        const scope = this;
-        if (!Cesium.defined(scope._hiddenObjects)) return;
-        for (let feature of toHideFeatures) {
-            if (!scope._hiddenObjects.includes(feature)) {
-                scope._hiddenObjects.push(feature);
-            }
-            feature.id.show = false;
-        }
-    };
-
-    CitydbGeoJSONLayer.prototype.hideSelected = function () {
-        this.hideObjects(this._prevSelectedFeatures);
     };
 
     CitydbGeoJSONLayer.prototype.getAllHighlightedObjects = function () {

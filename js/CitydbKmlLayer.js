@@ -33,10 +33,11 @@
 (function () {
     function CitydbKmlLayer(options) {
 
+        this._layerId = Cesium.createGuid();
+
         // variables defined in the 3dcitydb-layer-Interface
         this._url = options.url;
         this._name = options.name;
-        this._id = Cesium.defaultValue(options.id, Cesium.createGuid());
         this._region = options.region;
         this._active = Cesium.defaultValue(options.active, true);
         this._highlightedObjects = new Object();
@@ -90,7 +91,7 @@
         this._webMap = undefined;
 
         this._configParameters = {
-            "id": this.id,
+            "layerId": this.layerId,
             "url": this.url,
             "name": this.name,
             "layerDataType": this.layerDataType,
@@ -112,6 +113,12 @@
     }
 
     Object.defineProperties(CitydbKmlLayer.prototype, {
+
+        layerId: {
+            get: function () {
+                return this._layerId;
+            }
+        },
 
         active: {
             get: function () {
@@ -170,12 +177,6 @@
             },
             set: function (value) {
                 this._name = value;
-            }
-        },
-
-        id: {
-            get: function () {
-                return this._id;
             }
         },
 
@@ -440,9 +441,9 @@
     }
 
     function assignLayerIdToDataSourceEntites(entityCollection, layerId) {
-        var entities = entityCollection.values;
-        for (var i = 0; i < entities.length; i++) {
-            var entity = entities[i];
+        const entities = entityCollection.values;
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i];
             if (!entity.layerId) {
                 entity.addProperty('layerId');
                 entity.layerId = layerId;
@@ -498,16 +499,15 @@
         this._fnInfoTable = fnInfoTable;
         this._webMap = webMap;
         this._urlSuffix = CitydbUtil.get_suffix_from_filename(this._url);
-        var that = this;
-        var deferred = Cesium.defer();
+        const that = this;
+        const deferred = Cesium.defer();
         if (this._urlSuffix === 'json') {
             this._citydbKmlDataSource = new CitydbKmlDataSource({
-                layerId: this._id,
+                layerId: this._layerId,
                 camera: cesiumViewer.scene.camera,
                 canvas: cesiumViewer.scene.canvas,
                 gltfVersion: this._gltfVersion
             });
-            this.registerMouseEventHandlers();
             return loadMasterJSON(that, true);
         } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
@@ -516,7 +516,7 @@
             });
 
             this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+                assignLayerIdToDataSourceEntites(dataSource.entities, that._layerId);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
                 }
@@ -528,7 +528,7 @@
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
             this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+                assignLayerIdToDataSourceEntites(dataSource.entities, that._layerId);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
                 }
@@ -539,8 +539,6 @@
         } else {
             deferred.reject(new Cesium.DeveloperError('Unsupported Datasource from: ' + that._url));
         }
-
-        this.registerMouseEventHandlers();
 
         Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function () {
             if (that._urlSuffix === 'json')
@@ -555,15 +553,188 @@
         return deferred.promise;
     }
 
-    CitydbKmlLayer.prototype.removeFromCesium = function (cesiumViewer) {
-        this.activate(false);
+    CitydbKmlLayer.prototype.contains = function (object) {
+        return Cesium.defined(object.id)
+            && object.id.layerId === this._layerId;
     }
 
-    CitydbKmlLayer.prototype.registerMouseEventHandlers = function () {
-        const scope = this;
-        const viewer = scope._cesiumViewer;
+    CitydbKmlLayer.prototype.getColor = function (colorOrFeature) {
+        if (!Cesium.defined(colorOrFeature)) return undefined;
+        if (this.contains(colorOrFeature)) {
+            // Normal models
+            if (Cesium.defined(colorOrFeature.detail) && Cesium.defined(colorOrFeature.detail.model)) {
+                return {
+                    color: Cesium.clone(colorOrFeature.detail.model.color),
+                    colorBlendAmount: colorOrFeature.detail.model.colorBlendAmount,
+                    colorBlendMode: colorOrFeature.detail.model.colorBlendMode
+                };
+            }
+            // Transparent models
+            if (Cesium.defined(colorOrFeature.id) && Cesium.defined(colorOrFeature.id.polygon)) {
+                return colorOrFeature.id.polygon.material;
+            }
+        }
+        if (colorOrFeature instanceof Cesium.Color) return Cesium.clone(colorOrFeature);
+        if (colorOrFeature instanceof Cesium.ColorMaterialProperty) return colorOrFeature;
+        if (Cesium.defined(colorOrFeature.color)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)) {
+            return {
+                color: Cesium.clone(colorOrFeature.color),
+                colorBlendAmount: colorOrFeature.colorBlendAmount,
+                colorBlendMode: colorOrFeature.colorBlendMode
+            };
+        }
+        return undefined;
+    }
 
-        scope._webMap.registerMouseEventHandlers(scope, viewer);
+    CitydbKmlLayer.prototype.setColor = function (feature, colorOrFeature, colorOptions = {}, setChildren = false) {
+        if (!Cesium.defined(feature) || (!setChildren && !this.contains(feature))) return;
+        let entity = {}
+        if (setChildren) {
+            entity = feature;
+        } else {
+            entity = feature.id;
+        }
+        if (Cesium.defined(entity)) {
+            if (!setChildren
+                && Cesium.defined(entity._parent)
+                && Cesium.defined(entity._parent._children)
+                && entity._parent._children.length > 0) {
+                // Array of models
+                for (const child of entity._parent._children) {
+                    this.setColor(child, colorOrFeature, colorOptions, true);
+                }
+            } else if (Cesium.defined(entity.model)) {
+                // Normal models
+                if (!Cesium.defined(colorOrFeature)) {
+                    entity.model.color = undefined;
+                } else if (colorOrFeature instanceof Cesium.Color) {
+                    entity.model.color = this.getColor(colorOrFeature);
+                    if (Cesium.defined(colorOptions.colorBlendAmount)) {
+                        entity.model.colorBlendAmount = colorOptions.colorBlendAmount;
+                    }
+                    if (Cesium.defined(colorOptions.colorBlendMode)) {
+                        entity.model.colorBlendMode = colorOptions.colorBlendMode;
+                    }
+                } else if (Cesium.defined(colorOrFeature.color)
+                    && Cesium.defined(colorOrFeature.colorBlendAmount)
+                    && Cesium.defined(colorOrFeature.colorBlendMode)) {
+                    entity.model.color = this.getColor(colorOrFeature.color);
+                    if (Cesium.defined(colorOptions.colorBlendAmount)) {
+                        entity.model.colorBlendAmount = colorOptions.colorBlendAmount;
+                    } else {
+                        entity.model.colorBlendAmount = colorOrFeature.colorBlendAmount;
+                    }
+                    if (Cesium.defined(colorOptions.colorBlendMode)) {
+                        entity.model.colorBlendMode = colorOptions.colorBlendMode;
+                    } else {
+                        entity.model.colorBlendMode = colorOrFeature.colorBlendMode;
+                    }
+                } else {
+                    const colorObj = this.getColor(colorOrFeature);
+                    this.setColor(feature, colorObj, colorOptions);
+                }
+            } else if (Cesium.defined(entity.polygon)) {
+                if (!Cesium.defined(colorOrFeature)) {
+                    entity.polygon.material = undefined;
+                } else if (colorOrFeature instanceof Cesium.Color) {
+                    entity.polygon.material = new Cesium.ColorMaterialProperty(colorOrFeature);
+                } else if (colorOrFeature instanceof Cesium.ColorMaterialProperty) {
+                    entity.polygon.material = colorOrFeature;
+                } else {
+                    entity.polygon.material = this.getColor(colorOrFeature);
+                }
+            }
+        }
+    }
+
+    CitydbKmlLayer.prototype.isEqual = function (feature1, feature2) {
+        if (!this.contains(feature1) || !this.contains(feature2)) return false;
+        return feature1.id.id === feature2.id.id;
+    }
+
+    CitydbKmlLayer.prototype.inArray = function (array, object) {
+        if (!Cesium.defined(array)) return false;
+        for (const i of array) {
+            if (this.isEqual(i, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    CitydbKmlLayer.prototype.setSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        this._cesiumViewer.selectedEntity = feature.id;
+    }
+
+    CitydbKmlLayer.prototype.storeCameraPosition = function (viewer, movement, feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        const cartesian = viewer.scene.pickPosition(movement.position);
+        let destination = Cesium.Cartographic.fromCartesian(cartesian);
+        const boundingSphere = new Cesium.BoundingSphere(
+            Cesium.Cartographic.toCartesian(destination),
+            //viewer.camera.positionCartographic.height
+            40
+        );
+        const orientation = {
+            heading: viewer.camera.heading,
+            pitch: viewer.camera.pitch,
+            roll: viewer.camera.roll
+        };
+        feature.id._storedBoundingSphere = boundingSphere;
+        feature.id._storedOrientation = orientation;
+    }
+
+    CitydbKmlLayer.prototype.getProperties = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        let entityContent = {};
+        let entity = feature.id;
+        if (Cesium.defined(entity._parent)) {
+            // Child models -> use parent's ID
+            entity = entity._parent;
+        }
+        entityContent["gmlid"] = entity.id;
+        // Remove prefix COLLADA_ from ID
+        const idPrefixes = ["COLLADA_", "KMLGeom_"];
+        for (prefix of idPrefixes) {
+            if (entityContent["gmlid"].startsWith(prefix)) {
+                entityContent["gmlid"] = entityContent["gmlid"].replace(prefix, "");
+            }
+        }
+        // Store other properties embedded in the feature
+        const properties = entity._properties;
+        if (Cesium.defined(properties)) {
+            const propertyIds = properties._propertyNames;
+            for (let i = 0; i < propertyIds.length; i++) {
+                const key = propertyIds[i];
+                entityContent[key] = properties[key]._value;
+            }
+        }
+        return entityContent;
+    }
+
+    CitydbKmlLayer.prototype.hideSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.id.show = false;
+    }
+
+    CitydbKmlLayer.prototype.show = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.id.show = true;
+    }
+
+    CitydbKmlLayer.prototype.getIdObject = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        return {
+            key: feature.id.id,
+            object: feature.id
+        };
+    }
+
+    CitydbKmlLayer.prototype.removeFromCesium = function (cesiumViewer) {
+        this.activate(false);
     }
 
     /**
@@ -592,17 +763,6 @@
             this.unHighlightObject(this.getObjectById(id));
         }
         this._highlightedObjects = this._highlightedObjects;
-    };
-
-    CitydbKmlLayer.prototype.hideSelected = function () {
-        const scope = this;
-        if (!Cesium.defined(scope._hiddenObjects)) return;
-        for (let feature of scope._prevSelectedFeatures) {
-            if (!scope._hiddenObjects.includes(feature)) {
-                scope._hiddenObjects.push(feature);
-            }
-            feature.id.show = false;
-        }
     };
 
     /**
@@ -736,7 +896,7 @@
 
         if (scope._urlSuffix === 'json') {
             scope._citydbKmlDataSource = new CitydbKmlDataSource({
-                layerId: scope._id,
+                layerId: scope._layerId,
                 camera: scope._cesiumViewer.scene.camera,
                 canvas: scope._cesiumViewer.scene.canvas,
                 gltfVersion: scope._gltfVersion
@@ -752,21 +912,21 @@
             scope._citydbKmlDataSource.load(scope.checkProxyUrl(scope, scope._url), {
                 clampToGround: scope._layerClampToGround
             }).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+                assignLayerIdToDataSourceEntites(dataSource.entities, scope._layerId);
                 scope._cesiumViewer.dataSources.add(dataSource);
-                deferred.resolve(that);
+                deferred.resolve(scope);
             }, function (error) {
-                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
             });
         } else if (scope._urlSuffix === 'czml') {
             scope._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
             scope._citydbKmlDataSource.load(scope.checkProxyUrl(scope, scope._url)).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+                assignLayerIdToDataSourceEntites(dataSource.entities, scope._layerId);
                 cesiumViewer.dataSources.add(dataSource);
-                deferred.resolve(that);
+                deferred.resolve(scope);
             }, function (error) {
-                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
             });
         } else {
             deferred.reject(new Cesium.DeveloperError('Unsupported Datasource from: ' + that._url));
@@ -782,7 +942,7 @@
                 var primitive = primitives.get(i);
                 if (primitive instanceof Cesium.Model) {
                     if (primitive.ready) {
-                        if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
+                        if (primitive._id._name === objectId && primitive._id.layerId === this._layerId) {
                             return primitive;
                         }
                     }
@@ -825,7 +985,7 @@
             return null;
         }
 
-        return getEntitiesByIdFromPrimitiveCollection(primitives, this._id);
+        return getEntitiesByIdFromPrimitiveCollection(primitives, this._layerId);
     };
 
     CitydbKmlLayer.prototype.setEntityColorByPrimitive = function (entity, color) {
@@ -835,7 +995,7 @@
             if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
                 for (var j = 0; j < primitive._instanceIds.length; j++) {
                     var tmpId = primitive._instanceIds[j].name;
-                    if (tmpId == entity.name && entity.layerId === this._id) {
+                    if (tmpId === entity.name && entity.layerId === this._layerId) {
                         var attributes = primitive.getGeometryInstanceAttributes(entity);
                         if (Cesium.defined(attributes)) {
                             attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color);
