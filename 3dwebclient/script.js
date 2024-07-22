@@ -245,6 +245,10 @@ function initClient() {
             }
         }
 
+        // Visually highlight toggle buttons
+        handleToggleButton("toggleShadowButton", cesiumViewer.shadows);
+        handleToggleButton("toggleTerrainShadowButton", cesiumViewer.terrainShadows);
+
         // Adjust GUI based on given values
         layerDataTypeDropdownOnchange();
         thematicDataSourceAndTableTypeDropdownOnchange();
@@ -1106,12 +1110,19 @@ function printCurrentview() {
 function toggleShadows() {
     cesiumViewer.shadows = !cesiumViewer.shadows;
     if (!cesiumViewer.shadows) {
-        cesiumViewer.terrainShadows = Cesium.ShadowMode.DISABLED;
+        cesiumViewer.shadows = Cesium.ShadowMode.DISABLED;
+        if (cesiumViewer.terrainShadows) {
+            CitydbUtil.showAlertWindow("OK", "Switching off terrain shadows now", 'Please note that terrain shadows for 3D models will also be switched off.',
+                function () {
+                    toggleTerrainShadows();
+                });
+        }
     }
+    handleToggleButton("toggleShadowButton", cesiumViewer.shadows);
 }
 
 function toggleTerrainShadows() {
-    if (cesiumViewer.terrainShadows == Cesium.ShadowMode.ENABLED) {
+    if (cesiumViewer.terrainShadows === Cesium.ShadowMode.ENABLED) {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.DISABLED;
     } else {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.ENABLED;
@@ -1121,6 +1132,18 @@ function toggleTerrainShadows() {
                     toggleShadows();
                 });
         }
+    }
+    handleToggleButton("toggleTerrainShadowButton", cesiumViewer.terrainShadows);
+}
+
+function handleToggleButton(buttonId, isActivated) {
+    const toggleButton = document.getElementById(buttonId);
+    if (isActivated) {
+        toggleButton.style.backgroundColor = "#4CAF50";
+        toggleButton.style.borderColor = "yellow";
+    } else {
+        toggleButton.style.backgroundColor = "#303336";
+        toggleButton.style.borderColor = "#444";
     }
 }
 

@@ -263,7 +263,9 @@
                     <table class="citydb_inputtable">
                         <tbody>
                         <tr>
-                            <td colspan="3" style="border: yellow; color: yellow;"><b>Layer information</b><hr/></td>
+                            <td colspan="3" style="border: yellow; color: yellow;"><b>Layer information</b>
+                                <hr/>
+                            </td>
                         </tr>
                         <tr>
                             <td>Type</td>
@@ -346,9 +348,13 @@
                                               data-bind="checked: layerClampToGround"/> Clamp to ground</label>
                             </td>
                         </tr>
-                        <tr><td></td></tr>
                         <tr>
-                            <td colspan="3" style="border: yellow; color: yellow;"><b>Thematic data</b><hr/></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="border: yellow; color: yellow;"><b>Thematic data</b>
+                                <hr/>
+                            </td>
                         </tr>
                         <tr id="thematicDataSourceDropDownDiv">
                             <td>Type</td>
@@ -641,12 +647,14 @@
             </div>
             <div>
                 <div class="citydb_short_container">
-                    <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleShadows()">Toggle
+                    <button id="toggleShadowButton" type="button" style="width: 100%;" class="cesium-button"
+                            onclick="toggleShadows()">Toggle
                         Shadows
                     </button>
                 </div>
                 <div class="citydb_short_container">
-                    <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleTerrainShadows()">
+                    <button id="toggleTerrainShadowButton" type="button" style="width: 100%;" class="cesium-button"
+                            onclick="toggleTerrainShadows()">
                         Toggle Terrain Shadows
                     </button>
                 </div>
