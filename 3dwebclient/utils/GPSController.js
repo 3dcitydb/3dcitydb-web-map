@@ -26,7 +26,7 @@
  */
 
 /**
- * 
+ *
  * GPS Geolocation with device orientation in real-time
  */
 
@@ -206,9 +206,9 @@
                 restartView(function () {
                     cesiumCamera.flyTo({
                         destination: Cesium.Cartesian3.fromRadians(
-                                cesiumCamera.positionCartographic.longitude,
-                                cesiumCamera.positionCartographic.latitude,
-                                250),
+                            cesiumCamera.positionCartographic.longitude,
+                            cesiumCamera.positionCartographic.latitude,
+                            250),
                         orientation: {
                             heading: cesiumCamera.heading,
                             pitch: Cesium.Math.toRadians(-75),
@@ -294,13 +294,32 @@
 
             function getLocation() {
                 if (window.DeviceOrientationEvent) {
-                    window.addEventListener('deviceorientation', function auxOrientation(event) {
-                        flyToLocationWithOrientation(position, event);
-                        setTimeout(function () {
-                            // one-time event
-                            window.removeEventListener('deviceorientation', auxOrientation, false);
-                        }, scope._timerMiliseconds);
-                    }, false);
+                    // Request permission for iOS 13+
+                    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                        DeviceOrientationEvent.requestPermission()
+                            .then(permissionState => {
+                                if (permissionState === 'granted') {
+                                    window.addEventListener('deviceorientation', function auxOrientation(event) {
+                                        flyToLocationWithOrientation(position, event);
+                                        setTimeout(function () {
+                                            // one-time event
+                                            window.removeEventListener('deviceorientation', auxOrientation, false);
+                                        }, scope._timerMiliseconds);
+                                    }, false);
+                                } else {
+                                    CitydbUtil.showAlertWindow("OK", "Error", "Permission not granted for DeviceOrientation");
+                                }
+                            })
+                            .catch(console.error);
+                    } else {
+                        window.addEventListener('deviceorientation', function auxOrientation(event) {
+                            flyToLocationWithOrientation(position, event);
+                            setTimeout(function () {
+                                // one-time event
+                                window.removeEventListener('deviceorientation', auxOrientation, false);
+                            }, scope._timerMiliseconds);
+                        }, false);
+                    }
                 } else {
                     CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
                     flyToLocationWithOrientation(position, event);
