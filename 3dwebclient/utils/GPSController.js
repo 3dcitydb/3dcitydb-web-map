@@ -295,8 +295,8 @@
             function getLocation() {
                 if (window.DeviceOrientationEvent) {
                     // Request permission for iOS 13+
-                    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                        DeviceOrientationEvent.requestPermission()
+                    if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                        window.DeviceOrientationEvent.requestPermission()
                             .then(permissionState => {
                                 if (permissionState === 'granted') {
                                     window.addEventListener('deviceorientation', function auxOrientation(event) {
