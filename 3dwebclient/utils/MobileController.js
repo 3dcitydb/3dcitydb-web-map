@@ -26,7 +26,7 @@
  */
 
 /**
- * 
+ *
  * Controller for mobile devices
  */
 
@@ -54,6 +54,8 @@
         this.setInfoboxFullscreen();
         this.setToolboxFullscreen();
         this.setSplashWindowFullscreen();
+
+        this.setGestures();
     }
 
     Object.defineProperties(MobileController.prototype, {
@@ -101,7 +103,7 @@
 
     /**
      * True if mobile browser is being used.
-     * 
+     *
      * @returns {Boolean}
      */
     MobileController.prototype.isMobile = function () {
@@ -139,7 +141,7 @@
 
     /**
      * Set distance legend to display on the bottom right corner on mobile devices.
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.setDistanceLegend = function () {
@@ -159,7 +161,7 @@
 
     /**
      * Set loading indicator on mobile devices.
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.setLoadingIndicator = function () {
@@ -180,7 +182,7 @@
 
     /**
      * Hide credit logos and texts.
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.hideCredits = function () {
@@ -194,7 +196,7 @@
 
     /**
      * Hide navigation tools (compass + zooming).
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.hideNavigationDiv = function () {
@@ -231,7 +233,7 @@
 
     /**
      * Hide inspector that shows number of cached and loaded tiles.
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.hideInspector = function () {
@@ -256,7 +258,7 @@
 
     /**
      * Automatically hide toolbox/uiMenu when an infox is shown in fullscreen.
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.watchInfoboxVisibility = function () {
@@ -293,7 +295,7 @@
 
     /**
      * Set infobox containing thematic values to fullscreen on mobile devices.
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.setInfoboxFullscreen = function () {
@@ -310,7 +312,7 @@
 
     /**
      * Set toolbox to fullscreen on mobile devices.
-     * 
+     *
      * @returns {undefined}
      */
     MobileController.prototype.setToolboxFullscreen = function () {
@@ -348,7 +350,6 @@
             closeIgnoreButtons.classList.add("splashscreen-buttons-mobile");
 
 
-
             // Simplify contents of the splash window
             var mobileContentUrl = "splash/SplashWindow_Mobile.html";
             var http = new XMLHttpRequest();
@@ -358,6 +359,30 @@
                 // Mobile version for the contents of the splash window exists
                 document.getElementById('splashwindow_iframe_content').src = mobileContentUrl;
                 addSplashWindowModel.url = mobileContentUrl;
+            }
+        }
+    };
+
+    /**
+     * Set gesture events.
+     *
+     * @returns {undefined}
+     */
+    MobileController.prototype.setGestures = function () {
+        var scope = this;
+
+        if (scope._isMobile) {
+            if (scope.getMobileOS() === "iOS") {
+                // Source: https://stackoverflow.com/questions/37808180/disable-viewport-zooming-ios-10-safari/50823326#50823326
+                window.addEventListener(
+                    "touchmove",
+                    function (event) {
+                        if (event.scale !== 1) {
+                            event.preventDefault();
+                        }
+                    },
+                    {passive: false}
+                );
             }
         }
     };
