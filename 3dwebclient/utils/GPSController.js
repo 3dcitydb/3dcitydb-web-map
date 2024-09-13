@@ -283,65 +283,27 @@
     GPSController.prototype.startTracking = function () {
         var scope = this;
 
-        if ("permissions" in navigator) {
-            navigator.permissions.query({
-                name: "geolocation"
-            }).then((result) => {
-                if (result.state === "granted") {
-                    console.log("Geolocation granted");
-                } else if (result.state === "denied") {
-                    console.log("Geolocation denied");
-                } else {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(showPosition, showError, {
-                            timeout: 4000,
-                            maximumAge: 0
-                        });
-                    } else {
-                        CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
-                    }
-                }
-            });
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
         }
 
         function showPosition(position) {
-            getLocation();
-
-            function getLocation() {
-                if (window.DeviceOrientationEvent) {
-                    // Request permission for iOS 13+
-                    if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-                        window.DeviceOrientationEvent.requestPermission()
-                            .then(permissionState => {
-                                if (permissionState === 'granted') {
-                                    window.addEventListener('deviceorientation', function auxOrientation(event) {
-                                        flyToLocationWithOrientation(position, event);
-                                        setTimeout(function () {
-                                            // one-time event
-                                            window.removeEventListener('deviceorientation', auxOrientation, false);
-                                        }, scope._timerMiliseconds);
-                                    }, false);
-                                } else {
-                                    CitydbUtil.showAlertWindow("OK", "Error", "Permission not granted for DeviceOrientation");
-                                }
-                            })
-                            .catch(console.error);
-                    } else {
-                        window.addEventListener('deviceorientation', function auxOrientation(event) {
-                            flyToLocationWithOrientation(position, event);
-                            setTimeout(function () {
-                                // one-time event
-                                window.removeEventListener('deviceorientation', auxOrientation, false);
-                            }, scope._timerMiliseconds);
-                        }, false);
-                    }
-                } else {
-                    CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
-                    flyToLocationWithOrientation(position, event);
-                }
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', function auxOrientation(event) {
+                    flyToLocationWithOrientation(position, event, () => {
+                        setTimeout(function () {
+                            // one-time event
+                            window.removeEventListener('deviceorientation', auxOrientation, false);
+                        }, scope._timerMiliseconds);
+                    });
+                }, false);
+            } else {
+                CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
             }
 
-            function flyToLocationWithOrientation(position, ori) {
+            function flyToLocationWithOrientation(position, ori, callback) {
                 var oriAlpha = 0;
                 var oriBeta = 0;
                 var oriGamma = 0;
@@ -425,6 +387,9 @@
                                     }
                                 }, scope._timerMiliseconds);
                             }
+                        }
+                        if (callback) {
+                            callback();
                         }
                     }
                 });
