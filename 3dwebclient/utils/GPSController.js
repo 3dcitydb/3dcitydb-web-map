@@ -283,10 +283,25 @@
     GPSController.prototype.startTracking = function () {
         var scope = this;
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-            CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
+        if ("permissions" in navigator) {
+            navigator.permissions.query({
+                name: "geolocation"
+            }).then((result) => {
+                if (result.state === "granted") {
+                    console.log("Geolocation granted");
+                } else if (result.state === "denied") {
+                    console.log("Geolocation denied");
+                } else {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                            timeout: 4000,
+                            maximumAge: 0
+                        });
+                    } else {
+                        CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
+                    }
+                }
+            });
         }
 
         function showPosition(position) {
