@@ -290,15 +290,50 @@
         }
 
         function showPosition(position) {
-            if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', function auxOrientation(event) {
-                    flyToLocationWithOrientation(position, event, () => {
-                        setTimeout(function () {
-                            // one-time event
-                            window.removeEventListener('deviceorientation', auxOrientation, false);
-                        }, scope._timerMiliseconds);
-                    });
-                }, false);
+            if (DeviceOrientationEvent) {
+                // Source: https://forum.defold.com/t/how-to-force-safari-browser-to-allow-deviceorientation-permission-solved/75641/2
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    const requestOrientationPermission = () => {
+                        DeviceOrientationEvent.requestPermission().then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener('deviceorientation', function auxOrientation(event) {
+                                    flyToLocationWithOrientation(position, event, () => {
+                                        setTimeout(function () {
+                                            // one-time event
+                                            window.removeEventListener('deviceorientation', auxOrientation, false);
+                                        }, scope._timerMiliseconds);
+                                    });
+                                }, false);
+                            } else {
+                                const button = document.createElement('button');
+                                button.innerText = "Enable Orientation";
+                                button.style.position = 'absolute';
+                                button.style.top = '100%';
+                                button.style.left = '100%';
+                                button.style.transform = 'translate(50%, 50%)';
+                                document.body.appendChild(button);
+
+                                button.addEventListener('click', () => {
+                                    requestOrientationPermission();
+                                    document.body.removeChild(button); // Remove button after requesting permissions
+                                });
+                            }
+                        }).catch(err => {
+                            console.error("Error requesting deviceorientation permission:", err);
+                        });
+                    };
+                    requestOrientationPermission();
+                } else {
+                    // Automatically start listeners on non-iOS 13+ devices
+                    window.addEventListener('deviceorientation', function auxOrientation(event) {
+                        flyToLocationWithOrientation(position, event, () => {
+                            setTimeout(function () {
+                                // one-time event
+                                window.removeEventListener('deviceorientation', auxOrientation, false);
+                            }, scope._timerMiliseconds);
+                        });
+                    }, false);
+                }
             } else {
                 CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
             }
