@@ -291,14 +291,34 @@
 
         function showPosition(position) {
             if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', function auxOrientation(event) {
-                    flyToLocationWithOrientation(position, event, () => {
-                        setTimeout(function () {
-                            // one-time event
-                            window.removeEventListener('deviceorientation', auxOrientation, false);
-                        }, scope._timerMiliseconds);
-                    });
-                }, false);
+                if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                    // iOS 13+
+                    window.DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener('deviceorientation', function auxOrientation(event) {
+                                    flyToLocationWithOrientation(position, event, () => {
+                                        setTimeout(function () {
+                                            // one-time event
+                                            window.removeEventListener('deviceorientation', auxOrientation, false);
+                                        }, scope._timerMiliseconds);
+                                    });
+                                }, false);
+                            } else {
+                                CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
+                            }
+                        });
+                } else {
+                    // Other devices
+                    window.addEventListener('deviceorientation', function auxOrientation(event) {
+                        flyToLocationWithOrientation(position, event, () => {
+                            setTimeout(function () {
+                                // one-time event
+                                window.removeEventListener('deviceorientation', auxOrientation, false);
+                            }, scope._timerMiliseconds);
+                        });
+                    }, false);
+                }
             } else {
                 CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
             }
