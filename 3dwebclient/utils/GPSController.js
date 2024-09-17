@@ -301,6 +301,9 @@
                             } else {
                                 CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
                             }
+                        })
+                        .catch(error => {
+                            CitydbUtil.showAlertWindow("OK", "Error", error);
                         });
                 } else {
                     // Other devices
