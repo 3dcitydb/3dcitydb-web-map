@@ -296,31 +296,27 @@
                     window.DeviceOrientationEvent.requestPermission()
                         .then(permissionState => {
                             if (permissionState === 'granted') {
-                                window.addEventListener('deviceorientation', function auxOrientation(event) {
-                                    flyToLocationWithOrientation(position, event, () => {
-                                        setTimeout(function () {
-                                            // one-time event
-                                            window.removeEventListener('deviceorientation', auxOrientation, false);
-                                        }, scope._timerMiliseconds);
-                                    });
-                                }, false);
+                                CitydbUtil.showAlertWindow("OK", "iOS", "iOS device detected.");
+                                window.addEventListener('deviceorientation', auxOrientation, false);
                             } else {
                                 CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
                             }
                         });
                 } else {
                     // Other devices
-                    window.addEventListener('deviceorientation', function auxOrientation(event) {
-                        flyToLocationWithOrientation(position, event, () => {
-                            setTimeout(function () {
-                                // one-time event
-                                window.removeEventListener('deviceorientation', auxOrientation, false);
-                            }, scope._timerMiliseconds);
-                        });
-                    }, false);
+                    window.addEventListener('deviceorientation', auxOrientation, false);
                 }
             } else {
                 CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
+            }
+
+            function auxOrientation(event) {
+                flyToLocationWithOrientation(position, event, () => {
+                    setTimeout(function () {
+                        // one-time event
+                        window.removeEventListener('deviceorientation', auxOrientation, false);
+                    }, scope._timerMiliseconds);
+                });
             }
 
             function flyToLocationWithOrientation(position, ori, callback) {
