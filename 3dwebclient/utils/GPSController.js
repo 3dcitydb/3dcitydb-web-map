@@ -304,6 +304,7 @@
                         });
                 } else {
                     // Other devices
+                    CitydbUtil.showAlertWindow("OK", "OS", "Other OS detected.");
                     window.addEventListener('deviceorientation', auxOrientation, false);
                 }
             } else {
