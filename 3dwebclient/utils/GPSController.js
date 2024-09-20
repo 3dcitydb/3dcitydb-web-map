@@ -176,7 +176,7 @@
             clearInterval(scope._intervalIDPosOri);
             scope._intervalIDPosOri = undefined;
             // Hide GPS span
-            gpsButtonSingle.dispatchEvent(new Event("focusout"));
+            gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
             if (window.DeviceOrientationEvent) {
                 if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
@@ -252,7 +252,7 @@
                 gpsButtonMain.classList.remove("gps-button-main");
                 gpsButtonMain.classList.add("gps-button-live-ori");
                 // Hide GPS span
-                gpsButtonLiveOri.dispatchEvent(new Event("focusout"));
+                gpsSpan.dispatchEvent(new Event("focusout"));
                 // Get position and orientation
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition((position) => {
@@ -351,7 +351,7 @@
                 gpsButtonMain.classList.remove("gps-button-main");
                 gpsButtonMain.classList.add("gps-button-live-pos-ori");
                 // Hide GPS span
-                gpsButtonLivePosOri.dispatchEvent(new Event("focusout"));
+                gpsSpan.dispatchEvent(new Event("focusout"));
                 // Get position and orientation
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition((position) => {
@@ -448,7 +448,7 @@
             gpsButtonMain.classList.remove("gps-button-live-pos-ori");
             gpsButtonMain.classList.add("gps-button-main");
             // Hide GPS span
-            gpsButtonOff.dispatchEvent(new Event("focusout"));
+            gpsSpan.dispatchEvent(new Event("focusout"));
 
             restartCamera();
         }
