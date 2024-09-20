@@ -38,7 +38,6 @@
         this._timerMiliseconds = 2000; // track interval
         this._savedAlpha = undefined;
         this._firstPersonViewActivated = false;
-        this._watchPos = false;
         this._isMobile = isMobilePara;
         this.createGPSButtons();
     }
@@ -467,7 +466,7 @@
             }
 
             if (typeof scope._savedAlpha !== "undefined") {
-                var diffAngle = angle - scope._savedAlpha;
+                const diffAngle = angle - scope._savedAlpha;
                 if (diffAngle > 180) {
                     angle -= 360;
                 } else if (diffAngle < -180) {
@@ -522,7 +521,7 @@
                     pitch: oriBeta,
                     roll: oriGamma
                 },
-                duration: 0.75 * scope._timerMiliseconds / 1000,
+                duration: 0.9 * scope._timerMiliseconds / 1000,
                 complete: function () {
                     scope._firstPersonViewActivated = true;
                     if (callback) {
