@@ -166,7 +166,7 @@
         customCesiumViewerToolbar.replaceChild(gpsSpan, customGlobeSpan);
 
         // Show position and orientation snapshot
-        gpsButtonSingle.addEventListener('click', function() {
+        gpsButtonSingle.onclick = function () {
             // Replace the main GPS button symbol with this button
             gpsButtonMain.classList.remove("gps-button-main");
             gpsButtonMain.classList.add("gps-button-single");
@@ -176,14 +176,14 @@
             clearInterval(scope._intervalIDPosOri);
             scope._intervalIDPosOri = undefined;
             // Get position and orientation
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    if (window.DeviceOrientationEvent) {
-                        if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-                            // iOS 13+
-                            window.DeviceOrientationEvent.requestPermission()
-                                .then(permissionState => {
-                                    if (permissionState === 'granted') {
+            if (window.DeviceOrientationEvent) {
+                if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                    // iOS 13+
+                    window.DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                if (navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition((position) => {
                                         window.addEventListener('deviceorientation', function auxOrientation(ori) {
                                             flyToLocationWithOrientation(position, ori, () => {
                                                 setTimeout(function () {
@@ -192,32 +192,38 @@
                                                 }, scope._timerMiliseconds);
                                             });
                                         }, false);
-                                    } else {
-                                        CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
-                                    }
-                                })
-                                .catch(error => {
-                                    CitydbUtil.showAlertWindow("OK", "Error", error);
-                                });
-                        } else {
-                            // Other devices
+                                    }, showError);
+                                } else {
+                                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation not supported.");
+                                }
+                            } else {
+                                CitydbUtil.showAlertWindow("OK", "Error", "Orientation denied.");
+                            }
+                        })
+                        .catch(error => {
+                            CitydbUtil.showAlertWindow("OK", "Error", error);
+                        });
+                } else {
+                    // Other devices
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
                             window.addEventListener('deviceorientation', function auxOrientation(ori) {
                                 flyToLocationWithOrientation(position, ori, () => {
                                     setTimeout(function () {
-                                        // One-time event
+                                        // one-time event
                                         window.removeEventListener('deviceorientation', auxOrientation, false);
                                     }, scope._timerMiliseconds);
                                 });
                             }, false);
-                        }
+                        }, showError);
                     } else {
-                        CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
+                        CitydbUtil.showAlertWindow("OK", "Error", "Geolocation not supported.");
                     }
-                }, showError);
+                }
             } else {
-                CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
+                CitydbUtil.showAlertWindow("OK", "Error", "Orientation not supported.");
             }
-        });
+        }
 
         // Track orientation (with fixed position)
         gpsButtonLiveOri.onclick = function () {
