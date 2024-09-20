@@ -166,13 +166,13 @@
 
         // Show position and orientation snapshot
         gpsButtonSingle.onclick = async function () {
+            // Hide GPS span
+            gpsSpan.dispatchEvent(new Event("focusout"));
             // Replace the main GPS button symbol with this button
             setGPSButtonMain("gps-button-single");
             // Disable tracking
             clearTrackOri();
             clearTrackPosOri();
-            // Hide GPS span
-            gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
             try {
                 // Handle iOS 13+ Device Orientation permission
@@ -188,6 +188,8 @@
 
         // Track orientation (with fixed position)
         gpsButtonLiveOri.onclick = async function () {
+            // Hide GPS span
+            gpsSpan.dispatchEvent(new Event("focusout"));
             // Handle tracking
             if (scope._intervalIDPosOri) {
                 // Disable tracking position + orientation
@@ -207,8 +209,6 @@
             scope._intervalIDOri = undefined;
             // Replace the main GPS button symbol with this button
             setGPSButtonMain("gps-button-live-ori");
-            // Hide GPS span
-            gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
             try {
                 // Handle iOS 13+ Device Orientation permission
@@ -230,6 +230,8 @@
 
         // Track position and orientation
         gpsButtonLivePosOri.onclick = async function () {
+            // Hide GPS span
+            gpsSpan.dispatchEvent(new Event("focusout"));
             // Handle tracking
             if (scope._intervalIDOri) {
                 // Disable tracking orientation (with fixed position)
@@ -249,8 +251,6 @@
             scope._intervalIDPosOri = undefined;
             // Replace the main GPS button symbol with this button
             setGPSButtonMain("gps-button-live-pos-ori");
-            // Hide GPS span
-            gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
             try {
                 // Handle iOS 13+ Device Orientation permission
