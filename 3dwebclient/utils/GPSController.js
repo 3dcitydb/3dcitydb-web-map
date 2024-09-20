@@ -2,7 +2,7 @@
  * 3DCityDB-Web-Map-Client
  * http://www.3dcitydb.org/
  * 
- * Copyright 2015 - 2017
+ * Copyright 2015 - 2024
  * Chair of Geoinformatics
  * Technical University of Munich, Germany
  * https://www.gis.bgu.tum.de/
@@ -195,7 +195,7 @@
             }
             if (scope._intervalIDOri) {
                 // Already tracking -> disable tracking
-                clearTrackOri()
+                clearTrackOri();
                 // Restore the main GPS button symbol
                 restoreGPSButtonMain();
                 // Bring the camera to normal angle
@@ -261,7 +261,7 @@
                 // First fly
                 await flyToLocationWithOrientation(position, orientation);
                 // Interval tracking for orientation
-                scope._intervalIDOri = setInterval(async function () {
+                scope._intervalIDPosOri = setInterval(async function () {
                     position = await getPosition();
                     orientation = await getOrientation();
                     await flyToLocationWithOrientation(position, orientation);
@@ -291,6 +291,7 @@
         }
 
         function setGPSButtonMain(className) {
+            restoreGPSButtonMain();
             gpsButtonMain.classList.remove("gps-button-main");
             gpsButtonMain.classList.add(className);
         }
