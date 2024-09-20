@@ -178,6 +178,9 @@
             gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
             try {
+                // Handle iOS 13+ Device Orientation permission
+                await requestAccess();
+                // Get values
                 const position = await getPosition();
                 const orientation = await getOrientation();
                 flyToLocationWithOrientation(position, orientation);
@@ -186,28 +189,20 @@
             }
         }
 
+        async function requestAccess() {
+            if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                const permissionState = await DeviceOrientationEvent.requestPermission();
+                if (permissionState !== 'granted') {
+                    CitydbUtil.showAlertWindow("OK", "Error", "Orientation access denied.");
+                    throw new Error('Orientation access denied.');
+                }
+            }
+        }
+
         async function getOrientation() {
             return new Promise((resolve, reject) => {
                 if (window.DeviceOrientationEvent) {
-                    if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-                        // iOS 13+
-                        window.DeviceOrientationEvent.requestPermission()
-                            .then(permissionState => {
-                                if (permissionState === 'granted') {
-                                    window.addEventListener('deviceorientation', resolve, {once: true});
-                                } else {
-                                    reject("Orientation access denied.");
-                                    CitydbUtil.showAlertWindow("OK", "Error", "Orientation access denied.");
-                                }
-                            })
-                            .catch(error => {
-                                reject(error);
-                                CitydbUtil.showAlertWindow("OK", "Error", error);
-                            });
-                    } else {
-                        // Non-iOS devices
-                        window.addEventListener('deviceorientation', resolve, {once: true});
-                    }
+                    window.addEventListener('deviceorientation', resolve, {once: true});
                 } else {
                     reject("Orientation not supported.");
                     CitydbUtil.showAlertWindow("OK", "Error", "Orientation not supported.");
