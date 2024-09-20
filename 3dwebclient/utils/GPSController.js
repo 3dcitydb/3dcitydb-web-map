@@ -33,33 +33,25 @@
 (function () {
     /**constructor function**/
     function GPSController(isMobilePara) {
-        this._liveTrackingActivated = false;
-        this._timer = undefined;
-        this._timerMiliseconds = 350; // duration between clicks in ms
+        this._intervalIDOri = undefined;
+        this._intervalIDPosOri = undefined;
+        this._timerMiliseconds = 2000; // track interval
         this._savedAlpha = undefined;
-        this._firstActivated = false;
+        this._firstPersonViewActivated = false;
         this._watchPos = false;
-        this._touchHoldDuration = 500; // touch press duration in ms
-        this._longPress = false;
         this._isMobile = isMobilePara;
-        this.createGPSButton();
+        this.createGPSButtons();
     }
 
     Object.defineProperties(GPSController.prototype, {
-        liveTrackingActivated: {
+        intervalIDOri: {
             get: function () {
-                return this._liveTrackingActivated;
-            },
-            set: function (value) {
-                this._liveTrackingActivated = value;
+                return this._intervalIDOri;
             }
         },
-        timer: {
+        intervalIDPosOri: {
             get: function () {
-                return this._timer;
-            },
-            set: function (value) {
-                this._timer = value;
+                return this._intervalIDPosOri;
             }
         },
         timerMiliseconds: {
@@ -78,12 +70,12 @@
                 this._savedAlpha = value;
             }
         },
-        firstActivated: {
+        firstPersonViewActivated: {
             get: function () {
-                return this._firstActivated;
+                return this._firstPersonViewActivated;
             },
             set: function (value) {
-                this._firstActivated = value;
+                this._firstPersonViewActivated = value;
             }
         },
         watchPos: {
@@ -92,22 +84,6 @@
             },
             set: function (value) {
                 this._watchPos = value;
-            }
-        },
-        touchHoldDuration: {
-            get: function () {
-                return this._touchHoldDuration;
-            },
-            set: function (value) {
-                this._touchHoldDuration = value;
-            }
-        },
-        longPress: {
-            get: function () {
-                return this._longPress;
-            },
-            set: function (value) {
-                this._longPress = value;
             }
         },
         isMobile: {
@@ -120,300 +96,448 @@
         }
     });
 
-    GPSController.prototype.createGPSButton = function () {
-        var scope = this;
+    GPSController.prototype.createGPSButtons = function () {
+        const scope = this;
 
-        var button = document.getElementById("gpsButton");
-        button.className = "cesium-button cesium-toolbar-button tracking-deactivated";
-        button.title = "View GPS (single-click: one time, double-click: real-time)";
+        const gpsSpan = document.getElementById("gpsSpan");
+        const gpsButtonMain = document.getElementById("gpsButtonMain");
+        const gpsButtonSingle = document.getElementById("gpsButtonSingle");
+        const gpsButtonLiveOri = document.getElementById("gpsButtonLiveOri");
+        const gpsButtonLivePosOri = document.getElementById("gpsButtonLivePosOri");
+        const gpsButtonOff = document.getElementById("gpsButtonOff");
 
-        // replace the 3D/2D button with this GPS button
-        var customCesiumViewerToolbar = document.getElementsByClassName("cesium-viewer-toolbar")[0];
-        var customGlobeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-sceneModePicker-wrapper cesium-toolbar-button")[0];
-        customCesiumViewerToolbar.replaceChild(button, customGlobeButton);
-
-        if (scope._isMobile) {
-            // remove home button
-            var customHomeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-button cesium-toolbar-button cesium-home-button")[0];
-            customCesiumViewerToolbar.removeChild(customHomeButton);
-
-            // remove info button
-            // var customInfoButton = customCesiumViewerToolbar.getElementsByClassName("cesium-navigationHelpButton-wrapper")[0];
-            // customCesiumViewerToolbar.removeChild(customInfoButton);
-        }
-
-        // --------------------------MOUSE HELD EVENT--------------------------
-        var holdStart = 0;
-        var holdTime = 0;
-        if (scope._isMobile) {
-            button.addEventListener("touchstart", function (evt) {
-                holdStart = Date.now();
-            }, false);
-            button.addEventListener("touchend", function (evt) {
-                holdTime = Date.now() - holdStart;
-                scope._longPress = holdTime >= scope._touchHoldDuration;
-            }, false);
-        } else {
-            button.addEventListener("mousedown", function (evt) {
-                holdStart = Date.now();
-            }, false);
-            window.addEventListener("mouseup", function (evt) {
-                holdTime = Date.now() - holdStart;
-                scope._longPress = holdTime >= scope._touchHoldDuration;
-            }, false);
-        }
-
-        // --------------------------MOUSE CLICK EVENT-------------------------
-        button.onclick = function () {
-            if (scope._liveTrackingActivated) {
-                scope._liveTrackingActivated = false;
-                scope.stopTracking();
-            }
-
-            if (!scope._longPress) {
-                var object = document.getElementById("gpsButton");
-                // distinguish between double-click and single-click
-                // https://stackoverflow.com/questions/5497073/how-to-differentiate-single-click-event-and-double-click-event#answer-16033129
-                if (object.getAttribute("data-double-click") == null) {
-                    object.setAttribute("data-double-click", 1);
-                    setTimeout(function () {
-                        if (object.getAttribute("data-double-click") == 1) {
-                            scope.handleClick();
-                        }
-                        object.removeAttribute("data-double-click");
-                    }, 500);
-                } else if (object.getAttribute("data-triple-click") == null) {
-                    object.setAttribute("data-triple-click", 1);
-                    setTimeout(function () {
-                        if (object.getAttribute("data-triple-click") == 1) {
-                            scope.handleDclick();
-                        }
-                        object.removeAttribute("data-double-click");
-                        object.removeAttribute("data-triple-click");
-                    }, 500);
-                } else {
-                    object.removeAttribute("data-double-click");
-                    object.removeAttribute("data-triple-click");
-                    scope.handleTclick();
+        if (gpsButtonMain) {
+            gpsButtonMain.onclick = function () {
+                toggleGPSButtonMain(gpsButtonMain);
+                if (gpsButtonSingle) {
+                    toggleGPSButton(gpsButtonSingle);
                 }
+                if (gpsButtonLiveOri) {
+                    toggleGPSButton(gpsButtonLiveOri);
+                }
+                if (gpsButtonLivePosOri) {
+                    toggleGPSButton(gpsButtonLivePosOri);
+                }
+                if (gpsButtonOff) {
+                    toggleGPSButton(gpsButtonOff);
+                }
+            }
+        }
+
+        if (gpsSpan) {
+            gpsSpan.onfocusout = function () {
+                toggleGPSButtonMain(gpsButtonMain);
+                hideGPSButton(gpsButtonSingle);
+                hideGPSButton(gpsButtonLiveOri);
+                hideGPSButton(gpsButtonLivePosOri);
+                hideGPSButton(gpsButtonOff);
+            }
+        }
+
+        function toggleGPSButtonMain(button) {
+            if (!button.classList.contains("cesium-sceneModePicker-selected")) {
+                button.classList.add("cesium-sceneModePicker-selected");
             } else {
-                var restartView = function (_callback) {
-                    scope._firstActivated = false;
-                    cesiumCamera.cancelFlight();
-                    _callback();
-                };
-
-                restartView(function () {
-                    cesiumCamera.flyTo({
-                        destination: Cesium.Cartesian3.fromRadians(
-                            cesiumCamera.positionCartographic.longitude,
-                            cesiumCamera.positionCartographic.latitude,
-                            250),
-                        orientation: {
-                            heading: cesiumCamera.heading,
-                            pitch: Cesium.Math.toRadians(-75),
-                            roll: 0
-                        }
-                    });
-                });
+                button.classList.remove("cesium-sceneModePicker-selected");
             }
         }
-    }
 
-    // Handle single-click
-    GPSController.prototype.handleClick = function () {
-        var scope = this;
-
-        if (scope._liveTrackingActivated) {
-            scope._liveTrackingActivated = false;
-            scope.stopTracking();
-        } else {
-            var button = document.getElementById("gpsButton");
-            button.classList.remove("tracking-ori-activated");
-            button.classList.remove("tracking-pos-ori-activated");
-            button.classList.add("tracking-deactivated");
-
-            // one time tracking
-            scope.startTracking();
-        }
-    }
-
-    // Handle double-click
-    GPSController.prototype.handleDclick = function () {
-        var scope = this;
-
-        if (scope._liveTrackingActivated) {
-            scope._liveTrackingActivated = false;
-            scope.stopTracking();
-        } else {
-            scope._liveTrackingActivated = true;
-            scope._watchPos = false;
-
-            var button = document.getElementById("gpsButton");
-            button.classList.remove("tracking-deactivated");
-            button.classList.remove("tracking-ori-deactivated");
-            button.classList.add("tracking-ori-activated");
-
-            // tracking in intervals of miliseconds
-            scope.startTracking();
-        }
-    }
-
-    // Handle triple-click
-    GPSController.prototype.handleTclick = function () {
-        var scope = this;
-
-        if (scope._liveTrackingActivated) {
-            scope._liveTrackingActivated = false;
-            scope.stopTracking();
-        } else {
-            scope._liveTrackingActivated = true;
-            scope._watchPos = true;
-
-            var button = document.getElementById("gpsButton");
-            button.classList.remove("tracking-deactivated");
-            button.classList.remove("tracking-pos-ori-deactivated");
-            button.classList.add("tracking-pos-ori-activated");
-
-            // tracking in intervals of miliseconds
-            scope.startTracking();
-        }
-    }
-
-    GPSController.prototype.startTracking = function () {
-        var scope = this;
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-            CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
-        }
-
-        function showPosition(position) {
-            if (window.DeviceOrientationEvent) {
-                if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-                    // iOS 13+
-                    window.DeviceOrientationEvent.requestPermission()
-                        .then(permissionState => {
-                            if (permissionState === 'granted') {
-                                CitydbUtil.showAlertWindow("OK", "iOS", "iOS device detected.");
-                                window.addEventListener('deviceorientation', auxOrientation, false);
-                            } else {
-                                CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
-                            }
-                        })
-                        .catch(error => {
-                            CitydbUtil.showAlertWindow("OK", "Error", error);
-                        });
-                } else {
-                    // Other devices
-                    CitydbUtil.showAlertWindow("OK", "OS", "Other OS detected.");
-                    window.addEventListener('deviceorientation', auxOrientation, false);
-                }
-            } else {
-                CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
+        function toggleGPSButton(button) {
+            if (button.classList.contains("cesium-sceneModePicker-hidden")) {
+                showGPSButton(button);
+            } else if (button.classList.contains("cesium-sceneModePicker-visible")) {
+                hideGPSButton(button);
             }
+        }
 
-            function auxOrientation(event) {
-                flyToLocationWithOrientation(position, event, () => {
-                    setTimeout(function () {
-                        // one-time event
-                        window.removeEventListener('deviceorientation', auxOrientation, false);
-                    }, scope._timerMiliseconds);
-                });
-            }
+        function hideGPSButton(button) {
+            button.classList.remove("cesium-sceneModePicker-visible");
+            button.classList.add("cesium-sceneModePicker-hidden");
+        }
 
-            function flyToLocationWithOrientation(position, ori, callback) {
-                var oriAlpha = 0;
-                var oriBeta = 0;
-                var oriGamma = 0;
-                var oriHeight = 2;
+        function showGPSButton(button) {
+            button.classList.remove("cesium-sceneModePicker-hidden");
+            button.classList.add("cesium-sceneModePicker-visible");
+        }
 
-                var angle = 0;
-                if (ori.webkitCompassHeading) {
-                    angle = ori.webkitCompassHeading;
-                } else {
-                    angle = 360 - ori.alpha;
-                }
+        // replace the 3D/2D button with this GPS button and its list elements
+        const customCesiumViewerToolbar = document.getElementsByClassName("cesium-viewer-toolbar")[0];
+        const customGlobeSpan = customCesiumViewerToolbar.getElementsByClassName("cesium-sceneModePicker-wrapper cesium-toolbar-button")[0];
+        customCesiumViewerToolbar.replaceChild(gpsSpan, customGlobeSpan);
 
-                if (typeof scope._savedAlpha !== "undefined") {
-                    var diffAngle = angle - scope._savedAlpha;
-                    if (diffAngle > 180) {
-                        angle -= 360;
-                    } else if (diffAngle < -180) {
-                        angle += 360;
-                    }
-                }
-
-                oriAlpha = Cesium.Math.toRadians(angle);
-                scope._savedAlpha = oriAlpha;
-
-                // change view if specified in URL
-                var paraUrl = CitydbUtil.parse_query_string("viewMode", window.location.href);
-                if (paraUrl) {
-                    switch (paraUrl.toLowerCase()) {
-                        case "fpv":
-                            // first person view
-                            setFirstPersonView();
-                            break;
-                        case "debug":
-                            // debug view
-                            setDebugView();
-                            break;
-                        default:
-                            // default view = first person view
-                            setFirstPersonView();
-                    }
-                } else {
-                    // default view = first person view
-                    setFirstPersonView();
-                }
-
-                function setFirstPersonView() {
-                    if (!scope._firstActivated) {
-                        oriBeta = 0;
-                    } else {
-                        oriBeta = cesiumCamera.pitch;
-                    }
-                    oriGamma = 0;
-                    oriHeight = 2;
-                }
-
-                function setDebugView() {
-                    oriBeta = Cesium.Math.toRadians(-90);
-                    oriGamma = 0;
-                    oriHeight = 150;
-                }
-
-                cesiumCamera.flyTo({
-                    destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, oriHeight),
-                    orientation: {
-                        heading: oriAlpha,
-                        pitch: oriBeta,
-                        roll: oriGamma
-                    },
-                    complete: function () {
-                        scope._firstActivated = true;
-                        if (scope._liveTrackingActivated) {
-                            if (!scope._longPress) {
-                                // real-time tracking
-                                scope._timer = setTimeout(function () {
-                                    if (scope._watchPos) {
-                                        // also check position in real-time 
-                                        scope.startTracking();
+        // Show position and orientation snapshot
+        gpsButtonSingle.onclick = function () {
+            // Replace the main GPS button symbol with this button
+            gpsButtonMain.classList.remove("gps-button-main");
+            gpsButtonMain.classList.add("gps-button-single");
+            // Disable tracking
+            clearInterval(scope._intervalIDOri);
+            scope._intervalIDOri = undefined;
+            clearInterval(scope._intervalIDPosOri);
+            scope._intervalIDPosOri = undefined;
+            // Get position and orientation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    if (window.DeviceOrientationEvent) {
+                        if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                            // iOS 13+
+                            window.DeviceOrientationEvent.requestPermission()
+                                .then(permissionState => {
+                                    if (permissionState === 'granted') {
+                                        window.addEventListener('deviceorientation', function auxOrientation(ori) {
+                                            flyToLocationWithOrientation(position, ori, () => {
+                                                setTimeout(function () {
+                                                    // one-time event
+                                                    window.removeEventListener('deviceorientation', auxOrientation, false);
+                                                }, scope._timerMiliseconds);
+                                            });
+                                        }, false);
                                     } else {
-                                        // only check orientation in real-time
-                                        showPosition(position);
+                                        CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
                                     }
-                                }, scope._timerMiliseconds);
+                                })
+                                .catch(error => {
+                                    CitydbUtil.showAlertWindow("OK", "Error", error);
+                                });
+                        } else {
+                            // Other devices
+                            window.addEventListener('deviceorientation', function auxOrientation(ori) {
+                                flyToLocationWithOrientation(position, ori, () => {
+                                    setTimeout(function () {
+                                        // One-time event
+                                        window.removeEventListener('deviceorientation', auxOrientation, false);
+                                    }, scope._timerMiliseconds);
+                                });
+                            }, false);
+                        }
+                    } else {
+                        CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
+                    }
+                }, showError);
+            } else {
+                CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Track orientation (with fixed position)
+        gpsButtonLiveOri.onclick = function () {
+            // Handle tracking
+            if (scope._intervalIDPosOri) {
+                // Disable tracking position + orientation
+                clearInterval(scope._intervalIDPosOri);
+                scope._intervalIDPosOri = undefined;
+            }
+            if (scope._intervalIDOri) {
+                // Already tracking -> disable tracking
+                clearInterval(scope._intervalIDOri);
+                scope._intervalIDOri = undefined;
+                // Restore the main GPS button symbol
+                gpsButtonMain.classList.remove("gps-button-single");
+                gpsButtonMain.classList.remove("gps-button-live-ori");
+                gpsButtonMain.classList.remove("gps-button-live-pos-ori");
+                gpsButtonMain.classList.add("gps-button-main");
+                restartCamera();
+            } else {
+                // Start tracking
+                scope._intervalIDOri = undefined;
+                // Replace the main GPS button symbol with this button
+                gpsButtonMain.classList.remove("gps-button-main");
+                gpsButtonMain.classList.add("gps-button-live-ori");
+                // Get position and orientation
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        if (window.DeviceOrientationEvent) {
+                            if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                                // iOS 13+
+                                window.DeviceOrientationEvent.requestPermission()
+                                    .then(permissionState => {
+                                        if (permissionState === 'granted') {
+                                            window.addEventListener('deviceorientation', function auxOrientation(ori) {
+                                                // First fly (might take longer than timer)
+                                                flyToLocationWithOrientation(position, ori, () => {
+                                                    setTimeout(function () {
+                                                        // One-time event
+                                                        window.removeEventListener('deviceorientation', auxOrientation, false);
+                                                        // Subsequently: Update camera every interval
+                                                        scope._intervalIDOri = setInterval(function () {
+                                                            window.DeviceOrientationEvent.requestPermission()
+                                                                .then(permissionState => {
+                                                                    if (permissionState === 'granted') {
+                                                                        window.addEventListener('deviceorientation', function aux(ori) {
+                                                                            flyToLocationWithOrientation(position, ori, () => {
+                                                                                window.removeEventListener('deviceorientation', aux, false);
+                                                                            })
+                                                                        }, false);
+                                                                    } else {
+                                                                        CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
+                                                                    }
+                                                                })
+                                                                .catch(error => {
+                                                                    CitydbUtil.showAlertWindow("OK", "Error", error);
+                                                                });
+                                                        }, scope._timerMiliseconds);
+                                                    }, scope._timerMiliseconds);
+                                                });
+                                            }, false);
+                                        } else {
+                                            CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        CitydbUtil.showAlertWindow("OK", "Error", error);
+                                    });
+                            } else {
+                                // Other devices
+                                window.addEventListener('deviceorientation', function auxOrientation(ori) {
+                                    // First fly (might take longer than timer)
+                                    flyToLocationWithOrientation(position, ori, () => {
+                                        setTimeout(function () {
+                                            // One-time event
+                                            window.removeEventListener('deviceorientation', auxOrientation, false);
+                                            // Subsequently: Update camera every interval
+                                            scope._intervalIDOri = setInterval(function () {
+                                                window.addEventListener('deviceorientation', function aux(ori) {
+                                                    flyToLocationWithOrientation(position, ori, () => {
+                                                        window.removeEventListener('deviceorientation', aux, false);
+                                                    })
+                                                }, false);
+                                            }, scope._timerMiliseconds);
+                                        }, scope._timerMiliseconds);
+                                    });
+                                }, false);
                             }
+                        } else {
+                            CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
                         }
-                        if (callback) {
-                            callback();
+                    }, showError);
+                } else {
+                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
+                }
+            }
+        }
+
+        // Track position and orientation
+        gpsButtonLivePosOri.onclick = function () {
+            // Handle tracking
+            if (scope._intervalIDOri) {
+                // Disable tracking orientation (with fixed position)
+                clearInterval(scope._intervalIDOri);
+                scope._intervalIDOri = undefined;
+            }
+            if (scope._intervalIDPosOri) {
+                // Already tracking -> disable tracking
+                clearInterval(scope._intervalIDPosOri);
+                scope._intervalIDPosOri = undefined;
+                // Restore the main GPS button symbol
+                gpsButtonMain.classList.remove("gps-button-single");
+                gpsButtonMain.classList.remove("gps-button-live-ori");
+                gpsButtonMain.classList.remove("gps-button-live-pos-ori");
+                gpsButtonMain.classList.add("gps-button-main");
+                restartCamera();
+            } else {
+                // Start tracking
+                scope._intervalIDPosOri = undefined;
+                // Replace the main GPS button symbol with this button
+                gpsButtonMain.classList.remove("gps-button-main");
+                gpsButtonMain.classList.add("gps-button-live-pos-ori");
+                // Get position and orientation
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        if (window.DeviceOrientationEvent) {
+                            if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                                // iOS 13+
+                                window.DeviceOrientationEvent.requestPermission()
+                                    .then(permissionState => {
+                                        if (permissionState === 'granted') {
+                                            window.addEventListener('deviceorientation', function auxOrientation(ori) {
+                                                // First fly (might take longer than timer)
+                                                flyToLocationWithOrientation(position, ori, () => {
+                                                    setTimeout(function () {
+                                                        // One-time event
+                                                        window.removeEventListener('deviceorientation', auxOrientation, false);
+                                                        // Subsequently: Update camera every interval
+                                                        scope._intervalIDOri = setInterval(function () {
+                                                            navigator.geolocation.getCurrentPosition((position) => {
+                                                                window.DeviceOrientationEvent.requestPermission()
+                                                                    .then(permissionState => {
+                                                                        if (permissionState === 'granted') {
+                                                                            window.addEventListener('deviceorientation', function aux(ori) {
+                                                                                flyToLocationWithOrientation(position, ori, () => {
+                                                                                    window.removeEventListener('deviceorientation', aux, false);
+                                                                                })
+                                                                            }, false);
+                                                                        } else {
+                                                                            CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
+                                                                        }
+                                                                    })
+                                                                    .catch(error => {
+                                                                        CitydbUtil.showAlertWindow("OK", "Error", error);
+                                                                    });
+                                                            }, showError);
+                                                        }, scope._timerMiliseconds);
+                                                    }, scope._timerMiliseconds);
+                                                });
+                                            }, false);
+                                        } else {
+                                            CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        CitydbUtil.showAlertWindow("OK", "Error", error);
+                                    });
+                            } else {
+                                // Other devices
+                                window.addEventListener('deviceorientation', function auxOrientation(ori) {
+                                    // First fly (might take longer than timer)
+                                    flyToLocationWithOrientation(position, ori, () => {
+                                        setTimeout(function () {
+                                            // One-time event
+                                            window.removeEventListener('deviceorientation', auxOrientation, false);
+                                            // Subsequently: Update camera every interval
+                                            scope._intervalIDOri = setInterval(function () {
+                                                navigator.geolocation.getCurrentPosition((position) => {
+                                                    window.addEventListener('deviceorientation', function aux(ori) {
+                                                        flyToLocationWithOrientation(position, ori, () => {
+                                                            window.removeEventListener('deviceorientation', aux, false);
+                                                        })
+                                                    }, false);
+                                                }, showError);
+                                            }, scope._timerMiliseconds);
+                                        }, scope._timerMiliseconds);
+                                    });
+                                }, false);
+                            }
+                        } else {
+                            CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
                         }
+                    }, showError);
+                } else {
+                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
+                }
+            }
+        }
+
+        // Disable tracking
+        gpsButtonOff.onclick = function () {
+            // Handle tracking
+            if (scope._intervalIDOri) {
+                // Disable tracking orientation (with fixed position)
+                clearInterval(scope._intervalIDOri);
+                scope._intervalIDOri = undefined;
+            }
+            if (scope._intervalIDPosOri) {
+                // Disable tracking position and orientation
+                clearInterval(scope._intervalIDPosOri);
+                scope._intervalIDPosOri = undefined;
+            }
+            // Restore the main GPS button symbol
+            gpsButtonMain.classList.remove("gps-button-single");
+            gpsButtonMain.classList.remove("gps-button-live-ori");
+            gpsButtonMain.classList.remove("gps-button-live-pos-ori");
+            gpsButtonMain.classList.add("gps-button-main");
+
+            restartCamera();
+        }
+
+        function flyToLocationWithOrientation(position, ori, callback) {
+            let oriAlpha = 0;
+            let oriBeta = 0;
+            let oriGamma = 0;
+            let oriHeight = 2;
+
+            let angle = 0;
+            if (ori.webkitCompassHeading) {
+                angle = ori.webkitCompassHeading;
+            } else {
+                angle = 360 - ori.alpha;
+            }
+
+            if (typeof scope._savedAlpha !== "undefined") {
+                var diffAngle = angle - scope._savedAlpha;
+                if (diffAngle > 180) {
+                    angle -= 360;
+                } else if (diffAngle < -180) {
+                    angle += 360;
+                }
+            }
+
+            oriAlpha = Cesium.Math.toRadians(angle);
+            scope._savedAlpha = oriAlpha;
+
+            // Change view if specified in URL
+            const paraUrl = CitydbUtil.parse_query_string("viewMode", window.location.href);
+            if (paraUrl) {
+                switch (paraUrl.toLowerCase()) {
+                    case "fpv":
+                        // First person view
+                        setFirstPersonView();
+                        break;
+                    case "debug":
+                        // Debug view
+                        setDebugView();
+                        break;
+                    default:
+                        // Default view = first person view
+                        setFirstPersonView();
+                }
+            } else {
+                // Default view = first person view
+                setFirstPersonView();
+            }
+
+            function setFirstPersonView() {
+                if (!scope._firstPersonViewActivated) {
+                    oriBeta = 0;
+                } else {
+                    oriBeta = cesiumCamera.pitch;
+                }
+                oriGamma = 0;
+                oriHeight = 2;
+            }
+
+            function setDebugView() {
+                oriBeta = Cesium.Math.toRadians(-90);
+                oriGamma = 0;
+                oriHeight = 150;
+            }
+
+            cesiumCamera.flyTo({
+                destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, oriHeight),
+                orientation: {
+                    heading: oriAlpha,
+                    pitch: oriBeta,
+                    roll: oriGamma
+                },
+                duration: 0.75 * scope._timerMiliseconds / 1000,
+                complete: function () {
+                    scope._firstPersonViewActivated = true;
+                    if (callback) {
+                        callback();
+                    }
+                }
+            });
+        }
+
+        function restartCamera() {
+            const restartView = function (_callback) {
+                scope._firstPersonViewActivated = false;
+                cesiumCamera.cancelFlight();
+                _callback();
+            };
+
+            restartView(function () {
+                cesiumCamera.flyTo({
+                    destination: Cesium.Cartesian3.fromRadians(
+                        cesiumCamera.positionCartographic.longitude,
+                        cesiumCamera.positionCartographic.latitude,
+                        250),
+                    orientation: {
+                        heading: cesiumCamera.heading,
+                        pitch: Cesium.Math.toRadians(-75),
+                        roll: 0
                     }
                 });
-            }
+            });
         }
 
         function showError(error) {
@@ -432,18 +556,16 @@
                     break;
             }
         }
-    }
 
-    GPSController.prototype.stopTracking = function () {
-        var scope = this;
+        if (scope._isMobile) {
+            // remove home button
+            const customHomeButton = customCesiumViewerToolbar.getElementsByClassName("cesium-button cesium-toolbar-button cesium-home-button")[0];
+            customCesiumViewerToolbar.removeChild(customHomeButton);
 
-        scope._watchPos = false;
-
-        var button = document.getElementById("gpsButton");
-        button.classList.remove("tracking-activated");
-        button.classList.add("tracking-deactivated");
-
-        clearTimeout(scope._timer);
+            // remove info button
+            // var customInfoButton = customCesiumViewerToolbar.getElementsByClassName("cesium-navigationHelpButton-wrapper")[0];
+            // customCesiumViewerToolbar.removeChild(customInfoButton);
+        }
     }
 
     window.GPSController = GPSController;

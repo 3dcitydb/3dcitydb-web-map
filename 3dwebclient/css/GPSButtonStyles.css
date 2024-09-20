@@ -2,7 +2,7 @@
  * 3DCityDB-Web-Map
  * http://www.3dcitydb.org/
  * 
- * Copyright 2015 - 2017
+ * Copyright 2015 - 2024
  * Chair of Geoinformatics
  * Technical University of Munich, Germany
  * https://www.gis.bgu.tum.de/
@@ -25,30 +25,42 @@
  * limitations under the License.
  */
 
-.tracking-ori-activated,
-.tracking-ori-activated:hover{
+.gps-button-main,
+.gps-button-main:hover {
+    background-image: url(../images/GPS_main.png);
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.gps-button-single,
+.gps-button-single:hover {
+    background-image: url(../images/GPS_single.png);
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.gps-button-live-ori,
+.gps-button-live-ori:hover {
     background: #0074D9 url(../images/GPS_on_ori.png);
-    background-size: cover; 
-    background-position: center center; 
+    background-size: cover;
+    background-position: center center;
     background-repeat: no-repeat;
 }
 
-.tracking-pos-ori-activated,
-.tracking-pos-ori-activated:hover{
+.gps-button-live-pos-ori,
+.gps-button-live-pos-ori:hover {
     background: #0074D9 url(../images/GPS_on_pos_ori.png);
-    background-size: cover; 
-    background-position: center center; 
+    background-size: cover;
+    background-position: center center;
     background-repeat: no-repeat;
 }
 
-.tracking-deactivated,
-.tracking-deactivated:hover,
-.tracking-ori-deactivated,
-.tracking-ori-deactivated:hover,
-.tracking-pos-ori-deactivated,
-.tracking-pos-ori-deactivated:hover{
+.gps-button-off,
+.gps-button-off:hover {
     background-image: url(../images/GPS_off.png);
-    background-size: cover; 
-    background-position: center center; 
+    background-size: cover;
+    background-position: center center;
     background-repeat: no-repeat;
 }

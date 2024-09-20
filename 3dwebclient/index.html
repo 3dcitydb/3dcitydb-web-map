@@ -675,7 +675,28 @@
 </div>
 
 <!-- GPS button -->
-<button id="gpsButton" type="button" class="cesium-button"></button>
+<span id="gpsSpan" class="cesium-sceneModePicker-wrapper cesium-toolbar-button">
+    <button id="gpsButtonMain" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-button3D gps-button-main"
+            title="Geolocation">
+    </button>
+    <button id="gpsButtonSingle" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-single"
+            title="Current geolocation">
+    </button>
+    <button id="gpsButtonLiveOri" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-live-ori"
+            title="Track orientation (fixed position)">
+    </button>
+    <button id="gpsButtonLivePosOri" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-live-pos-ori"
+            title="Track position and orientation">
+    </button>
+    <button id="gpsButtonOff" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-off"
+            title="Disable geolocation">
+    </button>
+</span>
 
 <!-- Splash window -->
 <div class="splashscreen-buttons">
