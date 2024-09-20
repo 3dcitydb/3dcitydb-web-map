@@ -108,25 +108,17 @@
 
         if (gpsButtonMain) {
             gpsButtonMain.onclick = function () {
-                toggleGPSButtonMain(gpsButtonMain);
-                if (gpsButtonSingle) {
-                    toggleGPSButton(gpsButtonSingle);
-                }
-                if (gpsButtonLiveOri) {
-                    toggleGPSButton(gpsButtonLiveOri);
-                }
-                if (gpsButtonLivePosOri) {
-                    toggleGPSButton(gpsButtonLivePosOri);
-                }
-                if (gpsButtonOff) {
-                    toggleGPSButton(gpsButtonOff);
-                }
+                toggleGPSButtonMain();
+                toggleGPSButton(gpsButtonSingle);
+                toggleGPSButton(gpsButtonLiveOri);
+                toggleGPSButton(gpsButtonLivePosOri);
+                toggleGPSButton(gpsButtonOff);
             }
         }
 
         if (gpsSpan) {
             gpsSpan.onfocusout = function () {
-                toggleGPSButtonMain(gpsButtonMain);
+                deselectGPSButtonMain();
                 hideGPSButton(gpsButtonSingle);
                 hideGPSButton(gpsButtonLiveOri);
                 hideGPSButton(gpsButtonLivePosOri);
@@ -134,12 +126,20 @@
             }
         }
 
-        function toggleGPSButtonMain(button) {
-            if (!button.classList.contains("cesium-sceneModePicker-selected")) {
-                button.classList.add("cesium-sceneModePicker-selected");
+        function toggleGPSButtonMain() {
+            if (gpsButtonMain.classList.contains("cesium-sceneModePicker-selected")) {
+                deselectGPSButtonMain();
             } else {
-                button.classList.remove("cesium-sceneModePicker-selected");
+                selectGPSButtonMain();
             }
+        }
+
+        function selectGPSButtonMain() {
+            gpsButtonMain.classList.add("cesium-sceneModePicker-selected");
+        }
+
+        function deselectGPSButtonMain() {
+            gpsButtonMain.classList.remove("cesium-sceneModePicker-selected");
         }
 
         function toggleGPSButton(button) {
@@ -166,7 +166,7 @@
         customCesiumViewerToolbar.replaceChild(gpsSpan, customGlobeSpan);
 
         // Show position and orientation snapshot
-        gpsButtonSingle.onclick = function () {
+        gpsButtonSingle.addEventListener('click', function() {
             // Replace the main GPS button symbol with this button
             gpsButtonMain.classList.remove("gps-button-main");
             gpsButtonMain.classList.add("gps-button-single");
@@ -217,7 +217,7 @@
             } else {
                 CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
             }
-        }
+        });
 
         // Track orientation (with fixed position)
         gpsButtonLiveOri.onclick = function () {
