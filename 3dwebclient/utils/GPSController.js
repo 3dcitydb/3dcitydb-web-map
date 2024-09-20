@@ -165,7 +165,7 @@
         customCesiumViewerToolbar.replaceChild(gpsSpan, customGlobeSpan);
 
         // Show position and orientation snapshot
-        gpsButtonSingle.onclick = function () {
+        gpsButtonSingle.onclick = async function () {
             // Replace the main GPS button symbol with this button
             gpsButtonMain.classList.remove("gps-button-main");
             gpsButtonMain.classList.add("gps-button-single");
@@ -177,54 +177,74 @@
             // Hide GPS span
             gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
-            if (window.DeviceOrientationEvent) {
-                if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-                    // iOS 13+
-                    window.DeviceOrientationEvent.requestPermission()
-                        .then(permissionState => {
-                            if (permissionState === 'granted') {
-                                if (navigator.geolocation) {
-                                    navigator.geolocation.getCurrentPosition((position) => {
-                                        window.addEventListener('deviceorientation', function auxOrientation(ori) {
-                                            flyToLocationWithOrientation(position, ori, () => {
-                                                setTimeout(function () {
-                                                    // one-time event
-                                                    window.removeEventListener('deviceorientation', auxOrientation, false);
-                                                }, scope._timerMiliseconds);
-                                            });
-                                        }, false);
-                                    }, showError);
-                                } else {
-                                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation not supported.");
-                                }
-                            } else {
-                                CitydbUtil.showAlertWindow("OK", "Error", "Orientation denied.");
-                            }
-                        })
-                        .catch(error => {
-                            CitydbUtil.showAlertWindow("OK", "Error", error);
-                        });
-                } else {
-                    // Other devices
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition((position) => {
-                            window.addEventListener('deviceorientation', function auxOrientation(ori) {
-                                flyToLocationWithOrientation(position, ori, () => {
-                                    setTimeout(function () {
-                                        // one-time event
-                                        window.removeEventListener('deviceorientation', auxOrientation, false);
-                                    }, scope._timerMiliseconds);
-                                });
-                            }, false);
-                        }, showError);
-                    } else {
-                        CitydbUtil.showAlertWindow("OK", "Error", "Geolocation not supported.");
-                    }
-                }
-            } else {
-                CitydbUtil.showAlertWindow("OK", "Error", "Orientation not supported.");
+            try {
+                const position = await getPosition();
+                const orientation = await getOrientation();
+                flyToLocationWithOrientation(position, orientation);
+            } catch (error) {
+                CitydbUtil.showAlertWindow("OK", "Error", error);
             }
         }
+
+        async function getOrientation() {
+            return new Promise((resolve, reject) => {
+                if (window.DeviceOrientationEvent) {
+                    if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+                        // iOS 13+
+                        window.DeviceOrientationEvent.requestPermission()
+                            .then(permissionState => {
+                                if (permissionState === 'granted') {
+                                    window.addEventListener('deviceorientation', resolve, {once: true});
+                                } else {
+                                    reject("Orientation access denied.");
+                                    CitydbUtil.showAlertWindow("OK", "Error", "Orientation access denied.");
+                                }
+                            })
+                            .catch(error => {
+                                reject(error);
+                                CitydbUtil.showAlertWindow("OK", "Error", error);
+                            });
+                    } else {
+                        // Non-iOS devices
+                        window.addEventListener('deviceorientation', resolve, {once: true});
+                    }
+                } else {
+                    reject("Orientation not supported.");
+                    CitydbUtil.showAlertWindow("OK", "Error", "Orientation not supported.");
+                }
+            });
+        }
+
+        async function getPosition() {
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(resolve, (error) => {
+                        let errorMsg;
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = "User denied the request for Geolocation.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = "Location information is unavailable.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = "The request to get user location timed out.";
+                                break;
+                            case error.UNKNOWN_ERROR:
+                            default:
+                                errorMsg = "An unknown error occurred.";
+                                break;
+                        }
+                        reject(errorMsg);
+                        CitydbUtil.showAlertWindow("OK", "Error", errorMsg);
+                    });
+                } else {
+                    reject("Geolocation not supported.");
+                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation not supported.");
+                }
+            });
+        }
+
 
         // Track orientation (with fixed position)
         gpsButtonLiveOri.onclick = function () {
@@ -521,7 +541,7 @@
                     pitch: oriBeta,
                     roll: oriGamma
                 },
-                // duration: 0.9 * scope._timerMiliseconds / 1000,
+                duration: 0.9 * scope._timerMiliseconds / 1000,
                 complete: function () {
                     scope._firstPersonViewActivated = true;
                     if (callback) {
