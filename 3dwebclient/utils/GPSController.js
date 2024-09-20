@@ -207,7 +207,6 @@
             scope._intervalIDOri = undefined;
             // Replace the main GPS button symbol with this button
             setGPSButtonMain("gps-button-live-ori");
-            ;
             // Hide GPS span
             gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
@@ -216,17 +215,79 @@
                 await requestAccess();
                 // Get values
                 const position = await getPosition();
-                const orientation = await getOrientation();
+                let orientation = await getOrientation();
                 // First fly
                 await flyToLocationWithOrientation(position, orientation);
                 // Interval tracking for orientation
                 scope._intervalIDOri = setInterval(async function () {
-                    const intervalOrientation = await getOrientation();
-                    await flyToLocationWithOrientation(position, intervalOrientation);
+                    orientation = await getOrientation();
+                    await flyToLocationWithOrientation(position, orientation);
                 }, scope._timerMiliseconds);
             } catch (error) {
                 CitydbUtil.showAlertWindow("OK", "Error", error);
             }
+        }
+
+        // Track position and orientation
+        gpsButtonLivePosOri.onclick = async function () {
+            // Handle tracking
+            if (scope._intervalIDOri) {
+                // Disable tracking orientation (with fixed position)
+                clearTrackOri();
+            }
+            if (scope._intervalIDPosOri) {
+                // Already tracking -> disable tracking
+                clearTrackPosOri();
+                // Restore the main GPS button symbol
+                restoreGPSButtonMain();
+                // Bring the camera to normal angle
+                restartCamera();
+                return;
+            }
+
+            // Start tracking
+            scope._intervalIDPosOri = undefined;
+            // Replace the main GPS button symbol with this button
+            setGPSButtonMain("gps-button-live-pos-ori");
+            // Hide GPS span
+            gpsSpan.dispatchEvent(new Event("focusout"));
+            // Get position and orientation
+            try {
+                // Handle iOS 13+ Device Orientation permission
+                await requestAccess();
+                // Get values
+                let position = await getPosition();
+                let orientation = await getOrientation();
+                // First fly
+                await flyToLocationWithOrientation(position, orientation);
+                // Interval tracking for orientation
+                scope._intervalIDOri = setInterval(async function () {
+                    position = await getPosition();
+                    orientation = await getOrientation();
+                    await flyToLocationWithOrientation(position, orientation);
+                }, scope._timerMiliseconds);
+            } catch (error) {
+                CitydbUtil.showAlertWindow("OK", "Error", error);
+            }
+        }
+
+        // Disable tracking
+        gpsButtonOff.onclick = function () {
+            // Handle tracking
+            if (scope._intervalIDOri) {
+                // Disable tracking orientation (with fixed position)
+                clearTrackOri();
+            }
+            if (scope._intervalIDPosOri) {
+                // Disable tracking position and orientation
+                clearTrackPosOri();
+            }
+            // Restore the main GPS button symbol
+            restoreGPSButtonMain();
+            // Hide GPS span
+            gpsSpan.dispatchEvent(new Event("focusout"));
+            // Bring the camera to normal angle
+            restartCamera();
         }
 
         function setGPSButtonMain(className) {
@@ -300,134 +361,6 @@
                     CitydbUtil.showAlertWindow("OK", "Error", "Geolocation not supported.");
                 }
             });
-        }
-
-
-        // Track position and orientation
-        gpsButtonLivePosOri.onclick = function () {
-            // Handle tracking
-            if (scope._intervalIDOri) {
-                // Disable tracking orientation (with fixed position)
-                clearInterval(scope._intervalIDOri);
-                scope._intervalIDOri = undefined;
-            }
-            if (scope._intervalIDPosOri) {
-                // Already tracking -> disable tracking
-                clearInterval(scope._intervalIDPosOri);
-                scope._intervalIDPosOri = undefined;
-                // Restore the main GPS button symbol
-                gpsButtonMain.classList.remove("gps-button-single");
-                gpsButtonMain.classList.remove("gps-button-live-ori");
-                gpsButtonMain.classList.remove("gps-button-live-pos-ori");
-                gpsButtonMain.classList.add("gps-button-main");
-                restartCamera();
-            } else {
-                // Start tracking
-                scope._intervalIDPosOri = undefined;
-                // Replace the main GPS button symbol with this button
-                gpsButtonMain.classList.remove("gps-button-main");
-                gpsButtonMain.classList.add("gps-button-live-pos-ori");
-                // Hide GPS span
-                gpsSpan.dispatchEvent(new Event("focusout"));
-                // Get position and orientation
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        if (window.DeviceOrientationEvent) {
-                            if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-                                // iOS 13+
-                                window.DeviceOrientationEvent.requestPermission()
-                                    .then(permissionState => {
-                                        if (permissionState === 'granted') {
-                                            window.addEventListener('deviceorientation', function auxOrientation(ori) {
-                                                // First fly (might take longer than timer)
-                                                flyToLocationWithOrientation(position, ori, () => {
-                                                    setTimeout(function () {
-                                                        // One-time event
-                                                        window.removeEventListener('deviceorientation', auxOrientation, false);
-                                                        // Subsequently: Update camera every interval
-                                                        scope._intervalIDOri = setInterval(function () {
-                                                            navigator.geolocation.getCurrentPosition((position) => {
-                                                                window.DeviceOrientationEvent.requestPermission()
-                                                                    .then(permissionState => {
-                                                                        if (permissionState === 'granted') {
-                                                                            window.addEventListener('deviceorientation', function aux(ori) {
-                                                                                flyToLocationWithOrientation(position, ori, () => {
-                                                                                    window.removeEventListener('deviceorientation', aux, false);
-                                                                                })
-                                                                            }, false);
-                                                                        } else {
-                                                                            CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
-                                                                        }
-                                                                    })
-                                                                    .catch(error => {
-                                                                        CitydbUtil.showAlertWindow("OK", "Error", error);
-                                                                    });
-                                                            }, showError);
-                                                        }, scope._timerMiliseconds);
-                                                    }, scope._timerMiliseconds);
-                                                });
-                                            }, false);
-                                        } else {
-                                            CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
-                                        }
-                                    })
-                                    .catch(error => {
-                                        CitydbUtil.showAlertWindow("OK", "Error", error);
-                                    });
-                            } else {
-                                // Other devices
-                                window.addEventListener('deviceorientation', function auxOrientation(ori) {
-                                    // First fly (might take longer than timer)
-                                    flyToLocationWithOrientation(position, ori, () => {
-                                        setTimeout(function () {
-                                            // One-time event
-                                            window.removeEventListener('deviceorientation', auxOrientation, false);
-                                            // Subsequently: Update camera every interval
-                                            scope._intervalIDOri = setInterval(function () {
-                                                navigator.geolocation.getCurrentPosition((position) => {
-                                                    window.addEventListener('deviceorientation', function aux(ori) {
-                                                        flyToLocationWithOrientation(position, ori, () => {
-                                                            window.removeEventListener('deviceorientation', aux, false);
-                                                        })
-                                                    }, false);
-                                                }, showError);
-                                            }, scope._timerMiliseconds);
-                                        }, scope._timerMiliseconds);
-                                    });
-                                }, false);
-                            }
-                        } else {
-                            CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
-                        }
-                    }, showError);
-                } else {
-                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
-                }
-            }
-        }
-
-        // Disable tracking
-        gpsButtonOff.onclick = function () {
-            // Handle tracking
-            if (scope._intervalIDOri) {
-                // Disable tracking orientation (with fixed position)
-                clearInterval(scope._intervalIDOri);
-                scope._intervalIDOri = undefined;
-            }
-            if (scope._intervalIDPosOri) {
-                // Disable tracking position and orientation
-                clearInterval(scope._intervalIDPosOri);
-                scope._intervalIDPosOri = undefined;
-            }
-            // Restore the main GPS button symbol
-            gpsButtonMain.classList.remove("gps-button-single");
-            gpsButtonMain.classList.remove("gps-button-live-ori");
-            gpsButtonMain.classList.remove("gps-button-live-pos-ori");
-            gpsButtonMain.classList.add("gps-button-main");
-            // Hide GPS span
-            gpsSpan.dispatchEvent(new Event("focusout"));
-
-            restartCamera();
         }
 
         async function flyToLocationWithOrientation(position, ori) {
@@ -528,7 +461,7 @@
                         250),
                     orientation: {
                         heading: cesiumCamera.heading,
-                        pitch: Cesium.Math.toRadians(-75),
+                        pitch: Cesium.Math.toRadians(-45),
                         roll: 0
                     }
                 });
