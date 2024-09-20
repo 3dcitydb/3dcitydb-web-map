@@ -521,7 +521,7 @@
                     pitch: oriBeta,
                     roll: oriGamma
                 },
-                duration: 0.9 * scope._timerMiliseconds / 1000,
+                // duration: 0.9 * scope._timerMiliseconds / 1000,
                 complete: function () {
                     scope._firstPersonViewActivated = true;
                     if (callback) {
