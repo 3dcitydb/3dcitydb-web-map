@@ -35,7 +35,7 @@
     function GPSController(isMobilePara) {
         this._intervalIDOri = undefined;
         this._intervalIDPosOri = undefined;
-        this._timerMiliseconds = 2000; // track interval
+        this._timerMiliseconds = 1000; // track interval
         this._savedAlpha = undefined;
         this._firstPersonViewActivated = false;
         this._isMobile = isMobilePara;
@@ -159,7 +159,7 @@
             button.classList.add("cesium-sceneModePicker-visible");
         }
 
-        // replace the 3D/2D button with this GPS button and its list elements
+        // Replace the 3D/2D button with this GPS button and its list elements
         const customCesiumViewerToolbar = document.getElementsByClassName("cesium-viewer-toolbar")[0];
         const customGlobeSpan = customCesiumViewerToolbar.getElementsByClassName("cesium-sceneModePicker-wrapper cesium-toolbar-button")[0];
         customCesiumViewerToolbar.replaceChild(gpsSpan, customGlobeSpan);
@@ -167,13 +167,10 @@
         // Show position and orientation snapshot
         gpsButtonSingle.onclick = async function () {
             // Replace the main GPS button symbol with this button
-            gpsButtonMain.classList.remove("gps-button-main");
-            gpsButtonMain.classList.add("gps-button-single");
+            setGPSButtonMain("gps-button-single");
             // Disable tracking
-            clearInterval(scope._intervalIDOri);
-            scope._intervalIDOri = undefined;
-            clearInterval(scope._intervalIDPosOri);
-            scope._intervalIDPosOri = undefined;
+            clearTrackOri();
+            clearTrackPosOri();
             // Hide GPS span
             gpsSpan.dispatchEvent(new Event("focusout"));
             // Get position and orientation
@@ -183,10 +180,75 @@
                 // Get values
                 const position = await getPosition();
                 const orientation = await getOrientation();
-                flyToLocationWithOrientation(position, orientation);
+                await flyToLocationWithOrientation(position, orientation);
             } catch (error) {
                 CitydbUtil.showAlertWindow("OK", "Error", error);
             }
+        }
+
+        // Track orientation (with fixed position)
+        gpsButtonLiveOri.onclick = async function () {
+            // Handle tracking
+            if (scope._intervalIDPosOri) {
+                // Disable tracking position + orientation
+                clearTrackPosOri();
+            }
+            if (scope._intervalIDOri) {
+                // Already tracking -> disable tracking
+                clearTrackOri()
+                // Restore the main GPS button symbol
+                restoreGPSButtonMain();
+                // Bring the camera to normal angle
+                restartCamera();
+                return;
+            }
+
+            // Start tracking
+            scope._intervalIDOri = undefined;
+            // Replace the main GPS button symbol with this button
+            setGPSButtonMain("gps-button-live-ori");
+            ;
+            // Hide GPS span
+            gpsSpan.dispatchEvent(new Event("focusout"));
+            // Get position and orientation
+            try {
+                // Handle iOS 13+ Device Orientation permission
+                await requestAccess();
+                // Get values
+                const position = await getPosition();
+                const orientation = await getOrientation();
+                // First fly
+                await flyToLocationWithOrientation(position, orientation);
+                // Interval tracking for orientation
+                scope._intervalIDOri = setInterval(async function () {
+                    const intervalOrientation = await getOrientation();
+                    await flyToLocationWithOrientation(position, intervalOrientation);
+                }, scope._timerMiliseconds);
+            } catch (error) {
+                CitydbUtil.showAlertWindow("OK", "Error", error);
+            }
+        }
+
+        function setGPSButtonMain(className) {
+            gpsButtonMain.classList.remove("gps-button-main");
+            gpsButtonMain.classList.add(className);
+        }
+
+        function clearTrackOri() {
+            clearInterval(scope._intervalIDOri);
+            scope._intervalIDOri = undefined;
+        }
+
+        function clearTrackPosOri() {
+            clearInterval(scope._intervalIDPosOri);
+            scope._intervalIDPosOri = undefined;
+        }
+
+        function restoreGPSButtonMain() {
+            gpsButtonMain.classList.remove("gps-button-single");
+            gpsButtonMain.classList.remove("gps-button-live-ori");
+            gpsButtonMain.classList.remove("gps-button-live-pos-ori");
+            gpsButtonMain.classList.add("gps-button-main");
         }
 
         async function requestAccess() {
@@ -240,105 +302,6 @@
             });
         }
 
-
-        // Track orientation (with fixed position)
-        gpsButtonLiveOri.onclick = function () {
-            // Handle tracking
-            if (scope._intervalIDPosOri) {
-                // Disable tracking position + orientation
-                clearInterval(scope._intervalIDPosOri);
-                scope._intervalIDPosOri = undefined;
-            }
-            if (scope._intervalIDOri) {
-                // Already tracking -> disable tracking
-                clearInterval(scope._intervalIDOri);
-                scope._intervalIDOri = undefined;
-                // Restore the main GPS button symbol
-                gpsButtonMain.classList.remove("gps-button-single");
-                gpsButtonMain.classList.remove("gps-button-live-ori");
-                gpsButtonMain.classList.remove("gps-button-live-pos-ori");
-                gpsButtonMain.classList.add("gps-button-main");
-                restartCamera();
-            } else {
-                // Start tracking
-                scope._intervalIDOri = undefined;
-                // Replace the main GPS button symbol with this button
-                gpsButtonMain.classList.remove("gps-button-main");
-                gpsButtonMain.classList.add("gps-button-live-ori");
-                // Hide GPS span
-                gpsSpan.dispatchEvent(new Event("focusout"));
-                // Get position and orientation
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        if (window.DeviceOrientationEvent) {
-                            if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-                                // iOS 13+
-                                window.DeviceOrientationEvent.requestPermission()
-                                    .then(permissionState => {
-                                        if (permissionState === 'granted') {
-                                            window.addEventListener('deviceorientation', function auxOrientation(ori) {
-                                                // First fly (might take longer than timer)
-                                                flyToLocationWithOrientation(position, ori, () => {
-                                                    setTimeout(function () {
-                                                        // One-time event
-                                                        window.removeEventListener('deviceorientation', auxOrientation, false);
-                                                        // Subsequently: Update camera every interval
-                                                        scope._intervalIDOri = setInterval(function () {
-                                                            window.DeviceOrientationEvent.requestPermission()
-                                                                .then(permissionState => {
-                                                                    if (permissionState === 'granted') {
-                                                                        window.addEventListener('deviceorientation', function aux(ori) {
-                                                                            flyToLocationWithOrientation(position, ori, () => {
-                                                                                window.removeEventListener('deviceorientation', aux, false);
-                                                                            })
-                                                                        }, false);
-                                                                    } else {
-                                                                        CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
-                                                                    }
-                                                                })
-                                                                .catch(error => {
-                                                                    CitydbUtil.showAlertWindow("OK", "Error", error);
-                                                                });
-                                                        }, scope._timerMiliseconds);
-                                                    }, scope._timerMiliseconds);
-                                                });
-                                            }, false);
-                                        } else {
-                                            CitydbUtil.showAlertWindow("OK", "Error", "Could not access geolocation on this device.");
-                                        }
-                                    })
-                                    .catch(error => {
-                                        CitydbUtil.showAlertWindow("OK", "Error", error);
-                                    });
-                            } else {
-                                // Other devices
-                                window.addEventListener('deviceorientation', function auxOrientation(ori) {
-                                    // First fly (might take longer than timer)
-                                    flyToLocationWithOrientation(position, ori, () => {
-                                        setTimeout(function () {
-                                            // One-time event
-                                            window.removeEventListener('deviceorientation', auxOrientation, false);
-                                            // Subsequently: Update camera every interval
-                                            scope._intervalIDOri = setInterval(function () {
-                                                window.addEventListener('deviceorientation', function aux(ori) {
-                                                    flyToLocationWithOrientation(position, ori, () => {
-                                                        window.removeEventListener('deviceorientation', aux, false);
-                                                    })
-                                                }, false);
-                                            }, scope._timerMiliseconds);
-                                        }, scope._timerMiliseconds);
-                                    });
-                                }, false);
-                            }
-                        } else {
-                            CitydbUtil.showAlertWindow("OK", "Error", "Exact geolocation is not supported by this device.");
-                        }
-                    }, showError);
-                } else {
-                    CitydbUtil.showAlertWindow("OK", "Error", "Geolocation is not supported by this browser.");
-                }
-            }
-        }
 
         // Track position and orientation
         gpsButtonLivePosOri.onclick = function () {
@@ -467,82 +430,86 @@
             restartCamera();
         }
 
-        function flyToLocationWithOrientation(position, ori, callback) {
-            let oriAlpha = 0;
-            let oriBeta = 0;
-            let oriGamma = 0;
-            let oriHeight = 2;
+        async function flyToLocationWithOrientation(position, ori) {
+            return new Promise((resolve, reject) => {
+                let oriAlpha = 0;
+                let oriBeta = 0;
+                let oriGamma = 0;
+                let oriHeight = 2;
 
-            let angle = 0;
-            if (ori.webkitCompassHeading) {
-                angle = ori.webkitCompassHeading;
-            } else {
-                angle = 360 - ori.alpha;
-            }
-
-            if (typeof scope._savedAlpha !== "undefined") {
-                const diffAngle = angle - scope._savedAlpha;
-                if (diffAngle > 180) {
-                    angle -= 360;
-                } else if (diffAngle < -180) {
-                    angle += 360;
-                }
-            }
-
-            oriAlpha = Cesium.Math.toRadians(angle);
-            scope._savedAlpha = oriAlpha;
-
-            // Change view if specified in URL
-            const paraUrl = CitydbUtil.parse_query_string("viewMode", window.location.href);
-            if (paraUrl) {
-                switch (paraUrl.toLowerCase()) {
-                    case "fpv":
-                        // First person view
-                        setFirstPersonView();
-                        break;
-                    case "debug":
-                        // Debug view
-                        setDebugView();
-                        break;
-                    default:
-                        // Default view = first person view
-                        setFirstPersonView();
-                }
-            } else {
-                // Default view = first person view
-                setFirstPersonView();
-            }
-
-            function setFirstPersonView() {
-                if (!scope._firstPersonViewActivated) {
-                    oriBeta = 0;
+                let angle = 0;
+                if (ori.webkitCompassHeading) {
+                    angle = ori.webkitCompassHeading;
                 } else {
-                    oriBeta = cesiumCamera.pitch;
+                    angle = 360 - ori.alpha;
                 }
-                oriGamma = 0;
-                oriHeight = 2;
-            }
 
-            function setDebugView() {
-                oriBeta = Cesium.Math.toRadians(-90);
-                oriGamma = 0;
-                oriHeight = 150;
-            }
-
-            cesiumCamera.flyTo({
-                destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, oriHeight),
-                orientation: {
-                    heading: oriAlpha,
-                    pitch: oriBeta,
-                    roll: oriGamma
-                },
-                duration: 0.9 * scope._timerMiliseconds / 1000,
-                complete: function () {
-                    scope._firstPersonViewActivated = true;
-                    if (callback) {
-                        callback();
+                if (typeof scope._savedAlpha !== "undefined") {
+                    const diffAngle = angle - scope._savedAlpha;
+                    if (diffAngle > 180) {
+                        angle -= 360;
+                    } else if (diffAngle < -180) {
+                        angle += 360;
                     }
                 }
+
+                oriAlpha = Cesium.Math.toRadians(angle);
+                scope._savedAlpha = oriAlpha;
+
+                // Change view if specified in URL
+                const paraUrl = CitydbUtil.parse_query_string("viewMode", window.location.href);
+                if (paraUrl) {
+                    switch (paraUrl.toLowerCase()) {
+                        case "fpv":
+                            // First person view
+                            setFirstPersonView();
+                            break;
+                        case "debug":
+                            // Debug view
+                            setDebugView();
+                            break;
+                        default:
+                            // Default view = first person view
+                            setFirstPersonView();
+                    }
+                } else {
+                    // Default view = first person view
+                    setFirstPersonView();
+                }
+
+                function setFirstPersonView() {
+                    if (!scope._firstPersonViewActivated) {
+                        oriBeta = 0;
+                    } else {
+                        oriBeta = cesiumCamera.pitch;
+                    }
+                    oriGamma = 0;
+                    oriHeight = 2;
+                }
+
+                function setDebugView() {
+                    oriBeta = Cesium.Math.toRadians(-90);
+                    oriGamma = 0;
+                    oriHeight = 150;
+                }
+
+                // Fly to the location with orientation
+                cesiumCamera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(position.coords.longitude, position.coords.latitude, oriHeight),
+                    orientation: {
+                        heading: oriAlpha,
+                        pitch: oriBeta,
+                        roll: oriGamma
+                    },
+                    duration: 0.9 * scope._timerMiliseconds / 1000,
+                    complete: function () {
+                        scope._firstPersonViewActivated = true;
+                        resolve(); // Resolves the promise once the flyTo operation completes
+                    },
+                    cancel: function () {
+                        reject('FlyTo operation was canceled.');
+                    }
+                });
             });
         }
 
