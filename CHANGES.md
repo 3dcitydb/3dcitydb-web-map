@@ -7,7 +7,7 @@ This is a major release.
 ##### NEW
 
 * Added support for Index 3D Scene (i3s) layers.
-* Add support for embedded thematic data in Index 3D Scene (i3s) layers
+* Added support for embedded thematic data in Index 3D Scene (i3s) layers
   see [`04d8221`](https://github.com/3dcitydb/3dcitydb-web-map/commit/04d82218730bb2bb4164519c7c01ccbf6508f51c).
 * Added support for GeoJSON (with different sources of thematic data).
 * Added option for maximum screen space error in 3D tiles,
@@ -61,6 +61,8 @@ This is a major release.
 * Highlighting will be cleared when a layer has been updated or reactivated,
   see [`8475281`](https://github.com/3dcitydb/3dcitydb-web-map/commit/84752817e9c355111b51a069048768b20bac8e12).
 * The buttons for accessing geolocation and orientation on mobile have been modernized with completely new icons and implementations.
+* The tile inspector is now hidden by default to improve visual clarity,
+  see [`d4109eb`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d4109eb7211c4c642617521cff36593d566d0836).
 
 ##### FIXES
 
