@@ -23,7 +23,7 @@ This is a major release.
       regardless whether the letters are given in uppercase or lowercase.
     * The same also applies to the column name of the identifiers in PostgREST and Google Spreadsheets,
       as long as the column names are valid.
-* Cesium 3D Tiles can now be nagivated together with Google Street View, Dual Map View, etc.,
+* Cesium 3D Tiles can now be navigated together with Google Street View, Dual Map View, etc.,
   see [`a4e6bf3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/a4e6bf32476747c3c318207dae155e955af446dd).
 * WMS and terrain layers without an icon will be assigned with default ones,
   see[`c3b6c02`](https://github.com/3dcitydb/3dcitydb-web-map/commit/c3b6c0221e04448dbb964e9b8ba7a3c080dbb264).
