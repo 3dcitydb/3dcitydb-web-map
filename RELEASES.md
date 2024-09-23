@@ -1,10 +1,12 @@
 # Release Announcements
 
-### 2.0.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html)
+## 2.0.0
+
+[Release v2.0.0 demo link](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html)
 
 This is a major release.
 
-##### New Features
+### New Features
 
 * It is now possible to add **Index 3D Scene (i3s)** and **GeoJSON** layers,
   in addition to the existing layer types **KML/COLLADA/glTF** and **Cesium 3D Tiles**.
@@ -31,24 +33,27 @@ This is a major release.
 * **Web Map Tile Service (WMTS)** can now be used as another imagery or base map layer,
   in addition to the existing **Web Map Service (WMS)**.
 
-##### Improvements
+### Improvements
 
 * The **Graphical User Interface (GUI)** for adding and configuring layers in the toolbox have been rearranged
-  to provide more clarity and consistency. The input elements are now grouped into two groups based on their purposes:
-  **layer information** and **thematic data**, as shown below:
+  to provide more clarity and consistency. The input elements are now grouped into two groups
+  based on their functions for the selected layer type:
+  **layer information** and **thematic data**, as shown in the example below:
 
-  <img src="theme/img/gui_add_layer.png" style="display:block;float:none;margin-left:auto;margin-right:auto;">
+  <p align="center">
+    <img src="theme/img/gui_add_layer.png"/>
+  </p>
 
 * **Mobile support for geolocation** has been completely reworked to adhere to modern security rules on personal
   devices, especially for **iOS 13+**. The button icons and their functions are explained as follows:
 
-  <div style="display: flex; justify-content: center; align-items: center; gap: 5px;">
-    <img src="3dwebclient/images/GPS_main.png" style="width:70px">
-    <img src="3dwebclient/images/GPS_single.png" style="width:70px">
-    <img src="3dwebclient/images/GPS_on_ori.png" style="width:70px">
-    <img src="3dwebclient/images/GPS_on_pos_ori.png" style="width:70px">
-    <img src="3dwebclient/images/GPS_off.png" style="width:70px">
-  </div>
+  <p align="center" style="display:inline;float:none;margin-left:auto;margin-right:auto;">
+    <img src="3dwebclient/images/GPS_main.png" width="50px">
+    <img src="3dwebclient/images/GPS_single.png"  width="50px">
+    <img src="3dwebclient/images/GPS_on_ori.png"  width="50px">
+    <img src="3dwebclient/images/GPS_on_pos_ori.png"  width="50px">
+    <img src="3dwebclient/images/GPS_off.png"  width="50px">
+  </p>
 
   **From left to right**:
   Default button, "snapshot" location and orientation,
@@ -60,6 +65,6 @@ This is a major release.
 
 * **Cesium 3D Tiles** can now be navigated together with **Google Street View**, **Dual Map View**, etc.
 
-##### Change Logs
+### Change Logs
 
 For a complete list of all changes made for this release, please refer to the [change logs](CHANGES.md).
