@@ -1,6 +1,6 @@
 # Change Log
 
-### 2.0.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html)
+### 2.0.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html)
 
 This is a major release.
 
@@ -37,6 +37,7 @@ This is a major release.
   see [`9e6882a`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9e6882ad6cc00e45aef00ed27f5299736ae9832a).
 * Added highlighting for toggle buttons for shadows and terrain shadows,
   see [`e149d6d`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e149d6d458ab0a586535c0d846607155aa8ac252).
+* Added support for geolocation and orientation for iOS 13+.
 
 ##### UPDATES
 
@@ -59,6 +60,7 @@ This is a major release.
   see [`aa05d5b`](https://github.com/3dcitydb/3dcitydb-web-map/commit/aa05d5bc1f107395fdfa4732912bfe24d68b929d).
 * Highlighting will be cleared when a layer has been updated or reactivated,
   see [`8475281`](https://github.com/3dcitydb/3dcitydb-web-map/commit/84752817e9c355111b51a069048768b20bac8e12).
+* The buttons for accessing geolocation and orientation on mobile have been modernized with completely new icons and implementations.
 
 ##### FIXES
 
@@ -75,6 +77,7 @@ This is a major release.
   see [`e149d6d`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e149d6d458ab0a586535c0d846607155aa8ac252).
 * Fixed pinch gestures in iOS, where the entire screen is zoomed instead of only the globe,
   see [`9eb766c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9eb766c451aba3d9167f5df67f2f6355933a922a).
+* Fixed mobile support for accessing geolocation and orientation. 
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
