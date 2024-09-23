@@ -120,9 +120,9 @@ var GlobeTileTaskQueue = {};
         //------------------------------below are the relevant listeners call from the worker--------------------------------//
 
         /**
-         * 
+         *
          * remove the layers which are not in the vincity
-         * 
+         *
          */
         this.oTask.addListener("removeDatasources", function () {
             for (var tileUrl in dataPoolKml) {
@@ -144,16 +144,16 @@ var GlobeTileTaskQueue = {};
                 }
             }
             var promise = scope.createFrameBbox();
-            Cesium.when(promise, function (frame) {
+            Promise.resolve(promise).then((frame) => {
                 scope.oTask.triggerEvent('checkDataPool', frame);
             });
         });
 
         /**
-         * 
+         *
          * manage the caching and display of the objects
          * matrixItem -> [ minX, minY, maxX, maxY, colnum, rownum ]
-         * 
+         *
          */
         this.oTask.addListener("checkMasterPool", function (matrixItem, taskQueue) {
             if (!Cesium.defined(matrixItem)) {
@@ -232,12 +232,12 @@ var GlobeTileTaskQueue = {};
                         GlobeTileTaskQueue[tmpId] = tileUrl;
                         scope.taskNumber = taskQueue.length;
 
-                        // loading data tile from Cache	
+                        // loading data tile from Cache
                         dataSourceCollection.add(kmlDatasource).then(function () {
                             delete GlobeTileTaskQueue[tmpId];
                             scope.oTask.triggerEvent('updateTaskStack');
                             scope.oTask.triggerEvent('updateDataPoolRecord');
-                        }).otherwise(function (error) {
+                        }, function (error) {
                             delete GlobeTileTaskQueue[tmpId];
                             scope.oTask.triggerEvent('updateTaskStack');
                         });
@@ -249,7 +249,7 @@ var GlobeTileTaskQueue = {};
                 }
             } else {
                 var newKmlDatasource = new CitydbKmlDataSource({
-                    layerId: scope.citydbKmlLayerInstance.id,
+                    layerId: scope.citydbKmlLayerInstance.layerId,
                     camera: scope.citydbKmlLayerInstance.cesiumViewer.scene.camera,
                     canvas: scope.citydbKmlLayerInstance.cesiumViewer.scene.canvas,
                     gltfVersion: scope.citydbKmlLayerInstance.gltfVersion
@@ -275,7 +275,7 @@ var GlobeTileTaskQueue = {};
                         // loading data tile from Server
                         delete GlobeTileTaskQueue[tmpId];
                         scope.oTask.triggerEvent('updateTaskStack');
-                    }).otherwise(function (error) {
+                    }, function (error) {
                         delete GlobeTileTaskQueue[tmpId];
                         scope.oTask.triggerEvent('updateTaskStack');
                     });
@@ -292,7 +292,7 @@ var GlobeTileTaskQueue = {};
                                 scope.oTask.triggerEvent('updateTaskStack', 500);
                             }
                             ;
-                        }).otherwise(function (error) {
+                        }, function (error) {
                             scope.oTask.triggerEvent('updateTaskStack');
                         });
                     } else {
@@ -304,10 +304,10 @@ var GlobeTileTaskQueue = {};
         });
 
         /**
-         * 
+         *
          * Cache Size = [number of displayed layers] + [cached layers]
          * [cached layers] should not be bigger than a threshold value...
-         * 
+         *
          */
         scope.oTask.addListener("cleanCaching", function (maxCacheSize) {
             // default value
@@ -341,14 +341,14 @@ var GlobeTileTaskQueue = {};
                 delete networklinkCache[cacheRocordID];
                 cacheSize--;
             }
-            //	console.log("Current Cache size is: " + Object.keys(scope.networklinkCache).length);		        										        							        			           
+            //	console.log("Current Cache size is: " + Object.keys(scope.networklinkCache).length);
         });
 
 
         /**
-         * 
-         * update the status bar and Highlighting status of the KML objects		
-         *  
+         *
+         * update the status bar and Highlighting status of the KML objects
+         *
          */
         scope.oTask.addListener("refreshView", function () {
             scope.oTask.oListeners["cleanCaching"].call(this);
@@ -370,67 +370,67 @@ var GlobeTileTaskQueue = {};
 
         // event Listeners are so far, we start the Tiling Manager worker...
         var promise = scope.createFrameBbox();
-        Cesium.when(promise, function (frame) {
+        Promise.resolve(promise).then((frame) => {
             scope.oTask.triggerEvent('initWorker', frame, scope.citydbKmlLayerInstance.maxCountOfVisibleTiles);
         });
 
         this.runMonitoring();
     },
-            CitydbKmlTilingManager.prototype.isDataStreaming = function () {
-                if (this.oTask == null)
-                    return false;
-                return this.oTask.isSleep() ? false : true;
-            },
-            CitydbKmlTilingManager.prototype.clearCaching = function () {
-                if (this.oTask == null)
-                    return false;
-                this.oTask.oListeners["cleanCaching"].call(this, 0);
-            },
-            /**
-             * 
-             * create and add bounding box geometry in Cesium
-             * 
-             */
-            CitydbKmlTilingManager.prototype.createBboxGeometry = function (bbox) {
-                var rectangle = Cesium.Rectangle.fromDegrees(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax);
-                var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
-                this.boundingboxEntity = {
-                    id: Cesium.createGuid(),
-                    rectangle: {
-                        coordinates: rectangle,
-                        fill: false,
-                        outline: true,
-                        outlineWidth: 20,
-                        outlineColor: Cesium.Color.BLUE
-                    }
+        CitydbKmlTilingManager.prototype.isDataStreaming = function () {
+            if (this.oTask == null)
+                return false;
+            return this.oTask.isSleep() ? false : true;
+        },
+        CitydbKmlTilingManager.prototype.clearCaching = function () {
+            if (this.oTask == null)
+                return false;
+            this.oTask.oListeners["cleanCaching"].call(this, 0);
+        },
+        /**
+         *
+         * create and add bounding box geometry in Cesium
+         *
+         */
+        CitydbKmlTilingManager.prototype.createBboxGeometry = function (bbox) {
+            var rectangle = Cesium.Rectangle.fromDegrees(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax);
+            var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
+            this.boundingboxEntity = {
+                id: Cesium.createGuid(),
+                rectangle: {
+                    coordinates: rectangle,
+                    fill: false,
+                    outline: true,
+                    outlineWidth: 20,
+                    outlineColor: Cesium.Color.BLUE
                 }
-                cesiumViewer.entities.add(this.boundingboxEntity);
-            },
-            /**
-             * 
-             * create bounding box in monitor coordinate system
-             * 
-             */
-            CitydbKmlTilingManager.prototype.createFrameBbox = function () {
-                var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
-                var cesiumWidget = cesiumViewer.cesiumWidget;
-                var scene = cesiumWidget.scene;
-                var canvas = scene.canvas;
-                var frameWidth = canvas.clientWidth;
-                var frameHeight = canvas.clientHeight;
+            }
+            cesiumViewer.entities.add(this.boundingboxEntity);
+        },
+        /**
+         *
+         * create bounding box in monitor coordinate system
+         *
+         */
+        CitydbKmlTilingManager.prototype.createFrameBbox = function () {
+            var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
+            var cesiumWidget = cesiumViewer.cesiumWidget;
+            var scene = cesiumWidget.scene;
+            var canvas = scene.canvas;
+            var frameWidth = canvas.clientWidth;
+            var frameHeight = canvas.clientHeight;
 
-                var originHeight = 0;
-                var stepSize = frameHeight / 10;
+            var originHeight = 0;
+            var stepSize = frameHeight / 10;
 
-                return this.calcaulateFrameBbox(originHeight, stepSize, null);
-            };
+            return this.calcaulateFrameBbox(originHeight, stepSize, null);
+        };
 
     CitydbKmlTilingManager.prototype.calcaulateFrameBbox = function (originHeight, stepSize, internalDeferred) {
         var scope = this;
 
         var deferred;
         if (internalDeferred == null) {
-            deferred = Cesium.when.defer();
+            deferred = Cesium.defer();
         } else {
             deferred = internalDeferred;
         }
@@ -522,9 +522,9 @@ var GlobeTileTaskQueue = {};
     }
 
     /**
-     * 
+     *
      * check if the Tiling manager is started of not
-     * 
+     *
      */
     CitydbKmlTilingManager.prototype.isStarted = function () {
         if (this.oTask == null) {
@@ -535,9 +535,9 @@ var GlobeTileTaskQueue = {};
     };
 
     /**
-     * 
+     *
      * terminate the Tiling manager
-     * 
+     *
      */
     CitydbKmlTilingManager.prototype.doTerminate = function () {
         if (this.oTask != null) {
@@ -567,52 +567,52 @@ var GlobeTileTaskQueue = {};
     };
 
     /**
-     * 
+     *
      * get worker instance
-     * 
+     *
      */
     CitydbKmlTilingManager.prototype.getWorkerInstance = function () {
         return this.oTask;
     },
-            /**
-             * 
-             * public function to trigger Tiling Manager
-             * 
-             */
-            CitydbKmlTilingManager.prototype.triggerWorker = function (updateTaskQueue) {
-                var scope = this;
-                if (scope.oTask != null) {
-                    if (scope.oTask.isSleep()) {
-                        scope.oTask.wake();
+        /**
+         *
+         * public function to trigger Tiling Manager
+         *
+         */
+        CitydbKmlTilingManager.prototype.triggerWorker = function (updateTaskQueue) {
+            var scope = this;
+            if (scope.oTask != null) {
+                if (scope.oTask.isSleep()) {
+                    scope.oTask.wake();
+                    scope.startPrefetching = true;
+                    scope.oTask.triggerEvent('notifyWake');
+                } else {
+                    if (updateTaskQueue) {
                         scope.startPrefetching = true;
-                        scope.oTask.triggerEvent('notifyWake');
-                    } else {
-                        if (updateTaskQueue) {
-                            scope.startPrefetching = true;
-                            scope.oTask.triggerEvent('abortAndnotifyWake');
-                        }
+                        scope.oTask.triggerEvent('abortAndnotifyWake');
                     }
                 }
-            },
-            /**
-             * 
-             * Tiling manager and the highlighting events
-             * 
-             */
-            CitydbKmlTilingManager.prototype.runMonitoring = function () {
-                var scope = this;
-                var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
-                var scene = cesiumViewer.scene;
-                scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function () {
-                    if (scope.timer != null) {
-                        clearTimeout(scope.timer);
-                    }
-                    scope.timer = setTimeout(function () {
-                        scope.triggerWorker(true);
-                        scope.timer = null;
-                    }, 100 + 100 * Math.random());
-                });
-            };
+            }
+        },
+        /**
+         *
+         * Tiling manager and the highlighting events
+         *
+         */
+        CitydbKmlTilingManager.prototype.runMonitoring = function () {
+            var scope = this;
+            var cesiumViewer = this.citydbKmlLayerInstance.cesiumViewer;
+            var scene = cesiumViewer.scene;
+            scope.citydbKmlLayerInstance.registerEventHandler("VIEWCHANGED", function () {
+                if (scope.timer != null) {
+                    clearTimeout(scope.timer);
+                }
+                scope.timer = setTimeout(function () {
+                    scope.triggerWorker(true);
+                    scope.timer = null;
+                }, 100 + 100 * Math.random());
+            });
+        };
 
     window.CitydbKmlTilingManager = CitydbKmlTilingManager;
 })();

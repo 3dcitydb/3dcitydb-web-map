@@ -33,7 +33,6 @@ var UrlController = /** @class */ (function () {
             "maxLodPixels": "al",
             "maxSizeOfCachedTiles": "ac",
             "maxCountOfVisibleTiles": "av",
-            "maximumScreenSpaceError": "mse",
             // basemap infos
             "basemap": "bm",
             // "name" : "n",
@@ -43,6 +42,8 @@ var UrlController = /** @class */ (function () {
             "layers": "ls",
             "additionalParameters": "ap",
             "proxyUrl": "pu",
+            "tileStyle": "tst",
+            "tileMatrixSetId": "tmsi",
             // terrain infos
             "cesiumWorldTerrain": "ct",
             "terrain": "tr",
@@ -183,7 +184,7 @@ var UrlController = /** @class */ (function () {
             layerConfig[this.getUrlParaForward('maxLodPixels')] = Cesium.defaultValue(layer.maxLodPixels, "");
             layerConfig[this.getUrlParaForward('maxSizeOfCachedTiles')] = Cesium.defaultValue(layer.maxSizeOfCachedTiles, "");
             layerConfig[this.getUrlParaForward('maxCountOfVisibleTiles')] = Cesium.defaultValue(layer.maxCountOfVisibleTiles, "");
-            layerConfig[this.getUrlParaForward('maximumScreenSpaceError')] = Cesium.defaultValue(layer.maximumScreenSpaceError, "");
+            layerConfig[this.getUrlParaForward('maximumScreenSpaceError')] = Cesium.defaultValue(layer.maximumScreenSpaceError, 16);
             layerGroupObject[this.getUrlParaForward('layer_') + i] = Cesium.objectToQuery(layerConfig);
         }
         return Cesium.objectToQuery(layerGroupObject);
@@ -191,7 +192,8 @@ var UrlController = /** @class */ (function () {
     UrlController.prototype.basemapToQuery = function (addWmsViewModel, cesiumViewer, Cesium) {
         var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
         var baseLayerProviderFunc = baseLayerPickerViewModel.selectedImagery.creationCommand();
-        if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider) {
+        if (baseLayerProviderFunc instanceof Cesium.WebMapServiceImageryProvider
+            || baseLayerProviderFunc instanceof Cesium.WebMapTileServiceImageryProvider) {
             var basemapObject = {};
             basemapObject[this.getUrlParaForward('basemap')] = Cesium.objectToQuery(addWmsViewModel);
             return Cesium.objectToQuery(basemapObject);
@@ -242,7 +244,7 @@ var UrlController = /** @class */ (function () {
         }
         return Cesium.defaultValue(result, defaultValue);
     };
-    UrlController.prototype.getLayersFromUrl = function (url, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium) {
+    UrlController.prototype.getLayersFromUrl = function (url, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, CitydbI3SLayer, CitydbGeoJSONLayer, Cesium) {
         var index = 0;
         var nLayers = [];
         var layerConfigString = this.getUrlParaValue('layer_' + index, url, CitydbUtil);
@@ -269,11 +271,17 @@ var UrlController = /** @class */ (function () {
                 maxLodPixels: this.getValueFromObject('maxLodPixels', layerConfig, Number.MAX_VALUE, Cesium) === -1 ? Number.MAX_VALUE : this.getValueFromObject('maxLodPixels', layerConfig, Number.MAX_VALUE, Cesium),
                 maxSizeOfCachedTiles: this.getValueFromObject('maxSizeOfCachedTiles', layerConfig, 140, Cesium),
                 maxCountOfVisibleTiles: this.getValueFromObject('maxCountOfVisibleTiles', layerConfig, 140, Cesium),
-                maximumScreenSpaceError: this.getValueFromObject('maximumScreenSpaceError', layerConfig, '', Cesium),
+                maximumScreenSpaceError: this.getValueFromObject('maximumScreenSpaceError', layerConfig, 16, Cesium)
             };
-            if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1
+            if (options.layerDataType === "geojson") {
+                nLayers.push(new CitydbGeoJSONLayer(options));
+            }
+            else if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1
                 && options.layerDataType === "COLLADA/KML/glTF") {
                 nLayers.push(new CitydbKmlLayer(options));
+            }
+            else if (options.layerDataType === "i3s") {
+                nLayers.push(new CitydbI3SLayer(options));
             }
             else {
                 nLayers.push(new Cesium3DTilesDataLayer(options));
@@ -290,7 +298,7 @@ var UrlController = /** @class */ (function () {
         set: function (value) {
             this._urlDictionary = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return UrlController;

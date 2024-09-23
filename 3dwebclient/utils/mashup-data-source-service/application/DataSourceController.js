@@ -2,7 +2,8 @@ var DataSourceTypes;
 (function (DataSourceTypes) {
     DataSourceTypes["GoogleSheets"] = "GoogleSheets";
     DataSourceTypes["PostgreSQL"] = "PostgreSQL";
-    DataSourceTypes["KML"] = "KML";
+    DataSourceTypes["OGCFeatureAPI"] = "OGCFeatureAPI";
+    DataSourceTypes["Embedded"] = "Embedded";
 })(DataSourceTypes || (DataSourceTypes = {}));
 var TableTypes;
 (function (TableTypes) {
@@ -17,20 +18,21 @@ var DataSourceController = /** @class */ (function () {
     function DataSourceController(selectedDataSource, signInController, options) {
         var scope = this;
         scope._options = options;
-        if (selectedDataSource == DataSourceTypes.GoogleSheets) {
+        if (selectedDataSource === DataSourceTypes.GoogleSheets) {
             scope._dataSource = new GoogleSheets(signInController, scope._options);
-        }
-        else if (selectedDataSource == DataSourceTypes.PostgreSQL) {
+        } else if (selectedDataSource === DataSourceTypes.PostgreSQL) {
             scope._dataSource = new PostgreSQL(signInController, scope._options);
-        }
-        else if (selectedDataSource == DataSourceTypes.KML) {
+        } else if (selectedDataSource === DataSourceTypes.OGCFeatureAPI) {
+            scope._dataSource = new OGCFeatureAPI(signInController, scope._options);
+        } else if (selectedDataSource === DataSourceTypes.Embedded && options.layerType === "COLLADA/KML/glTF") {
             scope._dataSource = new KMLDataSource(signInController, scope._options);
         }
     }
-    DataSourceController.prototype.fetchData = function (id, callback, limit, clickedObject) {
+
+    DataSourceController.prototype.fetchData = function (gmlid, callback, limit, clickedObject) {
         var scope = this;
-        scope._dataSource.queryUsingId(id, function (result) {
-            callback(scope._dataSource.responseToKvp(result));
+        scope._dataSource.queryUsingId(gmlid, function (result) {
+            callback(scope._dataSource.responseToKvp(result), gmlid);
         }, limit, clickedObject);
     };
     Object.defineProperty(DataSourceController.prototype, "dataSource", {

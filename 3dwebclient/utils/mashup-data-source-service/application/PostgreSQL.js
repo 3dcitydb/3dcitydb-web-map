@@ -2,29 +2,39 @@
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            ({__proto__: []} instanceof Array && function (d, b) {
+                d.__proto__ = b;
+            }) ||
+            function (d, b) {
+                for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+            };
         return extendStatics(d, b);
     };
     return function (d, b) {
         extendStatics(d, b);
-        function __() { this.constructor = d; }
+
+        function __() {
+            this.constructor = d;
+        }
+
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
 var PostgreSQL = /** @class */ (function (_super) {
     __extends(PostgreSQL, _super);
+
     function PostgreSQL(signInController, options) {
         var _this = _super.call(this, signInController, options) || this;
         _this._idColName = !options.idColName ? "gmlid" : options.idColName;
         return _this;
     }
+
     PostgreSQL.prototype.responseToKvp = function (response) {
         // TODO test with PostgREST
         // response is just a text -> parse to JSON
         var responseJson = JSON.parse(response);
         var result = new Map();
-        if (this.tableType == TableTypes.Horizontal) {
+        if (this.tableType === TableTypes.Horizontal) {
             // all attributes per object are stored in one row
             for (var i = 0; i < responseJson.length; i++) {
                 var ele = responseJson[i];
@@ -32,8 +42,7 @@ var PostgreSQL = /** @class */ (function (_super) {
                     result[key] = ele[key];
                 }
             }
-        }
-        else {
+        } else {
             // one attribute per row
             // only store id once
             // (because the vertical table has multiple lines of the same id)
@@ -69,16 +78,60 @@ var PostgreSQL = /** @class */ (function (_super) {
         // TODO
         return null;
     };
-    PostgreSQL.prototype.queryUsingId = function (id, callback, limit, clickedObject) {
+    PostgreSQL.prototype.queryUsingId = function (gmlid, callback, limit, clickedObject) {
+        function tryUrls(urls) {
+            return new Promise((resolve, reject) => {
+                let i = 0;
+
+                function next() {
+                    if (i >= urls.length) {
+                        reject(new Error('GMLID not matched'));
+                        return;
+                    }
+
+                    let req = new XMLHttpRequest();
+                    req.open('GET', urls[i]);
+                    req.onload = function () {
+                        if (req.status === 200) {
+                            resolve(req.response);
+                        } else {
+                            i++;
+                            next();
+                        }
+                    };
+                    req.onerror = function () {
+                        i++;
+                        next();
+                    };
+                    req.send();
+                }
+
+                next();
+            });
+        }
+
+        // Column names in PostgREST are case-insensitive
+        const baseUrl = this._uri;
+        const gmlidValue = gmlid["value"];
+        const urls = [
+            baseUrl + "?gmlid=eq." + gmlidValue,
+            baseUrl + "?gml_id=eq." + gmlidValue,
+            baseUrl + "?gml-id=eq." + gmlidValue,
+            baseUrl + "?id=eq." + gmlidValue
+        ];
+
+        tryUrls(urls)
+            .then(response => callback(response))
+            .catch(error => console.log('Error:', error.message));
+
         // TODO use column number instead of column name (such as gmlid here)
-        this.queryUsingSql("?" + this.idColName + "=eq." + id, callback, !limit ? Number.MAX_VALUE : limit, clickedObject);
     };
     PostgreSQL.prototype.queryUsingSql = function (sql, callback, limit, clickedObject) {
         // TODO handle limit
         var baseUrl = this._uri;
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = function () {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
                 var queryResult = xmlHttp.responseText;
                 callback(queryResult);
             }

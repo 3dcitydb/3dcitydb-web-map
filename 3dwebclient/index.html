@@ -26,628 +26,757 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <!-- Use correct character set. -->
-        <meta charset="utf-8">
-        <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-        <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-        <title>3DCityDB-Web-Map-Client</title>
-        <link rel="icon" type="image/png" href="../theme/img/favicon.png" sizes="16x16">
-        <script src="../ThirdParty/jquery-3.3.1.min.js"></script>
-        <!-- Load jquery ui datepicker FLATPICKR -->
-        <link rel="stylesheet" type="text/css" href="../ThirdParty/flatpickrv4.5.1.css">
-        <script type="text/javascript" src="../ThirdParty/flatpickrv4.5.1.js"></script>
-        <!-- CesiumJS -->
-        <script src="../ThirdParty/Cesium/Cesium.js"></script>
-        <script src="../ThirdParty/Intersection/IntersectionAPI.js"></script>
-        <script src="../ThirdParty/Cesium-Navigation/Cesium-Navigation.js"></script>
-        <link rel="stylesheet" type="text/css" href="../ThirdParty/Cesium-Navigation/Cesium-Navigation.css" />
-        <script src="../js/3dcitydb-web-map.js"></script>
-        <script src="../js/CitydbUtil.js"></script>
-        <script src="../js/CitydbWebworker.js"></script>
-        <script src="../js/CitydbSceneTransforms.js"></script>
-        <script src="../js/CitydbKmlHighlightingManager.js"></script>
-        <script src="../js/CitydbKmlTilingManager.js"></script>
-        <script src="../js/CitydbKmlDataSource.js"></script>
-        <script src="../js/CitydbKmlLayer.js"></script>
-        <script src="../js/Cesium3DTilesDataLayer.js"></script>
-        <!-- Sign in utilities -->
-        <script type="text/javascript" src="https://apis.google.com/js/api:client.js?onLoad=onGoogleScriptLoaded"></script>
-        <script src="utils/SigninController.js"></script>
-        <!-- GPS geolocation with device orientation in real-time -->
-        <script src="utils/GPSController.js"></script>
-        <!-- Mobile utilities -->
-        <script src="utils/MobileController.js"></script>
-        <!-- OpenStreetMap GeoCoder Nominatim -->
-        <script src="utils/OpenStreetMapNominatimGeocoder.js"></script>
-        <!-- Splash Controller-->
-        <script src="utils/SplashController.js"></script>
-        <!-- Mashup Data Source Service -->
-        <script src="utils/mashup-data-source-service/core/DataRecord.js"></script>
-        <script src="utils/mashup-data-source-service/core/DataSourceCapability.js"></script>
-        <script src="utils/mashup-data-source-service/core/QueryResult.js"></script>
-        <script src="utils/mashup-data-source-service/core/ReadableDataSource.js"></script>
-        <script src="utils/mashup-data-source-service/core/WritableDataSource.js"></script>
-        <script src="utils/mashup-data-source-service/core/DataSource.js"></script>
-        <script src="utils/mashup-data-source-service/core/SQLDataSource.js"></script>
-        <script src="utils/mashup-data-source-service/core/XMLDataSource.js"></script>
-        <script src="utils/mashup-data-source-service/application/GoogleSheets.js"></script>
-        <script src="utils/mashup-data-source-service/application/PostgreSQL.js"></script>
-        <script src="utils/mashup-data-source-service/application/KMLDataSource.js"></script>
-        <script src="utils/mashup-data-source-service/core/MashupDataSource.js"></script>
-        <script src="utils/mashup-data-source-service/application/DataSourceController.js"></script>
-        <!-- URL controller -->
-        <script src="utils/UrlController.js"></script>
+<head>
+    <!-- Use correct character set. -->
+    <meta charset="utf-8">
+    <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>3DCityDB-Web-Map-Client</title>
+    <link rel="icon" type="image/png" href="../theme/img/favicon.png" sizes="16x16">
+    <script src="../ThirdParty/jquery-3.6.1.min.js"></script>
+    <!-- Load jquery ui datepicker FLATPICKR -->
+    <link rel="stylesheet" type="text/css" href="../ThirdParty/flatpickrv4.5.1.css">
+    <script type="text/javascript" src="../ThirdParty/flatpickrv4.5.1.js"></script>
+    <script src="../ThirdParty/Autolinker.min.js"></script>
+    <!-- CesiumJS -->
+    <script src="../ThirdParty/Cesium/Cesium.js"></script>
+    <script src="../ThirdParty/Intersection/IntersectionAPI.js"></script>
+    <!--        <script src="../ThirdParty/Cesium-Navigation/Cesium-Navigation.js"></script>-->
+    <!--        <link rel="stylesheet" type="text/css" href="../ThirdParty/Cesium-Navigation/Cesium-Navigation.css" />-->
+    <script>
+        Cesium.defineProperties = Object.defineProperties;
+    </script>
+    <script src="../ThirdParty/viewerCesiumNavigationMixin.min.js"></script>
+    <script src="../js/3dcitydb-web-map.js"></script>
+    <script src="../js/CitydbUtil.js"></script>
+    <script src="../js/CitydbWebworker.js"></script>
+    <script src="../js/CitydbSceneTransforms.js"></script>
+    <script src="../js/CitydbKmlHighlightingManager.js"></script>
+    <script src="../js/CitydbKmlTilingManager.js"></script>
+    <script src="../js/CitydbKmlDataSource.js"></script>
+    <script src="../js/CitydbKmlLayer.js"></script>
+    <script src="../js/Cesium3DTilesDataLayer.js"></script>
+    <script src="../js/CitydbI3SLayer.js"></script>
+    <script src="../js/CitydbGeoJSONLayer.js"></script>
+    <!-- Sign in utilities -->
+    <script type="text/javascript" src="https://apis.google.com/js/api:client.js?onLoad=onGoogleScriptLoaded"></script>
+    <script src="utils/SigninController.js"></script>
+    <!-- GPS geolocation with device orientation in real-time -->
+    <script src="utils/GPSController.js"></script>
+    <!-- Mobile utilities -->
+    <script src="utils/MobileController.js"></script>
+    <!-- OpenStreetMap GeoCoder Nominatim -->
+    <script src="utils/OpenStreetMapNominatimGeocoder.js"></script>
+    <!-- Splash Controller-->
+    <script src="utils/SplashController.js"></script>
+    <!-- Mashup Data Source Service -->
+    <script src="utils/mashup-data-source-service/core/DataRecord.js"></script>
+    <script src="utils/mashup-data-source-service/core/DataSourceCapability.js"></script>
+    <script src="utils/mashup-data-source-service/core/QueryResult.js"></script>
+    <script src="utils/mashup-data-source-service/core/ReadableDataSource.js"></script>
+    <script src="utils/mashup-data-source-service/core/WritableDataSource.js"></script>
+    <script src="utils/mashup-data-source-service/core/DataSource.js"></script>
+    <script src="utils/mashup-data-source-service/core/SQLDataSource.js"></script>
+    <script src="utils/mashup-data-source-service/core/XMLDataSource.js"></script>
+    <script src="utils/mashup-data-source-service/application/GoogleSheets.js"></script>
+    <script src="utils/mashup-data-source-service/application/PostgreSQL.js"></script>
+    <script src="utils/mashup-data-source-service/application/OGCFeatureAPI.js"></script>
+    <script src="utils/mashup-data-source-service/application/KMLDataSource.js"></script>
+    <script src="utils/mashup-data-source-service/core/MashupDataSource.js"></script>
+    <script src="utils/mashup-data-source-service/application/DataSourceController.js"></script>
+    <!-- URL controller -->
+    <script src="utils/UrlController.js"></script>
 
-        <style>
-            @import url(../ThirdParty/Cesium/Widgets/widgets.css);
-            @import url(css/GPSButtonStyles.css);
-            @import url(css/MobileFullscreenStyles.css);
-            @import url(css/SplashWindow.css);
+    <style>
+        @import url(../ThirdParty/Cesium/Widgets/widgets.css);
+        @import url(css/GPSButtonStyles.css);
+        @import url(css/MobileFullscreenStyles.css);
+        @import url(css/SplashWindow.css);
 
-            html, body, #cesiumContainer {
-                top: 0px;
-                left: 0px;
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                z-index: -1;
-            }
+        html, body, #cesiumContainer {
+            top: 0px;
+            left: 0px;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
 
-            #uiMenu {
-                border-radius: 5px;
-                padding: 5px;
-                position: absolute;
-                left: 5px;
-                font-family: "Arial";
-                z-index: 99980;
-            }
+        #uiMenu {
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            left: 5px;
+            font-family: "Arial";
+            z-index: 99980;
+        }
 
-            .loadingIndicator {
-                display: block;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                margin-top: -33px;
-                margin-left: -33px;
-                width: 66px;
-                height: 66px;
-                background-position: center;
-                background-repeat: no-repeat;
-                background-image: url(../theme/img/ajax-loader.gif);
-            }
+        .loadingIndicator {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -33px;
+            margin-left: -33px;
+            width: 66px;
+            height: 66px;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: url(../theme/img/ajax-loader.gif);
+        }
 
-            #loadingScreen {
-                display: block;
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 999999;
-                width: 100vw;
-                height: 100vh;
-                background-color: rgb(255, 255, 255);
-                background-image: url("../theme/img/3DCityDB_v4_Splashscreen.jpg");
-                background-repeat: no-repeat;
-                background-position: center;
-            }
+        #loadingScreen {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 999999;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgb(255, 255, 255);
+            background-image: url("../theme/img/3DCityDB_v4_Splashscreen.jpg");
+            background-repeat: no-repeat;
+            background-position: center;
+        }
 
-            .citydb_overSelect {
-                position: absolute;
-                left: 0; right: 0; top: 0; bottom: 0;
-            }
+        .citydb_overSelect {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
 
-            .citydb_short_container {
-                display: inline-block;
-                position: relative;
-                width: 48.5%;
-            }
+        .citydb_short_container {
+            display: inline-block;
+            position: relative;
+            width: 48.5%;
+        }
 
-            .citydb_long_container {
-                margin-left: 0px;
-                margin-right: 2%;
-            }
+        .citydb_long_container {
+            margin-left: 0px;
+            margin-right: 2%;
+        }
 
-            .citydb_dynamic_box {
-                display: none;
-                margin: 3px;
-                padding: 2px 3px;
-                position: relative;
-                border: 2px #505050 solid;
-                background: rgba(42, 42, 42, 0.6);
-                border-radius: 4px;
-                color: #fff;
-                font-family: sans-serif;
-                font-size: 9pt;
-            }
+        .citydb_dynamic_box {
+            display: none;
+            margin: 3px;
+            padding: 2px 3px;
+            position: relative;
+            border: 2px #505050 solid;
+            background: rgba(42, 42, 42, 0.6);
+            border-radius: 4px;
+            color: #fff;
+            font-family: sans-serif;
+            font-size: 9pt;
+        }
 
-            .citydb_dynamic_box input {
-                vertical-align: middle;
-                padding-top: 1px;
-                padding-bottom: 1px;
-            }
+        .citydb_dynamic_box input {
+            vertical-align: middle;
+            padding-top: 1px;
+            padding-bottom: 1px;
+        }
 
-            .citydb_inputtable {
-                width: 100%;
-            }
+        .citydb_inputtable {
+            width: 100%;
+        }
 
-            .citydb_inputtable th, td {
-                padding: 5px;
-            }
+        .citydb_inputtable th, td {
+            padding: 5px;
+        }
 
-            .citydb_inputtable select {
-                width: 100%;
-                padding: 3px;
-                margin: 1px;
-            }
+        .citydb_inputtable select {
+            width: 100%;
+            padding: 3px;
+            margin: 1px;
+        }
 
-            .citydb_inputtable input {
-                width: 100%;
-                padding: 0px;
-                margin: 0px;
-            }
+        .citydb_inputtable input {
+            width: 100%;
+            padding: 0px;
+            margin: 0px;
+        }
 
-            #citydb_layerlistpanel {
-                width: 97.5%;
-                background: rgba(42, 42, 42, 0.8);
-                text-align: left;
-            }
+        #citydb_layerlistpanel {
+            width: 97.5%;
+            background: rgba(42, 42, 42, 0.8);
+            text-align: left;
+        }
 
-            #citydb_layerlistpanel label:hover {
-                background-color: #1e90ff;
-            }
+        #citydb_layerlistpanel label:hover {
+            background-color: #1e90ff;
+        }
 
-            #citydb_toolbox {
-                width: 400px;
-                display: none;
-                background: rgba(42, 42, 42, 0.5);
-                border: 3px #505050 solid;
-            }
+        #citydb_toolbox {
+            width: 400px;
+            display: none;
+            background: rgba(42, 42, 42, 0.5);
+            border: 3px #505050 solid;
+        }
 
-        </style>
-    </head>
+    </style>
+</head>
 
-    <body>
-        <div id="cesiumContainer"></div>
-        <div id="loadingIndicator" class="loadingIndicator"></div>
-        <div id = "citydb_cachedTilesInspector" class="cesium-cesiumInspector" style="display: block; position: absolute; bottom: 5px; right: 5px; width: 130px" data-bind="html: dataSourcesText"></div>
-        <div id = "citydb_showedTilesInspector" class="cesium-cesiumInspector" style="display: block; position: absolute; bottom: 5px; right: 170px; width: 130px" data-bind="html: dataSourcesText"></div>
-        <img id = "citydb_loadingTilesInspector" src="../theme/img/ajax-loader.gif" style="display: none; position: absolute; bottom: 56px; right: 7px; width:30px;height:30px;">
-        <div id="uiMenu">
-            <div onclick="showToolbox()">
-                <select class="cesium-button">
-                    <option>Show / Hide Toolbox</option>
-                </select>
-                <div class="citydb_overSelect"></div>
+<body>
+<div id="cesiumContainer"></div>
+<div id="loadingIndicator" class="loadingIndicator"></div>
+<div id="citydb_cachedTilesInspector" class="cesium-cesiumInspector"
+     style="display: block; position: absolute; bottom: 5px; right: 5px; width: 130px"
+     data-bind="html: dataSourcesText"></div>
+<div id="citydb_showedTilesInspector" class="cesium-cesiumInspector"
+     style="display: block; position: absolute; bottom: 5px; right: 170px; width: 130px"
+     data-bind="html: dataSourcesText"></div>
+<img id="citydb_loadingTilesInspector" src="../theme/img/ajax-loader.gif"
+     style="display: none; position: absolute; bottom: 56px; right: 7px; width:30px;height:30px;">
+<div id="uiMenu">
+    <div onclick="showToolbox()">
+        <select class="cesium-button">
+            <option>Show / Hide Toolbox</option>
+        </select>
+        <div class="citydb_overSelect"></div>
+    </div>
+    <div id="uiMenu-content">
+        <div id="citydb_toolbox">
+            <div class="citydb_long_container">
+                <div id="citydb_layerlistpanel" class="citydb_dynamic_box" style="display: block; "></div>
             </div>
-            <div id="uiMenu-content">
-                <div id="citydb_toolbox">
-                    <div class = "citydb_long_container">
-                        <div id="citydb_layerlistpanel" class="citydb_dynamic_box" style="display: block; "></div>
+            <div style="width: 100%;">
+                <!-- add layer panel -->
+                <div class="citydb_short_container" onclick="showAddLayerPanel()">
+                    <select style="width: 100%;" class="cesium-button">
+                        <option>Add / Configure Layer</option>
+                    </select>
+                    <div class="citydb_overSelect"></div>
+                </div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="removeSelectedLayer()">
+                        Remove selected layer
+                    </button>
+                </div>
+                <div id="citydb_addlayerpanel" class="citydb_dynamic_box">
+                    <table class="citydb_inputtable">
+                        <tbody>
+                        <tr>
+                            <td colspan="3" style="border: yellow; color: yellow;"><b>Layer information</b>
+                                <hr/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Type</td>
+                            <td>
+                                <select id="layerDataTypeDropdown" data-bind="value: layerDataType"
+                                        onchange="layerDataTypeDropdownOnchange()">
+                                    <option value="COLLADA/KML/glTF" selected="selected">COLLADA/KML/glTF</option>
+                                    <option value="Cesium 3D Tiles">Cesium 3D Tiles</option>
+                                    <option value="i3s">Indexed 3D Scene Layers</option>
+                                    <option value="geojson">GeoJSON</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 45%;">URL (*)</td>
+                            <td style="width: 55%;">
+                                <input type="text" data-bind="value: url">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Name (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: name">
+                            </td>
+                        </tr>
+                        <tr id="gltfVersionDropdownRow">
+                            <td>glTF version</td>
+                            <td>
+                                <select id="gltfVersionDropdown" data-bind="value: gltfVersion">
+                                    <option value="0.8">0.8</option>
+                                    <option value="1.0">1.0</option>
+                                    <option value="2.0" selected="selected">2.0</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="cityobjectsJsonUrlRow">
+                            <td>cityobjectsJsonUrl</td>
+                            <td>
+                                <input type="text" data-bind="value: cityobjectsJsonUrl">
+                            </td>
+                        </tr>
+                        <tr id="minLodPixelsRow">
+                            <td>minLodPixels</td>
+                            <td>
+                                <input type="text" data-bind="value: minLodPixels">
+                            </td>
+                        </tr>
+                        <tr id="maxLodPixelsRow">
+                            <td>maxLodPixels</td>
+                            <td>
+                                <input type="text" data-bind="value: maxLodPixels">
+                            </td>
+                        </tr>
+                        <tr id="maxCountOfVisibleTilesRow">
+                            <td>MaxCountOfVisibleTiles (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: maxCountOfVisibleTiles">
+                            </td>
+                        </tr>
+                        <tr id="maxSizeOfCachedTilesRow">
+                            <td>MaxSizeOfCachedTiles (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: maxSizeOfCachedTiles">
+                            </td>
+                        </tr>
+                        <tr id="maximumScreenSpaceError" style="display: none;">
+                            <td>MaximumScreenSpaceError</td>
+                            <td>
+                                <input type="text" data-bind="value: maximumScreenSpaceError">
+                            </td>
+                        </tr>
+                        <tr id="layerProxyAndClampToGround">
+                            <td>
+                                <label><input type="checkbox" id="layerProxyCheckbox" style="width:auto;"
+                                              data-bind="checked: layerProxy"/> Load via proxy</label>
+                            </td>
+                            <td>
+                                <label><input type="checkbox" id="layerClampToGroundCheckbox" style="width:auto;"
+                                              data-bind="checked: layerClampToGround"/> Clamp to ground</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="border: yellow; color: yellow;"><b>Thematic data</b>
+                                <hr/>
+                            </td>
+                        </tr>
+                        <tr id="thematicDataSourceDropDownDiv">
+                            <td>Type</td>
+                            <td>
+                                <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource"
+                                        onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
+                                    <option value="GoogleSheets" selected="selected">Google Sheets API</option>
+                                    <option value="PostgreSQL">PostgreSQL REST API</option>
+                                    <option value="OGCFeatureAPI">OGC Feature API</option>
+                                    <option value="Embedded">Embedded</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="thematicDataUrlDiv">
+                            <td>URL</td>
+                            <td>
+                                <input type="text" data-bind="value: thematicDataUrl">
+                            </td>
+                        </tr>
+                        <tr id="thematicTableTypeDropdownDiv">
+                            <td>Table structure</td>
+                            <td>
+                                <select id="tableTypeDropdown" data-bind="value: tableType"
+                                        onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
+                                    <option value="Horizontal" selected="selected">All object attributes in one row
+                                    </option>
+                                    <option value="Vertical">One row per object attribute</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <!--                                    <tr id="rowGoogleSheetsApiKey" style="display: none;">-->
+                        <!--                                        <td>> Google Sheets API Key</td>-->
+                        <!--                                        <td>-->
+                        <!--                                            <input type="text" data-bind="value: googleSheetsApiKey">-->
+                        <!--                                        </td>-->
+                        <!--                                    </tr>-->
+                        <!--                                    <tr id="rowGoogleSheetsRanges" style="display: none;">-->
+                        <!--                                        <td>> Google Sheets Ranges </td>-->
+                        <!--                                        <td>-->
+                        <!--                                            <input type="text" data-bind="value: googleSheetsRanges" placeholder="'Sheet1'!A1:C2;'Sheet2'!A1:D2">-->
+                        <!--                                        </td>-->
+                        <!--                                    </tr>-->
+                        <!--                                    <tr id="rowGoogleSheetsClientId" style="display: none;">-->
+                        <!--                                        <td>> Google Sheets Client ID</td>-->
+                        <!--                                        <td>-->
+                        <!--                                            <input type="text" data-bind="value: googleSheetsClientId" placeholder="Only for OAuth2">-->
+                        <!--                                        </td>-->
+                        <!--                                    </tr>-->
+                        </tbody>
+                    </table>
+                    <div class="citydb_short_container">
+                        <button style="width: 100%;" type="button" class="cesium-button" onclick="addNewLayer()">Add
+                            layer
+                        </button>
                     </div>
-                    <div style="width: 100%;">
-                        <!-- add layer panel -->
-                        <div class="citydb_short_container" onclick="showAddLayerPanel()">
-                            <select style="width: 100%;" class="cesium-button" >
-                                <option>Add / Configure Layer</option>
-                            </select>
-                            <div class="citydb_overSelect"></div>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeSelectedLayer()">Remove selected layer</button>
-                        </div>
-                        <div id="citydb_addlayerpanel" class="citydb_dynamic_box">
-                            <table class="citydb_inputtable">
-                                <tbody>
-                                    <tr>
-                                        <td WIDTH="25%">URL(*)</td>
-                                        <td WIDTH="75%">
-                                            <input type="text" data-bind="value: url">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Name(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: name">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Layer data type</td>
-                                        <td>
-                                            <select id="layerDataTypeDropdown" data-bind="value: layerDataType" onchange="layerDataTypeDropdownOnchange()">
-                                                <option value="COLLADA/KML/glTF" selected="selected">COLLADA/KML/glTF</option>
-                                                <option value="Cesium 3D Tiles">Cesium 3D Tiles</option>
-                                                <option value="Others">Others</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr id="layerProxyAndClampToGround" style="display: none;">
-                                        <td>
-                                            <label><input type="checkbox" id="layerProxyCheckbox" style="width:auto;" data-bind="checked: layerProxy"/> Load via proxy</label>
-                                        </td>
-                                        <td>
-                                            <label><input type="checkbox" id="layerClampToGroundCheckbox" style="width:auto;" data-bind="checked: layerClampToGround"/> KML clamp to ground</label>
-                                        </td>
-                                    </tr>
-                                    <tr id="gltfVersionDropdownRow" style="display: none;">
-                                        <td>glTF version</td>
-                                        <td>
-                                            <select id="gltfVersionDropdown" data-bind="value: gltfVersion">
-                                                <option value="0.8">0.8</option>
-                                                <option value="1.0">1.0</option>
-                                                <option value="2.0" selected="selected">2.0</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>thematicDataUrl</td>
-                                        <td>
-                                            <input type="text" data-bind="value: thematicDataUrl">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>> Thematic Data Source</td>
-                                        <td>
-                                            <select id="thematicDataSourceDropdown" data-bind="value: thematicDataSource" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
-                                                <option value="GoogleSheets" selected="selected">Google Sheets API</option>
-                                                <option value="PostgreSQL">PostgreSQL REST API</option>
-                                                <option value="KML">KML Documents</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>> Table type</td>
-                                        <td>
-                                            <select id="tableTypeDropdown" data-bind="value: tableType" onchange="thematicDataSourceAndTableTypeDropdownOnchange()">
-                                                <option value="Horizontal" selected="selected">All object attributes in one row</option>
-                                                <option value="Vertical">One row per object attribute</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-<!--                                    <tr id="rowGoogleSheetsApiKey" style="display: none;">-->
-<!--                                        <td>> Google Sheets API Key</td>-->
-<!--                                        <td>-->
-<!--                                            <input type="text" data-bind="value: googleSheetsApiKey">-->
-<!--                                        </td>-->
-<!--                                    </tr>-->
-<!--                                    <tr id="rowGoogleSheetsRanges" style="display: none;">-->
-<!--                                        <td>> Google Sheets Ranges </td>-->
-<!--                                        <td>-->
-<!--                                            <input type="text" data-bind="value: googleSheetsRanges" placeholder="'Sheet1'!A1:C2;'Sheet2'!A1:D2">-->
-<!--                                        </td>-->
-<!--                                    </tr>-->
-<!--                                    <tr id="rowGoogleSheetsClientId" style="display: none;">-->
-<!--                                        <td>> Google Sheets Client ID</td>-->
-<!--                                        <td>-->
-<!--                                            <input type="text" data-bind="value: googleSheetsClientId" placeholder="Only for OAuth2">-->
-<!--                                        </td>-->
-<!--                                    </tr>-->
-                                    <tr>
-                                        <td>cityobjectsJsonUrl</td>
-                                        <td>
-                                            <input type="text" data-bind="value: cityobjectsJsonUrl">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>minLodPixels</td>
-                                        <td>
-                                            <input type="text" data-bind="value: minLodPixels">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>maxLodPixels</td>
-                                        <td>
-                                            <input type="text" data-bind="value: maxLodPixels">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxCountOfVisibleTiles(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: maxCountOfVisibleTiles">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxSizeOfCachedTiles(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: maxSizeOfCachedTiles">
-                                        </td>
-                                    </tr>
-                                    <tr id="maximumScreenSpaceError" style="display: none;">
-                                        <td>MaximumScreenSpaceError</td>
-                                        <td>
-                                            <input type="text" data-bind="value: maximumScreenSpaceError">
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="citydb_short_container">
-                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addNewLayer()">Add layer</button>
-                            </div>
-                            <div class="citydb_short_container">
-                                <button style="width: 100%;" type="button" class="cesium-button" onclick="saveLayerSettings()">Save layer settings</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="width: 100%;">
-                        <!-- add WMS panel -->
-                        <div class="citydb_short_container" onclick="showAddWMSPanel()">
-                            <select style="width: 100%;" class="cesium-button" >
-                                <option>Add WMS-Layer</option>
-                            </select>
-                            <div class="citydb_overSelect"></div>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeImageryProvider()">Remove WMS layer</button>
-                        </div>
-                        <div id="citydb_addwmspanel" class="citydb_dynamic_box">
-                            <table class="citydb_inputtable">
-                                <tbody>
-                                    <tr>
-                                        <td WIDTH="25%">name(*)</td>
-                                        <td WIDTH="75%">
-                                            <input type="text" data-bind="value: name">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>iconUrl(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: iconUrl">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>tooltip(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: tooltip">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>url(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: url">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>layers(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: layers">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>additionalParameters</td>
-                                        <td>
-                                            <input type="text" data-bind="value: additionalParameters">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>proxyUrl</td>
-                                        <td>
-                                            <input type="text" data-bind="value: proxyUrl">
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="citydb_long_container">
-                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addWebMapServiceProvider()">Add WMS layer</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="width: 100%;">
-                        <!-- add Terrain panel -->
-                        <div class="citydb_short_container" onclick="showAddTerrainPanel()">
-                            <select style="width: 100%;" class="cesium-button" >
-                                <option>Add Terrain-Layer</option>
-                            </select>
-                            <div class="citydb_overSelect"></div>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="removeTerrainProvider()">Remove Terrain layer</button>
-                        </div>
-                        <div id="citydb_addterrainpanel" class="citydb_dynamic_box">
-                            <table class="citydb_inputtable">
-                                <tbody>
-                                    <tr>
-                                        <td WIDTH="25%">name(*)</td>
-                                        <td WIDTH="75%">
-                                            <input type="text" data-bind="value: name">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>iconUrl(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: iconUrl">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>tooltip(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: tooltip">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>url(*)</td>
-                                        <td>
-                                            <input type="text" data-bind="value: url">
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="citydb_long_container">
-                                <button style="width: 100%;" type="button" class="cesium-button" onclick="addTerrainProvider()">Add Terrain layer</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="width: 100%;">
-                        <!-- add splash window -->
-                        <div class="citydb_short_container" onclick="showAddSplashWindow()">
-                            <select style="width: 100%;" class="cesium-button" >
-                                <option>Add Splash Window</option>
-                            </select>
-                            <div class="citydb_overSelect"></div>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="splashController.removeSplashWindow(jQuery)">Remove Splash Window</button>
-                        </div>
-                        <div id="citydb_addsplashwindow" class="citydb_dynamic_box">
-                            <table class="citydb_inputtable">
-                                <tbody>
-                                <tr>
-                                    <td WIDTH="35%">URL(*)</td>
-                                    <td WIDTH="65%">
-                                        <input type="text" data-bind="value: url">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td WIDTH="35%">Show on start(*)</td>
-                                    <td WIDTH="65%">
-                                        <input id="showOnStart_checkbox" type="checkbox" data-bind="checked: showOnStart">
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <div class="citydb_long_container">
-                                <button style="width: 100%;" type="button" class="cesium-button" onclick="splashController.addSplashWindow(jQuery)">Add Splash Window</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="citydb_long_container" onmouseover="listHighlightedObjects()">
-                        <select id = "citydb_highlightinglist" style="width: 100%;" class="cesium-button" onchange="flyToClickedObject(this)">
-                            <option selected="selected" disabled="disabled">Choose highlighted Object</option>
-                        </select>
-                    </div>
-                    <div class="citydb_long_container" onmouseover="listHiddenObjects()">
-                        <select id = "citydb_hiddenlist" style="width: 100%;" class="cesium-button" onchange="flyToClickedObject(this)">
-                            <option selected="selected" disabled="disabled">Choose hidden Object</option>
-                        </select>
-                    </div>
-                    <div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="showSceneLink()">Generate Scene Link</button>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="hideSelectedObjects()">Hide selected Objects</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="clearhighlight()">Clear Highlighting</button>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="showHiddenObjects()">Show Hidden Objects</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="createScreenshot()">Create Screenshot</button>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="printCurrentview()">Print current view</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleShadows()">Toggle Shadows</button>
-                        </div>
-                        <div class="citydb_short_container">
-                            <button type="button" style="width: 100%;" class="cesium-button" onclick="toggleTerrainShadows()">Toggle Terrain Shadows</button>
-                        </div>
-                    </div>
-                    <div class="citydb_long_container">
-                        <select id = "citydb_showinexternalmaps" style="width: 100%;" onchange="showInExternalMaps()" class="cesium-button">
-                            <option selected="selected" disabled="disabled">Show the selected object in External Maps</option>
-                            <option value = "google">Google StreetView</option>
-                            <option value = "osm"> OpenStreetMap</option>
-                            <option value = "bing">BingMaps ObliqueView</option>
-                            <option value = "dual">DualMaps</option>
-                        </select>
+                    <div class="citydb_short_container">
+                        <button style="width: 100%;" type="button" class="cesium-button" onclick="saveLayerSettings()">
+                            Save layer settings
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- GPS button -->
-        <button id="gpsButton" type="button" class="cesium-button"></button>
-
-        <!-- Splash window -->
-        <div class="splashscreen-buttons">
-            <input id="not_show_again_button" type="button" value="Ignore" onclick="splashController.ignoreSplashWindow(jQuery)">
-            <input id="close_button" type="button" value="Close" onclick="splashController.closeSplashWindow(jQuery)">
-        </div>
-        <div id="splashwindow_iframe" class="splash-wrapper">
-            <div class="splash-iframe-container">
-                <iframe id="splashwindow_iframe_content" src="" frameborder="0"></iframe>
+            <div style="width: 100%;">
+                <!-- add WMS panel -->
+                <div class="citydb_short_container" onclick="showAddWMSPanel()">
+                    <select style="width: 100%;" class="cesium-button">
+                        <option>Imagery Layer</option>
+                    </select>
+                    <div class="citydb_overSelect"></div>
+                </div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="removeImageryProvider()">
+                        Remove imagery layer
+                    </button>
+                </div>
+                <div id="citydb_addwmspanel" class="citydb_dynamic_box">
+                    <table class="citydb_inputtable">
+                        <tbody>
+                        <tr>
+                            <td>Type</td>
+                            <td>
+                                <select id="imageryTypeDropdown" data-bind="value: imageryType"
+                                        onchange="imageryTypeDropdownOnchange()">
+                                    <option value="wms" selected="selected">WMS</option>
+                                    <option value="wmts">WMTS</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 45%;">URL (*)</td>
+                            <td style="width: 55%;">
+                                <input type="text" data-bind="value: url">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Name (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: name">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sub-layers (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: layers">
+                            </td>
+                        </tr>
+                        <tr id="wmtsStyleRow" style="display: none;">
+                            <td>Style (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: tileStyle">
+                            </td>
+                        </tr>
+                        <tr id="wmtsMatrixSetIdRow" style="display: none;">
+                            <td>tileMatrixSetID (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: tileMatrixSetId">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Icon URL</td>
+                            <td>
+                                <input type="text" data-bind="value: iconUrl">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Tooltip</td>
+                            <td>
+                                <input type="text" data-bind="value: tooltip">
+                            </td>
+                        </tr>
+                        <tr id="additionalParametersRow">
+                            <td>Other parameters</td>
+                            <td>
+                                <input type="text" data-bind="value: additionalParameters">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Proxy URL</td>
+                            <td>
+                                <input type="text" data-bind="value: proxyUrl">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="citydb_long_container">
+                        <button id="addWMSButton" style="width: 100%;" type="button" class="cesium-button"
+                                onclick="addWebMapServiceProvider()">Add / Update Imagery Layer
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <div style="width: 100%;">
+                <!-- add Terrain panel -->
+                <div class="citydb_short_container" onclick="showAddTerrainPanel()">
+                    <select style="width: 100%;" class="cesium-button">
+                        <option>Terrain Layer</option>
+                    </select>
+                    <div class="citydb_overSelect"></div>
+                </div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="removeTerrainProvider()">
+                        Remove terrain layer
+                    </button>
+                </div>
+                <div id="citydb_addterrainpanel" class="citydb_dynamic_box">
+                    <table class="citydb_inputtable">
+                        <tbody>
+                        <tr>
+                            <td style="width: 45%;">URL (*)</td>
+                            <td style="width: 55%;">
+                                <input type="text" data-bind="value: url">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Name (*)</td>
+                            <td>
+                                <input type="text" data-bind="value: name">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Icon URL</td>
+                            <td>
+                                <input type="text" data-bind="value: iconUrl">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Tooltip</td>
+                            <td>
+                                <input type="text" data-bind="value: tooltip">
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <div class="citydb_long_container">
+                        <button style="width: 100%;" type="button" class="cesium-button" onclick="addTerrainProvider()">
+                            Add / Update Terrain Layer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="width: 100%;">
+                <!-- add splash window -->
+                <div class="citydb_short_container" onclick="showAddSplashWindow()">
+                    <select style="width: 100%;" class="cesium-button">
+                        <option>Add Splash Window</option>
+                    </select>
+                    <div class="citydb_overSelect"></div>
+                </div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button"
+                            onclick="splashController.removeSplashWindow(jQuery)">Remove Splash Window
+                    </button>
+                </div>
+                <div id="citydb_addsplashwindow" class="citydb_dynamic_box">
+                    <table class="citydb_inputtable">
+                        <tbody>
+                        <tr>
+                            <td style="width: 45%;">URL (*)</td>
+                            <td style="width: 55%;">
+                                <input type="text" data-bind="value: url">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Show on start</td>
+                            <td>
+                                <input id="showOnStart_checkbox" type="checkbox" data-bind="checked: showOnStart">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="citydb_long_container">
+                        <button style="width: 100%;" type="button" class="cesium-button"
+                                onclick="splashController.addSplashWindow(jQuery)">Add Splash Window
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="citydb_long_container" onmouseover="listHighlightedObjects()">
+                <select id="citydb_highlightinglist" style="width: 100%;" class="cesium-button"
+                        onchange="flyToHighlightedObject()">
+                    <option selected="selected" disabled="disabled">Choose highlighted Object</option>
+                </select>
+            </div>
+            <div class="citydb_long_container" onmouseover="listHiddenObjects()">
+                <select id="citydb_hiddenlist" style="width: 100%;" class="cesium-button"
+                        onchange="flyToHiddenObject()">
+                    <option selected="selected" disabled="disabled">Choose hidden Object</option>
+                </select>
+            </div>
+            <div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="showSceneLink()">Generate
+                        Scene Link
+                    </button>
+                </div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="hideSelectedObjects()">
+                        Hide selected Objects
+                    </button>
+                </div>
+            </div>
+            <div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="clearHighlight()">Clear
+                        Highlighting
+                    </button>
+                </div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="showHiddenObjects()">Show
+                        Hidden Objects
+                    </button>
+                </div>
+            </div>
+            <div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="createScreenshot()">Create
+                        Screenshot
+                    </button>
+                </div>
+                <div class="citydb_short_container">
+                    <button type="button" style="width: 100%;" class="cesium-button" onclick="printCurrentview()">Print
+                        current view
+                    </button>
+                </div>
+            </div>
+            <div>
+                <div class="citydb_short_container">
+                    <button id="toggleShadowButton" type="button" style="width: 100%;" class="cesium-button"
+                            onclick="toggleShadows()">Toggle
+                        Shadows
+                    </button>
+                </div>
+                <div class="citydb_short_container">
+                    <button id="toggleTerrainShadowButton" type="button" style="width: 100%;" class="cesium-button"
+                            onclick="toggleTerrainShadows()">
+                        Toggle Terrain Shadows
+                    </button>
+                </div>
+            </div>
+            <div class="citydb_long_container">
+                <select id="citydb_showinexternalmaps" style="width: 100%;" onchange="showInExternalMaps()"
+                        class="cesium-button">
+                    <option selected="selected" disabled="disabled">Show the selected object in External Maps</option>
+                    <option value="google">Google StreetView</option>
+                    <option value="osm"> OpenStreetMap</option>
+                    <option value="bing">BingMaps ObliqueView</option>
+                    <option value="dual">DualMaps</option>
+                </select>
+            </div>
+            <div id="toolbar"></div>
         </div>
+    </div>
+</div>
+
+<!-- GPS button -->
+<span id="gpsSpan" class="cesium-sceneModePicker-wrapper cesium-toolbar-button">
+    <button id="gpsButtonMain" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-button3D gps-button-main"
+            title="Geolocation">
+    </button>
+    <button id="gpsButtonSingle" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-single"
+            title="Current geolocation">
+    </button>
+    <button id="gpsButtonLiveOri" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-live-ori"
+            title="Track orientation (fixed position)">
+    </button>
+    <button id="gpsButtonLivePosOri" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-live-pos-ori"
+            title="Track position and orientation">
+    </button>
+    <button id="gpsButtonOff" type="button"
+            class="cesium-button cesium-toolbar-button cesium-sceneModePicker-dropDown-icon cesium-sceneModePicker-hidden gps-button-off"
+            title="Disable geolocation">
+    </button>
+</span>
+
+<!-- Splash window -->
+<div class="splashscreen-buttons">
+    <input id="not_show_again_button" type="button" value="Ignore"
+           onclick="splashController.ignoreSplashWindow(jQuery)">
+    <input id="close_button" type="button" value="Close" onclick="splashController.closeSplashWindow(jQuery)">
+</div>
+<div id="splashwindow_iframe" class="splash-wrapper">
+    <div class="splash-iframe-container">
+        <iframe id="splashwindow_iframe_content" src="" frameborder="0"></iframe>
+    </div>
+</div>
 
 
-        <script>
-            var expanded = false;
-            function showToolbox() {
-                var citydb_toolbox = document.getElementById("citydb_toolbox");
-                if (!expanded) {
-                    citydb_toolbox.style.display = "block";
-                    expanded = true;
-                } else {
-                    citydb_toolbox.style.display = "none";
-                    expanded = false;
-                }
-            }
+<script>
+    var expanded = false;
 
-            var expanded2 = false;
-            function showAddLayerPanel() {
-                var citydb_addlayerpanel = document.getElementById("citydb_addlayerpanel");
-                if (!expanded2) {
-                    citydb_addlayerpanel.style.display = "block";
-                    expanded2 = true;
-                } else {
-                    citydb_addlayerpanel.style.display = "none";
-                    expanded2 = false;
-                }
-            }
+    function showToolbox() {
+        var citydb_toolbox = document.getElementById("citydb_toolbox");
+        if (!expanded) {
+            citydb_toolbox.style.display = "block";
+            expanded = true;
+        } else {
+            citydb_toolbox.style.display = "none";
+            expanded = false;
+        }
+    }
 
-            var expanded3 = false;
-            function showAddWMSPanel() {
-                var citydb_addwmspanel = document.getElementById("citydb_addwmspanel");
-                if (!expanded3) {
-                    citydb_addwmspanel.style.display = "block";
-                    expanded3 = true;
-                } else {
-                    citydb_addwmspanel.style.display = "none";
-                    expanded3 = false;
-                }
-            }
+    var expanded2 = false;
 
-            var expanded4 = false;
-            function showAddTerrainPanel() {
-                var citydb_addterrainpanel = document.getElementById("citydb_addterrainpanel");
-                if (!expanded4) {
-                    citydb_addterrainpanel.style.display = "block";
-                    expanded4 = true;
-                } else {
-                    citydb_addterrainpanel.style.display = "none";
-                    expanded4 = false;
-                }
-            }
+    function showAddLayerPanel() {
+        var citydb_addlayerpanel = document.getElementById("citydb_addlayerpanel");
+        if (!expanded2) {
+            citydb_addlayerpanel.style.display = "block";
+            expanded2 = true;
+        } else {
+            citydb_addlayerpanel.style.display = "none";
+            expanded2 = false;
+        }
+    }
 
-            var expanded5 = false;
-            function showAddSplashWindow() {
-                var citydb_addsplashwindow = document.getElementById("citydb_addsplashwindow");
-                if (!expanded5) {
-                    citydb_addsplashwindow.style.display = "block";
-                    expanded5 = true;
-                } else {
-                    citydb_addsplashwindow.style.display = "none";
-                    expanded5 = false;
-                }
-            }
-        </script>
-        <script src="script.js"></script>
-    </body>
+    var expanded3 = false;
+
+    function showAddWMSPanel() {
+        const citydb_addwmspanel = document.getElementById("citydb_addwmspanel");
+        if (!expanded3) {
+            citydb_addwmspanel.style.display = "block";
+            expanded3 = true;
+        } else {
+            citydb_addwmspanel.style.display = "none";
+            expanded3 = false;
+        }
+    }
+
+    var expanded4 = false;
+
+    function showAddTerrainPanel() {
+        var citydb_addterrainpanel = document.getElementById("citydb_addterrainpanel");
+        if (!expanded4) {
+            citydb_addterrainpanel.style.display = "block";
+            expanded4 = true;
+        } else {
+            citydb_addterrainpanel.style.display = "none";
+            expanded4 = false;
+        }
+    }
+
+    var expanded5 = false;
+
+    function showAddSplashWindow() {
+        var citydb_addsplashwindow = document.getElementById("citydb_addsplashwindow");
+        if (!expanded5) {
+            citydb_addsplashwindow.style.display = "block";
+            expanded5 = true;
+        } else {
+            citydb_addsplashwindow.style.display = "none";
+            expanded5 = false;
+        }
+    }
+</script>
+<script src="script.js"></script>
+</body>
 </html>

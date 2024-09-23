@@ -31,11 +31,18 @@
 var urlController = new UrlController();
 
 /*---------------------------------  set globe variables  ----------------------------------------*/
-// BingMapsAPI Key for Bing Imagery Layers and Geocoder
+// Bing Token for Bing Imagery Layers and Geocoder
 // If this is not valid, the Bing Imagery Layers will be removed and the Bing Geocoder will be replaced with OSM Nominatim
 var bingToken = urlController.getUrlParaValue('bingToken', window.location.href, CitydbUtil);
 if (Cesium.defined(bingToken) && bingToken !== "") {
-    Cesium.BingMapsApi.defaultKey = bingToken;
+    new Cesium.BingMapsImageryProvider({
+        url: 'https://dev.virtualearth.net',
+        key: bingToken,
+        mapStyle: Cesium.BingMapsStyle.AERIAL
+    });
+    new Cesium.BingMapsGeocoderService({
+        key: bingToken
+    });
 }
 
 // Define clock to be animated per default
@@ -57,12 +64,12 @@ var cesiumViewerOptions = {
     clockViewModel: new Cesium.ClockViewModel(clock)
 }
 
-// If neither BingMapsAPI key nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
+// If neither Bing Token nor ionToken is present, use the OpenStreetMap Geocoder Nominatim
 var ionToken = urlController.getUrlParaValue('ionToken', window.location.href, CitydbUtil);
 if (Cesium.defined(ionToken) && ionToken !== "") {
     Cesium.Ion.defaultAccessToken = ionToken;
 }
-if ((!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "")
+if ((!Cesium.defined(bingToken) || bingToken === "")
     && (!Cesium.defined(ionToken) || ionToken === "")) {
     cesiumViewerOptions.geocoder = new OpenStreetMapNominatimGeocoder();
 }
@@ -71,7 +78,8 @@ var cesiumViewer = new Cesium.Viewer('cesiumContainer', cesiumViewerOptions);
 
 adjustIonFeatures();
 
-navigationInitialization('cesiumContainer', cesiumViewer);
+//navigationInitialization('cesiumContainer', cesiumViewer);
+cesiumViewer.extend(Cesium.viewerCesiumNavigationMixin, {});
 
 var cesiumCamera = cesiumViewer.scene.camera;
 var webMap = new WebMap3DCityDB(cesiumViewer);
@@ -82,7 +90,7 @@ var addLayerViewModel = {
     name: "",
     layerDataType: "",
     layerProxy: false,
-    layerClampToGround: true,
+    layerClampToGround: false,
     gltfVersion: "",
     thematicDataUrl: "",
     thematicDataSource: "",
@@ -101,13 +109,16 @@ Cesium.knockout.track(addLayerViewModel);
 Cesium.knockout.applyBindings(addLayerViewModel, document.getElementById('citydb_addlayerpanel'));
 
 var addWmsViewModel = {
-    name: '',
-    iconUrl: '',
-    tooltip: '',
-    url: '',
-    layers: '',
-    additionalParameters: '',
-    proxyUrl: '/proxy/'
+    imageryType: "",
+    url: "",
+    name: "",
+    iconUrl: "",
+    tooltip: "",
+    layers: "",
+    tileStyle: "",
+    tileMatrixSetId: "",
+    additionalParameters: "",
+    proxyUrl: "/proxy/"
 };
 Cesium.knockout.track(addWmsViewModel);
 Cesium.knockout.applyBindings(addWmsViewModel, document.getElementById('citydb_addwmspanel'));
@@ -147,19 +158,18 @@ function initClient() {
     // init progress indicator gif
     document.getElementById('loadingIndicator').style.display = 'none';
 
-    // activate mouseClick Events		
-    webMap.activateMouseClickEvents(true);
-    webMap.activateMouseMoveEvents(true);
+    // webMap events
     webMap.activateViewChangedEvent(true);
+    webMap.registerMouseEventHandlers(cesiumViewer);
 
     // add Copyrights, TUM, 3DCityDB or more...
     var creditDisplay = cesiumViewer.scene.frameState.creditDisplay;
 
-    var citydbCreditLogo = new Cesium.Credit('<a href="https://www.3dcitydb.org/" target="_blank"><img src="https://3dcitydb.org/3dcitydb/fileadmin/public/logos/3dcitydb_logo.png" title="3DCityDB"></a>');
-    creditDisplay.addDefaultCredit(citydbCreditLogo);
+    var citydbCreditLogo = new Cesium.Credit('<a href="https://www.3dcitydb.org/" target="_blank"><img src="https://3dcitydb.org/3dcitydb/fileadmin/public/logos/3dcitydb_logo.png" title="3DCityDB"></a>', true);
+    creditDisplay.addStaticCredit(citydbCreditLogo);
 
-    var tumCreditLogo = new Cesium.Credit('<a href="https://www.gis.bgu.tum.de/en/home/" target="_blank">© 2018 Chair of Geoinformatics, TU Munich</a>');
-    creditDisplay.addDefaultCredit(tumCreditLogo);
+    var tumCreditLogo = new Cesium.Credit('<a href="https://www.asg.ed.tum.de/en/gis/" target="_blank">© 2024 Chair of Geoinformatics, TU Munich</a>', true);
+    creditDisplay.addStaticCredit(tumCreditLogo);
 
     // activate debug mode
     var debugStr = urlController.getUrlParaValue('debug', window.location.href, CitydbUtil);
@@ -197,8 +207,16 @@ function initClient() {
     observeActiveLayer();
 
     // Zoom to desired camera position and load layers if encoded in the url...	
-    zoomToDefaultCameraPosition().then(function (info) {
-        var layers = urlController.getLayersFromUrl(window.location.href, CitydbUtil, CitydbKmlLayer, Cesium3DTilesDataLayer, Cesium);
+    Promise.resolve(zoomToDefaultCameraPosition()).then(function (info) {
+        var layers = urlController.getLayersFromUrl(
+            window.location.href,
+            CitydbUtil,
+            CitydbKmlLayer,
+            Cesium3DTilesDataLayer,
+            CitydbI3SLayer,
+            CitydbGeoJSONLayer,
+            Cesium
+        );
         loadLayerGroup(layers);
 
         var basemapConfigString = urlController.getUrlParaValue('basemap', window.location.href, CitydbUtil);
@@ -209,9 +227,9 @@ function initClient() {
             }
             addWebMapServiceProvider();
         }
-        
+
         var cesiumWorldTerrainString = urlController.getUrlParaValue('cesiumWorldTerrain', window.location.href, CitydbUtil);
-        if(cesiumWorldTerrainString === "true") {
+        if (cesiumWorldTerrainString === "true") {
             // if the Cesium World Terrain is given in the URL --> activate, else other terrains
             cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
             var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
@@ -226,6 +244,15 @@ function initClient() {
                 addTerrainProvider();
             }
         }
+
+        // Visually highlight toggle buttons
+        handleToggleButton("toggleShadowButton", cesiumViewer.shadows);
+        handleToggleButton("toggleTerrainShadowButton", cesiumViewer.terrainShadows);
+
+        // Adjust GUI based on given values
+        layerDataTypeDropdownOnchange();
+        thematicDataSourceAndTableTypeDropdownOnchange();
+        imageryTypeDropdownOnchange();
     });
 
     // jump to a timepoint
@@ -266,7 +293,7 @@ function initClient() {
             clockElement._flatpickr.open();
         }
     });
-    cesiumViewer.timeline.addEventListener("click", function() {
+    cesiumViewer.timeline.addEventListener("click", function () {
         clockElement._flatpickr.setDate(new Date(Cesium.JulianDate.toDate(cesiumViewer.clock.currentTime).toUTCString().substr(0, 25)));
     })
 
@@ -286,7 +313,7 @@ function observeActiveLayer() {
 
     observable.subscribe(function (selectedLayer) {
         if (Cesium.defined(selectedLayer)) {
-            document.getElementById(selectedLayer.id).childNodes[0].checked = true;
+            document.getElementById(selectedLayer.layerId).childNodes[0].checked = true;
 
             updateAddLayerViewModel(selectedLayer);
         }
@@ -334,8 +361,8 @@ function adjustIonFeatures() {
 
         // Cesium ion uses Bing Maps by default -> no need to insert Bing token if an ion token is already available
 
-        // If neither BingMapsAPI key nor ion access token is present, remove Bing Maps from the Imagery Providers
-        if (!Cesium.defined(Cesium.BingMapsApi.defaultKey) || Cesium.BingMapsApi.defaultKey === "") {
+        // If neither Bing Token nor ion access token is present, remove Bing Maps from the Imagery Providers
+        if (!Cesium.defined(bingToken) || bingToken === "") {
             var imageryProviders = cesiumViewer.baseLayerPicker.viewModel.imageryProviderViewModels;
             var i = 0;
             while (i < imageryProviders.length) {
@@ -348,7 +375,7 @@ function adjustIonFeatures() {
             }
 
             // Set default imagery to ESRI World Imagery
-            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[3];
+            cesiumViewer.baseLayerPicker.viewModel.selectedImagery = imageryProviders[0];
 
             // Disable auto-complete of OSM Geocoder due to OSM usage limitations
             // see https://operations.osmfoundation.org/policies/nominatim/#unacceptable-use
@@ -377,14 +404,20 @@ function inspectTileStatus() {
             var layer = layers[i];
             if (layers[i].active) {
                 if (layer instanceof CitydbKmlLayer) {
-                    numberOfshowedTiles = numberOfshowedTiles + Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
-                    numberOfCachedTiles = numberOfCachedTiles + Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
+                    numberOfshowedTiles += Object.keys(layers[i].citydbKmlTilingManager.dataPoolKml).length;
+                    numberOfCachedTiles += Object.keys(layers[i].citydbKmlTilingManager.networklinkCache).length;
                     numberOfTasks = numberOfTasks + layers[i].citydbKmlTilingManager.taskNumber;
-                }
-                if (layer instanceof Cesium3DTilesDataLayer) {
-                    numberOfshowedTiles = numberOfshowedTiles + layer._tileset._selectedTiles.length;
-                    numberOfCachedTiles = numberOfCachedTiles + layer._tileset._statistics.numberContentReady;
+                } else if (layer instanceof Cesium3DTilesDataLayer) {
+                    numberOfshowedTiles += layer._tileset._selectedTiles.length;
+                    numberOfCachedTiles += layer._tileset._statistics.numberContentReady;
                     tilesLoaded = layer._tileset._tilesLoaded;
+                } else if (layer instanceof CitydbI3SLayer) {
+                    for (var i = 0; i < layer._i3sProvider._layers.length; i++) {
+                        var iLayer = layer._i3sProvider.layers[i];
+                        numberOfshowedTiles += iLayer._tileset._selectedTiles.length;
+                        numberOfCachedTiles += iLayer._tileset._statistics.numberContentReady;
+                        tilesLoaded += iLayer._tileset._tilesLoaded;
+                    }
                 }
             }
         }
@@ -400,31 +433,37 @@ function inspectTileStatus() {
     }, 200);
 }
 
-function listHighlightedObjects() {
-    var highlightingListElement = document.getElementById("citydb_highlightinglist");
+let highlightedIdObjects = {};
 
-    emptySelectBox(highlightingListElement, function() {
-        var highlightedObjects = webMap.getAllHighlightedObjects();
-        for (var i = 0; i < highlightedObjects.length; i++) {
+function listHighlightedObjects() {
+    const highlightingListElement = document.getElementById("citydb_highlightinglist");
+
+    emptySelectBox(highlightingListElement, function () {
+        highlightedIdObjects = webMap.getAllHighlightedObjects();
+        for (let key in highlightedIdObjects) {
             var option = document.createElement("option");
-            option.text = highlightedObjects[i];
+            option.text = key;
+            option.value = key;
             highlightingListElement.add(option);
-            highlightingListElement.selectedIndex = 0;
         }
+        highlightingListElement.selectedIndex = 0;
     });
 }
 
-function listHiddenObjects() {
-    var hidddenListElement = document.getElementById("citydb_hiddenlist");
+let hiddenIdObjects = {};
 
-    emptySelectBox(hidddenListElement, function() {
-        var hiddenObjects = webMap.getAllHiddenObjects();
-        for (var i = 0; i < hiddenObjects.length; i++) {
+function listHiddenObjects() {
+    const hidddenListElement = document.getElementById("citydb_hiddenlist");
+
+    emptySelectBox(hidddenListElement, function () {
+        hiddenIdObjects = webMap.getAllHiddenObjects();
+        for (let key in hiddenIdObjects) {
             var option = document.createElement("option");
-            option.text = hiddenObjects[i];
+            option.text = key;
+            option.value = key;
             hidddenListElement.add(option);
-            hidddenListElement.selectedIndex = 0;
         }
+        hidddenListElement.selectedIndex = 0;
     });
 }
 
@@ -436,21 +475,38 @@ function emptySelectBox(selectElement, callback) {
     callback();
 }
 
-function flyToClickedObject(obj) {
-    // The web client stores clicked or ctrlclicked entities in a dictionary clickedEntities with {id, entity} as KVP.
-    // The function flyTo from Cesium Viewer will be first employed to fly to the selected entity.
-    // NOTE: This flyTo function will fail if the target entity has been unloaded (e.g. user has moved camera away).
-    // In this case, the function zoomToObjectById shall be used instead.
-    // NOTE: This zoomToObjectById function requires a JSON file containing the IDs and coordinates of objects.
-    cesiumViewer.flyTo(clickedEntities[obj.value]).then(function (result) {
-        if (!result) {
-            zoomToObjectById(obj.value);
-        }
-    }).otherwise(function (error) {
-        zoomToObjectById(obj.value);
-    });
+function flyToHighlightedObject() {
+    flyToObject(true);
+}
 
-    obj.selectedIndex = 0;
+function flyToHiddenObject() {
+    flyToObject(false);
+}
+
+function flyToObject(highlighted) {
+    let object;
+    if (highlighted) {
+        let listElement = document.getElementById("citydb_highlightinglist");
+        const selectedValue = listElement.value;
+        object = highlightedIdObjects[selectedValue];
+    } else {
+        let listElement = document.getElementById("citydb_hiddenlist");
+        const selectedValue = listElement.value;
+        object = hiddenIdObjects[selectedValue];
+    }
+
+    // flyTo function only executes for shown entities
+    // -> hidden entities will not be flown to
+    // -> store camera position when entites were clicked
+    if (object instanceof Cesium.Entity) {
+        cesiumViewer.camera.flyToBoundingSphere(object._storedBoundingSphere, {
+            offset: object._storedHeadingPitchRange
+        });
+    } else if (object instanceof Cesium.Cesium3DTileFeature) {
+        cesiumViewer.camera.flyToBoundingSphere(object._storedBoundingSphere, {
+            orientation: object._storedOrientation
+        });
+    }
 }
 
 function saveLayerSettings() {
@@ -481,27 +537,28 @@ function saveLayerSettings() {
     // update GUI:
     var nodes = document.getElementById('citydb_layerlistpanel').childNodes;
     for (var i = 0; i < nodes.length; i += 3) {
-        var layerOption = nodes[i];
-        if (layerOption.id == activeLayer.id) {
+        const layerOption = nodes[i];
+        if (layerOption.id === activeLayer.layerId) {
             layerOption.childNodes[2].innerHTML = activeLayer.name;
         }
     }
 
     document.getElementById('loadingIndicator').style.display = 'block';
-    var promise = activeLayer.reActivate();
-    Cesium.when(promise, function (result) {
+    Promise.resolve(activeLayer.reActivate()).then((result) => {
         document.getElementById('loadingIndicator').style.display = 'none';
-    }, function (error) {
+        webMap.clearSelectedObjects();
+    }, (error) => {
         CitydbUtil.showAlertWindow("OK", "Error", error.message);
         document.getElementById('loadingIndicator').style.display = 'none';
-    })
+        webMap.clearSelectedObjects();
+    });
 
     function applySaving(propertyName, activeLayer) {
         var newValue = addLayerViewModel[propertyName];
         if (propertyName === 'maxLodPixels' && newValue == -1) {
             newValue = Number.MAX_VALUE;
         }
-        if (Cesium.isArray(newValue)) {
+        if (Array.isArray(newValue)) {
             activeLayer[propertyName] = newValue[0];
         } else {
             activeLayer[propertyName] = newValue;
@@ -510,19 +567,18 @@ function saveLayerSettings() {
 }
 
 function loadLayerGroup(_layers) {
-    if (_layers.length == 0)
+    if (_layers.length === 0)
         return;
 
     document.getElementById('loadingIndicator').style.display = 'block';
     _loadLayer(0);
 
+    // Recursive for all layers
     function _loadLayer(index) {
-        var promise = webMap.addLayer(_layers[index]);
-        Cesium.when(promise, function (addedLayer) {
+        Promise.resolve(webMap.addLayer(_layers[index], createInfoTable)).then((addedLayer) => {
             console.log(addedLayer);
             var options = getDataSourceControllerOptions(addedLayer);
             addedLayer.dataSourceController = new DataSourceController(addedLayer.thematicDataSource, signInController, options);
-            addEventListeners(addedLayer);
             addLayerToList(addedLayer);
             if (index < (_layers.length - 1)) {
                 index++;
@@ -536,7 +592,7 @@ function loadLayerGroup(_layers) {
 
                 thematicDataSourceAndTableTypeDropdownOnchange();
             }
-        }).otherwise(function (error) {
+        }, (error) => {
             CitydbUtil.showAlertWindow("OK", "Error", error.message);
             console.log(error.stack);
             document.getElementById('loadingIndicator').style.display = 'none';
@@ -551,7 +607,7 @@ function addLayerToList(layer) {
     radio.onchange = function (event) {
         var targetRadio = event.target;
         var layerId = targetRadio.parentNode.id;
-        webMap.activeLayer = webMap.getLayerbyId(layerId);
+        webMap.activeLayer = webMap.getLayerById(layerId);
         console.log(webMap.activeLayer);
     };
 
@@ -562,10 +618,11 @@ function addLayerToList(layer) {
     checkbox.onchange = function (event) {
         var checkbox = event.target;
         var layerId = checkbox.parentNode.id;
-        var citydbLayer = webMap.getLayerbyId(layerId);
+        var citydbLayer = webMap.getLayerById(layerId);
         if (checkbox.checked) {
             console.log("Layer " + citydbLayer.name + " is visible now!");
             citydbLayer.activate(true);
+            webMap.clearSelectedObjects();
         } else {
             console.log("Layer " + citydbLayer.name + " is not visible now!");
             citydbLayer.activate(false);
@@ -576,7 +633,7 @@ function addLayerToList(layer) {
     label.appendChild(document.createTextNode(layer.name));
 
     var layerOption = document.createElement('div');
-    layerOption.id = layer.id;
+    layerOption.id = layer.layerId;
     layerOption.appendChild(radio);
     layerOption.appendChild(checkbox);
     layerOption.appendChild(label);
@@ -584,7 +641,7 @@ function addLayerToList(layer) {
     label.ondblclick = function (event) {
         event.preventDefault();
         var layerId = event.target.parentNode.id;
-        var citydbLayer = webMap.getLayerbyId(layerId);
+        var citydbLayer = webMap.getLayerById(layerId);
         citydbLayer.zoomToStartPosition();
     }
 
@@ -616,12 +673,18 @@ function addEventListeners(layer) {
                 id: objectId
             });
             cesiumViewer.selectedEntity = targetEntity;
+        } else if (layer instanceof CitydbI3SLayer) {
+            console.log(object);
+            // TODO
+        } else if (layer instanceof CitydbGeoJSONLayer) {
+            console.log(object);
+            // TODO
         }
 
         // Save this clicked object for later use (such as zooming using ID)
         clickedEntities[objectId] = targetEntity;
 
-        return [objectId ,targetEntity];
+        return [objectId, targetEntity];
     }
 
     layer.registerEventHandler("CLICK", function (object) {
@@ -635,7 +698,7 @@ function addEventListeners(layer) {
 }
 
 function zoomToDefaultCameraPosition() {
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
     var latitudeStr = urlController.getUrlParaValue('latitude', window.location.href, CitydbUtil);
     var longitudeStr = urlController.getUrlParaValue('longitude', window.location.href, CitydbUtil);
     var heightStr = urlController.getUrlParaValue('height', window.location.href, CitydbUtil);
@@ -661,7 +724,7 @@ function zoomToDefaultCameraPosition() {
 }
 
 function zoomToDefaultCameraPosition_expired() {
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
     var cesiumCamera = cesiumViewer.scene.camera;
     var latstr = urlController.getUrlParaValue('lat', window.location.href, CitydbUtil);
     var lonstr = urlController.getUrlParaValue('lon', window.location.href, CitydbUtil);
@@ -708,13 +771,12 @@ function zoomToDefaultCameraPosition_expired() {
     } else {
         // default camera postion
         deferred.resolve("fly to the default camera position");
-        ;
     }
     return deferred;
 }
 
 function flyToCameraPosition(cameraPosition) {
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
     var cesiumCamera = cesiumViewer.scene.camera;
     var longitude = cameraPosition.longitude;
     var latitude = cameraPosition.latitude;
@@ -755,36 +817,18 @@ function showSceneLink() {
 }
 
 // Clear Highlighting effect of all highlighted objects
-function clearhighlight() {
-    var layers = webMap._layers;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].active) {
-            layers[i].unHighlightAllObjects();
-        }
-    }
-    cesiumViewer.selectedEntity = undefined;
+function clearHighlight() {
+    webMap.clearSelectedObjects();
 }
 
 // hide the selected objects
 function hideSelectedObjects() {
-    var layers = webMap._layers;
-    var objectIds;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].active) {
-            objectIds = Object.keys(layers[i].highlightedObjects);
-            layers[i].hideObjects(objectIds);
-        }
-    }
+    webMap.hideSelectedObjects();
 }
 
 // show the hidden objects
 function showHiddenObjects() {
-    var layers = webMap._layers;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].active) {
-            layers[i].showAllObjects();
-        }
-    }
+    webMap.showHiddenObjects();
 }
 
 function zoomToObjectById(gmlId, callBackFunc, errorCallbackFunc) {
@@ -879,7 +923,7 @@ function flyToMapLocation(lat, lon, callBackFunc) {
 }
 
 function addNewLayer() {
-    var _layers = new Array();
+    var _layers = [];
     var options = {
         url: addLayerViewModel.url.trim(),
         name: addLayerViewModel.name.trim(),
@@ -900,11 +944,15 @@ function addNewLayer() {
         maxCountOfVisibleTiles: addLayerViewModel.maxCountOfVisibleTiles,
         maximumScreenSpaceError: addLayerViewModel.maximumScreenSpaceError
     }
-    
+
     // since Cesium 3D Tiles also require name.json in the URL, it must be checked first
     var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
     if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'Cesium 3D Tiles') {
         _layers.push(new Cesium3DTilesDataLayer(options));
+    } else if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'i3s') {
+        _layers.push(new CitydbI3SLayer(options));
+    } else if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value === 'geojson') {
+        _layers.push(new CitydbGeoJSONLayer(options));
     } else if (['kml', 'kmz', 'json', 'czml'].indexOf(CitydbUtil.get_suffix_from_filename(options.url)) > -1) {
         _layers.push(new CitydbKmlLayer(options));
     }
@@ -915,7 +963,7 @@ function addNewLayer() {
 function removeSelectedLayer() {
     var layer = webMap.activeLayer;
     if (Cesium.defined(layer)) {
-        var layerId = layer.id;
+        const layerId = layer.layerId;
         document.getElementById(layerId).remove();
         webMap.removeLayer(layerId);
         // update active layer of the globe webMap
@@ -929,49 +977,113 @@ function removeSelectedLayer() {
 }
 
 function addWebMapServiceProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var wmsProviderViewModel = new Cesium.ProviderViewModel({
-        name: addWmsViewModel.name.trim(),
-        iconUrl: addWmsViewModel.iconUrl.trim(),
-        tooltip: addWmsViewModel.tooltip.trim(),
-        creationFunction: function () {
-            return new Cesium.WebMapServiceImageryProvider({
-                url: new Cesium.Resource({url: addWmsViewModel.url.trim(), proxy: addWmsViewModel.proxyUrl.trim().length == 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())}),
-                layers: addWmsViewModel.layers.trim(),
-                parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
+    function update(callback) {
+        removeImageryProvider();
+        callback();
+    }
+
+    update(function () {
+        const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+        let iconUrl = addWmsViewModel.iconUrl.trim();
+        if (!Cesium.defined(iconUrl) || iconUrl === "") {
+            iconUrl = "images/icon_wms.png";
+        }
+
+        let providerViewModel;
+        if (addWmsViewModel.imageryType === "wms") {
+            providerViewModel = new Cesium.ProviderViewModel({
+                name: addWmsViewModel.name.trim(),
+                iconUrl: iconUrl,
+                tooltip: addWmsViewModel.tooltip.trim(),
+                creationFunction: function () {
+                    return new Cesium.WebMapServiceImageryProvider({
+                        url: new Cesium.Resource({
+                            url: addWmsViewModel.url.trim(),
+                            proxy: addWmsViewModel.proxyUrl.trim().length === 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                        }),
+                        layers: addWmsViewModel.layers.trim(),
+                        parameters: Cesium.queryToObject(addWmsViewModel.additionalParameters.trim())
+                    });
+                }
+            });
+        } else if (addWmsViewModel.imageryType === "wmts") {
+            providerViewModel = new Cesium.ProviderViewModel({
+                name: addWmsViewModel.name.trim(),
+                iconUrl: iconUrl,
+                tooltip: addWmsViewModel.tooltip.trim(),
+                creationFunction: function () {
+                    return new Cesium.WebMapTileServiceImageryProvider({
+                        url: new Cesium.Resource({
+                            url: addWmsViewModel.url.trim(),
+                            proxy: addWmsViewModel.proxyUrl.trim().length === 0 ? null : new Cesium.DefaultProxy(addWmsViewModel.proxyUrl.trim())
+                        }),
+                        layer: addWmsViewModel.layers.trim(),
+                        style: addWmsViewModel.tileStyle.trim(),
+                        tileMatrixSetID: addWmsViewModel.tileMatrixSetId.trim()
+                    });
+                }
             });
         }
+
+        baseLayerPickerViewModel.imageryProviderViewModels.push(providerViewModel);
+        baseLayerPickerViewModel.selectedImagery = providerViewModel;
     });
-    baseLayerPickerViewModel.imageryProviderViewModels.push(wmsProviderViewModel);
-    baseLayerPickerViewModel.selectedImagery = wmsProviderViewModel;
 }
 
 function removeImageryProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var selectedImagery = baseLayerPickerViewModel.selectedImagery;
+    const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+    const selectedImagery = baseLayerPickerViewModel.selectedImagery;
     baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
     baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
 }
 
+function imageryTypeDropdownOnchange() {
+    const imageryTypeDropdown = document.getElementById("imageryTypeDropdown");
+    const selectedValue = imageryTypeDropdown.options[imageryTypeDropdown.selectedIndex].value;
+    if (selectedValue === "wmts") {
+        document.getElementById("wmtsStyleRow").style.display = "";
+        document.getElementById("wmtsMatrixSetIdRow").style.display = "";
+        document.getElementById("additionalParametersRow").display = "none";
+    } else {
+        document.getElementById("wmtsStyleRow").style.display = "none";
+        document.getElementById("wmtsMatrixSetIdRow").style.display = "none";
+        document.getElementById("additionalParametersRow").display = "";
+    }
+    addWmsViewModel["imageryType"] = selectedValue;
+}
+
+
 function addTerrainProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var demProviderViewModel = new Cesium.ProviderViewModel({
-        name: addTerrainViewModel.name.trim(),
-        iconUrl: addTerrainViewModel.iconUrl.trim(),
-        tooltip: addTerrainViewModel.tooltip.trim(),
-        creationFunction: function () {
-            return new Cesium.CesiumTerrainProvider({
-                url: addTerrainViewModel.url.trim()
-            });
+    function update(callback) {
+        removeTerrainProvider();
+        callback();
+    }
+
+    update(function () {
+        let iconUrl = addTerrainViewModel.iconUrl.trim();
+        if (!Cesium.defined(iconUrl) || iconUrl === "") {
+            iconUrl = "images/icon_terrain.png";
         }
-    })
-    baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
-    baseLayerPickerViewModel.selectedTerrain = demProviderViewModel;
+        const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+        Cesium.CesiumTerrainProvider.fromUrl(addTerrainViewModel.url.trim(), {})
+            .then(function (terrainProvider) {
+                const demProviderViewModel = new Cesium.ProviderViewModel({
+                    name: addTerrainViewModel.name.trim(),
+                    iconUrl: iconUrl,
+                    tooltip: addTerrainViewModel.tooltip.trim(),
+                    creationFunction: function () {
+                        return terrainProvider;
+                    }
+                });
+                baseLayerPickerViewModel.terrainProviderViewModels.push(demProviderViewModel);
+                baseLayerPickerViewModel.selectedTerrain = demProviderViewModel;
+            });
+    });
 }
 
 function removeTerrainProvider() {
-    var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-    var selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
+    const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+    const selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
     baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
     baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
 }
@@ -981,9 +1093,9 @@ function createScreenshot() {
     var imageUri = cesiumViewer.canvas.toDataURL();
     var imageWin = window.open("");
     imageWin.document.write("<html><head>" +
-            "<title>" + imageUri + "</title></head><body>" +
-            '<img src="' + imageUri + '"width="100%">' +
-            "</body></html>");
+        "<title>" + imageUri + "</title></head><body>" +
+        '<img src="' + imageUri + '"width="100%">' +
+        "</body></html>");
     return imageWin;
 }
 
@@ -998,47 +1110,91 @@ function printCurrentview() {
 function toggleShadows() {
     cesiumViewer.shadows = !cesiumViewer.shadows;
     if (!cesiumViewer.shadows) {
-        cesiumViewer.terrainShadows = Cesium.ShadowMode.DISABLED;
+        cesiumViewer.shadows = Cesium.ShadowMode.DISABLED;
+        if (cesiumViewer.terrainShadows) {
+            CitydbUtil.showAlertWindow("OK", "Switching off terrain shadows now", 'Please note that terrain shadows for 3D models will also be switched off.',
+                function () {
+                    toggleTerrainShadows();
+                });
+        }
     }
+    handleToggleButton("toggleShadowButton", cesiumViewer.shadows);
 }
 
 function toggleTerrainShadows() {
-    if (cesiumViewer.terrainShadows == Cesium.ShadowMode.ENABLED) {
+    if (cesiumViewer.terrainShadows === Cesium.ShadowMode.ENABLED) {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.DISABLED;
     } else {
         cesiumViewer.terrainShadows = Cesium.ShadowMode.ENABLED;
         if (!cesiumViewer.shadows) {
             CitydbUtil.showAlertWindow("OK", "Switching on terrain shadows now", 'Please note that shadows for 3D models will also be switched on.',
-                    function () {
-                        toggleShadows();
-                    });
+                function () {
+                    toggleShadows();
+                });
         }
+    }
+    handleToggleButton("toggleTerrainShadowButton", cesiumViewer.terrainShadows);
+}
+
+function handleToggleButton(buttonId, isActivated) {
+    const toggleButton = document.getElementById(buttonId);
+    if (isActivated) {
+        toggleButton.style.backgroundColor = "#4CAF50";
+        toggleButton.style.borderColor = "yellow";
+    } else {
+        toggleButton.style.backgroundColor = "#303336";
+        toggleButton.style.borderColor = "#444";
     }
 }
 
 // source https://www.w3resource.com/javascript-exercises/javascript-regexp-exercise-9.php
 function isValidUrl(str) {
-    regexp =  /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+    const regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
     return regexp.test(str);
 }
 
 function createInfoTable(res, citydbLayer) {
-    var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-    var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
-    var gmlid = selectedThematicDataSource === "KML" ? res[1]._id : res[0];
-    var cesiumEntity = res[1];
-
-    var thematicDataUrl = citydbLayer.thematicDataUrl;
+    const cesiumEntity = res[0];
     cesiumEntity.description = "Loading feature information...";
 
-    citydbLayer.dataSourceController.fetchData(gmlid, function (kvp) {
-        if (!kvp) {
+    const kvp = res[1];
+
+    const thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+    const selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+
+    function getGmlid(kvp) {
+        // Search for gmlid in the result, accounting for all key names, case-insensitive
+        const keys = ["gmlid", "gml_id", "gml:id", "gml-id", "objectid", "object_id", "object-id", "id"];
+        let gmlid = {};
+        for (const key in kvp) {
+            if (!keys.includes(key.toLowerCase())) continue;
+            gmlid["key"] = key;
+            gmlid["value"] = kvp[key];
+            break;
+        }
+        return gmlid;
+    }
+
+    function displayKvp(kvp, gmlid) {
+        if (!Cesium.defined(kvp)) {
             cesiumEntity.description = 'No feature information found';
         } else {
             console.log(kvp);
-            var html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
-            for (var key in kvp) {
-                var iValue = kvp[key];
+
+            // Set title of infotable
+            if (cesiumEntity.name !== gmlid["value"] && Cesium.defined(gmlid["value"])) {
+                cesiumEntity.name = gmlid["value"];
+            }
+
+            // Content to display
+            let html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
+            if (Cesium.defined(gmlid["key"]) && Cesium.defined(gmlid["value"])) {
+                html += '<tr><td>' + gmlid["key"] + '</td><td>' + gmlid["value"] + '</td></tr>';
+            }
+            for (const key in kvp) {
+                if (key === gmlid["key"]) continue;
+                if (!Cesium.defined(key) || key.trim() === "") continue;
+                let iValue = kvp[key];
                 // check if this value is a valid URL
                 if (isValidUrl(iValue)) {
                     iValue = '<a href="' + iValue + '" target="_blank">' + iValue + '</a>';
@@ -1049,7 +1205,23 @@ function createInfoTable(res, citydbLayer) {
 
             cesiumEntity.description = html;
         }
-    }, 1000, cesiumEntity);
+    }
+
+    let gmlid = getGmlid(kvp);
+    if (!Cesium.defined(gmlid) || !Cesium.defined(gmlid["key"]) || !Cesium.defined(gmlid["value"])) {
+        gmlid["key"] = "gml_id"; // default
+        gmlid["value"] = cesiumEntity.name; // for KML
+    }
+    if (selectedThematicDataSource === "Embedded") {
+        if (Cesium.defined(res[1])) {
+            displayKvp(res[1], gmlid); // embedded properties are stored here
+        } else {
+            cesiumEntity.description = "Could not load embedded thematic data";
+        }
+    } else {
+        var thematicDataUrl = citydbLayer.thematicDataUrl;
+        citydbLayer.dataSourceController.fetchData(gmlid, displayKvp, 1000, cesiumEntity);
+    }
 
     // fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl).then(function (kvp) {
     //     console.log(kvp);
@@ -1067,7 +1239,7 @@ function createInfoTable(res, citydbLayer) {
 
 function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
     var kvp = {};
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
 
     var spreadsheetKey = thematicDataUrl.split("/")[5];
     var metaLink = 'https://spreadsheets.google.com/feeds/worksheets/' + spreadsheetKey + '/public/full?alt=json-in-script';
@@ -1087,13 +1259,13 @@ function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
                     kvp[key] = value;
                 }
                 deferred.resolve(kvp);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(error);
             });
-        }).otherwise(function (error) {
+        }, function (error) {
             deferred.reject(error);
         });
-    }).otherwise(function (error) {
+    }, function (error) {
         deferred.reject(error);
     });
 
@@ -1102,13 +1274,16 @@ function fetchDataFromGoogleSpreadsheet(gmlid, thematicDataUrl) {
 
 function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
     var kvp = {};
-    var deferred = Cesium.when.defer();
+    var deferred = Cesium.defer();
 
     var tableID = urlController.getUrlParaValue('docid', thematicDataUrl, CitydbUtil);
     var sql = "SELECT * FROM " + tableID + " WHERE GMLID = '" + gmlid + "'";
     var apiKey = "AIzaSyAm9yWCV7JPCTHCJut8whOjARd7pwROFDQ";
     var queryLink = "https://www.googleapis.com/fusiontables/v2/query";
-    new Cesium.Resource({url: queryLink, queryParameters: {sql: sql, key: apiKey}}).fetch({responseType: 'json'}).then(function (data) {
+    new Cesium.Resource({
+        url: queryLink,
+        queryParameters: {sql: sql, key: apiKey}
+    }).fetch({responseType: 'json'}).then(function (data) {
         console.log(data);
         var columns = data.columns;
         var rows = data.rows;
@@ -1119,35 +1294,40 @@ function fetchDataFromGoogleFusionTable(gmlid, thematicDataUrl) {
         }
         console.log(kvp);
         deferred.resolve(kvp);
-    }).otherwise(function (error) {
+    }, function (error) {
         deferred.reject(error);
     });
     return deferred.promise;
 }
 
 function showInExternalMaps() {
-    var mapOptionList = document.getElementById('citydb_showinexternalmaps');
-    var selectedIndex = mapOptionList.selectedIndex;
+    const mapOptionList = document.getElementById('citydb_showinexternalmaps');
+    const selectedIndex = mapOptionList.selectedIndex;
     mapOptionList.selectedIndex = 0;
 
-    var selectedEntity = cesiumViewer.selectedEntity;
+    const selectedEntity = cesiumViewer.selectedEntity;
     if (!Cesium.defined(selectedEntity))
         return;
 
-    var selectedEntityPosition = selectedEntity.position;
-    var wgs84OCoordinate;
+    const selectedEntityPosition = selectedEntity.position;
+    let wgs84OCoordinate;
 
+    let selectedEntityBoundingSphere;
     if (!Cesium.defined(selectedEntityPosition)) {
-        var boundingSphereScratch = new Cesium.BoundingSphere();
-        cesiumViewer._dataSourceDisplay.getBoundingSphere(selectedEntity, false, boundingSphereScratch);
-        wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(boundingSphereScratch.center);
+        selectedEntityBoundingSphere = selectedEntity._storedBoundingSphere; // From Cesium 3D tiles feature
+        if (!Cesium.defined(selectedEntityBoundingSphere)) {
+            const boundingSphereScratch = new Cesium.BoundingSphere();
+            cesiumViewer._dataSourceDisplay.getBoundingSphere(selectedEntity, false, boundingSphereScratch);
+            selectedEntityBoundingSphere = boundingSphereScratch;
+        }
+        wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityBoundingSphere.center);
     } else {
         wgs84OCoordinate = Cesium.Ellipsoid.WGS84.cartesianToCartographic(selectedEntityPosition._value);
 
     }
-    var lat = Cesium.Math.toDegrees(wgs84OCoordinate.latitude);
-    var lon = Cesium.Math.toDegrees(wgs84OCoordinate.longitude);
-    var mapLink = "";
+    const lat = Cesium.Math.toDegrees(wgs84OCoordinate.latitude);
+    const lon = Cesium.Math.toDegrees(wgs84OCoordinate.longitude);
+    let mapLink = "";
 
     switch (selectedIndex) {
         case 1:
@@ -1173,26 +1353,59 @@ function showInExternalMaps() {
 }
 
 function layerDataTypeDropdownOnchange() {
-    var layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
-    if (layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value !== "COLLADA/KML/glTF") {
+    const layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    const selectedValue = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
+    if (selectedValue !== "COLLADA/KML/glTF") {
         document.getElementById("gltfVersionDropdownRow").style.display = "none";
-        document.getElementById("layerProxyAndClampToGround").style.display = "none";
-        document.getElementById("maximumScreenSpaceError").style.display = "";
+        document.getElementById("cityobjectsJsonUrlRow").style.display = "none";
+        document.getElementById("minLodPixelsRow").style.display = "none";
+        document.getElementById("maxLodPixelsRow").style.display = "none";
+        document.getElementById("maxCountOfVisibleTilesRow").style.display = "none";
+        document.getElementById("maxSizeOfCachedTilesRow").style.display = "none";
     } else {
         document.getElementById("gltfVersionDropdownRow").style.display = "";
-        document.getElementById("layerProxyAndClampToGround").style.display = "";
-        document.getElementById("maximumScreenSpaceError").style.display = "none";
+        document.getElementById("cityobjectsJsonUrlRow").style.display = "";
+        document.getElementById("minLodPixelsRow").style.display = "";
+        document.getElementById("maxLodPixelsRow").style.display = "";
+        document.getElementById("maxCountOfVisibleTilesRow").style.display = "";
+        document.getElementById("maxSizeOfCachedTilesRow").style.display = "";
     }
-    addLayerViewModel["layerDataType"] = layerDataTypeDropdown.options[layerDataTypeDropdown.selectedIndex].value;
+
+    if (["COLLADA/KML/glTF", "geojson"].includes(selectedValue)) {
+        document.getElementById("layerProxyAndClampToGround").style.display = "";
+    } else {
+        document.getElementById("layerProxyAndClampToGround").style.display = "none";
+    }
+
+    if (selectedValue !== "Cesium 3D Tiles" && selectedValue !== "i3s") {
+        document.getElementById("maximumScreenSpaceError").style.display = "none";
+    } else {
+        document.getElementById("maximumScreenSpaceError").style.display = "";
+    }
+
+    addLayerViewModel["layerDataType"] = selectedValue;
 }
 
 function thematicDataSourceAndTableTypeDropdownOnchange() {
-    if (webMap && webMap._activeLayer) {
-        var thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-        var selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    const thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
+    const thematicTableTypeDropdownDiv = document.getElementById("thematicTableTypeDropdownDiv");
+    const thematicDataUrlDiv = document.getElementById("thematicDataUrlDiv");
+    if (thematicDataSourceDropdown.value === "Embedded") {
+        thematicTableTypeDropdownDiv.style.display = "none";
+        thematicDataUrlDiv.style = "display: none;";
+    } else if (thematicDataSourceDropdown.value === "OGCFeatureAPI") {
+        thematicTableTypeDropdownDiv.style.display = "none";
+        thematicDataUrlDiv.style.display = "";
+    } else {
+        thematicTableTypeDropdownDiv.style.display = "";
+        thematicDataUrlDiv.style.display = "";
+    }
 
-        var tableTypeDropdown = document.getElementById("tableTypeDropdown");
-        var selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
+    if (webMap && webMap._activeLayer) {
+        const selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+        const tableTypeDropdown = document.getElementById("tableTypeDropdown");
+        const selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex] == null ? ""
+            : tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
 
         addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
         addLayerViewModel["tableType"] = selectedTableType;
@@ -1207,19 +1420,26 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         //     document.getElementById("rowGoogleSheetsClientId").style.display = "none";
         // }
 
-        var options = getDataSourceControllerOptions(webMap._activeLayer);
         // Mashup Data Source Service
-        webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
+        initDataSourceController(selectedThematicDataSource);
     }
 }
 
+function initDataSourceController(selectedThematicDataSource) {
+    if (!webMap._activeLayer.active) return;
+    const options = getDataSourceControllerOptions(webMap._activeLayer);
+    webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
+}
+
 function getDataSourceControllerOptions(layer) {
-    var dataSourceUri = layer.thematicDataUrl === "" ? layer.url : layer.thematicDataUrl;
-    var options = {
+    const dataSourceUri = layer.thematicDataUrl === "" ? layer.url : layer.thematicDataUrl;
+    const layerDataTypeDropdown = document.getElementById("layerDataTypeDropdown");
+    const options = {
         // name: "",
         // type: "",
         // provider: "",
         uri: dataSourceUri,
+        layerType: layerDataTypeDropdown.value,
         tableType: layer.tableType,
         thirdPartyHandler: {
             type: "Cesium",

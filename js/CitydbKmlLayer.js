@@ -25,18 +25,19 @@
  * limitations under the License.
  */
 /**
- * 
- * This JavaScript class implements the interface Layer3DCityDB defined in "3dcitydb-layer.js"  
- * for processing KML/KMZ/glTF data exported by 3DCityDB-Importer-Exporter-Tool (version 3.1.0 or higher), 
- * 
+ *
+ * This JavaScript class implements the interface Layer3DCityDB defined in "3dcitydb-layer.js"
+ * for processing KML/KMZ/glTF data exported by 3DCityDB-Importer-Exporter-Tool (version 3.1.0 or higher),
+ *
  */
 (function () {
     function CitydbKmlLayer(options) {
 
+        this._layerId = Cesium.createGuid();
+
         // variables defined in the 3dcitydb-layer-Interface
         this._url = options.url;
         this._name = options.name;
-        this._id = Cesium.defaultValue(options.id, Cesium.createGuid());
         this._region = options.region;
         this._active = Cesium.defaultValue(options.active, true);
         this._highlightedObjects = new Object();
@@ -72,16 +73,25 @@
         this._urlSuffix = undefined;
         this._viewChangedEvent = new Cesium.Event();
 
-        this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
-        this._mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
+        this._highlightColor = Cesium.Color.AQUAMARINE;
+        this._mouseOverHighlightColor = Cesium.Color.YELLOW;
+        this._selectedEntity = new Cesium.Entity();
+        this._prevHoveredColor = undefined;
+        this._prevHoveredFeature = undefined;
+        this._prevSelectedFeatures = [];
+        this._prevSelectedColors = [];
+        this._hiddenObjects = []; // kvps, with entry key = gmlid and value = feature
 
         this._layerDataType = options.layerDataType;
         this._layerProxy = options.layerProxy;
         this._layerClampToGround = options.layerClampToGround;
         this._gltfVersion = options.gltfVersion;
 
+        this._fnInfoTable = undefined;
+        this._webMap = undefined;
+
         this._configParameters = {
-            "id": this.id,
+            "layerId": this.layerId,
             "url": this.url,
             "name": this.name,
             "layerDataType": this.layerDataType,
@@ -103,6 +113,12 @@
     }
 
     Object.defineProperties(CitydbKmlLayer.prototype, {
+
+        layerId: {
+            get: function () {
+                return this._layerId;
+            }
+        },
 
         active: {
             get: function () {
@@ -161,12 +177,6 @@
             },
             set: function (value) {
                 this._name = value;
-            }
-        },
-
-        id: {
-            get: function () {
-                return this._id;
             }
         },
 
@@ -359,6 +369,24 @@
             }
         },
 
+        fnInfoTable: {
+            get: function () {
+                return this._fnInfoTable;
+            },
+            set: function (value) {
+                this._fnInfoTable = value;
+            }
+        },
+
+        webMap: {
+            get: function () {
+                return this._webMap;
+            },
+            set: function (value) {
+                this._webMap = value;
+            }
+        },
+
         configParameters: {
             get: function () {
                 return this._configParameters;
@@ -367,7 +395,7 @@
     });
 
     function loadMasterJSON(that, isFirstLoad) {
-        var deferred = Cesium.when.defer();
+        var deferred = Cesium.defer();
         var jsonUrl = that.checkProxyUrl(that, that._url);
         new Cesium.Resource({url: jsonUrl}).fetch({responseType: 'json'}).then(function (json) {
             that._jsonLayerInfo = json;
@@ -383,13 +411,13 @@
 
             if (isFirstLoad) {
                 if (!that._minLodPixels)
-                    that._minLodPixels = json.minLodPixels == -1 ? Number.MIN_VALUE : json.minLodPixels;
+                    that._minLodPixels = json.minLodPixels === -1 ? Number.MIN_VALUE : json.minLodPixels;
                 if (!that._maxLodPixels)
-                    that._maxLodPixels = json.maxLodPixels == -1 ? Number.MAX_VALUE : json.maxLodPixels;
+                    that._maxLodPixels = json.maxLodPixels === -1 ? Number.MAX_VALUE : json.maxLodPixels;
             }
 
             if (that._active) {
-                if (that._urlSuffix == 'json')
+                if (that._urlSuffix === 'json')
                     that._citydbKmlTilingManager.doStart();
                 that._cesiumViewer.dataSources.add(that._citydbKmlDataSource);
             }
@@ -399,13 +427,13 @@
                 new Cesium.Resource({url: cityobjectsJsonUrl}).fetch({responseType: 'json'}).then(function (data) {
                     deferred.resolve(that);
                     that._cityobjectsJsonData = data;
-                }).otherwise(function () {
+                }, function () {
                     deferred.resolve(that);
                 });
             } else {
                 deferred.resolve(that);
             }
-        }).otherwise(function (error) {
+        }, function (error) {
             deferred.reject(new Cesium.DeveloperError('Failed to load: ' + jsonUrl));
         });
 
@@ -413,9 +441,9 @@
     }
 
     function assignLayerIdToDataSourceEntites(entityCollection, layerId) {
-        var entities = entityCollection.values;
-        for (var i = 0; i < entities.length; i++) {
-            var entity = entities[i];
+        const entities = entityCollection.values;
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i];
             if (!entity.layerId) {
                 entity.addProperty('layerId');
                 entity.layerId = layerId;
@@ -425,31 +453,31 @@
 
     /**
      * Support both old and new version of glTF
-     * 
+     *
      * @param {type} material
      * @returns {unresolved}
      */
     function _getEmissiveFactor(material) {
-        var testObj = material.getValue('emissiveFactor');
+        var testObj = material['emissiveFactor'];
         if (Cesium.defined(testObj)) {
             return testObj;
         }
-        return material.getValue('emission');
+        return material['emission'];
     }
 
     /**
      * Support both old and new version of glTF
-     * 
+     *
      * @param {type} material
      * @param {type} value
      * @returns {undefined}
      */
     function _setEmissiveFactor(material, value) {
-        var testObj = material.getValue('emissiveFactor');
+        var testObj = material['emissiveFactor'];
         if (Cesium.defined(testObj)) {
-            material.setValue('emissiveFactor', value);
+            material['emissiveFactor'] = value;
         } else {
-            material.setValue('emission', value);
+            material['emission'] = value;
         }
     }
 
@@ -466,211 +494,247 @@
      * adds this layer to the given Cesium viewer
      * @param {CesiumViewer} cesiumViewer
      */
-    CitydbKmlLayer.prototype.addToCesium = function (cesiumViewer) {
+    CitydbKmlLayer.prototype.addToCesium = function (cesiumViewer, webMap, fnInfoTable) {
         this._cesiumViewer = cesiumViewer;
+        this._fnInfoTable = fnInfoTable;
+        this._webMap = webMap;
         this._urlSuffix = CitydbUtil.get_suffix_from_filename(this._url);
-        var that = this;
-        var deferred = Cesium.when.defer();
-        if (this._urlSuffix == 'json') {
+        const that = this;
+        const deferred = Cesium.defer();
+        if (this._urlSuffix === 'json') {
             this._citydbKmlDataSource = new CitydbKmlDataSource({
-                layerId: this._id,
+                layerId: this._layerId,
                 camera: cesiumViewer.scene.camera,
                 canvas: cesiumViewer.scene.canvas,
                 gltfVersion: this._gltfVersion
             });
-            this.registerMouseEventHandlers();
             return loadMasterJSON(that, true);
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
+        } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz') {
             this._citydbKmlDataSource = new Cesium.KmlDataSource({
                 camera: cesiumViewer.scene.camera,
                 canvas: cesiumViewer.scene.canvas
             });
 
             this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+                assignLayerIdToDataSourceEntites(dataSource.entities, that._layerId);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
                 }
                 deferred.resolve(that);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
-        } else if (this._urlSuffix == 'czml') {
+        } else if (this._urlSuffix === 'czml') {
             this._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
             this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+                assignLayerIdToDataSourceEntites(dataSource.entities, that._layerId);
                 if (that._active) {
                     cesiumViewer.dataSources.add(dataSource);
                 }
                 deferred.resolve(that);
-            }).otherwise(function (error) {
+            }, function (error) {
                 deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
             });
         } else {
             deferred.reject(new Cesium.DeveloperError('Unsupported Datasource from: ' + that._url));
         }
 
-        this.registerMouseEventHandlers();
-
         Cesium.knockout.getObservable(this, '_highlightedObjects').subscribe(function () {
-            if (that._urlSuffix == 'json')
+            if (that._urlSuffix === 'json')
                 that._citydbKmlTilingManager.clearCaching();
         });
 
         Cesium.knockout.getObservable(this, '_hiddenObjects').subscribe(function () {
-            if (that._urlSuffix == 'json')
+            if (that._urlSuffix === 'json')
                 that._citydbKmlTilingManager.clearCaching();
         });
 
         return deferred.promise;
     }
 
-    CitydbKmlLayer.prototype.removeFromCesium = function (cesiumViewer) {
-        this.activate(false);
+    CitydbKmlLayer.prototype.contains = function (object) {
+        return Cesium.defined(object.id)
+            && object.id.layerId === this._layerId;
     }
 
-    CitydbKmlLayer.prototype.registerMouseEventHandlers = function () {
-        var highlightColor = this._highlightColor;
-        var mouseOverhighlightColor = this._mouseOverhighlightColor;
-        var scope = this;
-
-        scope.registerEventHandler("CLICK", function (object) {
-            var targetEntity = object.id;
-            var primitive = object.primitive;
-            var objectId = targetEntity.name;
-
-            if (objectId == "Tile border")
-                return;
-
-            if (scope.isInHighlightedList(objectId))
-                return;
-            // clear all other Highlighting status and just highlight the clicked object...
-            scope.unHighlightAllObjects();
-            var highlightThis = {};
-
-            highlightThis[objectId] = highlightColor;
-            scope.highlight(highlightThis);
-        });
-
-        // CtrlclickEvent Handler for Multi-Selection and Highlighting...
-        scope.registerEventHandler("CTRLCLICK", function (object) {
-            var targetEntity = object.id;
-            var primitive = object.primitive;
-
-            var objectId = targetEntity.name;
-
-            if (objectId == "Tile border")
-                return;
-
-            if (scope.isInHighlightedList(objectId)) {
-                scope.unHighlight([objectId]);
-            } else {
-                var highlightThis = {};
-                highlightThis[objectId] = highlightColor;
-                scope.highlight(highlightThis);
+    CitydbKmlLayer.prototype.getColor = function (colorOrFeature) {
+        if (!Cesium.defined(colorOrFeature)) return undefined;
+        if (this.contains(colorOrFeature)) {
+            // Normal models
+            if (Cesium.defined(colorOrFeature.detail) && Cesium.defined(colorOrFeature.detail.model)) {
+                return {
+                    color: Cesium.clone(colorOrFeature.detail.model.color),
+                    colorBlendAmount: colorOrFeature.detail.model.colorBlendAmount,
+                    colorBlendMode: colorOrFeature.detail.model.colorBlendMode
+                };
             }
-        });
-
-        // MouseIn- and MouseOut-Event Handler for MouseOver-Highlighting
-        scope.registerEventHandler("MOUSEIN", function (object) {
-            var targetEntity = object.id;
-            var primitive = object.primitive;
-
-            if (!Cesium.defined(targetEntity) || !Cesium.defined(primitive))
-                return;
-
-            if (scope.isInHighlightedList(targetEntity.name))
-                return;
-
-            if (primitive instanceof Cesium.Model) {
-                if (!Cesium.defined(targetEntity.originalMaterial)) {
-                    targetEntity.addProperty("originalMaterial");
-                    var materials = primitive._runtime.materialsByName;
-                    for (var materialId in materials) {
-                        targetEntity.originalMaterial = _getEmissiveFactor(materials[materialId]).clone();
-                    }
-                }
-                var materials = object.mesh._materials;
-                for (var i = 0; i < materials.length; i++) {
-                    // do mouseOver highlighting
-                    _setEmissiveFactor(materials[i], Cesium.Cartesian4.fromColor(mouseOverhighlightColor));
-                }
-            } else if (primitive instanceof Cesium.Primitive) {
-                try {
-                    var parentEntity = targetEntity._parent;
-                    var childrenEntities;
-                    if (Cesium.defined(parentEntity)) {
-                        childrenEntities = parentEntity._children;
-                    } else {
-                        childrenEntities = [targetEntity];
-                    }
-                } catch (e) {
-                    return;
-                } // not valid entities
-                _doMouseoverHighlighting(childrenEntities, primitive, mouseOverhighlightColor);
-            }
-        });
-
-        scope.registerEventHandler("MOUSEOUT", function (object) {
-            var primitive = object.primitive;
-            var targetEntity = object.id;
-
-            if (!Cesium.defined(targetEntity) || !Cesium.defined(primitive))
-                return;
-
-            if (scope.isInHighlightedList(targetEntity.name))
-                return;
-
-            if (primitive instanceof Cesium.Model) {
-                var materials = object.mesh._materials;
-                for (var i = 0; i < materials.length; i++) {
-                    // dismiss highlighting
-                    console.log(targetEntity.originalMaterial);
-                    _setEmissiveFactor(materials[i], targetEntity.originalMaterial);
-                }
-            } else if (primitive instanceof Cesium.Primitive) {
-                try {
-                    var parentEntity = targetEntity._parent;
-                    var childrenEntities;
-                    if (Cesium.defined(parentEntity)) {
-                        childrenEntities = parentEntity._children;
-                    } else {
-                        childrenEntities = [targetEntity];
-                    }
-                } catch (e) {
-                    return;
-                } // not valid entities
-                _dismissMouseoverHighlighting(childrenEntities, primitive);
-            }
-        })
-
-        function _doMouseoverHighlighting(_childrenEntities, _primitive, _mouseOverhighlightColor) {
-            for (var i = 0; i < _childrenEntities.length; i++) {
-                var childEntity = _childrenEntities[i];
-                var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
-                if (!Cesium.defined(childEntity.originalSurfaceColor)) {
-                    childEntity.addProperty("originalSurfaceColor");
-                }
-                childEntity.originalSurfaceColor = attributes.color;
-                attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(_mouseOverhighlightColor);
+            // Transparent models
+            if (Cesium.defined(colorOrFeature.id) && Cesium.defined(colorOrFeature.id.polygon)) {
+                return colorOrFeature.id.polygon.material;
             }
         }
+        if (colorOrFeature instanceof Cesium.Color) return Cesium.clone(colorOrFeature);
+        if (colorOrFeature instanceof Cesium.ColorMaterialProperty) return colorOrFeature;
+        if (Cesium.defined(colorOrFeature.color)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)) {
+            return {
+                color: Cesium.clone(colorOrFeature.color),
+                colorBlendAmount: colorOrFeature.colorBlendAmount,
+                colorBlendMode: colorOrFeature.colorBlendMode
+            };
+        }
+        return undefined;
+    }
 
-        function _dismissMouseoverHighlighting(_childrenEntities, _primitive) {
-            for (var i = 0; i < _childrenEntities.length; i++) {
-                var childEntity = _childrenEntities[i];
-                var originalSurfaceColor = childEntity.originalSurfaceColor;
-                try {
-                    var attributes = _primitive.getGeometryInstanceAttributes(childEntity);
-                    attributes.color = originalSurfaceColor;
-                } catch (e) {
-                    console.log(e);
-                    /* escape the DeveloperError exception: "This object was destroyed..." */
+    CitydbKmlLayer.prototype.setColor = function (feature, colorOrFeature, colorOptions = {}, setChildren = false) {
+        if (!Cesium.defined(feature) || (!setChildren && !this.contains(feature))) return;
+        let entity = {}
+        if (setChildren) {
+            entity = feature;
+        } else {
+            entity = feature.id;
+        }
+        if (Cesium.defined(entity)) {
+            if (!setChildren
+                && Cesium.defined(entity._parent)
+                && Cesium.defined(entity._parent._children)
+                && entity._parent._children.length > 0) {
+                // Array of models
+                for (const child of entity._parent._children) {
+                    this.setColor(child, colorOrFeature, colorOptions, true);
+                }
+            } else if (Cesium.defined(entity.model)) {
+                // Normal models
+                if (!Cesium.defined(colorOrFeature)) {
+                    entity.model.color = undefined;
+                } else if (colorOrFeature instanceof Cesium.Color) {
+                    entity.model.color = this.getColor(colorOrFeature);
+                    if (Cesium.defined(colorOptions.colorBlendAmount)) {
+                        entity.model.colorBlendAmount = colorOptions.colorBlendAmount;
+                    }
+                    if (Cesium.defined(colorOptions.colorBlendMode)) {
+                        entity.model.colorBlendMode = colorOptions.colorBlendMode;
+                    }
+                } else if (Cesium.defined(colorOrFeature.color)
+                    && Cesium.defined(colorOrFeature.colorBlendAmount)
+                    && Cesium.defined(colorOrFeature.colorBlendMode)) {
+                    entity.model.color = this.getColor(colorOrFeature.color);
+                    if (Cesium.defined(colorOptions.colorBlendAmount)) {
+                        entity.model.colorBlendAmount = colorOptions.colorBlendAmount;
+                    } else {
+                        entity.model.colorBlendAmount = colorOrFeature.colorBlendAmount;
+                    }
+                    if (Cesium.defined(colorOptions.colorBlendMode)) {
+                        entity.model.colorBlendMode = colorOptions.colorBlendMode;
+                    } else {
+                        entity.model.colorBlendMode = colorOrFeature.colorBlendMode;
+                    }
+                } else {
+                    const colorObj = this.getColor(colorOrFeature);
+                    this.setColor(feature, colorObj, colorOptions);
+                }
+            } else if (Cesium.defined(entity.polygon)) {
+                if (!Cesium.defined(colorOrFeature)) {
+                    entity.polygon.material = undefined;
+                } else if (colorOrFeature instanceof Cesium.Color) {
+                    entity.polygon.material = new Cesium.ColorMaterialProperty(colorOrFeature);
+                } else if (colorOrFeature instanceof Cesium.ColorMaterialProperty) {
+                    entity.polygon.material = colorOrFeature;
+                } else {
+                    entity.polygon.material = this.getColor(colorOrFeature);
                 }
             }
         }
+    }
 
+    CitydbKmlLayer.prototype.isEqual = function (feature1, feature2) {
+        if (!this.contains(feature1) || !this.contains(feature2)) return false;
+        return feature1.id.id === feature2.id.id;
+    }
+
+    CitydbKmlLayer.prototype.inArray = function (array, object) {
+        if (!Cesium.defined(array)) return false;
+        for (const i of array) {
+            if (this.isEqual(i, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    CitydbKmlLayer.prototype.setSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        this._cesiumViewer.selectedEntity = feature.id;
+    }
+
+    CitydbKmlLayer.prototype.storeCameraPosition = function (viewer, movement, feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        const cartesian = viewer.scene.pickPosition(movement.position);
+        let destination = Cesium.Cartographic.fromCartesian(cartesian);
+        const boundingSphere = new Cesium.BoundingSphere(
+            Cesium.Cartographic.toCartesian(destination),
+            //viewer.camera.positionCartographic.height
+            40
+        );
+        const orientation = {
+            heading: viewer.camera.heading,
+            pitch: viewer.camera.pitch,
+            roll: viewer.camera.roll
+        };
+        feature.id._storedBoundingSphere = boundingSphere;
+        feature.id._storedOrientation = orientation;
+    }
+
+    CitydbKmlLayer.prototype.getProperties = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        let entityContent = {};
+        let entity = feature.id;
+        if (Cesium.defined(entity._parent)) {
+            // Child models -> use parent's ID
+            entity = entity._parent;
+        }
+        entityContent["gmlid"] = entity.id;
+        // Remove prefix COLLADA_ from ID
+        const idPrefixes = ["COLLADA_", "KMLGeom_"];
+        for (prefix of idPrefixes) {
+            if (entityContent["gmlid"].startsWith(prefix)) {
+                entityContent["gmlid"] = entityContent["gmlid"].replace(prefix, "");
+            }
+        }
+        // Store other properties embedded in the feature
+        const properties = entity._properties;
+        if (Cesium.defined(properties)) {
+            const propertyIds = properties._propertyNames;
+            for (let i = 0; i < propertyIds.length; i++) {
+                const key = propertyIds[i];
+                entityContent[key] = properties[key]._value;
+            }
+        }
+        return entityContent;
+    }
+
+    CitydbKmlLayer.prototype.hideSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.id.show = false;
+    }
+
+    CitydbKmlLayer.prototype.show = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.id.show = true;
+    }
+
+    CitydbKmlLayer.prototype.getIdObject = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        return {
+            key: feature.id.id,
+            object: feature.id
+        };
+    }
+
+    CitydbKmlLayer.prototype.removeFromCesium = function (cesiumViewer) {
+        this.activate(false);
     }
 
     /**
@@ -702,23 +766,8 @@
     };
 
     /**
-     * hideObjects
-     * @param {Array<String>} A list of Object Ids which will be hidden
-     */
-    CitydbKmlLayer.prototype.hideObjects = function (toHide) {
-        for (var i = 0; i < toHide.length; i++) {
-            var objectId = toHide[i];
-            if (!this.isInHiddenList(objectId)) {
-                this._hiddenObjects.push(objectId);
-            }
-            this.hideObject(this.getObjectById(objectId));
-        }
-        this._hiddenObjects = this._hiddenObjects;
-    };
-
-    /**
      * showObjects, to undo hideObjects
-     * @param {Array<String>} A list of Object Ids which will be unhidden. 
+     * @param {Array<String>} A list of Object Ids which will be unhidden.
      */
     CitydbKmlLayer.prototype.showObjects = function (toUnhide) {
         for (var k = 0; k < toUnhide.length; k++) {
@@ -738,15 +787,15 @@
      */
     CitydbKmlLayer.prototype.activate = function (active) {
         this._active = active;
-        if (this._urlSuffix == 'json') {
-            if (active == false) {
+        if (this._urlSuffix === 'json') {
+            if (active === false) {
                 this._citydbKmlTilingManager.doTerminate();
                 this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
             } else {
                 this._citydbKmlTilingManager.doStart();
                 this._cesiumViewer.dataSources.add(this._citydbKmlDataSource);
             }
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
+        } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz' || this._urlSuffix === 'czml') {
             if (active == false) {
                 this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
             } else {
@@ -761,7 +810,7 @@
      * zooms to the layer cameraPostion
      */
     CitydbKmlLayer.prototype.zoomToStartPosition = function () {
-        if (this._urlSuffix == 'json') {
+        if (this._urlSuffix === 'json') {
             var that = this;
             var lat = this._cameraPosition.lat;
             var lon = this._cameraPosition.lon;
@@ -776,12 +825,12 @@
                     cesiumCamera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
                     cesiumCamera.lookAtTransform(Cesium.Matrix4.IDENTITY);
                     setTimeout(function () {
-                        if (this._urlSuffix == 'json')
+                        if (this._urlSuffix === 'json')
                             that._citydbKmlTilingManager.triggerWorker();
                     }, 3000)
                 }
             })
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
+        } else if (this._urlSuffix === 'kml' || this._urlSuffix === 'kmz' || this._urlSuffix === 'czml') {
             this._cesiumViewer.flyTo(this._citydbKmlDataSource);
         } else {
 
@@ -794,15 +843,7 @@
      * @param {function} callback function to be called
      */
     CitydbKmlLayer.prototype.removeEventHandler = function (event, callback) {
-        if (event == "CLICK") {
-            this._clickEvent.removeEventListener(callback, this);
-        } else if (event == "CTRLCLICK") {
-            this._ctrlClickEvent.removeEventListener(callback, this);
-        } else if (event == "MOUSEIN") {
-            this._mouseInEvent.removeEventListener(callback, this);
-        } else if (event == "MOUSEOUT") {
-            this._mouseOutEvent.removeEventListener(callback, this);
-        } else if (event == "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.removeEventListener(callback, this);
         }
     }
@@ -814,15 +855,7 @@
      * @return {String} id of the event Handler, can be used to remove the event Handler
      */
     CitydbKmlLayer.prototype.registerEventHandler = function (event, callback) {
-        if (event == "CLICK") {
-            this._clickEvent.addEventListener(callback, this);
-        } else if (event == "CTRLCLICK") {
-            this._ctrlClickEvent.addEventListener(callback, this)
-        } else if (event == "MOUSEIN") {
-            this._mouseInEvent.addEventListener(callback, this);
-        } else if (event == "MOUSEOUT") {
-            this._mouseOutEvent.addEventListener(callback, this);
-        } else if (event == "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.addEventListener(callback, this);
         }
     }
@@ -833,15 +866,7 @@
      * @param {*} arguments, any number of arguments
      */
     CitydbKmlLayer.prototype.triggerEvent = function (event, object) {
-        if (event == "CLICK") {
-            this._clickEvent.raiseEvent(object);
-        } else if (event == "CTRLCLICK") {
-            this._ctrlClickEvent.raiseEvent(object);
-        } else if (event == "MOUSEIN") {
-            this._mouseInEvent.raiseEvent(object);
-        } else if (event == "MOUSEOUT") {
-            this._mouseOutEvent.raiseEvent(object);
-        } else if (event == "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.raiseEvent(object);
         }
     }
@@ -851,51 +876,57 @@
     //--------------------------------------------------------------------------------------------------------//
 
     CitydbKmlLayer.prototype.reActivate = function () {
-        this._highlightedObjects = {};
-        this._hiddenObjects = [];
+        const scope = this;
+        const deferred = Cesium.defer();
+        scope._prevSelectedFeatures = [];
+        scope._prevSelectedColors = [];
+        scope._prevHoveredFeature = undefined;
+        scope._prevHoveredColor = undefined;
+        scope._hiddenObjects = [];
         this._cityobjectsJsonData = {};
-        if (this._active) {
-            if (this._urlSuffix == 'json') {
-                this._citydbKmlTilingManager.doTerminate();
-                this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
-            } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz' || this._urlSuffix == 'czml') {
-                this._cesiumViewer.dataSources.remove(this._citydbKmlDataSource);
-            } else {
+
+        if (scope._active) {
+            if (scope._urlSuffix === 'json') {
+                scope._citydbKmlTilingManager.doTerminate();
+                scope._cesiumViewer.dataSources.remove(scope._citydbKmlDataSource);
+            } else if (scope._urlSuffix === 'kml' || scope._urlSuffix === 'kmz' || scope._urlSuffix === 'czml') {
+                scope._cesiumViewer.dataSources.remove(scope._citydbKmlDataSource);
             }
         }
-        var deferred = Cesium.when.defer();
-        var that = this;
-        if (this._urlSuffix == 'json') {
-            this._citydbKmlDataSource = new CitydbKmlDataSource({
-                layerId: this._id,
-                camera: this._cesiumViewer.scene.camera,
-                canvas: this._cesiumViewer.scene.canvas,
-                gltfVersion: this._gltfVersion
+
+        if (scope._urlSuffix === 'json') {
+            scope._citydbKmlDataSource = new CitydbKmlDataSource({
+                layerId: scope._layerId,
+                camera: scope._cesiumViewer.scene.camera,
+                canvas: scope._cesiumViewer.scene.canvas,
+                gltfVersion: scope._gltfVersion
             });
-            this._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
-            return loadMasterJSON(this, false);
-        } else if (this._urlSuffix == 'kml' || this._urlSuffix == 'kmz') {
-            this._citydbKmlDataSource = new Cesium.KmlDataSource({
-                camera: this._cesiumViewer.scene.camera,
-                canvas: this._cesiumViewer.scene.canvas
+            scope._citydbKmlTilingManager = new CitydbKmlTilingManager(this);
+            return loadMasterJSON(scope, false);
+        } else if (scope._urlSuffix === 'kml' || scope._urlSuffix === 'kmz') {
+            scope._citydbKmlDataSource = new Cesium.KmlDataSource({
+                camera: scope._cesiumViewer.scene.camera,
+                canvas: scope._cesiumViewer.scene.canvas
             });
 
-            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url), {clampToGround: this._layerClampToGround}).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
-                that._cesiumViewer.dataSources.add(dataSource);
-                deferred.resolve(that);
-            }).otherwise(function (error) {
-                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+            scope._citydbKmlDataSource.load(scope.checkProxyUrl(scope, scope._url), {
+                clampToGround: scope._layerClampToGround
+            }).then(function (dataSource) {
+                assignLayerIdToDataSourceEntites(dataSource.entities, scope._layerId);
+                scope._cesiumViewer.dataSources.add(dataSource);
+                deferred.resolve(scope);
+            }, function (error) {
+                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
             });
-        } else if (this._urlSuffix == 'czml') {
-            this._citydbKmlDataSource = new Cesium.CzmlDataSource();
+        } else if (scope._urlSuffix === 'czml') {
+            scope._citydbKmlDataSource = new Cesium.CzmlDataSource();
 
-            this._citydbKmlDataSource.load(this.checkProxyUrl(this, this._url)).then(function (dataSource) {
-                assignLayerIdToDataSourceEntites(dataSource.entities, that._id);
+            scope._citydbKmlDataSource.load(scope.checkProxyUrl(scope, scope._url)).then(function (dataSource) {
+                assignLayerIdToDataSourceEntites(dataSource.entities, scope._layerId);
                 cesiumViewer.dataSources.add(dataSource);
-                deferred.resolve(that);
-            }).otherwise(function (error) {
-                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+                deferred.resolve(scope);
+            }, function (error) {
+                deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
             });
         } else {
             deferred.reject(new Cesium.DeveloperError('Unsupported Datasource from: ' + that._url));
@@ -906,12 +937,12 @@
 
     CitydbKmlLayer.prototype.getObjectById = function (objectId) {
         var primitives = this._cesiumViewer.scene.primitives;
-        if (this._layerType == "collada") {
+        if (this._layerType === "collada") {
             for (var i = 0; i < primitives.length; i++) {
                 var primitive = primitives.get(i);
                 if (primitive instanceof Cesium.Model) {
                     if (primitive.ready) {
-                        if (primitive._id._name === objectId && primitive._id.layerId === this._id) {
+                        if (primitive._id._name === objectId && primitive._id.layerId === this._layerId) {
                             return primitive;
                         }
                     }
@@ -925,14 +956,14 @@
     CitydbKmlLayer.prototype.getEntitiesById = function (objectId) {
         var primitives = this._cesiumViewer.scene.primitives;
 
-        function getEntitiesByIdFromPrimitiveCollection (primitiveCollection, layerId) {
+        function getEntitiesByIdFromPrimitiveCollection(primitiveCollection, layerId) {
             for (var i = 0; i < primitiveCollection.length; i++) {
                 var primitive = primitiveCollection.get(i);
 
                 if (primitive instanceof Cesium.PrimitiveCollection) {
                     var entity = getEntitiesByIdFromPrimitiveCollection(primitiveCollection.get(i), layerId);
 
-                    if(entity) {
+                    if (entity) {
                         return entity;
                     }
                 } else if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
@@ -954,7 +985,7 @@
             return null;
         }
 
-        return getEntitiesByIdFromPrimitiveCollection(primitives, this._id);
+        return getEntitiesByIdFromPrimitiveCollection(primitives, this._layerId);
     };
 
     CitydbKmlLayer.prototype.setEntityColorByPrimitive = function (entity, color) {
@@ -964,70 +995,12 @@
             if (primitive instanceof Cesium.Primitive && Cesium.defined(primitive._instanceIds)) {
                 for (var j = 0; j < primitive._instanceIds.length; j++) {
                     var tmpId = primitive._instanceIds[j].name;
-                    if (tmpId == entity.name && entity.layerId === this._id) {
+                    if (tmpId === entity.name && entity.layerId === this._layerId) {
                         var attributes = primitive.getGeometryInstanceAttributes(entity);
                         if (Cesium.defined(attributes)) {
                             attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(color);
                             return;
                         }
-                    }
-                }
-            }
-        }
-    };
-
-    CitydbKmlLayer.prototype.highlightObject = function (object) {
-        if (object == null)
-            return;
-        if (object instanceof Cesium.Model) {
-            if (object.ready) {
-                var highlightColor = this._highlightedObjects[object._id._name];
-                if (highlightColor) {
-                    var targetEntity = object._id;
-                    if (!Cesium.defined(targetEntity.originalMaterial)) {
-                        targetEntity.addProperty("originalMaterial");
-                        var materials = object._runtime.materialsByName;
-                        for (var materialId in materials) {
-                            targetEntity.originalMaterial = _getEmissiveFactor(materials[materialId]).clone();
-                        }
-                    }
-                    var materials = object._runtime.materialsByName;
-                    for (var materialId in materials) {
-                        _setEmissiveFactor(materials[materialId], Cesium.Cartesian4.fromColor(highlightColor));
-                    }
-                }
-            }
-        } else if (object instanceof Array) {
-            for (var i = 0; i < object.length; i++) {
-                var childEntity = object[i];
-                if (!Cesium.defined(childEntity.originalMaterial)) {
-                    childEntity.addProperty("originalMaterial");
-                }
-                childEntity.originalMaterial = this.getObjectMaterial(childEntity);
-                this.setObjectMaterial(childEntity, this._highlightedObjects[childEntity.name]);
-            }
-        }
-    };
-
-    CitydbKmlLayer.prototype.unHighlightObject = function (object) {
-        if (object == null)
-            return;
-        if (object instanceof Cesium.Model) {
-            if (object.ready) {
-                var targetEntity = object._id;
-                var materials = object._runtime.materialsByName;
-                for (var materialId in materials) {
-                    _setEmissiveFactor(materials[materialId], targetEntity.originalMaterial);
-                }
-            }
-        } else if (object instanceof Array) {
-            if (!this.isHiddenObject(object)) {
-                for (var i = 0; i < object.length; i++) {
-                    var childEntity = object[i];
-                    var originalMaterial = childEntity.originalMaterial;
-                    if (Cesium.defined(originalMaterial)) {
-                        this.setEntityColorByPrimitive(childEntity, originalMaterial.color._value.clone());
-                        this.setObjectMaterial(childEntity, originalMaterial);
                     }
                 }
             }
@@ -1084,16 +1057,10 @@
     };
 
     CitydbKmlLayer.prototype.hideObject = function (object) {
-        if (object == null)
-            return;
+        if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
-                var nodes = object._runtime.nodesByName;
-                for (var nodeId in nodes) {
-                    var node = nodes[nodeId];
-                    var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-                    publicNode.show = false;
-                }
+                object._id.show = false; // model._id is entity
             }
         } else if (object instanceof Array) {
             for (var i = 0; i < object.length; i++) {
@@ -1104,16 +1071,10 @@
     };
 
     CitydbKmlLayer.prototype.showObject = function (object) {
-        if (object == null)
-            return;
+        if (object == null) return;
         if (object instanceof Cesium.Model) {
             if (object.ready) {
-                var nodes = object._runtime.nodesByName;
-                for (var nodeId in nodes) {
-                    var node = nodes[nodeId];
-                    var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-                    publicNode.show = true;
-                }
+                object._id.show = true; // model._id is entity
             }
         } else if (object instanceof Array) {
             for (var i = 0; i < object.length; i++) {
@@ -1146,12 +1107,7 @@
     CitydbKmlLayer.prototype.isHiddenObject = function (object) {
         if (object instanceof Cesium.Model) {
             if (object.ready) {
-                var nodes = object._runtime.nodesByName;
-                for (var nodeId in nodes) {
-                    var node = nodes[nodeId];
-                    var publicNode = Cesium.defined(node) ? node.publicNode : undefined
-                    return !publicNode.show;
-                }
+                return object._id.show; // model._id is entity
             }
         } else if (object instanceof Array) {
             for (var i = 0; i < object.length; i++) {
@@ -1163,12 +1119,11 @@
     };
 
     CitydbKmlLayer.prototype.showAllObjects = function () {
-        for (var k = 0; k < this._hiddenObjects.length; k++) {
-            var objectId = this._hiddenObjects[k];
-            this.showObject(this.getObjectById(objectId));
+        const scope = this;
+        for (let feature of scope._hiddenObjects) {
+            feature.id.show = true;
         }
-        this._hiddenObjects = this._hiddenObjects;
-        this._hiddenObjects = [];
+        scope._hiddenObjects = [];
     };
 
     CitydbKmlLayer.prototype.isInHiddenList = function (objectId) {
@@ -1199,6 +1154,24 @@
             geometryGraphic = object.point;
         }
         return geometryGraphic.material
+    };
+
+    CitydbKmlLayer.prototype.getAllHighlightedObjects = function () {
+        const scope = this;
+        let result = {};
+        for (let feature of scope._prevSelectedFeatures) {
+            result[feature.id.id] = feature.id;
+        }
+        return result;
+    };
+
+    CitydbKmlLayer.prototype.getAllHiddenObjects = function () {
+        const scope = this;
+        let result = {};
+        for (let feature of scope._hiddenObjects) {
+            result[feature.id.id] = feature.id;
+        }
+        return result;
     };
 
     window.CitydbKmlLayer = CitydbKmlLayer;

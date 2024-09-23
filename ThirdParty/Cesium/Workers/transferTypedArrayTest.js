@@ -1,7 +1,9 @@
 /**
- * Cesium - https://github.com/AnalyticalGraphicsInc/cesium
+ * @license
+ * Cesium - https://github.com/CesiumGS/cesium
+ * Version 1.117
  *
- * Copyright 2011-2017 Cesium Contributors
+ * Copyright 2011-2022 Cesium Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +20,22 @@
  * Columbus View (Pat. Pend.)
  *
  * Portions licensed separately.
- * See https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md for full licensing details.
+ * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
-/*global self:true*/
-// make sure self is defined so that the Dojo build can evaluate this file without crashing.
-if (typeof self === 'undefined') {
-    self = {};
-}
 
+
+// packages/engine/Source/Workers/transferTypedArrayTest.js
 self.onmessage = function(event) {
-    'use strict';
-    var array = event.data.array;
-    var postMessage = self.webkitPostMessage || self.postMessage;
-
-    try {
-        // transfer the test array back to the caller
-        postMessage({
-            array : array
-        }, [array.buffer]);
-    } catch (e) {
-        postMessage({});
-    }
+  const array = event.data.array;
+  const postMessage = self.webkitPostMessage || self.postMessage;
+  try {
+    postMessage(
+      {
+        array
+      },
+      [array.buffer]
+    );
+  } catch (e) {
+    postMessage({});
+  }
 };
-

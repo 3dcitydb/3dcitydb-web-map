@@ -2,15 +2,15 @@
  * 3DCityDB-Web-Map
  * http://www.3dcitydb.org/
  * 
- * Copyright 2015 - 2017
+ * Copyright 2015 - 2024
  * Chair of Geoinformatics
  * Technical University of Munich, Germany
- * https://www.gis.bgu.tum.de/
+ https://www.asg.ed.tum.de/en/gis
  * 
  * The 3DCityDB-Web-Map is jointly developed with the following
  * cooperation partners:
  * 
- * virtualcitySYSTEMS GmbH, Berlin <http://www.virtualcitysystems.de/>
+ * virtualcitySYSTEMS GmbH, Berlin <https://vc.systems/>
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,43 +34,51 @@
         } else {
             proxyUrl = location.protocol + '//' + location.host + '/proxy/'
         }
-        this._defaultProxy = new Cesium.DefaultProxy(proxyUrl)
+        this._defaultProxy = new Cesium.DefaultProxy(proxyUrl);
+
+        this._layerId = Cesium.createGuid();
 
         this._url = this.autofillUrl(options.url);
         this._name = options.name;
-        this._id = Cesium.defaultValue(options.id, Cesium.createGuid());
         this._region = options.region;
         this._active = Cesium.defaultValue(options.active, true);
-        this._highlightedObjects = {};
-        this._hiddenObjects = [];
         this._cameraPosition = {};
         this._thematicDataUrl = Cesium.defaultValue(options.thematicDataUrl, "");
         this._thematicDataSource = Cesium.defaultValue(options.thematicDataSource, "");
+        this._tableType = Cesium.defaultValue(options.tableType, "");
         var dataSourceControllerOptions = {};
         dataSourceControllerOptions.uri = this._thematicDataUrl;
         dataSourceControllerOptions.tableType = this._tableType;
         this._dataSourceController = new DataSourceController(this._thematicDataSource, signInController, dataSourceControllerOptions);
-        this._tableType = Cesium.defaultValue(options.tableType, "");
         this._cityobjectsJsonUrl = options.cityobjectsJsonUrl;
         this._thematicDataProvider = Cesium.defaultValue(options.thematicDataProvider, "");
         this._maximumScreenSpaceError = Cesium.defaultValue(options.maximumScreenSpaceError, "");
         this._cesiumViewer = undefined;
         this._tileset = undefined;
 
-        this._highlightColor = new Cesium.Color(0.4, 0.4, 0.0, 1.0);
-        this._mouseOverhighlightColor = new Cesium.Color(0.0, 0.3, 0.0, 1.0);
+        this._highlightColor = Cesium.Color.AQUAMARINE;
+        this._mouseOverHighlightColor = Cesium.Color.YELLOW;
+        this._selectedEntity = new Cesium.Entity();
+        this._prevHoveredColor = undefined;
+        this._prevHoveredFeature = undefined;
+        this._prevSelectedFeatures = [];
+        this._prevSelectedColors = [];
+        this._hiddenObjects = []; // kvps, with entry key = gmlid and value = feature
 
         this._layerDataType = options.layerDataType;
 
+        this._fnInfoTable = undefined;
+        this._webMap = undefined;
+
         this._configParameters = {
-            "id": this.id,
+            "layerId": this.layerId,
             "name": this.name,
             "url": this.url,
             "layerDataType": this.layerDataType,
             "thematicDataUrl": this.thematicDataUrl,
             "thematicDataProvider": this._thematicDataProvider,
-            "maximumScreenSpaceError": this._maximumScreenSpaceError,
-        }
+            "maximumScreenSpaceError": this._maximumScreenSpaceError
+        };
 
         /**
          * handles ClickEvents
@@ -91,38 +99,24 @@
 
         this._viewChangedEvent = new Cesium.Event();
 
-        Cesium.knockout.track(this, ['_highlightedObjects', '_hiddenObjects']);
+        Cesium.knockout.track(this, ['_prevSelectedFeatures', '_hiddenObjects']);
     }
 
     Object.defineProperties(Cesium3DTilesDataLayer.prototype, {
         /**
-         * Gets the active 
+         * Gets the index of the layer
+         */
+        layerId: {
+            get: function () {
+                return this._layerId;
+            }
+        },
+        /**
+         * Gets the active
          */
         active: {
             get: function () {
                 return this._active;
-            }
-        },
-        /**
-         * Gets the currently highlighted Objects as an array
-         */
-        highlightedObjects: {
-            get: function () {
-                return this._highlightedObjects;
-            },
-            set: function (value) {
-                this._highlightedObjects = value;
-            }
-        },
-        /**
-         * Gets the currently hidden Objects as an array
-         */
-        hiddenObjects: {
-            get: function () {
-                return this._hiddenObjects;
-            },
-            set: function (value) {
-                this._hiddenObjects = value;
             }
         },
         /**
@@ -159,18 +153,7 @@
             }
         },
         /**
-         * Gets the id of this datasource, the id should be unique.
-         */
-        id: {
-            get: function () {
-                return this._id;
-            },
-            set: function (value) {
-                this._id = value;
-            }
-        },
-        /**
-         * Gets boundingbox of this layer as an Cesium Rectangle Object with longitude/latitude values in radians. 
+         * Gets boundingbox of this layer as an Cesium Rectangle Object with longitude/latitude values in radians.
          */
         region: {
             get: function () {
@@ -241,12 +224,12 @@
             }
         },
 
-        mouseOverhighlightColor: {
+        mouseOverHighlightColor: {
             get: function () {
-                return this._mouseOverhighlightColor;
+                return this._mouseOverHighlightColor;
             },
             set: function (value) {
-                this._mouseOverhighlightColor = value;
+                this._mouseOverHighlightColor = value;
             }
         },
 
@@ -259,14 +242,30 @@
             }
         },
 
+        fnInfoTable: {
+            get: function () {
+                return this._fnInfoTable;
+            },
+            set: function (value) {
+                this._fnInfoTable = value;
+            }
+        },
+
+        webMap: {
+            get: function () {
+                return this._webMap;
+            },
+            set: function (value) {
+                this._webMap = value;
+            }
+        },
+
         configParameters: {
             get: function () {
                 return this._configParameters;
             }
         },
-        /**
-         * Gets the maximumScreenSpaceError of the Cesium 3D Tiles
-         */
+
         maximumScreenSpaceError: {
             get: function () {
                 return this._maximumScreenSpaceError;
@@ -274,7 +273,7 @@
             set: function (value) {
                 this._maximumScreenSpaceError = value;
             }
-        },
+        }
     });
 
     /**
@@ -297,148 +296,178 @@
      * adds this layer to the given Cesium viewer
      * @param {CesiumViewer} cesiumViewer
      */
-    Cesium3DTilesDataLayer.prototype.addToCesium = function (cesiumViewer) {
-        var that = this;
-        this._cesiumViewer = cesiumViewer;
-        var deferred = Cesium.when.defer();
+    Cesium3DTilesDataLayer.prototype.addToCesium = function (cesiumViewer, webMap, fnInfoTable) {
+        const scope = this;
+        scope._cesiumViewer = cesiumViewer;
+        scope._fnInfoTable = fnInfoTable;
+        scope._webMap = webMap;
+        const deferred = Cesium.defer();
 
-        this._tileset = new Cesium.Cesium3DTileset({
-            url: this._url,
+        Cesium.Cesium3DTileset.fromUrl(scope.autofillUrl(scope._url), {
             maximumScreenSpaceError: this._maximumScreenSpaceError
-        });
-
-        this._tileset.readyPromise.then(function (tileset) {
-            cesiumViewer.scene.primitives.add(tileset);
-            tileset.show = that._active;
-            that.registerTilesLoadedEventHandler();
-            that.registerMouseEventHandlers();
-            deferred.resolve(that);
-        }).otherwise(function () {
-            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+        }).then(function (tileset) {
+            scope._tileset = tileset;
+            scope._tileset.layerId = scope._layerId;
+            scope._cesiumViewer.scene.primitives.add(tileset);
+            scope._tileset.show = scope._active;
+            scope.configPointCloudShading(tileset);
+            scope.registerTilesLoadedEventHandler();
+            deferred.resolve(scope);
+        }, function () {
+            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });
 
         return deferred.promise;
     }
 
+    Cesium3DTilesDataLayer.prototype.contains = function (object) {
+        return (object instanceof Cesium.Cesium3DTileFeature)
+            && Cesium.defined(object.primitive)
+            && object.primitive.layerId === this._layerId;
+    }
+
+    Cesium3DTilesDataLayer.prototype.getColor = function (colorOrFeature) {
+        if (!Cesium.defined(colorOrFeature)) return undefined;
+        if (this.contains(colorOrFeature)) return colorOrFeature.color;
+        if (colorOrFeature instanceof Cesium.Color) return Cesium.clone(colorOrFeature);
+        if (colorOrFeature instanceof Cesium.ColorMaterialProperty) return colorOrFeature;
+        if (Cesium.defined(colorOrFeature.color)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)
+            && Cesium.defined(colorOrFeature.colorBlendAmount)) {
+            return {
+                color: Cesium.clone(colorOrFeature.color),
+                colorBlendAmount: colorOrFeature.colorBlendAmount,
+                colorBlendMode: colorOrFeature.colorBlendMode
+            };
+        }
+        return undefined;
+    }
+
+    Cesium3DTilesDataLayer.prototype.setColor = function (feature, colorOrFeature, colorOptions = {}) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        if (!Cesium.defined(colorOrFeature)) {
+            feature.color = undefined;
+        } else if (colorOrFeature instanceof Cesium.Color) {
+            feature.color = colorOrFeature;
+        } else {
+            feature.color = this.getColor(colorOrFeature);
+        }
+    }
+
+    Cesium3DTilesDataLayer.prototype.isEqual = function (feature1, feature2) {
+        if (!this.contains(feature1) || !this.contains(feature2)) return false;
+        return feature1._batchId === feature2._batchId;
+    }
+
+    Cesium3DTilesDataLayer.prototype.inArray = function (array, object) {
+        if (!Cesium.defined(array)) return false;
+        for (const i of array) {
+            if (this.isEqual(i, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Cesium3DTilesDataLayer.prototype.setSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        this._cesiumViewer.selectedEntity = this._selectedEntity;
+    }
+
+    Cesium3DTilesDataLayer.prototype.storeCameraPosition = function (viewer, movement, feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        const cartesian = viewer.scene.pickPosition(movement.position);
+        let destination = Cesium.Cartographic.fromCartesian(cartesian);
+        const boundingSphere = new Cesium.BoundingSphere(
+            Cesium.Cartographic.toCartesian(destination),
+            //viewer.camera.positionCartographic.height
+            40
+        );
+        const orientation = {
+            heading: viewer.camera.heading,
+            pitch: viewer.camera.pitch,
+            roll: viewer.camera.roll
+        };
+        feature._storedBoundingSphere = boundingSphere;
+        feature._storedOrientation = orientation;
+    }
+
+    Cesium3DTilesDataLayer.prototype.getProperties = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        let entityContent = {};
+        const propertyIds = feature.getPropertyIds();
+        for (let i = 0; i < propertyIds.length; i++) {
+            const key = propertyIds[i];
+            entityContent[key] = feature.getProperty(key);
+        }
+        return entityContent;
+    }
+
+    Cesium3DTilesDataLayer.prototype.hideSelected = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.show = false;
+    }
+
+    Cesium3DTilesDataLayer.prototype.show = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        feature.show = true;
+    }
+
+    Cesium3DTilesDataLayer.prototype.getIdObject = function (feature) {
+        if (!Cesium.defined(feature) || !this.contains(feature)) return;
+        let res = {};
+        const gmlidKeys = ["gmlid", "gml_id", "gml-id", "gml:id", "id"];
+        for (const key of gmlidKeys) {
+            const gmlid = feature.getProperty(key);
+            if (Cesium.defined(gmlid)) {
+                res.key = gmlid;
+                res.object = feature;
+                break;
+            }
+        }
+        return res;
+    }
+
+    Cesium3DTilesDataLayer.prototype.configPointCloudShading = function (tileset) {
+        tileset.pointCloudShading.attenuation = true;
+        tileset.pointCloudShading.maximumAttenuation = 3;
+        tileset.pointCloudShading.eyeDomeLighting = true;
+        tileset.pointCloudShading.eyeDomeLightingStrength = 0.5;
+        tileset.pointCloudShading.eyeDomeLightingRadius = 0.5;
+    }
+
     Cesium3DTilesDataLayer.prototype.registerTilesLoadedEventHandler = function () {
         var scope = this;
         var timer = null;
-        this._tileset.tileVisible.addEventListener(function (tile) {
-            if (tile._content instanceof Cesium.PointCloud3DTileContent) {
+        scope._tileset.tileVisible.addEventListener(function (tile) {
+            if (tile._content instanceof Cesium.Cesium3DTilePointFeature) {
                 tile._content._pointCloud._pointSize = 3;
             }
-            if (!(tile._content instanceof Cesium.Batched3DModel3DTileContent))
+            if (!(tile._content instanceof Cesium.Cesium3DTileContent))
                 return;
             var features = tile._content._features;
             var featuresLength = tile._content.featuresLength;
             for (var k = 0; k < featuresLength; k++) {
                 if (Cesium.defined(features)) {
-                    var object = features[k];
+                    var feature = features[k];
 
-                    var featureArray = object._content._features;
+                    var featureArray = feature._content._features;
                     if (!Cesium.defined(featureArray))
                         return;
-                    var objectId = featureArray[object._batchId].getProperty("id");
 
-                    if (scope.isInHighlightedList(objectId) && !Cesium.Color.equals(object.color, scope._highlightColor)) {
-                        scope.highlightObject(object)
+                    if (scope.isInHighlightedList(feature) && !Cesium.Color.equals(feature.color, scope._highlightColor)) {
+                        feature.color = scope._highlightColor;
                     }
 
-                    if (!scope.isInHighlightedList(objectId) && Cesium.Color.equals(object.color, scope._highlightColor)) {
-                        scope.unHighlightObject(object);
+                    if (!scope.isInHighlightedList(objectId) && Cesium.Color.equals(feature.color, scope._highlightColor)) {
+                        const i = scope._prevSelectedFeatures.indexOf(feature);
+                        feature.color = scope._prevSelectedColors[i];
+                        scope._prevSelectedFeatures.splice(i, 1);
+                        scope._prevSelectedColors.splice(i, 1);
                     }
 
-                    if (scope.isInHiddenList(objectId)) {
-                        scope.hideObject(object);
-                    } else {
-                        scope.showObject(object);
-                    }
+                    feature.show = !scope._hiddenObjects.includes(feature);
                 }
-            }
-        });
-    }
-
-    Cesium3DTilesDataLayer.prototype.registerMouseEventHandlers = function () {
-        var highlightColor = this._highlightColor;
-        var mouseOverhighlightColor = this._mouseOverhighlightColor;
-
-        var scope = this;
-        scope.registerEventHandler("CLICK", function (object) {
-            if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
-                return;
-
-            var featureArray = object._content._features;
-            if (!Cesium.defined(featureArray))
-                return;
-            var objectId = featureArray[object._batchId].getProperty("id");
-            if (!Cesium.defined(objectId))
-                return;
-
-            if (scope.isInHighlightedList(objectId))
-                return;
-
-            // clear all other Highlighting status and just highlight the clicked object...
-            scope.unHighlightAllObjects();
-            var highlightThis = {};
-
-            highlightThis[objectId] = highlightColor;
-            scope.highlight(highlightThis);
-        });
-
-        // CtrlclickEvent Handler for Multi-Selection and Highlighting...
-        scope.registerEventHandler("CTRLCLICK", function (object) {
-            if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
-                return;
-
-            var featureArray = object._content._features;
-            if (!Cesium.defined(featureArray))
-                return;
-            var objectId = featureArray[object._batchId].getProperty("id");
-            if (!Cesium.defined(objectId))
-                return;
-
-            if (scope.isInHighlightedList(objectId)) {
-                scope.unHighlight([objectId]);
-            } else {
-                var highlightThis = {};
-                highlightThis[objectId] = highlightColor;
-                scope.highlight(highlightThis);
-            }
-        });
-
-        scope.registerEventHandler("MOUSEIN", function (object) {
-            if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
-                return;
-
-            var featureArray = object._content._features;
-            if (!Cesium.defined(featureArray))
-                return;
-            var objectId = featureArray[object._batchId].getProperty("id");
-
-            if (scope.isInHighlightedList(objectId))
-                return;
-
-            object.setProperty("originalColorValue", Cesium.Color.clone(object.color));
-            object.color = mouseOverhighlightColor;
-        });
-
-        scope.registerEventHandler("MOUSEOUT", function (object) {
-            if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
-                return;
-
-            var featureArray = object._content._features;
-            if (!Cesium.defined(featureArray))
-                return;
-            var objectId = featureArray[object._batchId].getProperty("id");
-
-            if (scope.isInHighlightedList(objectId))
-                return;
-
-            try {
-                var originalColor = object.getProperty("originalColorValue");
-                object.color = originalColor;
-            } catch (e) {
-                return;
             }
         });
     }
@@ -469,183 +498,41 @@
      * @param undefined
      */
     Cesium3DTilesDataLayer.prototype.reActivate = function () {
-        var that = this;
-        var deferred = Cesium.when.defer();
-        this._highlightedObjects = {};
-        this._hiddenObjects = [];
-        this._cesiumViewer.scene.primitives.remove(this._tileset);
+        const scope = this;
+        const deferred = Cesium.defer();
+        scope._prevSelectedFeatures = [];
+        scope._prevSelectedColors = [];
+        scope._prevHoveredFeature = undefined;
+        scope._prevHoveredColor = undefined;
+        scope._hiddenObjects = [];
+        scope._cesiumViewer.scene.primitives.remove(this._tileset);
 
-        this._tileset = new Cesium.Cesium3DTileset({
-            url: this.autofillUrl(this._url),
+        Cesium.Cesium3DTileset.fromUrl(scope.autofillUrl(scope._url), {
             maximumScreenSpaceError: this._maximumScreenSpaceError
-        });
-
-        this._tileset.readyPromise.then(function (tileset) {
-            that._cesiumViewer.scene.primitives.add(tileset);
-            that.registerTilesLoadedEventHandler();
-            deferred.resolve();
-        }).otherwise(function () {
-            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + that._url));
+        }).then(function (tileset) {
+            scope._tileset = tileset;
+            scope._cesiumViewer.scene.primitives.add(tileset);
+            scope.configPointCloudShading(tileset);
+            scope.registerTilesLoadedEventHandler();
+            deferred.resolve(scope);
+        }, function () {
+            deferred.reject(new Cesium.DeveloperError('Failed to load: ' + scope._url));
         });
 
         return deferred.promise;
     }
 
-    /**
-     * highlights one or more object with a given color;
-     */
-    Cesium3DTilesDataLayer.prototype.highlight = function (toHighlight) {
-        for (var id in toHighlight) {
-            this._highlightedObjects[id] = toHighlight[id];
-            var objects = this.getObjectById(id);
-            for (var i = 0; i < objects.length; i++) {
-                this.highlightObject(objects[i]);
-            }
-        }
-        this._highlightedObjects = this._highlightedObjects;
-    }
-
-    Cesium3DTilesDataLayer.prototype.highlightObject = function (object) {
-        if (object == null)
-            return;
-
-        if (!(object._content instanceof Cesium.Batched3DModel3DTileContent))
-            return;
-
-        var featureArray = object._content._features;
-        if (!Cesium.defined(featureArray))
-            return;
-        var objectId = featureArray[object._batchId].getProperty("id");
-
-        var highlightColor = this._highlightedObjects[objectId];
-        if (highlightColor) {
-            if (!Cesium.defined(object.getProperty("originalColorValue"))) {
-                object.setProperty("originalColorValue", Cesium.Color.clone(object.color));
-            }
-            object.color = highlightColor;
-        }
-    };
-
-    Cesium3DTilesDataLayer.prototype.getObjectById = function (objectId) {
-        var objects = [];
-        var loadedTiles = this._tileset._selectedTiles;
-        for (var i = 0; i < loadedTiles.length; i++) {
-            if (!(loadedTiles[i]._content instanceof Cesium.Batched3DModel3DTileContent))
-                continue;
-
-            var idArray = loadedTiles[i]._content.batchTable._properties.id;
-            if (!Cesium.defined(idArray))
-                break;
-
-            var index = idArray.indexOf(objectId);
-            if (index > -1 && Cesium.defined(loadedTiles[i]._content._features)) {
-                var object = loadedTiles[i]._content._features[index];
-                objects.push(object);
-            }
-        }
-        return objects;
-    };
-
-    /**
-     * undo highlighting
-     */
-    Cesium3DTilesDataLayer.prototype.unHighlight = function (toUnHighlight) {
-        for (var k = 0; k < toUnHighlight.length; k++) {
-            var id = toUnHighlight[k];
-            delete this._highlightedObjects[id];
-        }
-        for (var k = 0; k < toUnHighlight.length; k++) {
-            var id = toUnHighlight[k];
-            var objects = this.getObjectById(id);
-            for (var i = 0; i < objects.length; i++) {
-                this.unHighlightObject(objects[i]);
-            }
-        }
-        this._highlightedObjects = this._highlightedObjects;
-    }
-
-    Cesium3DTilesDataLayer.prototype.unHighlightObject = function (object) {
-        var originalColor = object.getProperty("originalColorValue");
-        object.color = originalColor;
-    };
-
-    /**
-     * hideObjects
-     */
-    Cesium3DTilesDataLayer.prototype.hideObjects = function (toHide) {
-        for (var i = 0; i < toHide.length; i++) {
-            var objectId = toHide[i];
-            if (!this.isInHiddenList(objectId)) {
-                this._hiddenObjects.push(objectId);
-            }
-            var objects = this.getObjectById(objectId);
-            for (var k = 0; k < objects.length; k++) {
-                this.hideObject(objects[k]);
-            }
-        }
-        this._hiddenObjects = this._hiddenObjects;
-    }
-
-    Cesium3DTilesDataLayer.prototype.hideObject = function (object) {
-        object.show = false;
-    };
-
-    Cesium3DTilesDataLayer.prototype.isInHiddenList = function (objectId) {
-        return this._hiddenObjects.indexOf(objectId) > -1 ? true : false;
-    };
-
-    Cesium3DTilesDataLayer.prototype.hasHiddenObjects = function () {
-        return this._hiddenObjects.length > 0 ? true : false;
-    };
-
-    Cesium3DTilesDataLayer.prototype.isHiddenObject = function (object) {
-        return object.show ? false : true;
-    };
-
-    Cesium3DTilesDataLayer.prototype.showAllObjects = function () {
-        for (var k = 0; k < this._hiddenObjects.length; k++) {
-            var objectId = this._hiddenObjects[k];
-            var objects = this.getObjectById(objectId);
-            for (var i = 0; i < objects.length; i++) {
-                this.showObject(objects[i]);
-            }
-        }
-        this._hiddenObjects = this._hiddenObjects;
-        this._hiddenObjects = [];
-    };
-
-    Cesium3DTilesDataLayer.prototype.showObjects = function (toUnhide) {
-        for (var k = 0; k < toUnhide.length; k++) {
-            var objectId = toUnhide[k];
-            this._hiddenObjects.splice(objectId, 1);
-        }
-        for (var k = 0; k < toUnhide.length; k++) {
-            var objectId = toUnhide[k];
-            var objects = this.getObjectById(objectId);
-            for (var i = 0; i < objects.length; i++) {
-                this.showObject(objects[i]);
-            }
-        }
-        this._hiddenObjects = this._hiddenObjects;
-    }
-
-    Cesium3DTilesDataLayer.prototype.showObject = function (object) {
-        object.show = true;
-    }
-
     Cesium3DTilesDataLayer.prototype.unHighlightAllObjects = function () {
-        for (var id in this._highlightedObjects) {
-            delete this._highlightedObjects[id];
-            var objects = this.getObjectById(id);
-            for (var i = 0; i < objects.length; i++) {
-                this.unHighlightObject(objects[i]);
-            }
+        let scope = this;
+        for (let i = 0; i < scope._prevSelectedFeatures.length; i++) {
+            let feature = scope._prevSelectedFeatures[i];
+            feature.color = scope._prevSelectedColors[i];
         }
-        this._highlightedObjects = this._highlightedObjects;
+        scope._prevSelectedFeatures = [];
     };
 
-    Cesium3DTilesDataLayer.prototype.isInHighlightedList = function (objectId) {
-        return this._highlightedObjects.hasOwnProperty(objectId);
+    Cesium3DTilesDataLayer.prototype.isInHighlightedList = function (feature) {
+        return this._prevSelectedFeatures.includes(feature);
     };
 
     /**
@@ -653,15 +540,7 @@
      * @param {String} event (either CLICK, MOUSEIN or MOUSEOUT)
      */
     Cesium3DTilesDataLayer.prototype.removeEventHandler = function (event, callback) {
-        if (event == "CLICK") {
-            this._clickEvent.removeEventListener(callback, this);
-        } else if (event == "CTRLCLICK") {
-            this._ctrlClickEvent.removeEventListener(callback, this);
-        } else if (event == "MOUSEIN") {
-            this._mouseInEvent.removeEventListener(callback, this);
-        } else if (event == "MOUSEOUT") {
-            this._mouseOutEvent.removeEventListener(callback, this);
-        } else if (event == "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.removeEventListener(callback, this);
         }
     }
@@ -672,15 +551,7 @@
      * @return {String} id of the event Handler, can be used to remove the event Handler
      */
     Cesium3DTilesDataLayer.prototype.registerEventHandler = function (event, callback) {
-        if (event == "CLICK") {
-            this._clickEvent.addEventListener(callback, this);
-        } else if (event == "CTRLCLICK") {
-            this._ctrlClickEvent.addEventListener(callback, this)
-        } else if (event == "MOUSEIN") {
-            this._mouseInEvent.addEventListener(callback, this);
-        } else if (event == "MOUSEOUT") {
-            this._mouseOutEvent.addEventListener(callback, this);
-        } else if (event == "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.addEventListener(callback, this);
         }
     }
@@ -691,15 +562,7 @@
      * @param {*} arguments, any number of arguments
      */
     Cesium3DTilesDataLayer.prototype.triggerEvent = function (event, object) {
-        if (event == "CLICK") {
-            this._clickEvent.raiseEvent(object);
-        } else if (event == "CTRLCLICK") {
-            this._ctrlClickEvent.raiseEvent(object);
-        } else if (event == "MOUSEIN") {
-            this._mouseInEvent.raiseEvent(object);
-        } else if (event == "MOUSEOUT") {
-            this._mouseOutEvent.raiseEvent(object);
-        } else if (event == "VIEWCHANGED") {
+        if (event === "VIEWCHANGED") {
             this._viewChangedEvent.raiseEvent(object);
         }
     }
