@@ -152,23 +152,25 @@ such as credit texts and logos, as well as some of Cesium's built-in navigation 
     </p>
 
 * Most importantly: **The introduction of a GPS button** (located on the top right corner in the view toolbar) providing new functionalities involving user's current location and orientation. Namely: 
-    * GPS "snapshot" (single-click): shows the user's current position and orientation,
+    * GPS "snapshot": shows the user's current position and orientation,
     <p align="center">
-    <img src="theme/img/GPS_off.png" width="15%" />
+    <img src="3dwebclient/images/GPS_single.png" width="15%" />
     </p> 
 
-    * Real-time Compass Tracking  (double-click): periodically shows the user's current orientation with fixed location,
+    * Real-time Compass Tracking: periodically shows the user's current orientation with fixed location,
     <p align="center">
-    <img src="theme/img/GPS_on_ori.png" width="15%" />
+    <img src="3dwebclient/images/GPS_on_ori.png" width="15%" />
     </p> 
 
-    * Real-time Compass Tracking + Position (triple-click) or the "First-person View" mode: periodically shows the user's current orientation and position.
+    * Real-time Compass Tracking + Position or the "First-person View" mode: periodically shows the user's current orientation and position.
     <p align="center">
-    <img src="theme/img/GPS_on_pos_ori.png" width="15%" />
+    <img src="3dwebclient/images/GPS_on_pos_ori.png" width="15%" />
     </p> 
 
-    * To disable real-time tracking, simply either click on the button again to return to "snapshot" mode 
-or hold the button for 1 second, the camera will then ascend to a higher altitude of the current location.
+    * Disable real-time tracking: the camera will then ascend to a higher altitude of the current location.
+    <p align="center">
+    <img src="3dwebclient/images/GPS_off.png" width="15%" />
+    </p>
 
 ## Demos
 
