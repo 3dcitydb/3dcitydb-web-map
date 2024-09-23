@@ -5,7 +5,7 @@ News
 -------
 #### Version [v2.0.0](https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v2.0.0) released!
 
-The 3DCityDB Web Map Client now supports displaying thematic data stored from data sources such as Google Spreadsheets (using Google Sheets API v4) and PostgreSQL (using PostgREST API).
+The 3DCityDB Web Map Client now supports displaying thematic data stored from data sources such as Google Spreadsheets (using Google Sheets API v4), PostgreSQL (using PostgREST API) and OGC Feature API.
 
 See [release announcements](RELEASES.md), [change logs](CHANGES.md) for the list of changes occurred in this version as well as previous versions.
 
