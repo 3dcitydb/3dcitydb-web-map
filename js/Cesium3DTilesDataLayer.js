@@ -371,7 +371,9 @@
 
     Cesium3DTilesDataLayer.prototype.setSelected = function (feature) {
         if (!Cesium.defined(feature) || !this.contains(feature)) return;
-        this._cesiumViewer.selectedEntity = this._selectedEntity;
+        let entity = new Cesium.Entity();
+        entity._storedBoundingSphere = feature._storedBoundingSphere;
+        this._cesiumViewer.selectedEntity = entity;
     }
 
     Cesium3DTilesDataLayer.prototype.storeCameraPosition = function (viewer, movement, feature) {
