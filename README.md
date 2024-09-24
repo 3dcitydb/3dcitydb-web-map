@@ -7,7 +7,7 @@ News
 
 The 3DCityDB Web Map Client now supports displaying thematic data stored from data sources such as Google Spreadsheets (using Google Sheets API v4), PostgreSQL (using PostgREST API) and OGC Feature API.
 
-See [release announcements](RELEASES.md), [change logs](CHANGES.md) for the list of changes occurred in this version as well as previous versions.
+See [release announcements](RELEASES.md) and [change logs](CHANGES.md) for the list of changes occurred in this version as well as previous versions.
 
 Introduction
 -------
