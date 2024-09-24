@@ -24,7 +24,8 @@ The key features and functionalities of the 3DCityDB-Web-Map-Client is summarize
 * Support for rich interaction with 3D visualization models, for example, **highlighting** of 3D objects on mouseover and mouseclick as well as **hiding** and **showing** of multiple selected 3D objects
 * Support for exploring a 3D object of interest from **different view perspectives** using third-party mapping services like **Microsoft Bing Maps** with oblique view, **Google Streetview**, and a combined version (**DualMaps**) 
 * Support for on-the-fly activating and deactivating **shadow visualization** of 3D objects and Cesium digital terrain models
-* Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of **generating a scene link** including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers, etc.  
+* Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of **generating a scene link** including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers, etc.
+* Packaged as a [**Docker image**](https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated) for fast and convenient deployment
 
 Architecture
 -------
@@ -67,6 +68,11 @@ A complete and comprehensive documentation on the 3DCityDB-Web-Map-Client is ins
 
 Contributing
 ------------
+
+The source codes of this project are available on [GitHub](https://github.com/3dcitydb/3dcitydb-web-map). All releases can be found [here](https://github.com/3dcitydb/3dcitydb-web-map/releases).
+
+The platform GitHub is also used for collaborating:
+
 * To report bugs found in the software, please create a GitHub issue.
 * To contribute code for fixing issues, please create a pull request with the issue id.
 * To propose a new feature, please also create a GitHub issue and open a discussion.
