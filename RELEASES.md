@@ -4,9 +4,9 @@ This is a major release.
 
 ### New Features
 
-* It is now possible to add **Index 3D Scene (i3s)** and **GeoJSON** layers, in addition to the existing layer types **KML/COLLADA/glTF** and **Cesium 3D Tiles**.
+* It is now possible to add **Indexed 3D Scene Layers (I3S)** and **GeoJSON**, in addition to the existing layer types **KML/COLLADA/glTF**, **CZML** and **Cesium 3D Tiles**.
 
-* Existing **thematic data embedded** within the 3D layers themselves can now also be extracted and displayed, in addition to the already available options to include external thematic data using **PostgreSQL/PostgREST** and **Google Spreadsheets**. These layers include Index 3D Scene (i3s), KML, Cesium 3D Tiles, and GeoJSON.
+* Existing **thematic data embedded** within the 3D layers themselves can now also be extracted and displayed, in addition to the already available options to include external thematic data using **PostgreSQL/PostgREST** and **Google Spreadsheets**. These layers include Index 3D Scene Layers (I3S), KML, Cesium 3D Tiles, and GeoJSON.
 
   **Note**: Due to the inconsistent **labelling of object identifiers** in Cesium 3D Tiles from various providers, the following approach was used for querying:
   * Different identifier names are considered, such as `gml:id`, `gml_id`, `gmlid`, `gml-id`, `id`, etc., regardless of whether the letters are given in uppercase or lowercase.
