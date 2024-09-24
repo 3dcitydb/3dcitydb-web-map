@@ -608,6 +608,9 @@ function addLayerToList(layer) {
         var targetRadio = event.target;
         var layerId = targetRadio.parentNode.id;
         webMap.activeLayer = webMap.getLayerById(layerId);
+        // Adjust GUI based on given values
+        layerDataTypeDropdownOnchange();
+        thematicDataSourceAndTableTypeDropdownOnchange();
         console.log(webMap.activeLayer);
     };
 
