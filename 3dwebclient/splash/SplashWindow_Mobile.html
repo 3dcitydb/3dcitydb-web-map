@@ -42,49 +42,14 @@
             margin: 0 auto;
             padding: 0 5% 50px;
             width: 100%;
-            height: 95vh;
-            overflow-y: auto;
         }
 
         article {
             position: relative;
             max-width: 100%;
             margin: 0 auto;
-        }
-
-        .timeline__nav {
-            position: fixed;
-            z-index: 99;
-            top: 0;
-            transition: top 0.3s ease-out;
-        }
-
-        .timeline__nav ul {
-            list-style: none;
-            list-style-position: inside;
-            margin: 15px 0;
-        }
-
-        .timeline__nav ul li {
-            margin: 15px 0;
-            padding-left: 0;
-            list-style-type: none;
-            color: #bfc1c3;
-            border-bottom: 1px dotted rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            transition: all 0.3s ease-out;
-        }
-
-        .timeline__nav ul li.active {
-            font-weight: bold;
-            color: #2c7cff;
-            border-bottom: 1px dotted transparent;
-            -webkit-transform: scale(1.5);
-            transform: scale(1.5);
-        }
-
-        .timeline__nav ul li:hover {
-            color: #000;
+            height: 95vh;
+            overflow-y: scroll;
         }
     </style>
 </head>
@@ -93,10 +58,9 @@
 
 <h1>3DCityDB-Web-Map-Client</h1>
 
-<article class="timeline">
-    <section class="timeline__section">
+<article>
+    <section>
         <div class="wrapper">
-
             <h2 class="milestone">Introduction</h2>
             <p>
                 The <b>3DCityDB-Web-Map-Client</b> is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of <b>arbitrarily large semantic 3D city models in CityGML</b>. It utilizes the <a href="https://cesium.com/" target="_blank">Cesium Virtual Globe</a> as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
