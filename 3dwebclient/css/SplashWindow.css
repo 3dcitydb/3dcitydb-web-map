@@ -22,6 +22,7 @@
     width: 80%;
     height: 80%;
     max-height: 90%;
+    overflow-y: scroll;
     top: 10%;
     position: relative;
     z-index: 99990;
