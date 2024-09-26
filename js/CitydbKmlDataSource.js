@@ -1604,12 +1604,15 @@
         var roll = Cesium.Math.toRadians(rollValue);
 
         // Backward compatible....
+        // Cesium already handles versions
+        /*
         if (dataSource._gltfVersion == '0.8') {
             heading = Cesium.Math.toRadians(headingValue - 270);
             pitch = Cesium.Math.toRadians(180);
         } else if (dataSource._gltfVersion == '1.0') {
             heading = Cesium.Math.toRadians(headingValue - 90);
         }
+        */
 
         var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
         var orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
