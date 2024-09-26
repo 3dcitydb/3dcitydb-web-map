@@ -82,6 +82,9 @@ This is a major release.
 * Fixed mobile support for accessing geolocation and orientation.
 * Fixed insertion and removal of terrain layers,
   see [`ff178e4`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ff178e46f78a5f847595ed926ad652938d153f66).
+* Fixed insertion and removal of imagery layers,
+  see [`f5e0a22`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f5e0a229eec8ad84689d10fd4654c88384761b57)
+  and [`1d276a3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/1d276a3ed2ad5a96692bc03de09de1760fcf497f).
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
