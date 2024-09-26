@@ -13,23 +13,29 @@ Employed version: **2.0.0-dev**.
 In this document, the following symbols are used:
 
 + [ ] Pending test
+
 + [x] Test OK
+
+:x: Problem
+
+:heavy_check_mark: All tests done
+
 
 ## Base Web Client
 
-### Web client without any layers
+### Web client without any layers :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html)
 
-### :point_right: Terrain Bavaria DTM
+### :point_right: Terrain Bavaria DTM :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.141633&lo=11.580329&h=1377.45&hd=272.19&p=-62.11&r=360&&tr=name%3DBavaria%2520DTM%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fbvv3d21.bayernwolke.de%252F3d-data%252Flatest%252Fterrain%252F&sw=showOnStart%3Dfalse)
 
 + [x] Insert a terrain layer
 + [x] Display the terrain layer
-+ [ ] Delete the terrain layer
-+ [ ] Reinsert after delete
-+ [ ] Reimport using generated URL
++ [x] Delete the terrain layer
++ [x] Reinsert after delete
++ [x] Reimport using generated URL
 
 ### :point_right: WMS Bavaria DOP 80
 
@@ -45,27 +51,27 @@ In this document, the following symbols are used:
 + [ ] Reinsert after delete
 + [ ] Reimport using generated URL
 
-### :point_right: WMS Bavaria DOP 40
+### :point_right: WMS Bavaria DOP 40 :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.141287&lo=11.585618&h=35931.217&hd=360&p=-90&r=0&&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fgeoservices.bayern.de%252Fod%252Fwms%252Fdop%252Fv1%252Fdop40%253F%26name%3DBavaria%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop40c%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&sw=showOnStart%3Dfalse)
 
 + [x] Insert a WMS layer
 + [x] Display the WMS layer
-+ [ ] Delete the WMS layer
-+ [ ] Reinsert after delete
-+ [ ] Reimport using generated URL
++ [x] Delete the WMS layer
++ [x] Reinsert after delete
++ [x] Reimport using generated URL
 
-### :point_right: WMS Bavaria DOP 20
+### :point_right: WMS Bavaria DOP 20 :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.141287&lo=11.585618&h=35931.217&hd=360&p=-90&r=0&&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fgeoservices.bayern.de%252Fod%252Fwms%252Fdop%252Fv1%252Fdop20%253F%26name%3DBavaria%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop20c%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&sw=showOnStart%3Dfalse)
 
 + [x] Insert a WMS layer
 + [x] Display the WMS layer
-+ [ ] Delete the WMS layer
-+ [ ] Reinsert after delete
-+ [ ] Reimport using generated URL
++ [x] Delete the WMS layer
++ [x] Reinsert after delete
++ [x] Reimport using generated URL
 
-### :point_right: WMTS USGS Shaded Relief
+### :point_right: WMTS USGS Shaded Relief :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=34.253513&lo=22.289328&h=8221190.152&hd=360&p=-89.87&r=0&&bm=imageryType%3Dwmts%26url%3Dhttps%253A%252F%252Fbasemap.nationalmap.gov%252Farcgis%252Frest%252Fservices%252FUSGSShadedReliefOnly%252FMapServer%252FWMTS%26name%3DUSGS%2520Shaded%2520Relief%2520(via%2520WMTS)%26iconUrl%3D%26tooltip%3D%26layers%3DUSGSShadedReliefOnly%26tileStyle%3Ddefault%26tileMatrixSetId%3Ddefault028mm%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&sw=showOnStart%3Dfalse)
 
@@ -75,15 +81,15 @@ In this document, the following symbols are used:
 + [ ] Reinsert after delete
 + [ ] Reimport using generated URL
 
-### :point_right: WMTS Bavaria DOP
+### :point_right: WMTS Bavaria DOP :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.132231&lo=11.569072&h=10363.664&hd=0&p=-90&r=0&&bm=imageryType%3Dwmts%26url%3Dhttps%253A%252F%252Fwmtsod1.bayernwolke.de%252Fwmts%252Fby_dop%252F%257BTileMatrixSet%257D%252F%257BTileMatrix%257D%252F%257BTileCol%257D%252F%257BTileRow%257D%26name%3DBavaria%2520WMTS%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop%26tileStyle%3Ddefault%26tileMatrixSetId%3Dsmerc%26additionalParameters%3D%26proxyUrl%3D&sw=showOnStart%3Dfalse)
 
 + [x] Insert a WMTS layer
 + [x] Display the WMTS layer
-+ [ ] Delete the WMTS layer
-+ [ ] Reinsert after delete
-+ [ ] Reimport using generated URL
++ [x] Delete the WMTS layer
++ [x] Reinsert after delete
++ [x] Reimport using generated URL
 
 ### :point_right: WMTS NRW DOP
 
