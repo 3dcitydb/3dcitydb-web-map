@@ -77,9 +77,9 @@ In this document, the following symbols are used:
 
 + [x] Insert a WMTS layer
 + [x] Display the WMTS layer
-+ [ ] Delete the WMTS layer
-+ [ ] Reinsert after delete
-+ [ ] Reimport using generated URL
++ [x] Delete the WMTS layer
++ [x] Reinsert after delete
++ [x] Reimport using generated URL
 
 ### :point_right: WMTS Bavaria DOP :heavy_check_mark:
 
