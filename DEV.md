@@ -105,322 +105,322 @@ In this document, the following symbols are used:
 
 ## Cesium 3D Tiles with Thematic Data
 
-### :point_right: Buildings in Bavaria with WMS and Terrain, thematic PostgreSQL/PostgREST
+### :point_right: Buildings in Bavaria with WMS and Terrain, thematic PostgreSQL/PostgREST :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.136034&lo=11.567686&h=1122.942&hd=7.28&p=-45.67&r=360&l_0=u%3Dhttps%253A%252F%252Fbvv3d21.bayernwolke.de%252F3d-data%252Flatest%252Flod23d%252Ftileset.json%26n%3DBavaria%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Fgeomassendaten%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D%26null%3D16&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fgeoservices.bayern.de%252Fod%252Fwms%252Fdop%252Fv1%252Fdop20%253F%26name%3DBavaria%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop20c%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&tr=name%3DBavaria%2520DTM%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fbvv3d21.bayernwolke.de%252F3d-data%252Flatest%252Fterrain%252F&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: Buildings in Cologne with WMS and Terrain, thematic OGC Feature API
+### :point_right: Buildings in Cologne with WMS and Terrain, thematic OGC Feature API :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=50.9222&lo=6.940655&h=898.086&hd=349.28&p=-49.15&r=0&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fwww.ldproxy.nrw.de%252Fkataster%252Fcollections%252Fgebaeudebauwerk%252Fitems%26ds%3DOGCFeatureAPI%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: Buildings in Cologne with WMS and Terrain, embedded thematic data
+### :point_right: Buildings in Cologne with WMS and Terrain, embedded thematic data :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=50.9222&lo=6.940655&h=898.086&hd=349.28&p=-49.15&r=360&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fwww.ldproxy.nrw.de%252Fkataster%252Fcollections%252Fgebaeudebauwerk%252Fitems%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: Buildings in Hamburg with WMS and Terrain, thematic OGC Feature API
+### :point_right: Buildings in Hamburg with WMS and Terrain, thematic OGC Feature API :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=53.544272&lo=9.991035&h=1770.099&hd=1.55&p=-72.82&r=0&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fapi.hamburg.de%252Fdatasets%252Fv1%252Falkis_vereinfacht%252Fcollections%252FGebaeudeBauwerk%252Fitems%26ds%3DOGCFeatureAPI%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: Buildings in Hamburg with WMS and Terrain, embedded thematic data
+### :point_right: Buildings in Hamburg with WMS and Terrain, embedded thematic data :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=53.544272&lo=9.991035&h=1770.099&hd=1.55&p=-72.82&r=360&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fapi.hamburg.de%252Fdatasets%252Fv1%252Falkis_vereinfacht%252Fcollections%252FGebaeudeBauwerk%252Fitems%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: Buildings in Munich with WMS and Terrain, embedded thematic data
+### :point_right: Buildings in Munich with WMS and Terrain, embedded thematic data :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.122821&lo=11.504208&h=930.269&hd=2.52&p=-46.06&r=359.81&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D%26mse%3D&bm=name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26layers%3Dde_basemapde_web_raster_farbe%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
 ## COLLADA/KML/glTF Tiles with Thematic Data
 
-### :point_right: Streets in Bavaria with WMS and Terrain, thematic Google Spreadsheets
+### :point_right: Streets in Bavaria with WMS and Terrain, thematic Google Spreadsheets :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=Ingolstadt_A9&s=false&ts=0&la=48.768575&lo=11.463732&h=916.517&hd=330.05&p=-48.44&r=359.86&l_0=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fingolstadt_A9%252Fkml_roads_A9%252Fkml_roads_A9_collada_MasterJSON.json%26n%3DRoads%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j2lSK82S23oF4JF9Cu9bdY2e4LNl-l1ujzVMXGutjds%252Fedit%253Fusp%253Dsharing%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D125%26al%3D1.7976931348623157e%252B308%26ac%3D50%26av%3D200%26null%3D16&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fgeoservices.bayern.de%252Fod%252Fwms%252Fdop%252Fv1%252Fdop20%253F%26name%3DBavaria%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop20c%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&tr=name%3Ddgm%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fbvv3d21.bayernwolke.de%252F3d-data%252Flatest%252Fterrain%252F&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
 ## Indexed 3D Scene Layers (I3S) with Thematic Data
 
@@ -431,43 +431,43 @@ In this document, the following symbols are used:
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [ ] Select and fly to a highlighted object -> Highlighting sometimes disappears due to zooming?
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
 ## GeoJSON with Thematic Data
 
