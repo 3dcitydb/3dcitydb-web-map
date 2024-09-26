@@ -79,7 +79,9 @@ This is a major release.
   see [`e149d6d`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e149d6d458ab0a586535c0d846607155aa8ac252).
 * Fixed pinch gestures in iOS, where the entire screen is zoomed instead of only the globe,
   see [`9eb766c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9eb766c451aba3d9167f5df67f2f6355933a922a).
-* Fixed mobile support for accessing geolocation and orientation. 
+* Fixed mobile support for accessing geolocation and orientation.
+* Fixed insertion and removal of terrain layers,
+  see [`ff178e4`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ff178e46f78a5f847595ed926ad652938d153f66).
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
