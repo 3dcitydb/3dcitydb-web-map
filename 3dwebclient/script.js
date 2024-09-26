@@ -1084,11 +1084,18 @@ function addTerrainProvider() {
     });
 }
 
+let defaultTerrain = undefined;
+
 function removeTerrainProvider() {
     const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     const selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
     baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
-    baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+    if (!Cesium.defined(defaultTerrain)) {
+        defaultTerrain = selectedTerrain;
+        baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+    } else {
+        baseLayerPickerViewModel.selectedTerrain = defaultTerrain;
+    }
 }
 
 function createScreenshot() {
