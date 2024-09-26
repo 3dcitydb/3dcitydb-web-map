@@ -1105,8 +1105,8 @@ function removeTerrainProvider() {
 
 function createScreenshot() {
     cesiumViewer.render();
-    var imageUri = cesiumViewer.canvas.toDataURL();
-    var imageWin = window.open("");
+    const imageUri = cesiumViewer.canvas.toDataURL();
+    const imageWin = window.open("");
     imageWin.document.write("<html><head>" +
         "<title>" + imageUri + "</title></head><body>" +
         '<img src="' + imageUri + '"width="100%">' +
@@ -1115,11 +1115,11 @@ function createScreenshot() {
 }
 
 function printCurrentview() {
-    var imageWin = createScreenshot();
+    const imageWin = createScreenshot();
     imageWin.document.close();
     imageWin.focus();
     imageWin.print();
-    imageWin.close();
+    // imageWin.close();
 }
 
 function toggleShadows() {
