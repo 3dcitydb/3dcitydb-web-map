@@ -54,10 +54,8 @@ var clock = new Cesium.Clock({
 var shadows = urlController.getUrlParaValue('shadows', window.location.href, CitydbUtil);
 var terrainShadows = urlController.getUrlParaValue('terrainShadows', window.location.href, CitydbUtil);
 
-const imageryDefaultIndex = 1;
-
 var cesiumViewerOptions = {
-    selectedImageryProviderViewModel: Cesium.createDefaultImageryProviderViewModels()[imageryDefaultIndex],
+    selectedImageryProviderViewModel: Cesium.createDefaultImageryProviderViewModels()[1],
     timeline: true,
     animation: true,
     fullscreenButton: false,
@@ -1043,7 +1041,7 @@ function removeImageryProvider() {
     const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     const selectedImagery = baseLayerPickerViewModel.selectedImagery;
     baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
-    baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[imageryDefaultIndex];
+    baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
     imageryInserted = false;
 }
 
