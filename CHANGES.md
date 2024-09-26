@@ -63,6 +63,8 @@ This is a major release.
 * The buttons for accessing geolocation and orientation on mobile have been modernized with completely new icons and implementations.
 * The tile inspector is now hidden by default to improve visual clarity,
   see [`d4109eb`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d4109eb7211c4c642617521cff36593d566d0836).
+* Cesium already handles different versions of glTF,
+  see [`d8084f6`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d8084f6760b9f0191c63f9869431f329993d81f7).
 
 ##### FIXES
 
