@@ -674,6 +674,58 @@ In this document, the following symbols are used:
 + [x] Open in BingMaps ObliqueView
 + [x] Open in DualMaps
 
+## :milky_way: Mixed Layers > :point_right: Buildings Tokyo, Bridges, Solar :heavy_check_mark:
+
+[Demo Link](https://3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=35.672454&lo=139.765624&h=517.929&hd=358.98&p=-39.35&r=360&l_0=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftokyo%252Fbldg-solar%252Fbldg-bldg-solar_collada_MasterJSON.json%26n%3DBldg-solar%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Ftokyo_solar%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D200%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200&l_1=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftokyo%252Fbridges%252Fbridges_collada_MasterJSON.json%26n%3DBridges%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D200%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200&tr=name%3DDGM%26iconUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fdgm.png%26tooltip%3D%26url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftokyo%252Fterrain&sw=)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
 ## :milky_way: Mixed Layers > :point_right: Buildings Hamburg, Roads, Bridges, textured :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?t=Hamburg&s=false&ts=0&la=53.541944&lo=9.981145&h=318.782&hd=18.52&p=-48.35&r=0.09&l_0=u%3Dhttps%253A%252F%252Fdaten-hamburg.de%252Fgdi3d%252Fdatasource-data%252FBrueckenflaechen_HH%252Ftileset.json%26n%3DHH_Bridges%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_1=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fhamburg_TAVF%252FHH_roads_3D_v1%252FHH_roads_3D_collada_MasterJSON.json%26n%3DHH_Roads%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1ArMIufnP5Cie272YAa2x1BWZlcuCWN_NYovmptdN0b0%252Fedit%253Fusp%253Dsharing%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D125%26al%3D1.7976931348623157e%252B308%26ac%3D50%26av%3D200&l_2=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fhamburg_TAVF%252FHH_markings_3D%252FHH_markings_3D_collada_MasterJSON.json%26n%3DHH_Markings%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D125%26al%3D1.7976931348623157e%252B308%26ac%3D50%26av%3D200&l_3=u%3Dhttps%253A%252F%252Fdaten-hamburg.de%252Fgdi3d%252Fdatasource-data%252FLoD3_tex20cm_Area1%252Ftileset.json%26n%3DHH_Buildings%253ALOD3_area1%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_4=u%3Dhttps%253A%252F%252Fdaten-hamburg.de%252Fgdi3d%252Fdatasource-data%252FLoD3_tex20cm_Area4%252Ftileset.json%26n%3DHH_Buildings%253ALOD3_area4%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_5=u%3Dhttps%253A%252F%252Fdaten-hamburg.de%252Fgdi3d%252Fdatasource-data%252FStrassenbaumkataster_Sommerbaeume%252Ftileset.json%26n%3DHH_Vegetation%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_6=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fhamburg_TAVF%252FHH_cityfurniture_absolute_heights%252Ftileset.json%26n%3DHH_CityFurniture%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1kiu5kYECYMzJHX2DXG_fBRtN-5VUIzBcK1Xby846GLQ%252Fedit%253Fusp%253Dsharing%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&tr=name%3DHH_dgm%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fdaten-hamburg.de%252Fgdi3d%252Fdatasource-data%252FGelaende%252F&sw=showOnStart%3Dfalse)
@@ -1057,58 +1109,6 @@ In this document, the following symbols are used:
 **Highlighting and hiding**:
 
 + [ ] Highlight single and multiple objects -> Some (textured) buildings have no/invisible highlighting on hover
-+ [x] List highlighted objects
-+ [x] Select and fly to a highlighted object
-+ [x] Hide single and multiple objects
-+ [x] List hidden objects
-+ [x] Select and fly to a hidden object
-+ [x] Show all hidden objects
-+ [x] Clear highlighting
-
-**Thematic data**:
-
-+ [x] Info table for a clicked object
-
-**Screenshot and print**:
-
-+ [x] Create screenshot
-+ [x] Print current view
-
-**Enabling and disabling shadows**:
-
-+ [x] Enable shadows
-+ [x] Enable shadows first, then enable terrain shadows
-+ [x] Enable terrain shadows without enabling shadows
-+ [x] Disable terrain shadows
-+ [x] Disable terrain shadows first, then disable shadows
-+ [x] Disable shadows without disabling terrain shadows
-
-**Display in external maps**:
-
-+ [x] Open in Google StreetView
-+ [x] Open in OpenStreetMap
-+ [x] Open in BingMaps ObliqueView
-+ [x] Open in DualMaps
-
-## :milky_way: Mixed Layers > :point_right: LOD3 TUM Buildings, Streets, Project TUM2TWIN :heavy_check_mark:
-
-[Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?t=tum2twin&s=false&ts=0&la=48.146631&lo=11.569777&h=701.398&hd=323.05&p=-37.61&r=0&l_0=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-playground%252Flod3_textured%252Ftileset.json%26n%3DBuildings%2520LOD3%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_1=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FmunichCenter%252Fvegetation-glTF%252Fvege_collada_MasterJSON.json%26n%3DVegetation%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D120%26al%3D1.7976931348623157e%252B308%26ac%3D50%26av%3D200&l_2=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum_clearancespace%252Fpointcloud%252Ftileset.json%26n%3DPointcloud%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dfalse%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_3=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-playground%252Flod2_without_lod3%252Ftileset.json%26n%3DBuildings%2520LOD2%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_4=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-playground%252Froadrunner_height_texture%252Ftileset.json%26n%3DRoads%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=name%3Dluftbild%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fgeoportal.muenchen.de%252Fgeoserver%252Fgsm%252Fows%253Fservice%253DWMS%2526request%253DGetMap%2526crs%253DEPSG%253A4326%2526dpiMode%253D7%2526format%253Dimage%252Fpng%2526layers%253Dluftbild%26layers%3Dluftbild%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&tr=name%3Dterrain%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-playground%252Fterrain&sw=)
-
-**General information**:
-
-+ [x] Display layer information in toolbox
-+ [x] Responsive display/switch of layer information
-
-**3D layer handling**:
-
-+ [x] Activate layers
-+ [x] Deactivate layers
-+ [x] Remove layers
-+ [x] Reinsert layers
-
-**Highlighting and hiding**:
-
-+ [x] Highlight single and multiple objects
 + [x] List highlighted objects
 + [x] Select and fly to a highlighted object
 + [x] Hide single and multiple objects
