@@ -86,7 +86,7 @@ In this document, the following symbols are used:
 
 :x: WMTS dataset currently not available/working
 
-## :atom: Cesium 3D Tiles > :point_right: Buildings in Bavaria with WMS and Terrain, thematic PostgreSQL/PostgREST :heavy_check_mark:
+## :basketball: Cesium 3D Tiles > :point_right: Buildings in Bavaria with WMS and Terrain, thematic PostgreSQL/PostgREST :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.136034&lo=11.567686&h=1122.942&hd=7.28&p=-45.67&r=360&l_0=u%3Dhttps%253A%252F%252Fbvv3d21.bayernwolke.de%252F3d-data%252Flatest%252Flod23d%252Ftileset.json%26n%3DBavaria%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Fgeomassendaten%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D%26null%3D16&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fgeoservices.bayern.de%252Fod%252Fwms%252Fdop%252Fv1%252Fdop20%253F%26name%3DBavaria%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop20c%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D%252Fproxy%252F&tr=name%3DBavaria%2520DTM%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fbvv3d21.bayernwolke.de%252F3d-data%252Flatest%252Fterrain%252F&sw=showOnStart%3Dfalse)
 
@@ -131,7 +131,7 @@ In this document, the following symbols are used:
 + [x] Open in BingMaps ObliqueView
 + [x] Open in DualMaps
 
-## :atom: Cesium 3D Tiles > :point_right: Buildings in Cologne with WMS and Terrain, thematic OGC Feature API :heavy_check_mark:
+## :basketball: Cesium 3D Tiles > :point_right: Buildings in Cologne with WMS and Terrain, thematic OGC Feature API :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=50.9222&lo=6.940655&h=898.086&hd=349.28&p=-49.15&r=0&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fwww.ldproxy.nrw.de%252Fkataster%252Fcollections%252Fgebaeudebauwerk%252Fitems%26ds%3DOGCFeatureAPI%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
@@ -176,7 +176,7 @@ In this document, the following symbols are used:
 + [x] Open in BingMaps ObliqueView
 + [x] Open in DualMaps
 
-## :atom: Cesium 3D Tiles > :point_right: Buildings in Cologne with WMS and Terrain, embedded thematic data :heavy_check_mark:
+## :basketball: Cesium 3D Tiles > :point_right: Buildings in Cologne with WMS and Terrain, embedded thematic data :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=50.9222&lo=6.940655&h=898.086&hd=349.28&p=-49.15&r=360&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fwww.ldproxy.nrw.de%252Fkataster%252Fcollections%252Fgebaeudebauwerk%252Fitems%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
@@ -221,7 +221,7 @@ In this document, the following symbols are used:
 + [x] Open in BingMaps ObliqueView
 + [x] Open in DualMaps
 
-## :atom: Cesium 3D Tiles > :point_right: Buildings in Hamburg with WMS and Terrain, thematic OGC Feature API :heavy_check_mark:
+## :basketball: Cesium 3D Tiles > :point_right: Buildings in Hamburg with WMS and Terrain, thematic OGC Feature API :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=53.544272&lo=9.991035&h=1770.099&hd=1.55&p=-72.82&r=0&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fapi.hamburg.de%252Fdatasets%252Fv1%252Falkis_vereinfacht%252Fcollections%252FGebaeudeBauwerk%252Fitems%26ds%3DOGCFeatureAPI%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
@@ -266,7 +266,7 @@ In this document, the following symbols are used:
 + [x] Open in BingMaps ObliqueView
 + [x] Open in DualMaps
 
-## :atom: Cesium 3D Tiles > :point_right: Buildings in Hamburg with WMS and Terrain, embedded thematic data :heavy_check_mark:
+## :basketball: Cesium 3D Tiles > :point_right: Buildings in Hamburg with WMS and Terrain, embedded thematic data :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=53.544272&lo=9.991035&h=1770.099&hd=1.55&p=-72.82&r=360&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fapi.hamburg.de%252Fdatasets%252Fv1%252Falkis_vereinfacht%252Fcollections%252FGebaeudeBauwerk%252Fitems%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&bm=imageryType%3Dwms%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26layers%3Dde_basemapde_web_raster_farbe%26tileStyle%3D%26tileMatrixSetId%3D%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=showOnStart%3Dfalse)
 
@@ -311,7 +311,7 @@ In this document, the following symbols are used:
 + [x] Open in BingMaps ObliqueView
 + [x] Open in DualMaps
 
-## :atom: Cesium 3D Tiles > :point_right: Buildings in Munich with WMS and Terrain, embedded thematic data :heavy_check_mark:
+## :basketball: Cesium 3D Tiles > :point_right: Buildings in Munich with WMS and Terrain, embedded thematic data :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-04-23T10%3A35%3A37Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.122821&lo=11.504208&h=930.269&hd=2.52&p=-46.06&r=359.81&l_0=u%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fbuildings-fly%252Froot.json%26n%3DBasemap.de%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D%26mse%3D&bm=name%3DGDI-DE%2520Webmap%2520Karte%26iconUrl%3Dhttps%253A%252F%252Fgdz.bkg.bund.de%252Fskin%252Ffrontend%252Fbkg%252Fbkg_blau%252Fimages%252Fbkg_logo.svg%26tooltip%3DGDI-DE%2520Webmap%2520Karte%26url%3Dhttps%253A%252F%252Fsgx.geodatenzentrum.de%252Fwms_basemapde%26layers%3Dde_basemapde_web_raster_farbe%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM5%26iconUrl%3D%26tooltip%3D%26url%3Dhttps%253A%252F%252Fweb3d.basemap.de%252Fcesium%252Fdgm5-mesh&sw=)
 
@@ -401,7 +401,7 @@ In this document, the following symbols are used:
 + [x] Open in BingMaps ObliqueView
 + [x] Open in DualMaps
 
-## :electron: I3S > :point_right: Buildings in San Francisco, embedded thematic data
+##  :soccer: I3S > :point_right: Buildings in San Francisco, embedded thematic data
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=37.756783&lo=-122.43645&h=160.854&hd=318.53&p=-43.14&r=360&l_0=u%3Dhttps%253A%252F%252Ftiles.arcgis.com%252Ftiles%252Fz2tnIkrLQ2BRzr6P%252Farcgis%252Frest%252Fservices%252FSanFrancisco_3DObjects_1_7%252FSceneServer%252Flayers%252F0%26n%3Di3s%26ld%3Di3s%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D%26null%3D16&sw=showOnStart%3Dfalse)
 
