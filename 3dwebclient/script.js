@@ -54,8 +54,10 @@ var clock = new Cesium.Clock({
 var shadows = urlController.getUrlParaValue('shadows', window.location.href, CitydbUtil);
 var terrainShadows = urlController.getUrlParaValue('terrainShadows', window.location.href, CitydbUtil);
 
+const imageryDefaultIndex = 1;
+
 var cesiumViewerOptions = {
-    selectedImageryProviderViewModel: Cesium.createDefaultImageryProviderViewModels()[1],
+    selectedImageryProviderViewModel: Cesium.createDefaultImageryProviderViewModels()[imageryDefaultIndex],
     timeline: true,
     animation: true,
     fullscreenButton: false,
@@ -979,6 +981,8 @@ function removeSelectedLayer() {
     }
 }
 
+let imageryInserted = false;
+
 function addWebMapServiceProvider() {
     function update(callback) {
         removeImageryProvider();
@@ -1030,14 +1034,17 @@ function addWebMapServiceProvider() {
 
         baseLayerPickerViewModel.imageryProviderViewModels.push(providerViewModel);
         baseLayerPickerViewModel.selectedImagery = providerViewModel;
+        imageryInserted = true;
     });
 }
 
 function removeImageryProvider() {
+    if (!imageryInserted) return; // Remove only if inserted by user
     const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     const selectedImagery = baseLayerPickerViewModel.selectedImagery;
     baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
-    baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
+    baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[imageryDefaultIndex];
+    imageryInserted = false;
 }
 
 function imageryTypeDropdownOnchange() {
