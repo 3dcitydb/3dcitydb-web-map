@@ -471,229 +471,232 @@ In this document, the following symbols are used:
 
 ## GeoJSON with Thematic Data
 
-### :point_right: Districts in NRW, thematic OGC Feature API
+### :point_right: Districts in NRW, thematic OGC Feature API :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=50.333235&lo=6.427043&h=4053.567&hd=360&p=-45.06&r=360&l_0=u%3Dhttps%253A%252F%252Fwww.ldproxy.nrw.de%252Fkataster%252Fcollections%252Fflurstueck%252Fitems%253Ff%253Djson%2526bbox%253D6.4%252C50.35%252C6.45%252C50.4%2526limit%253D2000%26n%3DGeoJSON%26ld%3Dgeojson%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fwww.ldproxy.nrw.de%252Fkataster%252Fcollections%252Fflurstueck%252Fitems%26ds%3DOGCFeatureAPI%26tt%3DHorizontal%26gc%3D%26il%3D140%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200%26null%3D16&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
-
-**Enabling and disabling shadows**:
-
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Create screenshot
++ [x] Print current view
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: Districts in NRW, embedded thematic data
+### :point_right: Districts in NRW, embedded thematic data :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=50.333235&lo=6.427043&h=4053.567&hd=360&p=-45.06&r=360&l_0=u%3Dhttps%253A%252F%252Fwww.ldproxy.nrw.de%252Fkataster%252Fcollections%252Fflurstueck%252Fitems%253Ff%253Djson%2526bbox%253D6.4%252C50.35%252C6.45%252C50.4%2526limit%253D2000%26n%3DGeoJSON%26ld%3Dgeojson%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DEmbedded%26tt%3DHorizontal%26gc%3D%26il%3D140%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200%26null%3D16&sw=showOnStart%3Dfalse)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
-
-**Enabling and disabling shadows**:
-
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Create screenshot
++ [x] Print current view
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
 ## Multiple Layers
 
-### :point_right: TUM Buildings in different LODs, Solar Radiation, Vegetation
+### :point_right: TUM Buildings in different LODs, Solar Radiation, Vegetation :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?t=3DCityDB-Web-Map-Client&s=false&ts=0&la=48.146479&lo=11.568271&h=659.643&hd=343.25&p=-30.38&r=359.94&l_0=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FmunichSolarFull%252Fvegetation%252Fmunich_vegetation_collada_MasterJSON.json%26n%3DVegetation%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D120%26al%3D1.7976931348623157e%252B308%26ac%3D100%26av%3D50%26null%3D16&l_1=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FmunichSolarScenarios%252Flod1_dgm%252Fsolar-bldg-glTF%252Flod1_orgBy_dgm_solar-bldg-glTF_collada_MasterJSON.json%26n%3DBldg%2520LoD1%2520-%2520Terrain%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dfalse%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Fmunich_lod1_dgm%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D120%26al%3D1.7976931348623157e%252B308%26ac%3D100%26av%3D50%26null%3D16&l_2=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FmunichSolarScenarios%252Flod1_dgm_vegetation%252Fsolar-bldg-glTF%252Flod1_orgBy_dgm_vegetation_solar-bldg-glTF_collada_MasterJSON.json%26n%3DBldg%2520LoD1%2520-%2520Terrain%252C%2520Vegetation%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dfalse%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Fmunich_lod1_dgm_vegetation%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D120%26al%3D1.7976931348623157e%252B308%26ac%3D100%26av%3D50%26null%3D16&l_3=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FmunichSolarScenarios%252Flod2_dgm%252Fsolar-bldg-glTF%252Flod2_dgm_solar-bldg-glTF_collada_MasterJSON.json%26n%3DBldg%2520LoD2%2520-%2520Terrain%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dfalse%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Fmunich_lod2_dgm%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D120%26al%3D1.7976931348623157e%252B308%26ac%3D100%26av%3D50%26null%3D16&l_4=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FmunichSolarFull%252Fsolar-bldg-glTF%252Fmunich_solar-bldg-glTF_collada_MasterJSON.json%26n%3DBldg%2520LoD2%2520-%2520Terrain%252C%2520Vegetation%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Fmunich_full%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D120%26al%3D1.7976931348623157e%252B308%26ac%3D100%26av%3D50%26null%3D16&bm=imageryType%3Dwmts%26url%3Dhttps%253A%252F%252Fwmtsod1.bayernwolke.de%252Fwmts%252Fby_dop%252F%257BTileMatrixSet%257D%252F%257BTileMatrix%257D%252F%257BTileCol%257D%252F%257BTileRow%257D%26name%3DBavaria%2520WMTS%26iconUrl%3D%26tooltip%3D%26layers%3Dby_dop%26tileStyle%3Ddefault%26tileMatrixSetId%3Dsmerc%26additionalParameters%3D%26proxyUrl%3D&tr=name%3DDGM1%26iconUrl%3D%26tooltip%3DLDBV%2520-%2520DGM1%26url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fterrain_bay_geomassendaten&sw=)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: TUM Lane Models with Buildings, Solar Radiation, Vegetation
+### :point_right: TUM Lane Models with Buildings, Solar Radiation, Vegetation :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2024-06-22T11%3A05%3A05Z&t=Munich_LaneModel&s=false&ts=0&la=48.145591&lo=11.570041&h=467.332&hd=333.36&p=-54.52&r=360&l_0=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FLaneModel%252Ftum%252Fbuildings_height_zero%252Ftileset.json%26n%3DBuildings%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_1=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FLaneModel%252Ftum%252FLaneModel_visexp_textured%252FLaneAreas_TUMclip%252Ftileset.json%26n%3DLane%2520Model%26ld%3DCesium%25203D%2520Tiles%26lp%3D%26lc%3D%26gv%3D%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D%26al%3D%26ac%3D%26av%3D&l_2=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FLaneModel%252Ftum%252Fvegetation%252Fvegetation_collada_MasterJSON.json%26n%3DVegetation%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D125%26al%3D1.7976931348623157e%252B308%26ac%3D50%26av%3D200&l_3=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_trafficSpace%252FTUM_trafficSpace_geometry_MasterJSON.json%26n%3DTUM%2520TrafficSpaces%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dfalse%26tdu%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1JiIJnxpZiKOrCvVittVhPkVjmBEEItRuvGlP5H1BdT4%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D0%26al%3D1.7976931348623157e%252B308%26ac%3D50%26av%3D200&sw=)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
 
-### :point_right: Tokyo Buildings with Bridges, Textures
+### :point_right: Tokyo Buildings with Bridges, Textures :heavy_check_mark:
 
 [Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?d=2021-04-20T20%3A17%3A07Z&t=3DCityDB-Web-Map-Client&s=false&ts=0&la=35.675426&lo=139.765468&h=241.186&hd=9.53&p=-26.24&r=0.03&l_0=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftokyo%252Fbldg%252Fbldg-bldg-solar_collada_MasterJSON.json%26n%3DTokio_Buildings%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3Dhttps%253A%252F%252Fbsvr.gis.lrg.tum.de%252Fpostgrest%252Ftokyo_en%26ds%3DPostgreSQL%26tt%3DVertical%26gc%3D%26il%3D50%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200&l_1=u%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftokyo%252Fbridges%252Fbridges_collada_MasterJSON.json%26n%3DTokio_Bridges%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dfalse%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D50%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200&tr=name%3DDGM%26iconUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fdgm.png%26tooltip%3D%26url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftokyo%252Fterrain&sw=)
 
 **General information**:
 
 + [x] Display layer information in toolbox
-+ [ ] Responsive display/switch of layer information
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
 
 **Highlighting and hiding**:
 
-+ [ ] Highlight single and multiple objects
-+ [ ] List highlighted objects
-+ [ ] Select and fly to a highlighted object
-+ [ ] Hide single and multiple objects
-+ [ ] List hidden objects
-+ [ ] Select and fly to a hidden object
-+ [ ] Show all hidden objects
-+ [ ] Clear highlighting
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
 
 **Thematic data**:
 
-+ [ ] Info table for a clicked object
++ [x] Info table for a clicked object
 
 **Screenshot and print**:
 
-+ [ ] Create screenshot
-+ [ ] Print current view
++ [x] Create screenshot
++ [x] Print current view
 
 **Enabling and disabling shadows**:
 
-+ [ ] Enable shadows
-+ [ ] Enable shadows first, then enable terrain shadows
-+ [ ] Enable terrain shadows without enabling shadows
-+ [ ] Disable terrain shadows
-+ [ ] Disable terrain shadows first, then disable shadows
-+ [ ] Disable shadows without disabling terrain shadows
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
 
 **Display in external maps**:
 
-+ [ ] Open in Google StreetView
-+ [ ] Open in OpenStreetMap
-+ [ ] Open in BingMaps ObliqueView
-+ [ ] Open in DualMaps
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
