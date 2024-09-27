@@ -41,7 +41,7 @@ var SplashController = /** @class */ (function () {
                     <td><img src="' + 'images/3DCityDB_Logo.png' + '" width="76" height="81" /></td>\
                     <td>\
                         <!-- <div class="cesium-navigation-help-pan">Chair of Geoinformatics</div>\ -->\
-                        <div class="cesium-navigation-help-details"><a href="https://www.3dcitydb.org/3dcitydb/" target="_blank" style="color: yellow;">3D City Database</a> (3DCityDB) <br> Software Suite.</div>\
+                        <div class="cesium-navigation-help-details"><a href="https://www.3dcitydb.org/3dcitydb" target="_blank" style="color: yellow;">3D City Database</a> (3DCityDB) <br> Software Suite.</div>\
                     </td>\
                 </tr>\
             </table>\
