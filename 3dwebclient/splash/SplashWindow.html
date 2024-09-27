@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>3DCityDB-Web-Map-Client</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
@@ -187,32 +187,38 @@
 
             <h2 class="milestone">Introduction</h2>
             <p>
-                The <b>3DCityDB-Web-Map-Client</b> is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of <b>arbitrarily large semantic 3D city models in CityGML</b>. It utilizes the <a href="http://cesiumjs.org/index.html" target="_blank">Cesium Virtual Globe</a> as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
+                The <b>3DCityDB-Web-Map-Client</b> is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of <b>arbitrarily large semantic 3D city models in CityGML</b>. It utilizes the <a href="https://cesium.com/" target="_blank">Cesium Virtual Globe</a> as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
             </p>
             <p>
                 The key features and functionalities of the 3DCityDB-Web-Map-Client is summarized as follows:
 
                 <ul>
                     <li>
-                        Support for efficient displaying, caching, prefetching, dynamic loading and unloading of large pre-styled 3D visualization models in the form of tiled KML/glTF datasets exported from the 3DCityDB using the Importer/Exporter
+                        Support for efficient displaying, caching, prefetching, dynamic loading and unloading of large pre-styled 3D visualization models in the form of <b>tiled KML/glTF datasets exported from the 3DCityDB</b> using the Importer/Exporter
                     </li>
                     <li>
-                        Intuitive user interface for adding and removing arbitrary number of data layers like 3D visualization model (KML/glTF), WMS imagery layer, and Cesium digital terrain model
+                        Intuitive user interface for adding and removing <b>arbitrary number of data layers</b> for 3D visualization (KML/glTF, CZML, GeoJSON, Cesium 3D Tiles, I3S), together with WMS/WMTS imagery layer, and Cesium digital terrain model
                     </li>
                     <li>
-                        Support for linking the 3D visualization models (KML/glTF) with the cloud-based Google Fusion Table allowing for querying the thematic data of every 3D object
+                        Support for linking the 3D visualization models (KML/glTF, GeoJSON, Cesium 3D Tiles, I3S) with <b>external thematic data sources</b>, such as <b>Google Spreadsheets</b>, <b>PostgreSQL/PostgREST</b> and <b>OGC Feature API</b>, allowing for querying the thematic data of every 3D object
                     </li>
                     <li>
-                        Support for rich interaction with 3D visualization models (KML/glTF), for example, highlighting of 3D objects on mouseover and mouseclick as well as hiding and showing of the selected 3D objects
+                        Support for displaying the existing <b>thematic data embedded</b> within the visualization datasets, such as KML, GeoJSON, Cesium 3D Tiles and I3S
                     </li>
                     <li>
-                        Support for exploring a 3D object of interest from different view perspectives using third-party mapping services like Microsoft Bing Maps with oblique view, Google Streetview, and a combined version (DualMaps)
+                        Support for rich interaction with 3D visualization models, for example, <b>highlighting</b> of 3D objects on mouseover and mouseclick as well as <b>hiding</b> and <b>showing</b> of multiple selected 3D objects
                     </li>
                     <li>
-                        Support for on-the-fly activating and deactivating shadow visualization of 3D objects (only for glTF, KML is currently not supported yet) and Cesium digital terrain models
+                        Support for exploring a 3D object of interest from <b>different view perspectives</b> using third-party mapping services like <b>Microsoft Bing Maps</b> with oblique view, <b>Google Streetview</b>, and a combined version (<b>DualMaps</b>)
                     </li>
                     <li>
-                        Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of generating a scene link including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers etc.
+                        Support for on-the-fly activating and deactivating <b>shadow visualization</b> of 3D objects and Cesium digital terrain models
+                    </li>
+                    <li>
+                        Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of <b>generating a scene link</b> including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers, etc. This link can be easily shared or bookmarked, and can be reopened in a browser on different machines.
+                    </li>
+                    <li>
+                        Packaged as a <a href="https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated" target="_blank"><b>Docker image</b></a> for fast and convenient deployment
                     </li>
                 </ul>
             </p>
@@ -227,12 +233,13 @@
 
             <h2 class="milestone">Latest release</h2>
             <p>
-                The latest stable release of the 3DCityDB-Web-Map-Client is <samp>1.7.1</samp>.
-            <p>
                 All releases are available from the <a href="https://github.com/3dcitydb/3dcitydb-web-map/releases" target="_blank">releases section</a>.
             </p>
             <p>
-                For convenient use, there is an official <a href="https://www.3dcitydb.org/3dcitydb-web-map/1.7.1/3dwebclient/index.html" target="_blank">web link</a> available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser.
+                This project is also available in Docker, see <a href="https://github.com/tum-gis/3dcitydb-web-map-docker" target="_blank">repository</a> and <a href="https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated" target="_blank">Docker images</a>.
+            </p>
+            <p>
+                For convenient use, there is an official <a href="https://www.3dcitydb.org/3dcitydb-web-map/latest/3dwebclient/index.html" target="_blank">web link</a> available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser.
             </p>
 
             <h2 class="milestone">System requirements</h2>
@@ -240,7 +247,7 @@
                 The hardware on which the 3DCityDB-Web-Map-Client will be run must have a graphics card installed that supports WebGL. In addition, the web browser in use must also provide appropriate WebGL support.
             </p>
             <p>
-                You can visit the <a href="http://get.webgl.org/](http://get.webgl.org/" target="_blank">WebGL website</a> to check whether your web browser supports WebGL.
+                You can visit the <a href="http://get.webgl.org](http://get.webgl.org" target="_blank">WebGL website</a> to check whether your web browser supports WebGL.
             </p>
             <p>
                 The 3DCityDB-Web-Map-Client has been successfully tested on (but is not limited to) the following web browsers under different desktop operating systems like Microsoft Windows, Linux, Apple Mac OS X, and even on mobile operating systems like Android and iOS.
@@ -270,15 +277,19 @@
 
             <h2 class="milestone">Contributing</h2>
             <p>
+                The source codes of this project are available on <a href="https://github.com/3dcitydb/3dcitydb-web-map" target="_blank">GitHub</a>. All releases can be found <a href="https://github.com/3dcitydb/3dcitydb-web-map/releases" target="_blank">here</a>.
+            </p>
+            <p>
+                The platform GitHub is also used for collaborating:
                 <ul>
                     <li>
-                        To file bugs found in the software create a GitHub issue.
+                        To report bugs found in the software, please create a GitHub issue.
                     </li>
                     <li>
-                        To contribute code for fixing filed issues create a pull request with the issue id.
+                        To contribute code for fixing issues, please create a pull request with the issue id.
                     </li>
                     <li>
-                        To propose a new feature create a GitHub issue and open a discussion.
+                        To propose a new feature, please also create a GitHub issue and open a discussion.
                     </li>
                 </ul>
             </p>
@@ -288,9 +299,9 @@
                 The 3DCityDB-Web-Map-Client has been developed by:
                 <ul>
                     <li>
-                        Zhihang Yao, Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
+                        Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
                         <br>
-                        <a href="https://www.gis.bgu.tum.de/" target="_blank">Chair of Geoinformatics, Technical University of Munich</a>
+                        <a href="https://www.asg.ed.tum.de/en/gis" target="_blank">Chair of Geoinformatics, Technical University of Munich</a>
                     </li>
                 </ul>
             </p>
@@ -298,9 +309,9 @@
                 and with the support from the following cooperation partners:
                 <ul>
                     <li>
-                        Jannes Bolling, Lucas van Walstijn, and Claus Nagel
+                        Zhihang Yao, Jannes Bolling, Lucas van Walstijn, and Claus Nagel
                         <br>
-                        <a href="https://www.virtualcitysystems.de/" target="_blank">virtualcitySYSTEMS GmbH, Berlin</a>
+                        <a href="https://vc.systems" target="_blank">Virtual City Systems, Berlin</a>
                     </li>
                 </ul>
             </p>

@@ -608,6 +608,9 @@ function addLayerToList(layer) {
         var targetRadio = event.target;
         var layerId = targetRadio.parentNode.id;
         webMap.activeLayer = webMap.getLayerById(layerId);
+        // Adjust GUI based on given values
+        layerDataTypeDropdownOnchange();
+        thematicDataSourceAndTableTypeDropdownOnchange();
         console.log(webMap.activeLayer);
     };
 
@@ -976,6 +979,8 @@ function removeSelectedLayer() {
     }
 }
 
+let imageryInserted = false;
+
 function addWebMapServiceProvider() {
     function update(callback) {
         removeImageryProvider();
@@ -1027,14 +1032,17 @@ function addWebMapServiceProvider() {
 
         baseLayerPickerViewModel.imageryProviderViewModels.push(providerViewModel);
         baseLayerPickerViewModel.selectedImagery = providerViewModel;
+        imageryInserted = true;
     });
 }
 
 function removeImageryProvider() {
+    if (!imageryInserted) return; // Remove only if inserted by user
     const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     const selectedImagery = baseLayerPickerViewModel.selectedImagery;
     baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
     baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
+    imageryInserted = false;
 }
 
 function imageryTypeDropdownOnchange() {
@@ -1081,17 +1089,24 @@ function addTerrainProvider() {
     });
 }
 
+let defaultTerrain = undefined;
+
 function removeTerrainProvider() {
     const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     const selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
     baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
-    baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+    if (!Cesium.defined(defaultTerrain)) {
+        defaultTerrain = selectedTerrain;
+        baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
+    } else {
+        baseLayerPickerViewModel.selectedTerrain = defaultTerrain;
+    }
 }
 
 function createScreenshot() {
     cesiumViewer.render();
-    var imageUri = cesiumViewer.canvas.toDataURL();
-    var imageWin = window.open("");
+    const imageUri = cesiumViewer.canvas.toDataURL();
+    const imageWin = window.open("");
     imageWin.document.write("<html><head>" +
         "<title>" + imageUri + "</title></head><body>" +
         '<img src="' + imageUri + '"width="100%">' +
@@ -1100,11 +1115,11 @@ function createScreenshot() {
 }
 
 function printCurrentview() {
-    var imageWin = createScreenshot();
+    const imageWin = createScreenshot();
     imageWin.document.close();
     imageWin.focus();
     imageWin.print();
-    imageWin.close();
+    // imageWin.close();
 }
 
 function toggleShadows() {

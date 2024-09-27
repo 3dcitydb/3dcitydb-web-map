@@ -63,6 +63,8 @@ This is a major release.
 * The buttons for accessing geolocation and orientation on mobile have been modernized with completely new icons and implementations.
 * The tile inspector is now hidden by default to improve visual clarity,
   see [`d4109eb`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d4109eb7211c4c642617521cff36593d566d0836).
+* Cesium already handles different versions of glTF,
+  see [`d8084f6`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d8084f6760b9f0191c63f9869431f329993d81f7).
 
 ##### FIXES
 
@@ -79,7 +81,14 @@ This is a major release.
   see [`e149d6d`](https://github.com/3dcitydb/3dcitydb-web-map/commit/e149d6d458ab0a586535c0d846607155aa8ac252).
 * Fixed pinch gestures in iOS, where the entire screen is zoomed instead of only the globe,
   see [`9eb766c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/9eb766c451aba3d9167f5df67f2f6355933a922a).
-* Fixed mobile support for accessing geolocation and orientation. 
+* Fixed mobile support for accessing geolocation and orientation.
+* Fixed insertion and removal of terrain layers,
+  see [`ff178e4`](https://github.com/3dcitydb/3dcitydb-web-map/commit/ff178e46f78a5f847595ed926ad652938d153f66).
+* Fixed insertion and removal of imagery layers,
+  see [`f5e0a22`](https://github.com/3dcitydb/3dcitydb-web-map/commit/f5e0a229eec8ad84689d10fd4654c88384761b57)
+  and [`1d276a3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/1d276a3ed2ad5a96692bc03de09de1760fcf497f).
+* Fixed printing screenshots,
+  see [`3a22a3c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3a22a3cdeb4c4316f0a3fd52810c70420b1baa45).
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 

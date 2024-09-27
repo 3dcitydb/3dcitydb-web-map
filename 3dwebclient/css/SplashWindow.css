@@ -23,7 +23,8 @@
     height: 80%;
     max-height: 90%;
     top: 10%;
-    position: relative;
+    left: 10%;
+    position: absolute;
     z-index: 99990;
 }
 

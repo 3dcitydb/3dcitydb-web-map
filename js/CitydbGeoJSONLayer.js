@@ -474,7 +474,7 @@
 
     CitydbGeoJSONLayer.prototype.setSelected = function (feature) {
         if (!Cesium.defined(feature) || !this.contains(feature)) return;
-        this._cesiumViewer.selectedEntity = this._selectedEntity;
+        this._cesiumViewer.selectedEntity = feature.id;
     }
 
     CitydbGeoJSONLayer.prototype.storeCameraPosition = function (viewer, movement, feature) {
