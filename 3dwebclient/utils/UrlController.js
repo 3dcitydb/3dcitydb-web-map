@@ -33,6 +33,7 @@ var UrlController = /** @class */ (function () {
             "maxLodPixels": "al",
             "maxSizeOfCachedTiles": "ac",
             "maxCountOfVisibleTiles": "av",
+            "maximumScreenSpaceError": "msse",
             // basemap infos
             "basemap": "bm",
             // "name" : "n",
