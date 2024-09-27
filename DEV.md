@@ -6,6 +6,8 @@ For a full list of changes, please refer to the [change logs](CHANGES.md).
 
 For a full list of all releases, please refer to the [release announcements](RELEASES.md).
 
+Many of the following demos were introduced from [this page](https://collab.dvb.bayern/display/TUMgisproject/Online+Demo+Collection).
+
 Employed version: **2.0.0-dev**.
 
 ## Symbols used
