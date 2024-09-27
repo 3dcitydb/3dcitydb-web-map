@@ -1408,6 +1408,8 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
     if (thematicDataSourceDropdown.value === "Embedded") {
         thematicTableTypeDropdownDiv.style.display = "none";
         thematicDataUrlDiv.style = "display: none;";
+        addLayerViewModel.tableType = "Horizontal";
+        addLayerViewModel.thematicDataUrl = "";
     } else if (thematicDataSourceDropdown.value === "OGCFeatureAPI") {
         thematicTableTypeDropdownDiv.style.display = "none";
         thematicDataUrlDiv.style.display = "";
@@ -1422,8 +1424,8 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
         const selectedTableType = tableTypeDropdown.options[tableTypeDropdown.selectedIndex] == null ? ""
             : tableTypeDropdown.options[tableTypeDropdown.selectedIndex].value;
 
-        addLayerViewModel["thematicDataSource"] = selectedThematicDataSource;
-        addLayerViewModel["tableType"] = selectedTableType;
+        addLayerViewModel.thematicDataSource = selectedThematicDataSource;
+        addLayerViewModel.tableType = selectedTableType;
 
         // if (selectedThematicDataSource == "GoogleSheets") {
         //     document.getElementById("rowGoogleSheetsApiKey").style.display = "table-row";
