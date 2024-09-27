@@ -1174,8 +1174,7 @@ function createInfoTable(res, citydbLayer) {
 
     const kvp = res[1];
 
-    const thematicDataSourceDropdown = document.getElementById("thematicDataSourceDropdown");
-    const selectedThematicDataSource = thematicDataSourceDropdown.options[thematicDataSourceDropdown.selectedIndex].value;
+    const selectedThematicDataSource = citydbLayer.dataSourceController.dataSource;
 
     function getGmlid(kvp) {
         // Search for gmlid in the result, accounting for all key names, case-insensitive
@@ -1227,7 +1226,10 @@ function createInfoTable(res, citydbLayer) {
         gmlid["key"] = "gml_id"; // default
         gmlid["value"] = cesiumEntity.name; // for KML
     }
-    if (selectedThematicDataSource === "Embedded") {
+    const isEmbedded = !(selectedThematicDataSource instanceof GoogleSheets)
+        && !(selectedThematicDataSource instanceof PostgreSQL)
+        && !(selectedThematicDataSource instanceof OGCFeatureAPI);
+    if (isEmbedded) {
         if (Cesium.defined(res[1])) {
             displayKvp(res[1], gmlid); // embedded properties are stored here
         } else {
