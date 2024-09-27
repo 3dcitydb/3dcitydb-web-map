@@ -838,6 +838,7 @@ In this document, the following symbols are used:
 
 + [x] Display layer information in toolbox
 + [x] Responsive display/switch of layer information
++ [x] CZML simulation
 
 **3D layer handling**:
 
@@ -1109,6 +1110,632 @@ In this document, the following symbols are used:
 **Highlighting and hiding**:
 
 + [ ] Highlight single and multiple objects -> Some (textured) buildings have no/invisible highlighting on hover
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: Vienna LOD1 Buildings, Streets :heavy_check_mark:
+
+[Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?t=Vienna_CityModel&s=false&ts=0&la=48.214497&lo=16.389639&h=783.76&hd=352.98&p=-65.56&r=359.94&l_0=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fwien%252Froads%252Fvienna_roads_gltf_collada_MasterJSON.json%26n%3DVienna_Roads%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D125%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200&l_1=u%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fwien%252Fkml_building_lod1_wien%252Fkml_building_lod1_wien_collada_MasterJSON.json%26n%3DVienna_Buildings%26ld%3DCOLLADA%252FKML%252FglTF%26lp%3Dfalse%26lc%3Dtrue%26gv%3D2.0%26a%3Dtrue%26tdu%3D%26ds%3DGoogleSheets%26tt%3DHorizontal%26gc%3D%26il%3D125%26al%3D1.7976931348623157e%252B308%26ac%3D200%26av%3D200&sw=)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: TUM Traffic Spaces, Buildings :heavy_check_mark:
+
+[Demo Link](https://3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?title=TUM_TrafficSpaces_Demo&shadows=false&terrainShadows=0&latitude=48.146704304522174&longitude=11.568444567729504&height=109.24374138697007&heading=347.30598385282934&pitch=-43.29684117171245&roll=359.9420533694946&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_TrafficArea%252FTUM_TrafficArea_collada_MasterJSON.json%26name%3DTUM_TrafficArea%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j9emFAkNtS9ROo_0cEagNMev2uluMBcVI_VoaE2j97Y%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_trafficSpace%252FTUM_trafficSpace_geometry_MasterJSON.json%26name%3DTUM_TrafficSpace%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1JiIJnxpZiKOrCvVittVhPkVjmBEEItRuvGlP5H1BdT4%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_building%252FTUM_building_collada_MasterJSON.json%26name%3DTUM_Building_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1GMNdPpx5ujDLWLdou6kobuibwxJHQCxFAiEPBFb7L5w%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-vegetation%252Ftum-vegetation_collada_MasterJSON.json%26name%3DTUM_Vegetation%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_4=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_auxiliaryTrafficArea%252FTUM_auxiliaryTrafficArea_collada_MasterJSON.json%26name%3DTUM_AuxiliaryTrafficArea%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_5=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_auxiliaryTrafficSpace%252FTUM_auxiliaryTrafficSpace_geometry_MasterJSON.json%26name%3DTUM_AuxiliaryTrafficSpace%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_6=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_bike_lanes%252FTUM_bike_lanes_footprint_MasterJSON.json%26name%3DTUM_bike_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_7=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_car_lanes%252FTUM_car_lanes_footprint_MasterJSON.json%26name%3DTUM_car_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_8=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_pedestrian_lanes%252FTUM_pedestrian_lanes_footprint_MasterJSON.json%26name%3DTUM_pedestrian_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j9emFAkNtS9ROo_0cEagNMev2uluMBcVI_VoaE2j97Y%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: TUM Traffic Areas, Buildings :heavy_check_mark:
+
+[Demo Link](https://3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?title=TUM_TrafficSpaces_Demo&shadows=false&terrainShadows=0&latitude=48.146704304522174&longitude=11.568444567729504&height=109.24374138697007&heading=347.30598385282934&pitch=-43.29684117171245&roll=359.9420533694946&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_TrafficArea%252FTUM_TrafficArea_collada_MasterJSON.json%26name%3DTUM_TrafficArea%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j9emFAkNtS9ROo_0cEagNMev2uluMBcVI_VoaE2j97Y%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_trafficSpace%252FTUM_trafficSpace_geometry_MasterJSON.json%26name%3DTUM_TrafficSpace%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1JiIJnxpZiKOrCvVittVhPkVjmBEEItRuvGlP5H1BdT4%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_building%252FTUM_building_collada_MasterJSON.json%26name%3DTUM_Building_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1GMNdPpx5ujDLWLdou6kobuibwxJHQCxFAiEPBFb7L5w%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-vegetation%252Ftum-vegetation_collada_MasterJSON.json%26name%3DTUM_Vegetation%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_4=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_auxiliaryTrafficArea%252FTUM_auxiliaryTrafficArea_collada_MasterJSON.json%26name%3DTUM_AuxiliaryTrafficArea%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_5=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_auxiliaryTrafficSpace%252FTUM_auxiliaryTrafficSpace_geometry_MasterJSON.json%26name%3DTUM_AuxiliaryTrafficSpace%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_6=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_bike_lanes%252FTUM_bike_lanes_footprint_MasterJSON.json%26name%3DTUM_bike_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_7=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_car_lanes%252FTUM_car_lanes_footprint_MasterJSON.json%26name%3DTUM_car_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_8=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_pedestrian_lanes%252FTUM_pedestrian_lanes_footprint_MasterJSON.json%26name%3DTUM_pedestrian_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j9emFAkNtS9ROo_0cEagNMev2uluMBcVI_VoaE2j97Y%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: TUM Traffic Lines, Buildings :heavy_check_mark:
+
+[Demo Link](https://3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?title=TUM_TrafficSpaces_Demo&shadows=false&terrainShadows=0&latitude=48.146704304522174&longitude=11.568444567729504&height=109.24374138697007&heading=347.30598385282934&pitch=-43.29684117171245&roll=359.9420533694946&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_TrafficArea%252FTUM_TrafficArea_collada_MasterJSON.json%26name%3DTUM_TrafficArea%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j9emFAkNtS9ROo_0cEagNMev2uluMBcVI_VoaE2j97Y%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_trafficSpace%252FTUM_trafficSpace_geometry_MasterJSON.json%26name%3DTUM_TrafficSpace%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1JiIJnxpZiKOrCvVittVhPkVjmBEEItRuvGlP5H1BdT4%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_building%252FTUM_building_collada_MasterJSON.json%26name%3DTUM_Building_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1GMNdPpx5ujDLWLdou6kobuibwxJHQCxFAiEPBFb7L5w%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-vegetation%252Ftum-vegetation_collada_MasterJSON.json%26name%3DTUM_Vegetation%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_4=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_auxiliaryTrafficArea%252FTUM_auxiliaryTrafficArea_collada_MasterJSON.json%26name%3DTUM_AuxiliaryTrafficArea%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_5=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation%252FTUM_auxiliaryTrafficSpace%252FTUM_auxiliaryTrafficSpace_geometry_MasterJSON.json%26name%3DTUM_AuxiliaryTrafficSpace%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_6=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_bike_lanes%252FTUM_bike_lanes_footprint_MasterJSON.json%26name%3DTUM_bike_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_7=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_car_lanes%252FTUM_car_lanes_footprint_MasterJSON.json%26name%3DTUM_car_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_8=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_Streetspace%252FTUM_pedestrian_lanes%252FTUM_pedestrian_lanes_footprint_MasterJSON.json%26name%3DTUM_pedestrian_lanes%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j9emFAkNtS9ROo_0cEagNMev2uluMBcVI_VoaE2j97Y%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects -> Traffic lines without highlighting
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: TUM Traffic Spaces, Buildings, TrueDOP20 :heavy_check_mark:
+
+[Demo Link](https://3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?title=TUM_Streetspace_Demo_textured&shadows=false&terrainShadows=0&latitude=48.14620565618091&longitude=11.568248586473178&height=186.88491934457545&heading=355.6526816702481&pitch=-48.43357011676891&roll=359.97805785824437&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_building_LoD2_textured%252FTUM_Building_textured_collada_MasterJSON.json%26name%3DTUM_Building_LoD2_textured%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1GMNdPpx5ujDLWLdou6kobuibwxJHQCxFAiEPBFb7L5w%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTUM_transportation_textured%252Fkml_transportation_TUM_textured_collada_MasterJSON.json%26name%3DTUM_Transportation_LoD2_textured%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1j9emFAkNtS9ROo_0cEagNMev2uluMBcVI_VoaE2j97Y%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftum-vegetation%252Ftum-vegetation_collada_MasterJSON.json%26name%3DTUM_Vegetation%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: NYC Streets, Buildings :heavy_check_mark:
+
+[Demo Link](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?title=NYC_Detailed_Road_Model&shadows=false&terrainShadows=0&latitude=40.74324791682301&longitude=-73.98788672934239&height=393.81226291204905&heading=212.81661879694923&pitch=-54.90142422275025&roll=359.82142819822883&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FEntrance1%252FEntrance1_collada_MasterJSON.json%26name%3DParking_Lot_Entrance%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1-3JFVBB16ZY2heG6a1eJi6W1rEPo5FEPuKQ469G-hxA%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FParking_Lot1%252FParking_Lot1_collada_MasterJSON.json%26name%3DParking_Lot%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1A-907mG66x_Ry1s3T0k5cBLVi7Xo4ijrezHoqVGkDe0%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FMedian_Grass%252FMedian_Grass_collada_MasterJSON.json%26name%3DGrass_Area%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1rhjSQwkgky74jTe1jDJlHIiQB6_sFiX-LJ5ZEpbhLtY%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FSidewalk1%252FSidewalk1_collada_MasterJSON.json%26name%3DSidewalk%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1GIcPNoMLAyPJVtVbNE3-_0Tiu1Xjr1Fj09tY2QPPA2s%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_4=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FMedian_Painted1%252FMedian_Painted1_collada_MasterJSON.json%26name%3DRoad_Marking%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1fd-xnvIoAPvJjzRwRTuGogKgJX08nDDyym184t02avo%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_5=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FIntersection1%252FIntersection1_collada_MasterJSON.json%26name%3DIntersection%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1DL1TpKUcOfSmcaqfJ-iB6rHBW2TQJkYLvl2sg6FGes4%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_6=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FRoadbed1%252FRoadbed1_collada_MasterJSON.json%26name%3DRoadbed%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F13U0NRWyRjjaAOlsIHvhtKFYNSUUpmseBKAzr4ei-954%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_7=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FPlaza1%252FPlaza_collada_MasterJSON.json%26name%3DPlaza%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1qkO0qgrfnP8tbuiJhz2I5ydX-lR1CCZl-wyxbXdcjvk%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_8=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FCurb%252FCurb_collada_MasterJSON.json%26name%3DCurb%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1fNljJXfTFkAiDMFncGUYhse8R_CQ1Vo_HeNWRP_fijU%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_9=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FTrack%252FTrack_collada_MasterJSON.json%26name%3DTrack%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dfalse%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1Z9PIPrFQY5tudHOqczsPjfIN29XfCrtXez2rtgpto7g%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_10=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FTraffic_Islands%252FTraffic_Islands_collada_MasterJSON.json%26name%3DDividing_Strips%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1qXPJ1ezPV04RNONpOBlJYm7JE_8I_Q8ho-bJLdXlqlc%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_11=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FNYC-Model-20170501%252FBuilding_gltf%252FBuilding_gltf_collada_MasterJSON.json%26name%3DBuildings%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1DbkMUSYW_YlE48MUxH5fak56uaCL8QXNrBgEr0gfuCY%26cityobjectsJsonUrl%3D%26minLodPixels%3D125%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dtrue)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: NYC Streets, Buildings, Solar :heavy_check_mark:
+
+[Demo Link](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?title=Manhattan_Solar_Potential_Demo&shadows=false&terrainShadows=0&latitude=40.74376291111547&longitude=-73.98825169927005&height=536.2218171263468&heading=211.0638244871956&pitch=-59.003177051480215&roll=359.8103188243277&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_building_original%252Fnyc_building_original_collada_MasterJSON.json%26name%3DNYC%2520Buildings%26active%3Dfalse%26spreadsheetUrl%3D%26cityobjectsJsonUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_building_original%252Fnyc_building_original.json%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_street_original%252Fnyc_street_original_collada_MasterJSON.json%26name%3DNYC%2520Streets%26active%3Dfalse%26spreadsheetUrl%3D%26cityobjectsJsonUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_street_original%252Fnyc_street_original.json%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_solar_building%252Fnyc_solar_building_collada_MasterJSON.json%26name%3DNYC%2520Buildings%2520(Solar)%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252FDataSource%253Fdocid%253D1k3XQq8X2wmccRE2xFYTb8VglkdSx_kSH63Gmn-mK%26cityobjectsJsonUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_solar_building%252Fnyc_solar_building.json%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_solar_street%252Fnyc_solar_street_collada_MasterJSON.json%26name%3DNYC%2520Streets%2520(Solar)%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Ffusiontables.google.com%252FDataSource%253Fdocid%253D17VIvDhLSOOwMd5fWAAPFbGsRZe6Qx_4n4SvveajY%26cityobjectsJsonUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fsunpot-nyc-street%252Fnyc_solar_street%252Fnyc_solar_street.json%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object -> Fusiontables (deprecated) were used
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: Grafing Traffic Simulations
+
+[Demo Link](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?title=Grafing_near_Munich_Traffic_Simulation&shadows=false&terrainShadows=0&latitude=48.04573825376668&longitude=11.966930276447522&height=30.206652166610038&heading=245.3071184351577&pitch=-24.548391116909492&roll=359.8089378958422&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTheresa%252FKML%252Ftransportation2citygml_collada_MasterJSON.json%26name%3DTransportation%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252FDataSource%253Fdocid%253D1r1nE2ih6r83hJzt65ZyI8B4B7vzR9ckQH-XmeyH9%26cityobjectsJsonUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTheresa%252FKML%252Ftransportation2citygml.json%26minLodPixels%3D120%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTheresa%252FKML%252Fsignals2citygml_collada_MasterJSON.json%26name%3DSignals%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252FDataSource%253Fdocid%253D1H6EsTosik8LEweAk-CikiDdWX418_7NyItv16bwf%26cityobjectsJsonUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTheresa%252FKML%252Fsignals2citygml.json%26minLodPixels%3D120%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTheresa%252FKML%252Fobjects2citygml_collada_MasterJSON.json%26name%3DObjects%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252FDataSource%253Fdocid%253D1XB0KCY8qXM6GWpKFnwhef7FVfUIKJaJ1umWbsk63%26cityobjectsJsonUrl%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FTheresa%252FKML%252Fobjects2citygml.json%26minLodPixels%3D120%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftraffic-grafing%252FSim6minLSA.czml%26name%3DVerkehrssimulation%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3D%26cityobjectsJsonUrl%3D%26minLodPixels%3D120%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_4=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FGrafing_Demo%252FGrafing_Buildings_2016-04-28_Textures_ScaleFactor_1.0%252FGrafing_Buildings_collada_MasterJSON.json%26name%3DBuildings%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3D%26cityobjectsJsonUrl%3D%26minLodPixels%3D50%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
++ [ ] CZML simulation -> Vehicles orientation rotated by 90 degrees
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object -> Fusiontables (deprecated) were used
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: CityGML and OpenDRIVE Grafing, Traffic Simulation
+
+[Demo Link](https://3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?title=Grafing_CityGML_Demo&shadows=false&terrainShadows=0&latitude=48.044786640755994&longitude=11.96616818443124&height=141.680954180839&heading=2.1740016787565626&pitch=-64.12308341485138&roll=0.016751920662850174&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fgrafing_transportation%252Fkml_grafing_TrafficAreas%252Fkml_grafing_TrafficAreas_collada_MasterJSON.json%26name%3DGrafing_CityGML_TrafficAreas%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1aRIHMNWJHjavYEYvcjAQqLEkekWFFaqpNbwJkQuKeaY%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fmydata%252FGrafing_Demo%252FGrafing_Buildings_2016-04-28_Textures_ScaleFactor_1.0%252FGrafing_Buildings_collada_MasterJSON.json%26name%3DGrafing_CityGML_Buildings%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FGrafing-Test-20170208%252Flod0Network%252Flod0Newtork_footprint_MasterJSON.json%26name%3DGrafing_OpenDrive_Referenceline%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fgrafing_transportation%252Fkml_grafing_sections%252Fkml_grafing_sections_geometry_MasterJSON.json%26name%3DGrafing_CityGML_Sections%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_4=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fgrafing_transportation%252Fkml_grafing_intersections%252Fkml_grafing_intersections_geometry_MasterJSON.json%26name%3DGrafing_CityGML_Intersections%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dfalse%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_5=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fgrafing_transportation%252Fkml_grafing_markings%252Fkml_grafing_markings_collada_MasterJSON.json%26name%3DGrafing_CityGML_Markings%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_6=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Ftraffic-grafing%252FSim6minLSA.czml%26name%3DGrafing_TraffiicSimulation%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
++ [ ] CZML simulation -> Vehicles orientation rotated by 90 degrees
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: Melbourne LOD2 Streets, Buildings :heavy_check_mark:
+
+[Demo Link](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/?title=Melbourne_Streetspace_LoD2&shadows=false&terrainShadows=0&latitude=-37.808172850916705&longitude=144.96510794314432&height=443.4330303601941&heading=9.896470830181748&pitch=-74.89240010024886&roll=359.87863005263307&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD2%252FMelbourne_Carriageway_LoD2%252FMelbourne_Carriageway_LoD2_geometry_MasterJSON.json%26name%3DMelbourne_Carriageway_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1sw1Lh9m1DTJotSa8Bbr4BKHQF9WkseRmeAjsS2ypVWw%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD2%252FMelbourne_Footpath_LoD2%252FMelbourne_Footpath_LoD2_geometry_MasterJSON.json%26name%3DMelbourne_Footpath_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F15igWEPL_Hicfu1t29ryzSsPa593h48uYwgDp9sy4pAY%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_2=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD2%252FMelbourne_Median_LoD2%252FMelbourne_Median_LoD2_geometry_MasterJSON.json%26name%3DMelbourne_Median_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1b7jpctmo2mPAh0cyZ_WpGipr9Ea2klRRJVTos7spJ4E%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_3=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD2%252FMelbourne_Kerb_LoD2%252FMelbourne_Kerb_LoD2_geometry_MasterJSON.json%26name%3DMelbourne_Kerb_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1KOI0fZx9y1AsCPpFAxF2OK7clnrHaSu069AN4GoIVKs%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_4=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD2%252FMelbourne_Parking_Bay_LoD2%252FMelbourne_Parking_Bay_LoD2_geometry_MasterJSON.json%26name%3DMelbourne_Parking_Bay_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1tGuB2_Ckt14Fq6ws6b2_gldTob4tF_JeFxPpFj8adLk%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_5=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD2%252FMelbourne_Road_Channel_LoD2%252FMelbourne_Road_Channel_LoD2_geometry_MasterJSON.json%26name%3DMelbourne_Road_Channel_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1Y2gAOvFa2B3_dg24ptrzH0V3k5n3bUNn7UgRJ2V9jFE%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_6=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD2%252FMelbourne_Tramway_LoD2%252FMelbourne_Tramway_LoD2_geometry_MasterJSON.json%26name%3DMelbourne_Tramway_LoD2%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F146HHsN82mpNzAr6g6CAXQCMBLupGeaGwmvfsOT1oQQc%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_7=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Building_LoD1%252FMelbourne_Building_LoD1_collada_MasterJSON.json%26name%3DMelbourne_Building_LoD1%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fdocs.google.com%252Fspreadsheets%252Fd%252F1vAfXUTi6YbgHh1SvfmkPGjMNgPALKKATqcyqbg9SyXs%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dtrue)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: Melbourne LOD1 Streets, Buildings :heavy_check_mark:
+
+[Demo Link](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0-dev/3dwebclient/index.html?title=Melbourne_Streetspace_LoD1&shadows=false&terrainShadows=0&latitude=-37.81011251757671&longitude=144.9631999448069&height=656.2681691357357&heading=7.505459775427195&pitch=-59.50883495500552&roll=359.9523173380835&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Streetspace_LoD1%252FMelboune_Streetspace_LoD1_geometry_MasterJSON.json%26name%3DMelbourne_Streetspace_LoD1%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D1.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252FDataSource%253Fdocid%253D1it5kP2V1yAHnzMyvxbgWqKdYKNqY27pquDK_8u19%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&layer_1=url%3Dhttps%253A%252F%252Fwww.3dcitydb.org%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252FMelbourne%252FMelbourne_Building_LoD1%252FMelbourne_Building_LoD1_collada_MasterJSON.json%26name%3DMelbourne_Building_LoD1%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3Dhttps%253A%252F%252Fwww.google.com%252Ffusiontables%252FDataSource%253Fdocid%253D14wGFcpPSVRtqsOG8aMhGjUAjOhuVtxjk7C-NmysA%26cityobjectsJsonUrl%3D%26minLodPixels%3D100%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
++ [x] List highlighted objects
++ [x] Select and fly to a highlighted object
++ [x] Hide single and multiple objects
++ [x] List hidden objects
++ [x] Select and fly to a hidden object
++ [x] Show all hidden objects
++ [x] Clear highlighting
+
+**Thematic data**:
+
++ [x] Info table for a clicked object -> Fusiontables (deprecated) were used
+
+**Screenshot and print**:
+
++ [x] Create screenshot
++ [x] Print current view
+
+**Enabling and disabling shadows**:
+
++ [x] Enable shadows
++ [x] Enable shadows first, then enable terrain shadows
++ [x] Enable terrain shadows without enabling shadows
++ [x] Disable terrain shadows
++ [x] Disable terrain shadows first, then disable shadows
++ [x] Disable shadows without disabling terrain shadows
+
+**Display in external maps**:
+
++ [x] Open in Google StreetView
++ [x] Open in OpenStreetMap
++ [x] Open in BingMaps ObliqueView
++ [x] Open in DualMaps
+
+## :milky_way: Mixed Layers > :point_right: Washington D.C. Streets :heavy_check_mark:
+
+[Demo Link](https://www.3dcitydb.net/3dcitydb-web-map/2.0.0-dev/3dwebclient/?title=Washington_Road_Demo&shadows=false&terrainShadows=0&latitude=38.889078957501305&longitude=-77.03700093391359&height=1006.8315445658836&heading=1.6544813327191306&pitch=-49.66103584894631&roll=0.008414778094956044&layer_0=url%3Dhttps%253A%252F%252Fwww.3dcitydb.net%252F3dcitydb%252Ffileadmin%252Fpublic%252F3dwebclientprojects%252Fwashington_demo%252Fkml_transportation_example%252Fkml_washington_transportation_example_collada_MasterJSON.json%26name%3DWashington_Road%26layerDataType%3DCOLLADA%252FKML%252FglTF%26gltfVersion%3D2.0%26active%3Dtrue%26spreadsheetUrl%3D%26thematicDataSource%3DGoogleSheets%26tableType%3DHorizontal%26cityobjectsJsonUrl%3D%26minLodPixels%3D0%26maxLodPixels%3D1.7976931348623157e%252B308%26maxSizeOfCachedTiles%3D200%26maxCountOfVisibleTiles%3D200&splashWindow=url%3Dsplash%252FSplashWindow.html%26showOnStart%3Dfalse)
+
+**General information**:
+
++ [x] Display layer information in toolbox
++ [x] Responsive display/switch of layer information
+
+**3D layer handling**:
+
++ [x] Activate layers
++ [x] Deactivate layers
++ [x] Remove layers
++ [x] Reinsert layers
+
+**Highlighting and hiding**:
+
++ [x] Highlight single and multiple objects
 + [x] List highlighted objects
 + [x] Select and fly to a highlighted object
 + [x] Hide single and multiple objects
