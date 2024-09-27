@@ -70,7 +70,7 @@
         <div class="wrapper">
             <h2 class="milestone">Introduction</h2>
             <p>
-                The <b>3DCityDB-Web-Map-Client</b> is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of <b>arbitrarily large semantic 3D city models in CityGML</b>. It utilizes the <a href="https://cesium.com/" target="_blank">Cesium Virtual Globe</a> as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
+                The <b>3DCityDB-Web-Map-Client</b> is a web-based front-end for high-performance 3D visualization and interactive exploration of <b>arbitrarily large semantic 3D city models</b> and other geospatial data. The web client utilizes the <a href="https://cesium.com/" target="_blank">Cesium Virtual Globe</a> as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
             </p>
             <p>
                 The key features and functionalities of the 3DCityDB-Web-Map-Client is summarized as follows:
@@ -101,6 +101,9 @@
                         Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of <b>generating a scene link</b> including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers, etc. This link can be easily shared or bookmarked, and can be reopened in a browser on different machines.
                     </li>
                     <li>
+                        Support for <b>mobile devices</b> (smartphones, tablets, etc.) with live tracking of geolocation and orientation
+                    </li>
+                    <li>
                         Packaged as a <a href="https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated" target="_blank"><b>Docker image</b></a> for fast and convenient deployment
                     </li>
                 </ul>
@@ -122,7 +125,7 @@
                 This project is also available in Docker, see <a href="https://github.com/tum-gis/3dcitydb-web-map-docker" target="_blank">repository</a> and <a href="https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated" target="_blank">Docker images</a>.
             </p>
             <p>
-                For convenient use, there is an official <a href="https://www.3dcitydb.org/3dcitydb-web-map/latest/3dwebclient/index.html" target="_blank">web link</a> available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser.
+                For convenient use, there is an official <a href="https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html" target="_blank">web link</a> available for the current version that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. <b>All past and future versions</b> of the web client are hosted on our server using their own version numbers, so that they will remain accessible and available at any given time.
             </p>
 
             <h2 class="milestone">System requirements</h2>
@@ -130,7 +133,7 @@
                 The hardware on which the 3DCityDB-Web-Map-Client will be run must have a graphics card installed that supports WebGL. In addition, the web browser in use must also provide appropriate WebGL support.
             </p>
             <p>
-                You can visit the <a href="http://get.webgl.org](http://get.webgl.org" target="_blank">WebGL website</a> to check whether your web browser supports WebGL.
+                You can visit the <a href="http://get.webgl.org" target="_blank">WebGL website</a> to check whether your web browser supports WebGL.
             </p>
             <p>
                 The 3DCityDB-Web-Map-Client has been successfully tested on (but is not limited to) the following web browsers under different desktop operating systems like Microsoft Windows, Linux, Apple Mac OS X, and even on mobile operating systems like Android and iOS.
@@ -201,10 +204,10 @@
 
             <h2 class="milestone">More information</h2>
             <p>
-                <a href="https://www.opengeospatial.org/standards/citygml" target="_blank">OGC CityGML</a> is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the <a href="https://www.opengeospatial.org/standards/gml" target="_blank">Geography Markup Language version 3.1.1 (GML3)</a>, the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model.
+                The 3DCityDB-Web-Map-Client is a part of the <a href="https://www.3dcitydb.org" target="_blank">3DCityDB Software Suite</a> for managing and working with large semantic 3D city models in CityGML. However, the web client can also be used as a separate stand-alone component.
             </p>
             <p>
-                CityGML is an international OGC standard and can be used free of charge.
+                <a href="https://www.opengeospatial.org/standards/citygml" target="_blank">OGC CityGML</a> is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the <a href="https://www.opengeospatial.org/standards/gml" target="_blank">Geography Markup Language version 3 (GML3)</a>, the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model. CityGML is an international OGC standard and can be used free of charge.
             </p>
         </div>
     </section>
