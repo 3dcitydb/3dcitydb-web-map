@@ -661,6 +661,9 @@
         scope._cesiumViewer.dataSources.add(Cesium.GeoJsonDataSource.load(scope._url, {
             clampToGround: scope._layerClampToGround
         })).then(datasSource => {
+            for (const entity of datasSource.entities.values) {
+                entity.layerId = scope._layerId;
+            }
             scope._citydbGeoJSONDataSource = datasSource;
             deferred.resolve(scope);
         });

@@ -513,6 +513,7 @@
             maximumScreenSpaceError: this._maximumScreenSpaceError
         }).then(function (tileset) {
             scope._tileset = tileset;
+            scope._tileset.layerId = scope._layerId;
             scope._cesiumViewer.scene.primitives.add(tileset);
             scope.configPointCloudShading(tileset);
             scope.registerTilesLoadedEventHandler();
