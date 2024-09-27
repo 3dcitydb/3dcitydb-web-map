@@ -35,13 +35,13 @@ var SplashController = /** @class */ (function () {
         contents.innerHTML = '\
             <div class="cesium-navigation-help-zoom" style="padding: 15px 5px 20px 5px; text-align: center;">3DCityDB Web Map Client</div>\
             <hr width="50%" style="margin-top: -10px; border-color: grey;">\
-            <div class="cesium-navigation-help-details" style="padding: 5px; text-align: center;">This tool employs the JavaScript library <a href="https://cesiumjs.org/" target="_blank">CesiumJS</a> and is a part of the</div>\
+            <div class="cesium-navigation-help-details" style="padding: 5px; text-align: center;">This tool employs the JavaScript library <a href="https://cesium.com" target="_blank" style="color: yellow;">CesiumJS</a> and is a part of the</div>\
             <table>\
                 <tr>\
                     <td><img src="' + 'images/3DCityDB_Logo.png' + '" width="76" height="81" /></td>\
                     <td>\
                         <!-- <div class="cesium-navigation-help-pan">Chair of Geoinformatics</div>\ -->\
-                        <div class="cesium-navigation-help-details"><a href="https://www.3dcitydb.org/3dcitydb/" target="_blank">3D City Database</a> (3DCityDB) <br> Software Suite.</div>\
+                        <div class="cesium-navigation-help-details"><a href="https://www.3dcitydb.org/3dcitydb" target="_blank" style="color: yellow;">3D City Database</a> (3DCityDB) <br> Software Suite.</div>\
                     </td>\
                 </tr>\
             </table>\
@@ -52,7 +52,7 @@ var SplashController = /** @class */ (function () {
                     <td><img src="' + 'images/TUM_Logo.svg' + '" width="76" height="40" /></td>\
                     <td>\
                         <!-- <div class="cesium-navigation-help-pan">Chair of Geoinformatics</div>\ -->\
-                        <div class="cesium-navigation-help-details"><a href="https://www.gis.bgu.tum.de/en/home/" target="_blank">TUM, Chair of Geoinformatics</a></div>\
+                        <div class="cesium-navigation-help-details"><a href="https://www.asg.ed.tum.de/en/gis" target="_blank" style="color: yellow;">TUM, Chair of Geoinformatics</a></div>\
                     </td>\
                 </tr>\
             </table>\

@@ -560,6 +560,9 @@
         // Create I3S data provider
         Cesium.I3SDataProvider.fromUrl(scope._url, i3sOptions).then(function (i3sDataProvider) {
             scope._i3sProvider = i3sDataProvider;
+            for (const layer of scope._i3sProvider.layers) {
+                layer.tileset.layerId = scope.layerId;
+            }
             // Add the i3s layer provider as a primitive data type
             scope._cesiumViewer.scene.primitives.add(scope._i3sProvider);
             scope._i3sProvider.show = scope._active;

@@ -13,7 +13,7 @@ See [release announcements](RELEASES.md) and [change logs](CHANGES.md) for the c
 
 Introduction
 -------
-The **3DCityDB-Web-Map-Client** is a web-based front-end of the 3DCityDB for high-performance 3D visualization and interactive exploration of **arbitrarily large semantic 3D city models in CityGML**. It utilizes the [Cesium Virtual Globe](https://cesium.com/) as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
+The **3DCityDB-Web-Map-Client** is a web-based front-end for high-performance 3D visualization and interactive exploration of **arbitrarily large semantic 3D city models** and other geospatial data. The web client utilizes the [Cesium Virtual Globe](https://cesium.com/) as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
 
 The key features and functionalities of the 3DCityDB-Web-Map-Client is summarized as follows: 
 
@@ -24,7 +24,8 @@ The key features and functionalities of the 3DCityDB-Web-Map-Client is summarize
 * Support for rich interaction with 3D visualization models, for example, **highlighting** of 3D objects on mouseover and mouseclick as well as **hiding** and **showing** of multiple selected 3D objects
 * Support for exploring a 3D object of interest from **different view perspectives** using third-party mapping services like **Microsoft Bing Maps** with oblique view, **Google Streetview**, and a combined version (**DualMaps**) 
 * Support for on-the-fly activating and deactivating **shadow visualization** of 3D objects and Cesium digital terrain models
-* Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of **generating a scene link** including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers, etc.
+* Support for collaborative creation and sharing of the workspace of the 3DCityDB-Web-Map-Client by means of **generating a scene link** including information about the current camera perspective, activation status of the shadow visualization, parameters of the current loaded data layers, etc. This link can be easily shared or bookmarked, and can be reopened in a browser on different machines
+* Support for **mobile devices** (smartphones, tablets, etc.) with live tracking of geolocation and orientation
 * Packaged as a [**Docker image**](https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated) for fast and convenient deployment
 
 Architecture
@@ -44,7 +45,7 @@ All releases are available from the [releases section](https://github.com/3dcity
 This project is also available in Docker, see [repository](https://github.com/tum-gis/3dcitydb-web-map-docker) 
 and [images](https://hub.docker.com/r/tumgis/3dcitydb-web-map/tags?page=1&ordering=last_updated).
 
-For convenient use, there is an official [web link](https://www.3dcitydb.org/3dcitydb-web-map/latest/3dwebclient/index.html) available that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. 
+For convenient use, there is an official [web link](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html) available for the current version that can be called to directly run the 3DCityDb-Web-Map-Client on your web browser. **All past and future versions** of the web client are hosted on our server using their own version numbers, so that they will remain accessible and available at any given time. 
 
 System requirements
 ------------------- 
@@ -192,9 +193,10 @@ Additional important notes:
 
 More information
 ----------------
-[OGC CityGML](https://www.opengeospatial.org/standards/citygml) is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the [Geography Markup Language version 3.1.1 (GML3)](https://www.opengeospatial.org/standards/gml), the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model.
 
-CityGML is an international OGC standard and can be used free of charge.
+The 3DCityDB-Web-Map-Client is a part of the [3DCityDB Software Suite](https://www.3dcitydb.org) for managing and working with large semantic 3D city models in CityGML. However, the web client can also be used as a separate stand-alone component.
+
+[OGC CityGML](https://www.opengeospatial.org/standards/citygml) is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the [Geography Markup Language version 3 (GML3)](https://www.opengeospatial.org/standards/gml), the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model. CityGML is an international OGC standard and can be used free of charge.
 
 ## Acknowledgement
 
