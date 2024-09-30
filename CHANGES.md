@@ -65,6 +65,8 @@ This is a major release.
   see [`d4109eb`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d4109eb7211c4c642617521cff36593d566d0836).
 * Cesium already handles different versions of glTF,
   see [`d8084f6`](https://github.com/3dcitydb/3dcitydb-web-map/commit/d8084f6760b9f0191c63f9869431f329993d81f7).
+* Deactivated layers can now be changed and reactivated later,
+  see [`843a1c7`](https://github.com/3dcitydb/3dcitydb-web-map/commit/843a1c775338b081b55afe37657c4b24352345d4).
 
 ##### FIXES
 
