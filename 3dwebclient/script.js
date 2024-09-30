@@ -149,7 +149,7 @@ initClient();
 // Store clicked entities
 var clickedEntities = {};
 
-function initClient() {
+async function initClient() {
     // adjust cesium navigation help popup for splash window
     splashController.insertSplashInfoHelp();
     // read splash window from url
@@ -206,56 +206,68 @@ function initClient() {
     // display current infos of active layer in the main menu
     observeActiveLayer();
 
-    // Zoom to desired camera position and load layers if encoded in the url...	
-    Promise.resolve(zoomToDefaultCameraPosition()).then(function (info) {
-        var layers = urlController.getLayersFromUrl(
-            window.location.href,
-            CitydbUtil,
-            CitydbKmlLayer,
-            Cesium3DTilesDataLayer,
-            CitydbI3SLayer,
-            CitydbGeoJSONLayer,
-            Cesium
-        );
-        loadLayerGroup(layers);
+    // Zoom to desired camera position
+    await zoomToDefaultCameraPosition();
+    // Then load layers if encoded in the URL
+    await loadFromUrl();
 
-        var basemapConfigString = urlController.getUrlParaValue('basemap', window.location.href, CitydbUtil);
-        if (basemapConfigString) {
-            var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(basemapConfigString))[0]);
-            for (key in viewMoModel) {
-                addWmsViewModel[key] = viewMoModel[key];
-            }
-            addWebMapServiceProvider();
-        }
+    async function loadFromUrl() {
+        return new Promise((resolve) => {
+            // Load layers if encoded in the URL
+            const layers = urlController.getLayersFromUrl(
+                window.location.href,
+                CitydbUtil,
+                CitydbKmlLayer,
+                Cesium3DTilesDataLayer,
+                CitydbI3SLayer,
+                CitydbGeoJSONLayer,
+                Cesium
+            );
+            loadLayerGroup(layers); // Assuming loadLayerGroup is synchronous, if async, add `await`
 
-        var cesiumWorldTerrainString = urlController.getUrlParaValue('cesiumWorldTerrain', window.location.href, CitydbUtil);
-        if (cesiumWorldTerrainString === "true") {
-            // if the Cesium World Terrain is given in the URL --> activate, else other terrains
-            cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
-            var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
-            baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[1];
-        } else {
-            var terrainConfigString = urlController.getUrlParaValue('terrain', window.location.href, CitydbUtil);
-            if (terrainConfigString) {
-                var viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(terrainConfigString))[0]);
-                for (key in viewMoModel) {
-                    addTerrainViewModel[key] = viewMoModel[key];
+            // Load basemap configuration if present
+            const basemapConfigString = urlController.getUrlParaValue('basemap', window.location.href, CitydbUtil);
+            if (basemapConfigString) {
+                let viewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(basemapConfigString))[0]);
+                for (let key in viewMoModel) {
+                    addWmsViewModel[key] = viewMoModel[key];
                 }
-                addTerrainProvider();
+                addWebMapServiceProvider();
             }
-        }
 
-        // Visually highlight toggle buttons
-        handleToggleButton("toggleShadowButton", cesiumViewer.shadows);
-        handleToggleButton("toggleTerrainShadowButton", cesiumViewer.terrainShadows);
+            // Check if Cesium World Terrain is present in URL
+            const cesiumWorldTerrainString = urlController.getUrlParaValue('cesiumWorldTerrain', window.location.href, CitydbUtil);
+            if (cesiumWorldTerrainString === "true") {
+                cesiumViewer.terrainProvider = Cesium.createWorldTerrain();
+                var baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
+                baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[1];
+            } else {
+                // If no Cesium World Terrain, load terrain configuration
+                const terrainConfigString = urlController.getUrlParaValue('terrain', window.location.href, CitydbUtil);
+                if (terrainConfigString) {
+                    let terrainViewMoModel = Cesium.queryToObject(Object.keys(Cesium.queryToObject(terrainConfigString))[0]);
+                    for (let key in terrainViewMoModel) {
+                        addTerrainViewModel[key] = terrainViewMoModel[key];
+                    }
+                    addTerrainProvider();
+                }
+            }
 
-        // Adjust GUI based on given values
-        layerDataTypeDropdownOnchange();
-        thematicDataSourceAndTableTypeDropdownOnchange();
-        imageryTypeDropdownOnchange();
-    });
+            // Visually highlight toggle buttons
+            handleToggleButton("toggleShadowButton", cesiumViewer.shadows);
+            handleToggleButton("toggleTerrainShadowButton", cesiumViewer.terrainShadows);
 
-    // jump to a timepoint
+            // Adjust GUI based on given values
+            layerDataTypeDropdownOnchange();
+            thematicDataSourceAndTableTypeDropdownOnchange();
+            imageryTypeDropdownOnchange();
+
+            // Resolve promise when all operations are complete
+            resolve();
+        });
+    }
+
+    // Jump to a timepoint
     var dayTimeStr = urlController.getUrlParaValue('dayTime', window.location.href, CitydbUtil);
     if (dayTimeStr) {
         var julianDate = Cesium.JulianDate.fromIso8601(decodeURIComponent(dayTimeStr));
@@ -703,102 +715,94 @@ function addEventListeners(layer) {
     });
 }
 
-function zoomToDefaultCameraPosition() {
-    var deferred = Cesium.defer();
-    var latitudeStr = urlController.getUrlParaValue('latitude', window.location.href, CitydbUtil);
-    var longitudeStr = urlController.getUrlParaValue('longitude', window.location.href, CitydbUtil);
-    var heightStr = urlController.getUrlParaValue('height', window.location.href, CitydbUtil);
-    var headingStr = urlController.getUrlParaValue('heading', window.location.href, CitydbUtil);
-    var pitchStr = urlController.getUrlParaValue('pitch', window.location.href, CitydbUtil);
-    var rollStr = urlController.getUrlParaValue('roll', window.location.href, CitydbUtil);
+async function zoomToDefaultCameraPosition() {
+    const latitudeStr = urlController.getUrlParaValue('latitude', window.location.href, CitydbUtil);
+    const longitudeStr = urlController.getUrlParaValue('longitude', window.location.href, CitydbUtil);
+    const heightStr = urlController.getUrlParaValue('height', window.location.href, CitydbUtil);
+    const headingStr = urlController.getUrlParaValue('heading', window.location.href, CitydbUtil);
+    const pitchStr = urlController.getUrlParaValue('pitch', window.location.href, CitydbUtil);
+    const rollStr = urlController.getUrlParaValue('roll', window.location.href, CitydbUtil);
 
     if (latitudeStr && longitudeStr && heightStr && headingStr && pitchStr && rollStr) {
-        var cameraPostion = {
+        const cameraPosition = {
             latitude: parseFloat(latitudeStr),
             longitude: parseFloat(longitudeStr),
             height: parseFloat(heightStr),
             heading: parseFloat(headingStr),
             pitch: parseFloat(pitchStr),
             roll: parseFloat(rollStr)
-        }
-        return flyToCameraPosition(cameraPostion);
-    } else {
-        return zoomToDefaultCameraPosition_expired();
-    }
+        };
 
-    return deferred;
+        // Fly to the desired camera position and return the result of the function
+        return await flyToCameraPosition(cameraPosition);
+    } else {
+        // If parameters are missing, call the default expired function
+        return await zoomToDefaultCameraPosition_expired();
+    }
 }
 
-function zoomToDefaultCameraPosition_expired() {
-    var deferred = Cesium.defer();
-    var cesiumCamera = cesiumViewer.scene.camera;
-    var latstr = urlController.getUrlParaValue('lat', window.location.href, CitydbUtil);
-    var lonstr = urlController.getUrlParaValue('lon', window.location.href, CitydbUtil);
+async function zoomToDefaultCameraPosition_expired() {
+    const cesiumCamera = cesiumViewer.scene.camera;
+    const latstr = urlController.getUrlParaValue('lat', window.location.href, CitydbUtil);
+    const lonstr = urlController.getUrlParaValue('lon', window.location.href, CitydbUtil);
 
-    if (latstr && lonstr) {
-        var lat = parseFloat(latstr);
-        var lon = parseFloat(lonstr);
-        var range = 800;
-        var heading = 6;
-        var tilt = 49;
-        var altitude = 40;
+    return new Promise(async (resolve) => {
+        if (latstr && lonstr) {
+            let lat = parseFloat(latstr);
+            let lon = parseFloat(lonstr);
+            let range = 800;
+            let heading = 6;
+            let tilt = 49;
+            let altitude = 40;  // Optional default altitude
 
-        var rangestr = urlController.getUrlParaValue('range', window.location.href, CitydbUtil);
-        if (rangestr)
-            range = parseFloat(rangestr);
+            const rangestr = urlController.getUrlParaValue('range', window.location.href, CitydbUtil);
+            if (rangestr) range = parseFloat(rangestr);
 
-        var headingstr = urlController.getUrlParaValue('heading', window.location.href, CitydbUtil);
-        if (headingstr)
-            heading = parseFloat(headingstr);
+            const headingstr = urlController.getUrlParaValue('heading', window.location.href, CitydbUtil);
+            if (headingstr) heading = parseFloat(headingstr);
 
-        var tiltstr = urlController.getUrlParaValue('tilt', window.location.href, CitydbUtil);
-        if (tiltstr)
-            tilt = parseFloat(tiltstr);
+            const tiltstr = urlController.getUrlParaValue('tilt', window.location.href, CitydbUtil);
+            if (tiltstr) tilt = parseFloat(tiltstr);
+            tilt = tilt - 90;  // Tilt adjustment
 
-        var altitudestr = urlController.getUrlParaValue('altitude', window.location.href, CitydbUtil);
-        if (altitudestr)
-            altitude = parseFloat(altitudestr);
+            const altitudestr = urlController.getUrlParaValue('altitude', window.location.href, CitydbUtil);
+            if (altitudestr) altitude = parseFloat(altitudestr);
 
-        var _center = Cesium.Cartesian3.fromDegrees(lon, lat);
-        var _heading = Cesium.Math.toRadians(heading);
-        var _pitch = Cesium.Math.toRadians(tilt - 90);
-        var _range = range;
-        cesiumCamera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(lon, lat, _range),
-            orientation: {
-                heading: _heading,
-                pitch: _pitch,
+            const _center = Cesium.Cartesian3.fromDegrees(lon, lat);
+            const cameraPosition = {
+                longitude: lon,
+                latitude: lat,
+                height: range,
+                heading: heading,
+                pitch: tilt,
                 roll: 0
-            },
-            complete: function () {
-                deferred.resolve("fly to the desired camera position");
-            }
-        });
-    } else {
-        // default camera postion
-        deferred.resolve("fly to the default camera position");
-    }
-    return deferred;
-}
-
-function flyToCameraPosition(cameraPosition) {
-    var deferred = Cesium.defer();
-    var cesiumCamera = cesiumViewer.scene.camera;
-    var longitude = cameraPosition.longitude;
-    var latitude = cameraPosition.latitude;
-    var height = cameraPosition.height;
-    cesiumCamera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
-        orientation: {
-            heading: Cesium.Math.toRadians(cameraPosition.heading),
-            pitch: Cesium.Math.toRadians(cameraPosition.pitch),
-            roll: Cesium.Math.toRadians(cameraPosition.roll)
-        },
-        complete: function () {
-            deferred.resolve("fly to the desired camera position");
+            };
+            await flyToCameraPosition(cameraPosition);
+            resolve("Fly to the desired camera position complete");
+        } else {
+            // Resolve immediately for the default camera position
+            resolve("Fly to the default camera position complete");
         }
     });
-    return deferred;
+}
+
+async function flyToCameraPosition(cameraPosition) {
+    const cesiumCamera = cesiumViewer.scene.camera;
+    const {longitude, latitude, height, heading, pitch, roll} = cameraPosition;
+
+    return new Promise((resolve) => {
+        cesiumCamera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
+            orientation: {
+                heading: Cesium.Math.toRadians(heading),
+                pitch: Cesium.Math.toRadians(pitch),
+                roll: Cesium.Math.toRadians(roll)
+            },
+            complete: function () {
+                resolve("Fly to the desired camera position complete");
+            }
+        });
+    });
 }
 
 // Creation of a scene link for sharing with other people..
