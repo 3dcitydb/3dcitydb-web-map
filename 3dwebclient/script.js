@@ -534,7 +534,7 @@ function saveLayerSettings() {
     // Update Data Source
     thematicDataSourceAndTableTypeDropdownOnchange();
 
-    // update GUI:
+    // Update GUI:
     var nodes = document.getElementById('citydb_layerlistpanel').childNodes;
     for (var i = 0; i < nodes.length; i += 3) {
         const layerOption = nodes[i];
@@ -543,15 +543,18 @@ function saveLayerSettings() {
         }
     }
 
-    document.getElementById('loadingIndicator').style.display = 'block';
-    Promise.resolve(activeLayer.reActivate()).then((result) => {
-        document.getElementById('loadingIndicator').style.display = 'none';
-        webMap.clearSelectedObjects();
-    }, (error) => {
-        CitydbUtil.showAlertWindow("OK", "Error", error.message);
-        document.getElementById('loadingIndicator').style.display = 'none';
-        webMap.clearSelectedObjects();
-    });
+    // Only reactivate when the layer is already activated
+    if (activeLayer.active) {
+        document.getElementById('loadingIndicator').style.display = 'block';
+        Promise.resolve(activeLayer.reActivate()).then((result) => {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            webMap.clearSelectedObjects();
+        }, (error) => {
+            CitydbUtil.showAlertWindow("OK", "Error", error.message);
+            document.getElementById('loadingIndicator').style.display = 'none';
+            webMap.clearSelectedObjects();
+        });
+    }
 
     function applySaving(propertyName, activeLayer) {
         var newValue = addLayerViewModel[propertyName];
@@ -1465,7 +1468,7 @@ function thematicDataSourceAndTableTypeDropdownOnchange() {
 }
 
 function initDataSourceController(selectedThematicDataSource) {
-    if (!webMap._activeLayer.active) return;
+    // if (!webMap._activeLayer.active) return;
     const options = getDataSourceControllerOptions(webMap._activeLayer);
     webMap._activeLayer.dataSourceController = new DataSourceController(selectedThematicDataSource, signInController, options);
 }
