@@ -91,6 +91,8 @@ This is a major release.
   and [`1d276a3`](https://github.com/3dcitydb/3dcitydb-web-map/commit/1d276a3ed2ad5a96692bc03de09de1760fcf497f).
 * Fixed printing screenshots,
   see [`3a22a3c`](https://github.com/3dcitydb/3dcitydb-web-map/commit/3a22a3cdeb4c4316f0a3fd52810c70420b1baa45).
+* Fixed async loading of the globe and layers on start,
+  see [`508b51f`](https://github.com/3dcitydb/3dcitydb-web-map/commit/508b51f7074643dd35d5c3815abb7397268c1bf7).
 
 ### 1.9.1 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/1.9.1/3dwebclient/index.html)
 
