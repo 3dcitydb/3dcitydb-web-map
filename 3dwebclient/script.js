@@ -983,7 +983,7 @@ let imageryInserted = false;
 
 function addWebMapServiceProvider() {
     function update(callback) {
-        removeImageryProvider();
+        removeImageryProvider(false);
         callback();
     }
 
@@ -1036,13 +1036,27 @@ function addWebMapServiceProvider() {
     });
 }
 
-function removeImageryProvider() {
+function removeImageryProvider(resetGUI) {
     if (!imageryInserted) return; // Remove only if inserted by user
     const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     const selectedImagery = baseLayerPickerViewModel.selectedImagery;
     baseLayerPickerViewModel.imageryProviderViewModels.remove(selectedImagery);
     baseLayerPickerViewModel.selectedImagery = baseLayerPickerViewModel.imageryProviderViewModels[0];
     imageryInserted = false;
+    // Reset GUI
+    if (resetGUI) {
+        addWmsViewModel.imageryType = "wms";
+        addWmsViewModel.url = "";
+        addWmsViewModel.name = "";
+        addWmsViewModel.layers = "";
+        addWmsViewModel.tileStyle = "";
+        addWmsViewModel.tileMatrixSetID = "";
+        addWmsViewModel.iconUrl = "";
+        addWmsViewModel.tooltip = "";
+        addWmsViewModel.additionalParameters = "";
+        addWmsViewModel.proxyUrl = "/proxy/";
+        imageryTypeDropdownOnchange();
+    }
 }
 
 function imageryTypeDropdownOnchange() {
@@ -1060,10 +1074,9 @@ function imageryTypeDropdownOnchange() {
     addWmsViewModel["imageryType"] = selectedValue;
 }
 
-
 function addTerrainProvider() {
     function update(callback) {
-        removeTerrainProvider();
+        removeTerrainProvider(false);
         callback();
     }
 
@@ -1091,7 +1104,7 @@ function addTerrainProvider() {
 
 let defaultTerrain = undefined;
 
-function removeTerrainProvider() {
+function removeTerrainProvider(resetGUI) {
     const baseLayerPickerViewModel = cesiumViewer.baseLayerPicker.viewModel;
     const selectedTerrain = baseLayerPickerViewModel.selectedTerrain;
     baseLayerPickerViewModel.terrainProviderViewModels.remove(selectedTerrain);
@@ -1100,6 +1113,13 @@ function removeTerrainProvider() {
         baseLayerPickerViewModel.selectedTerrain = baseLayerPickerViewModel.terrainProviderViewModels[0];
     } else {
         baseLayerPickerViewModel.selectedTerrain = defaultTerrain;
+    }
+    // Reset GUI
+    if (resetGUI) {
+        addTerrainViewModel.url = "";
+        addTerrainViewModel.name = "";
+        addTerrainViewModel.iconUrl = "";
+        addTerrainViewModel.tooltip = "";
     }
 }
 
