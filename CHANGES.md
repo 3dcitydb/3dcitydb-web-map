@@ -1,5 +1,21 @@
 # Change Log
 
+### Pending Release
+
+##### NEW
+
+##### UPDATES
+
+##### CHANGES
+
+* Deactivated layers can now be changed and reactivated later,
+  see [`843a1c7`](https://github.com/3dcitydb/3dcitydb-web-map/commit/843a1c775338b081b55afe37657c4b24352345d4).
+
+##### FIXES
+
+* Fixed async loading of the globe and layers on start,
+  see [`508b51f`](https://github.com/3dcitydb/3dcitydb-web-map/commit/508b51f7074643dd35d5c3815abb7397268c1bf7).
+
 ### 2.0.0 - Released [[Demo Link]](https://www.3dcitydb.org/3dcitydb-web-map/2.0.0/3dwebclient/index.html)
 
 This is a major release.
