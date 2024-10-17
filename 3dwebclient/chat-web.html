@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat and Web Client</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #container {
+            display: flex;
+            height: 100%;
+        }
+
+        #appChat, #appWeb {
+            flex: 1;
+            border: none;
+        }
+
+        #divider {
+            width: 5px;
+            background-color: #ccc;
+            cursor: ew-resize;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <iframe id="appChat" src="chat.html"></iframe>
+    <div id="divider"></div>
+    <iframe id="appWeb" src="index.html"></iframe>
+</div>
+
+<script>
+    // Functions for resizing
+    const divider = document.getElementById('divider');
+    const container = document.getElementById('container');
+    let isResizing = false;
+
+    divider.addEventListener('mousedown', function (e) {
+        isResizing = true;
+    });
+
+    window.addEventListener('mousemove', function (e) {
+        if (!isResizing) return;
+        let offset = e.clientX / window.innerWidth;
+        document.getElementById('appChat').style.flex = offset;
+        document.getElementById('appWeb').style.flex = 1 - offset;
+    });
+
+    window.addEventListener('mouseup', function (e) {
+        isResizing = false;
+    });
+</script>
+
+</body>
+</html>

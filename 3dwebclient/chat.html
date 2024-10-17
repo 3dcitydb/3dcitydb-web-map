@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Application</title>
+    <style>
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+<button type="button" onclick="sendCoordinates()">Fly to Munich!</button>
+<pre id="messageText"></pre>
+</body>
+
+<script>
+    function sendCoordinates() {
+        const targetWindow = window.parent.document.getElementById('appWeb').contentWindow;
+        const cameraPosition = {
+            longitude: 11.564866,
+            latitude: 48.144463,
+            height: 4359.716,
+            heading: 360,
+            pitch: -90,
+            roll: 0
+        }
+        targetWindow.postMessage(JSON.stringify(cameraPosition), '*');
+    }
+
+    window.addEventListener('message', (event) => {
+        console.log('Message from web client app: ', event.data);
+        const messageText = document.getElementById("messageText");
+        messageText.innerText = event.data;
+    });
+</script>
+</html>

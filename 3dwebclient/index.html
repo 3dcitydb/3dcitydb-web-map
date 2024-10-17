@@ -427,7 +427,8 @@
                     <div class="citydb_overSelect"></div>
                 </div>
                 <div class="citydb_short_container">
-                    <button type="button" style="width: 100%;" class="cesium-button" onclick="removeImageryProvider(true)">
+                    <button type="button" style="width: 100%;" class="cesium-button"
+                            onclick="removeImageryProvider(true)">
                         Remove imagery layer
                     </button>
                 </div>
@@ -517,7 +518,8 @@
                     <div class="citydb_overSelect"></div>
                 </div>
                 <div class="citydb_short_container">
-                    <button type="button" style="width: 100%;" class="cesium-button" onclick="removeTerrainProvider(true)">
+                    <button type="button" style="width: 100%;" class="cesium-button"
+                            onclick="removeTerrainProvider(true)">
                         Remove terrain layer
                     </button>
                 </div>
@@ -776,6 +778,18 @@
             expanded5 = false;
         }
     }
+
+    function sendToChat(message) {
+        const targetWindow = window.parent.document.getElementById('appChat').contentWindow;
+        targetWindow.postMessage(message, '*');
+    }
+
+    window.addEventListener('message', async (event) => {
+        console.log('Message from chat app: ', event.data);
+        const cameraPosition = JSON.parse(event.data);
+        await flyToCameraPosition(cameraPosition);
+        sendToChat("Flight complete to camera position\n" + JSON.stringify(cameraPosition, undefined, "\t"));
+    });
 </script>
 <script src="script.js"></script>
 </body>
