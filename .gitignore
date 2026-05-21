@@ -1,7 +1,19 @@
-.settings
+node_modules/
+dist/
+.vite/
+*.local
+.env.local
+.DS_Store
+
+# IDE / OS / tooling
+.idea/
+.vscode/
+.claude/
+.settings/
 /.project
-/memorandum.txt
-.gitignore
-data
-*.gitignore
 /nbproject/private/
+
+# Local notes / data dumps from the legacy project
+/memorandum.txt
+/data/
+/archive/
