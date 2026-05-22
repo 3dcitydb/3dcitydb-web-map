@@ -48,7 +48,8 @@ export class Cesium3DTilesLayer extends LayerBase {
   private tileset?: TaggedTileset;
   private prevSelectedFeatures: TaggedFeature[] = [];
   private prevSelectedColors: Color[] = [];
-  private hiddenObjects: TaggedFeature[] = [];
+  // Set for O(1) lookup: tileVisible queries this once per feature every frame.
+  private hiddenObjects = new Set<TaggedFeature>();
 
   constructor(options: LayerOptions) {
     super();
@@ -130,7 +131,7 @@ export class Cesium3DTilesLayer extends LayerBase {
     if (!this.viewer) throw new Error('Layer has not been added to a viewer yet');
     this.prevSelectedFeatures = [];
     this.prevSelectedColors = [];
-    this.hiddenObjects = [];
+    this.hiddenObjects.clear();
     if (this.tileset) {
       this.viewer.scene.primitives.remove(this.tileset);
     }
@@ -236,11 +237,13 @@ export class Cesium3DTilesLayer extends LayerBase {
 
   hideSelected(feature: TaggedFeature): void {
     if (!this.contains(feature)) return;
+    this.hiddenObjects.add(feature);
     feature.show = false;
   }
 
   show(feature: TaggedFeature): void {
     if (!this.contains(feature)) return;
+    this.hiddenObjects.delete(feature);
     feature.show = true;
   }
 
@@ -292,7 +295,8 @@ export class Cesium3DTilesLayer extends LayerBase {
           }
         }
 
-        feature.show = !this.hiddenObjects.includes(feature);
+        const shouldShow = !this.hiddenObjects.has(feature);
+        if (feature.show !== shouldShow) feature.show = shouldShow;
       }
     });
   }

@@ -211,8 +211,8 @@ export function useWebMap() {
 
     // ctrlKey=false → replace selection. ctrlKey=true → append (multi-select).
     function handleClick(position: Cartesian2, ctrlKey: boolean): void {
-      // Snapshot the hover color BEFORE any state mutation: mouse-move fired before this
-      // click handler put prevHoveredColor to the picked feature's original color.
+      // Snapshot hover state before restoreSelected() / state resets clobber it.
+      const hoveredBeforeClick = prevHovered;
       const originalColorBeforeHover = prevHoveredColor;
 
       if (!ctrlKey) restoreSelected();
@@ -235,14 +235,12 @@ export function useWebMap() {
       // Already selected? Don't re-add.
       if (o.inArray(prevSelected.value, picked)) return;
 
-      // Use the snapshot we took before any state was reset. If the user clicked without
-      // a preceding hover (e.g., touchscreen tap), it's undefined → restore-to-default is fine.
-      const restoreColor = ctrlKey
-        ? o.getColor(picked) // CTRL+click on a fresh feature: remember its current color.
-        : originalColorBeforeHover;
+      // If the click hit the hovered feature, its current color is mouseOverColor — not the original.
+      const wasHovered = hoveredBeforeClick != null && o.isEqual(hoveredBeforeClick, picked);
+      const restoreColor = wasHovered ? originalColorBeforeHover : o.getColor(picked);
 
       prevSelected.value = [...prevSelected.value, picked];
-      prevSelectedColors.value = [...prevSelectedColors.value, o.getColor(restoreColor as PickedFeature)];
+      prevSelectedColors.value = [...prevSelectedColors.value, restoreColor];
 
       // We've absorbed the hover into the selection; clear hover state so a later move-off
       // doesn't try to restore the now-selected feature back to mouseOverColor.

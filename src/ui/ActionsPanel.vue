@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { ShadowMode } from 'cesium';
 import {
   ElButton,
   ElCard,
@@ -71,9 +72,10 @@ function onToggleShadows() {
 
 function onToggleTerrainShadows() {
   if (!viewer.value) return;
-  // Cesium ShadowMode: DISABLED=0, ENABLED=1, CAST_ONLY=2, RECEIVE_ONLY=3
-  const next = viewer.value.terrainShadows === 1 ? 0 : 1;
-  viewer.value.terrainShadows = next;
+  const enabling = viewer.value.terrainShadows !== ShadowMode.ENABLED;
+  viewer.value.terrainShadows = enabling ? ShadowMode.ENABLED : ShadowMode.DISABLED;
+  // terrainShadows is gated by the global shadow map.
+  if (enabling && !viewer.value.shadows) viewer.value.shadows = true;
 }
 
 function onExternalMap(svc: ExternalMap) {

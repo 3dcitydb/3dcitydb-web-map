@@ -57,7 +57,7 @@ export class I3SLayer extends LayerBase {
   private i3sProvider?: I3SDataProvider;
   private prevSelectedFeatures: I3SFeature[] = [];
   private prevSelectedColors: Color[] = [];
-  private hiddenObjects: I3SFeature[] = [];
+  private hiddenObjects = new Set<I3SFeature>();
 
   constructor(options: LayerOptions) {
     super();
@@ -130,7 +130,7 @@ export class I3SLayer extends LayerBase {
     if (!this.viewer) throw new Error('Layer has not been added to a viewer yet');
     this.prevSelectedFeatures = [];
     this.prevSelectedColors = [];
-    this.hiddenObjects = [];
+    this.hiddenObjects.clear();
     if (this.i3sProvider) {
       this.viewer.scene.primitives.remove(this.i3sProvider);
     }
@@ -192,7 +192,7 @@ export class I3SLayer extends LayerBase {
     for (const feature of this.hiddenObjects) {
       feature.show = true;
     }
-    this.hiddenObjects = [];
+    this.hiddenObjects.clear();
   }
 
   unHighlightAllObjects(): void {
@@ -264,11 +264,13 @@ export class I3SLayer extends LayerBase {
 
   hideSelected(feature: I3SFeature): void {
     if (!this.contains(feature)) return;
+    this.hiddenObjects.add(feature);
     feature.show = false;
   }
 
   show(feature: I3SFeature): void {
     if (!this.contains(feature)) return;
+    this.hiddenObjects.delete(feature);
     feature.show = true;
   }
 
@@ -302,7 +304,7 @@ export class I3SLayer extends LayerBase {
     }
   }
 
-  private indexByGmlId(features: I3SFeature[]): Record<string, I3SFeature> {
+  private indexByGmlId(features: Iterable<I3SFeature>): Record<string, I3SFeature> {
     const result: Record<string, I3SFeature> = {};
     for (const feature of features) {
       const fields = feature.content.tile.i3sNode.getFieldsForFeature(feature.featureId);

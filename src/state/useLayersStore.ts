@@ -113,5 +113,11 @@ export const useLayersStore = defineStore('layers', () => {
     triggerRef(layers);
   }
 
-  return { layers, addLayer, removeLayer, toggleLayer };
+  function zoomToLayer(id: string): void {
+    const entry = layers.value.find((l) => l.id === id);
+    if (!entry || entry.loading || entry.error) return;
+    entry.instance.zoomToStartPosition();
+  }
+
+  return { layers, addLayer, removeLayer, toggleLayer, zoomToLayer };
 });

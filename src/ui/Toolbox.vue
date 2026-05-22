@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { ElButton, ElCard, ElCheckbox, ElForm, ElFormItem, ElInput, ElInputNumber, ElSelect, ElOption, ElMessage, ElSwitch } from 'element-plus';
-import { useLayersStore, type LayerKind } from '../state/useLayersStore';
+import { useLayersStore, type ActiveLayer, type LayerKind } from '../state/useLayersStore';
 import { useViewerRef } from '../viewer/viewerRef';
 
 const layers = useLayersStore();
@@ -78,6 +78,10 @@ async function onAdd() {
     submitting.value = false;
   }
 }
+
+function canZoom(l: ActiveLayer): boolean {
+  return !l.loading && !l.error;
+}
 </script>
 
 <template>
@@ -138,7 +142,12 @@ async function onAdd() {
 
       <ul v-if="layers.layers.length" class="layer-list">
         <li v-for="l in layers.layers" :key="l.id">
-          <span class="layer-name">
+          <span
+            class="layer-name"
+            :class="{ clickable: canZoom(l) }"
+            title="Click to zoom to layer"
+            @click="layers.zoomToLayer(l.id)"
+          >
             <span class="kind-tag">{{ l.spec.kind }}</span>
             {{ l.spec.name }}
             <span v-if="l.loading" class="status">(loading…)</span>
@@ -177,6 +186,12 @@ async function onAdd() {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.layer-name.clickable {
+  cursor: pointer;
+}
+.layer-name.clickable:hover {
+  color: var(--citydb-border-focus);
 }
 .kind-tag {
   display: inline-block;

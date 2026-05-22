@@ -43,6 +43,10 @@ const FORWARD: Record<string, string> = {
 };
 
 function fwd(name: string): string {
+  // Numbered layer keys: layer_0 → l_0, layer_1 → l_1, … (FORWARD only stores the prefix).
+  if (name.startsWith('layer_') && name.length > 'layer_'.length) {
+    return FORWARD['layer_'] + name.substring('layer_'.length);
+  }
   return FORWARD[name] ?? name;
 }
 
@@ -144,11 +148,9 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
   while (true) {
     const raw = readParam(params, `layer_${i}`);
     if (!raw) break;
-    // The original code stores layer config as a nested query string in the value.
-    // It first encodes the layer config as `key=value&key=value`, then encodes the
-    // whole string as the parameter value (which gets URI-encoded once more).
-    const decoded = decodeURIComponent(raw);
-    const cfg = queryToObject(decoded);
+    // raw is already outer-decoded by URLSearchParams; decoding again would collapse the
+    // inner '%26' (from layer URLs containing '&') and truncate the URL on the next split.
+    const cfg = queryToObject(raw);
     layers.push({
       url: cfg[fwd('url')] ?? cfg.url ?? '',
       name: cfg[fwd('name')] ?? cfg.name ?? '',
@@ -169,7 +171,7 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
   const basemapRaw = readParam(params, 'basemap');
   let imagery: ImageryConfig | undefined;
   if (basemapRaw) {
-    const cfg = queryToObject(decodeURIComponent(basemapRaw));
+    const cfg = queryToObject(basemapRaw);
     imagery = {
       kind: (cfg.imageryType === 'wmts' ? 'wmts' : 'wms') as 'wms' | 'wmts',
       url: cfg[fwd('url')] ?? cfg.url ?? '',
@@ -184,7 +186,7 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
   const terrainRaw = readParam(params, 'terrain');
   let terrain: TerrainConfig | undefined;
   if (terrainRaw) {
-    const cfg = queryToObject(decodeURIComponent(terrainRaw));
+    const cfg = queryToObject(terrainRaw);
     terrain = {
       url: cfg[fwd('url')] ?? cfg.url ?? '',
       name: cfg[fwd('name')] ?? cfg.name ?? 'Terrain',
@@ -195,7 +197,7 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
   let splashUrl: string | undefined;
   let splashShowOnStart: boolean | undefined;
   if (splashRaw) {
-    const cfg = queryToObject(decodeURIComponent(splashRaw));
+    const cfg = queryToObject(splashRaw);
     splashUrl = cfg[fwd('url')] ?? cfg.url;
     splashShowOnStart = asBool(cfg[fwd('showOnStart')] ?? cfg.showOnStart);
   }

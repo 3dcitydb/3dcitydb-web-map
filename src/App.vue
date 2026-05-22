@@ -125,11 +125,14 @@ body,
 }
 
 .panels-stack {
-  margin-top: 8px;
+  margin-top: 6px;
   overflow-y: auto;
   padding-right: 4px;
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 /* ---- Mobile drawer: full-width panel stack overlaying the viewer ---- */
@@ -188,7 +191,6 @@ body,
 .citydb-panel {
   background: var(--citydb-bg-translucent);
   color: var(--citydb-text);
-  margin-top: 8px;
   border: 1px solid var(--citydb-border);
   border-radius: 4px;
   transition: border-color 0.15s, box-shadow 0.15s;
