@@ -114,7 +114,7 @@ function asNumber(v: string | undefined): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-function asBool(v: string | undefined): boolean | undefined {
+export function asBool(v: string | undefined): boolean | undefined {
   if (v === 'true') return true;
   if (v === 'false') return false;
   return undefined;

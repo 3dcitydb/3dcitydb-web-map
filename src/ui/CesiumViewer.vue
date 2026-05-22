@@ -11,6 +11,7 @@ import { createViewer } from '../viewer/useViewer';
 import { setViewer } from '../viewer/viewerRef';
 import { useWebMap } from '../composables/useWebMap';
 import { installGmlIdGeocoder } from '../composables/useGmlGeocoder';
+import { useMobile } from '../composables/useMobile';
 import { parseUrlState, flyToCamera } from '../state/useUrlState';
 import { useLayersStore } from '../state/useLayersStore';
 import { useBasemapStore } from '../state/useBasemapStore';
@@ -21,6 +22,7 @@ let viewer: Viewer | undefined;
 const webMap = useWebMap();
 const layers = useLayersStore();
 const basemap = useBasemapStore();
+const { isMobile } = useMobile();
 
 const parsed = parseUrlState();
 
@@ -84,12 +86,14 @@ onMounted(async () => {
   if (!parsed.ionToken) adjustIonFeatures(viewer);
   addStaticCredits(viewer);
 
-  // Compass + zoom + distance legend (replaces the legacy viewerCesiumNavigationMixin.min.js IIFE)
+  // Compass + zoom + distance legend (replaces the legacy viewerCesiumNavigationMixin.min.js IIFE).
+  // On mobile, drop the compass/zoom controls — touch gestures already cover them — and keep only
+  // the distance legend so users still have a scale reference.
   new CesiumNavigation(viewer, {
-    enableCompass: true,
-    enableZoomControls: true,
+    enableCompass: !isMobile.value,
+    enableZoomControls: !isMobile.value,
     enableDistanceLegend: true,
-    enableCompassOuterRing: true,
+    enableCompassOuterRing: !isMobile.value,
   });
 
   webMap.installMouseHandlers(viewer);

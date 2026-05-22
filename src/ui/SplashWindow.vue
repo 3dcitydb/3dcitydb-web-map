@@ -8,7 +8,7 @@ const props = defineProps<{
   showOnStart?: boolean;
 }>();
 
-const { isMobile } = useMobile();
+const { isMobile, isIOS } = useMobile();
 const visible = ref(false);
 const STORAGE_KEY = 'citydb_splash_ignore';
 
@@ -55,7 +55,7 @@ defineExpose({ open, close });
 
 <template>
   <Teleport to="body">
-    <div v-if="visible" class="splash-overlay">
+    <div v-if="visible" class="splash-overlay" :class="{ mobile: isMobile, ios: isIOS }">
       <div class="splash-content">
         <iframe :src="effectiveUrl" class="splash-frame" frameborder="0" />
         <div class="splash-buttons">
@@ -99,5 +99,16 @@ defineExpose({ open, close });
   gap: 8px;
   background: #f5f5f5;
   border-top: 1px solid #e0e0e0;
+}
+
+/* ---- Mobile: near-fullscreen splash, matching legacy 96% × 96% layout ---- */
+.splash-overlay.mobile .splash-content {
+  width: 96vw;
+  height: 96vh;
+  border-radius: 4px;
+}
+.splash-overlay.mobile.ios .splash-frame {
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
 }
 </style>

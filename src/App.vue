@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { ElSwitch } from 'element-plus';
 import CesiumViewer from './ui/CesiumViewer.vue';
 import Toolbox from './ui/Toolbox.vue';
@@ -16,9 +16,29 @@ import { useAuthStore } from './state/useAuthStore';
 const parsed = parseUrlState();
 const auth = useAuthStore();
 auth.setClientId(parsed.googleClientId);
-const { isMobile } = useMobile();
+const { isMobile, isIOS } = useMobile();
 const toolboxVisible = ref(false);
-const layoutClass = computed(() => (isMobile.value ? 'app-root mobile' : 'app-root'));
+const layoutClass = computed(() => {
+  const classes = ['app-root'];
+  if (isMobile.value) classes.push('mobile');
+  if (isIOS.value) classes.push('ios');
+  return classes.join(' ');
+});
+
+// iOS Safari interprets multi-touch on the page as a pinch-to-zoom of the whole document,
+// which fights with Cesium's own pinch handling. Block the page-level zoom only.
+function preventIOSPageZoom(event: TouchEvent) {
+  const e = event as TouchEvent & { scale?: number };
+  if (e.scale !== undefined && e.scale !== 1) event.preventDefault();
+}
+onMounted(() => {
+  if (isIOS.value) {
+    window.addEventListener('touchmove', preventIOSPageZoom, { passive: false });
+  }
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('touchmove', preventIOSPageZoom);
+});
 </script>
 
 <template>
@@ -112,9 +132,56 @@ body,
   min-height: 0;
 }
 
+/* ---- Mobile drawer: full-width panel stack overlaying the viewer ---- */
 .mobile .panels {
-  width: calc(100vw - 24px);
-  max-width: 360px;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  width: auto;
+  max-width: none;
+  max-height: calc(100vh - 16px);
+}
+.mobile .panels-stack {
+  max-height: calc(100vh - 70px);
+  padding-right: 0;
+}
+.mobile .citydb-panel {
+  font-size: 13px;
+}
+.mobile .citydb-panel .el-card__body {
+  padding: 8px 10px;
+}
+.mobile .citydb-panel .el-form-item {
+  margin-bottom: 6px;
+}
+
+/* ---- Cesium widget tweaks on mobile ---- */
+/* Credits text is noisy on small screens; logo/image credits stay. */
+.mobile .cesium-widget-credits {
+  display: none !important;
+}
+/* InfoBox: Cesium's default popup is tiny on phones — expand to near-fullscreen. */
+.mobile .cesium-infoBox {
+  top: 44px !important;
+  right: 0 !important;
+  left: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  max-height: calc(100vh - 50px) !important;
+  border-radius: 0 !important;
+}
+.mobile .cesium-infoBox-iframe {
+  height: 100% !important;
+  max-height: none !important;
+}
+.ios .cesium-infoBox {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+/* Error dialog: keep it readable on narrow screens. */
+.mobile .cesium-widget-errorPanel-content {
+  max-width: 90vw !important;
+  max-height: 70vh !important;
 }
 
 /* ----- Shared panel skin (consumed by Toolbox/Imagery/Terrain/Actions) ----- */
