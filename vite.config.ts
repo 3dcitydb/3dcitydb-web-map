@@ -19,4 +19,20 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split heavy vendor deps so they cache independently and load in parallel.
+        // NOTE: 'cesium' itself is externalized by vite-plugin-cesium (loaded at runtime
+        // from /cesium/Cesium.js), so it's not chunked here. cesium-navigation-es6 IS
+        // bundled because it's a small wrapper that just imports cesium symbols.
+        manualChunks: {
+          'cesium-navigation': ['cesium-navigation-es6'],
+          'element-plus': ['element-plus'],
+          vue: ['vue', 'pinia'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1500,
+  },
 });

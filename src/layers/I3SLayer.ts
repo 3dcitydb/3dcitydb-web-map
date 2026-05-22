@@ -31,8 +31,6 @@ interface I3SFeature extends Cesium3DTileFeature {
   };
 }
 
-const GMLID_KEYS = ['gmlid', 'gml_id', 'gml-id', 'gml:id', 'id', 'OBJECTID'] as const;
-
 export class I3SLayer extends LayerBase {
   readonly layerId: string = createGuid();
   name: string;
@@ -236,13 +234,12 @@ export class I3SLayer extends LayerBase {
   getIdObject(feature: I3SFeature): { key: string | number; object: I3SFeature } | undefined {
     if (!this.contains(feature)) return undefined;
     const fields = feature.content.tile.i3sNode.getFieldsForFeature(feature.featureId);
-    for (const key of GMLID_KEYS) {
-      const gmlid = fields[key];
-      if (gmlid != null) {
-        return { key: gmlid as string | number, object: feature };
-      }
-    }
-    return { key: feature._batchId as number, object: feature };
+    const keys = Object.keys(fields);
+    // Prefer OBJECTID (case-insensitive); otherwise fall back to the first field.
+    const idKey = keys.find((k) => k.toUpperCase() === 'OBJECTID') ?? keys[0];
+    if (!idKey) return { key: feature._batchId as number, object: feature };
+    const value = fields[idKey];
+    return { key: (value ?? feature._batchId) as string | number, object: feature };
   }
 
   private buildTilesetOptions(): Record<string, unknown> {

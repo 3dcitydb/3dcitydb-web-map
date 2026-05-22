@@ -1,5 +1,5 @@
 import { SQLDataSource } from './DataSource';
-import { TableType, type DataSourceOptions, type GmlId, type KvpResult, type SignInController } from './types';
+import { TableType, type DataSourceOptions, type KvpResult, type ObjectId, type SignInController } from './types';
 
 interface GoogleSheetsOptions extends DataSourceOptions {
   ranges?: string[];
@@ -63,8 +63,8 @@ export class GoogleSheets extends SQLDataSource {
     return result;
   }
 
-  queryUsingId(gmlid: GmlId, callback: (response: string) => void): void {
-    this.queryUsingSql(`SELECT * WHERE A='${gmlid.value}'`, callback);
+  queryUsingId(objectId: ObjectId, callback: (response: string) => void): void {
+    this.queryUsingSql(`SELECT * WHERE A='${objectId.value}'`, callback);
   }
 
   queryUsingSql(sql: string, callback: (response: string) => void): void {

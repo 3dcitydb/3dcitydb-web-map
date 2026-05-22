@@ -54,10 +54,10 @@ function parseCentroid(value: unknown): { lat: number; lon: number } | undefined
 }
 
 /**
- * Hook into Cesium's geocoder so typing a GML id in the search box triggers a thematic-data
+ * Hook into Cesium's geocoder so typing an object id in the search box triggers a thematic-data
  * CENTROID lookup. Falls back to the normal geocoder if no layer can resolve the id.
  */
-export function installGmlIdGeocoder(viewer: Viewer): void {
+export function installObjectIdGeocoder(viewer: Viewer): void {
   const vm = (viewer as unknown as { geocoder?: { viewModel?: GeocoderViewModel } }).geocoder
     ?.viewModel;
   if (!vm) return;
@@ -68,8 +68,8 @@ export function installGmlIdGeocoder(viewer: Viewer): void {
     const callGeocodingService = info.args[0] === true;
     if (callGeocodingService) return; // normal geocoder pass — let it through
 
-    const gmlId = vm.searchText.trim();
-    if (!gmlId) return;
+    const objectId = vm.searchText.trim();
+    if (!objectId) return;
 
     info.cancel = true;
     const originalText = vm.searchText;
@@ -100,7 +100,7 @@ export function installGmlIdGeocoder(viewer: Viewer): void {
 
     for (const dsc of controllers) {
       dsc.fetchData(
-        { key: 'gmlid', value: gmlId },
+        { key: 'OBJECTID', value: objectId },
         (kvp) => {
           remaining--;
           if (resolved) return;
@@ -109,7 +109,7 @@ export function installGmlIdGeocoder(viewer: Viewer): void {
           );
           if (centroid) {
             resolved = true;
-            vm.searchText = gmlId;
+            vm.searchText = objectId;
             flyToMapLocation(viewer, centroid.lat, centroid.lon);
           } else if (remaining === 0) {
             tryNormalGeocoder();

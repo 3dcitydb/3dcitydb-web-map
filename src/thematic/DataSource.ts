@@ -2,13 +2,13 @@ import {
   TableType,
   type DataSourceCapability,
   type DataSourceOptions,
-  type GmlId,
   type KvpResult,
+  type ObjectId,
   type SignInController,
   type ThirdPartyHandler,
 } from './types';
 
-export type QueryCallback = (kvp: KvpResult, gmlid: GmlId) => void;
+export type QueryCallback = (kvp: KvpResult, objectId: ObjectId) => void;
 
 export abstract class DataSource {
   name: string;
@@ -33,13 +33,13 @@ export abstract class DataSource {
     this.tableType = options.tableType ?? TableType.Horizontal;
     this.thirdPartyHandler = options.thirdPartyHandler;
     this.proxyPrefix = options.proxyPrefix ?? '';
-    this.idColName = options.idColName ?? 'gmlid';
+    this.idColName = options.idColName ?? 'OBJECTID';
   }
 
   abstract responseToKvp(response: string): KvpResult;
 
   abstract queryUsingId(
-    gmlid: GmlId,
+    objectId: ObjectId,
     callback: (response: string) => void,
     limit?: number,
     clickedObject?: unknown,

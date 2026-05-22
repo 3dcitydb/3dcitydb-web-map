@@ -21,7 +21,7 @@ export enum DataSourceKind {
   Embedded = 'Embedded',
 }
 
-export interface GmlId {
+export interface ObjectId {
   key: string;
   value: string;
 }

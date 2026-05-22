@@ -215,14 +215,14 @@ export class GeoJSONLayer extends LayerBase {
   getProperties(feature: PickedGeoJsonObject): Record<string, unknown> | undefined {
     if (!this.contains(feature)) return undefined;
     const entity = feature.id;
-    let gmlid = entity.id;
+    let objectId = entity.id;
     for (const prefix of ID_PREFIXES) {
-      if (gmlid.startsWith(prefix)) {
-        gmlid = gmlid.slice(prefix.length);
+      if (objectId.startsWith(prefix)) {
+        objectId = objectId.slice(prefix.length);
         break;
       }
     }
-    const result: Record<string, unknown> = { gmlid };
+    const result: Record<string, unknown> = { OBJECTID: objectId };
     if (entity.properties) {
       const now = JulianDate.now();
       Object.assign(result, entity.properties.getValue(now));

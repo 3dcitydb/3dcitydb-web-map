@@ -265,8 +265,8 @@ export function useWebMap() {
           }
           const dsc = (layer as unknown as { dataSourceController?: DataSourceController })
             .dataSourceController;
-          // fillInfoTable does its own gmlid extraction from props with a fallback to entity.name,
-          // so we don't need idObj to render embedded data.
+          // fillInfoTable does its own object id extraction from props with a fallback to
+          // entity.name, so we don't need idObj to render embedded data.
           const selectedEntity = (viewer.selectedEntity ?? idObj?.object) as {
             description?: string;
             name?: string;

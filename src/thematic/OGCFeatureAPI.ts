@@ -1,5 +1,5 @@
 import { SQLDataSource } from './DataSource';
-import type { GmlId, KvpResult } from './types';
+import type { KvpResult, ObjectId } from './types';
 
 export class OGCFeatureAPI extends SQLDataSource {
   responseToKvp(response: string): KvpResult {
@@ -25,24 +25,24 @@ export class OGCFeatureAPI extends SQLDataSource {
     return result;
   }
 
-  queryUsingId(gmlid: GmlId, callback: (response: string) => void): void {
-    const gmlidValue = gmlid.value;
+  queryUsingId(objectId: ObjectId, callback: (response: string) => void): void {
+    const objectIdValue = objectId.value;
     let baseUrl = this.uri;
     baseUrl += baseUrl.endsWith('/') ? '' : '/';
 
-    const urls = [`${baseUrl}?id=${gmlidValue}&f=json`];
+    const urls = [`${baseUrl}?id=${objectIdValue}&f=json`];
 
-    if (baseUrl.includes('hamburg.de') && gmlidValue.startsWith('DEHH')) {
+    if (baseUrl.includes('hamburg.de') && objectIdValue.startsWith('DEHH')) {
       if (baseUrl.includes('GebaeudeBauwerk')) {
-        urls.push(`${baseUrl}?oid=${gmlidValue}BL&f=json`);
+        urls.push(`${baseUrl}?oid=${objectIdValue}BL&f=json`);
       } else {
-        urls.push(`${baseUrl}?oid=${gmlidValue}&f=json`);
+        urls.push(`${baseUrl}?oid=${objectIdValue}&f=json`);
       }
-    } else if (baseUrl.includes('nrw.de') && gmlidValue.startsWith('DENW')) {
+    } else if (baseUrl.includes('nrw.de') && objectIdValue.startsWith('DENW')) {
       if (baseUrl.includes('gebaeudebauwerk')) {
-        urls.push(`${baseUrl}${gmlidValue}BL?f=json`);
+        urls.push(`${baseUrl}${objectIdValue}BL?f=json`);
       } else {
-        urls.push(`${baseUrl}${gmlidValue}?f=json`);
+        urls.push(`${baseUrl}${objectIdValue}?f=json`);
       }
     }
 
@@ -63,6 +63,6 @@ export class OGCFeatureAPI extends SQLDataSource {
         // try next
       }
     }
-    throw new Error('GMLID not matched');
+    throw new Error('ObjectId not matched');
   }
 }

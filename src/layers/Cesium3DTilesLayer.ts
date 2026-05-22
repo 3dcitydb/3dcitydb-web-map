@@ -243,16 +243,12 @@ export class Cesium3DTilesLayer extends LayerBase {
 
   getIdObject(feature: TaggedFeature): { key: string | number; object: TaggedFeature } | undefined {
     if (!this.contains(feature)) return undefined;
-    const gmlidKeys = ['gmlid', 'gml_id', 'gml-id', 'gml:id', 'id', 'OBJECTID', 'object_id', 'object-id'];
-    for (const key of gmlidKeys) {
-      const gmlid = feature.getProperty(key);
-      if (gmlid != null) {
-        return { key: gmlid as string | number, object: feature };
-      }
-    }
-    // Fallback: batchId so the feature still surfaces in the "Highlighted objects" list,
-    // even when the tileset uses a non-standard id column or none at all.
-    return { key: feature._batchId as number, object: feature };
+    const ids = feature.getPropertyIds();
+    // Prefer OBJECTID (case-insensitive); otherwise fall back to the first property.
+    const idKey = ids.find((k) => k.toUpperCase() === 'OBJECTID') ?? ids[0];
+    if (!idKey) return { key: feature._batchId as number, object: feature };
+    const value = feature.getProperty(idKey);
+    return { key: (value ?? feature._batchId) as string | number, object: feature };
   }
 
   private configPointCloudShading(tileset: Cesium3DTileset): void {

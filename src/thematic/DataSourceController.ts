@@ -2,10 +2,10 @@ import type { DataSource } from './DataSource';
 import { GoogleSheets } from './GoogleSheets';
 import { PostgreSQL } from './PostgreSQL';
 import { OGCFeatureAPI } from './OGCFeatureAPI';
-import { DataSourceKind, type DataSourceOptions, type GmlId, type KvpResult, type SignInController } from './types';
+import { DataSourceKind, type DataSourceOptions, type KvpResult, type ObjectId, type SignInController } from './types';
 import { useAuthStore } from '../state/useAuthStore';
 
-export type FetchCallback = (kvp: KvpResult, gmlid: GmlId) => void;
+export type FetchCallback = (kvp: KvpResult, objectId: ObjectId) => void;
 
 export class DataSourceController {
   readonly dataSource: DataSource;
@@ -36,10 +36,10 @@ export class DataSourceController {
     }
   }
 
-  fetchData(gmlid: GmlId, callback: FetchCallback, limit?: number, clickedObject?: unknown): void {
+  fetchData(objectId: ObjectId, callback: FetchCallback, limit?: number, clickedObject?: unknown): void {
     this.dataSource.queryUsingId(
-      gmlid,
-      (result) => callback(this.dataSource.responseToKvp(result), gmlid),
+      objectId,
+      (result) => callback(this.dataSource.responseToKvp(result), objectId),
       limit,
       clickedObject,
     );

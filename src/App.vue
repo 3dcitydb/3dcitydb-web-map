@@ -94,22 +94,28 @@ body,
 
 .panels {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  /* Match Cesium's .cesium-viewer-toolbar offset (top: 5px; right: 5px) so the
+     toolbox toggle lines up horizontally with the home / nav / base-layer buttons. */
+  top: 5px;
+  left: 5px;
   width: 360px;
   z-index: 10;
-  max-height: calc(100vh - 24px);
+  max-height: calc(100vh - 10px);
   display: flex;
   flex-direction: column;
 }
 
-/* Top-level toolbox toggle uses the Cesium toolbar button look. */
+/* Top-level toolbox toggle uses the Cesium toolbar button look.
+   Height matches .cesium-toolbar-button (32px box-sizing: border-box) so the toggle
+   sits flush with Cesium's home / nav / base-layer buttons in the opposite corner. */
 .toolbox-toggle {
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 10px;
   background: var(--citydb-bg-translucent);
   color: var(--citydb-text);
   border: 1px solid var(--citydb-border);
@@ -199,7 +205,11 @@ body,
   border-color: var(--citydb-border-hover);
 }
 .citydb-panel .el-card__header {
-  padding: 8px 12px;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
   border-bottom: 1px solid var(--citydb-border);
   color: var(--citydb-text);
 }
@@ -227,10 +237,11 @@ body,
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   cursor: pointer;
   color: var(--citydb-text);
   user-select: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.3px;
 }

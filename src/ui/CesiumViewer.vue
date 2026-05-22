@@ -10,7 +10,7 @@ import CesiumNavigation from 'cesium-navigation-es6';
 import { createViewer } from '../viewer/useViewer';
 import { setViewer } from '../viewer/viewerRef';
 import { useWebMap } from '../composables/useWebMap';
-import { installGmlIdGeocoder } from '../composables/useGmlGeocoder';
+import { installObjectIdGeocoder } from '../composables/useObjectIdGeocoder';
 import { useMobile } from '../composables/useMobile';
 import { parseUrlState, flyToCamera } from '../state/useUrlState';
 import { useLayersStore } from '../state/useLayersStore';
@@ -97,7 +97,7 @@ onMounted(async () => {
   });
 
   webMap.installMouseHandlers(viewer);
-  installGmlIdGeocoder(viewer);
+  installObjectIdGeocoder(viewer);
 
   if (parsed.imagery) {
     try {

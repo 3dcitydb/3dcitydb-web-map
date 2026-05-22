@@ -1,5 +1,5 @@
 import { SQLDataSource } from './DataSource';
-import { TableType, type GmlId, type KvpResult } from './types';
+import { TableType, type KvpResult, type ObjectId } from './types';
 
 interface PostgrestRow extends Record<string, unknown> {
   attribute?: string;
@@ -27,17 +27,13 @@ export class PostgreSQL extends SQLDataSource {
     return result;
   }
 
-  queryUsingId(gmlid: GmlId, callback: (response: string) => void): void {
-    const baseUrl = this.uri;
-    const gmlidValue = gmlid.value;
-    const urls = [
-      `${baseUrl}?gmlid=eq.${gmlidValue}`,
-      `${baseUrl}?gml_id=eq.${gmlidValue}`,
-      `${baseUrl}?gml-id=eq.${gmlidValue}`,
-      `${baseUrl}?id=eq.${gmlidValue}`,
-    ];
-
-    this.tryUrls(urls)
+  queryUsingId(objectId: ObjectId, callback: (response: string) => void): void {
+    const url = `${this.uri}?${this.idColName}=eq.${objectId.value}`;
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
       .then(callback)
       .catch((err) => console.warn('PostgreSQL:', err.message));
   }
@@ -46,17 +42,5 @@ export class PostgreSQL extends SQLDataSource {
     fetch(this.uri + sql)
       .then((r) => r.text())
       .then(callback);
-  }
-
-  private async tryUrls(urls: string[]): Promise<string> {
-    for (const url of urls) {
-      try {
-        const res = await fetch(url);
-        if (res.ok) return await res.text();
-      } catch {
-        // try next
-      }
-    }
-    throw new Error('GMLID not matched');
   }
 }

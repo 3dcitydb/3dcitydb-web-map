@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ShadowMode } from 'cesium';
 import {
   ElButton,
@@ -7,6 +7,7 @@ import {
   ElMessage,
   ElOption,
   ElSelect,
+  ElSwitch,
 } from 'element-plus';
 import { useWebMap } from '../composables/useWebMap';
 import { useViewerRef } from '../viewer/viewerRef';
@@ -29,6 +30,21 @@ const hidden = computed(() => webMap.getAllHiddenObjects());
 const selectedHighlight = ref<string>('');
 const selectedHidden = ref<string>('');
 const externalMap = ref<ExternalMap | ''>('');
+
+// Mirror viewer's shadow state for two-way switches. Cesium doesn't expose change events
+// on these properties, so we initialize when the viewer becomes available and write through
+// on user toggle. External mutations during runtime aren't expected.
+const shadowsEnabled = ref(false);
+const terrainShadowsEnabled = ref(false);
+watch(
+  viewer,
+  (v) => {
+    if (!v) return;
+    shadowsEnabled.value = v.shadows;
+    terrainShadowsEnabled.value = v.terrainShadows === ShadowMode.ENABLED;
+  },
+  { immediate: true },
+);
 
 function flyToEntity(o: unknown) {
   if (!viewer.value || !o) return;
@@ -65,17 +81,20 @@ function onPrint() {
   if (viewer.value) printCurrentView(viewer.value);
 }
 
-function onToggleShadows() {
+function onToggleShadows(v: string | number | boolean) {
   if (!viewer.value) return;
-  viewer.value.shadows = !viewer.value.shadows;
+  viewer.value.shadows = Boolean(v);
 }
 
-function onToggleTerrainShadows() {
+function onToggleTerrainShadows(v: string | number | boolean) {
   if (!viewer.value) return;
-  const enabling = viewer.value.terrainShadows !== ShadowMode.ENABLED;
-  viewer.value.terrainShadows = enabling ? ShadowMode.ENABLED : ShadowMode.DISABLED;
-  // terrainShadows is gated by the global shadow map.
-  if (enabling && !viewer.value.shadows) viewer.value.shadows = true;
+  const enabled = Boolean(v);
+  viewer.value.terrainShadows = enabled ? ShadowMode.ENABLED : ShadowMode.DISABLED;
+  // terrainShadows is gated by the global shadow map — auto-enable it.
+  if (enabled && !viewer.value.shadows) {
+    viewer.value.shadows = true;
+    shadowsEnabled.value = true;
+  }
 }
 
 function onExternalMap(svc: ExternalMap) {
@@ -147,8 +166,17 @@ async function onShareLink() {
         <el-button size="small" @click="onShareLink">Scene link</el-button>
         <el-button size="small" @click="onScreenshot">Screenshot</el-button>
         <el-button size="small" @click="onPrint">Print</el-button>
-        <el-button size="small" @click="onToggleShadows">Toggle shadows</el-button>
-        <el-button size="small" @click="onToggleTerrainShadows">Toggle terrain sh.</el-button>
+      </div>
+
+      <div class="switch-row">
+        <label>
+          <el-switch v-model="shadowsEnabled" size="small" @change="onToggleShadows" />
+          <span>Shadows</span>
+        </label>
+        <label>
+          <el-switch v-model="terrainShadowsEnabled" size="small" @change="onToggleTerrainShadows" />
+          <span>Terrain shadows</span>
+        </label>
       </div>
 
       <el-select
@@ -176,4 +204,19 @@ async function onShareLink() {
   margin-bottom: 8px;
 }
 .grid :deep(.el-button) { width: 100%; margin-left: 0; }
+
+.switch-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.switch-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+}
 </style>

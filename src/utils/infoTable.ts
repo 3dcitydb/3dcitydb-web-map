@@ -2,27 +2,16 @@ import { GoogleSheets } from '../thematic/GoogleSheets';
 import { OGCFeatureAPI } from '../thematic/OGCFeatureAPI';
 import { PostgreSQL } from '../thematic/PostgreSQL';
 import type { DataSourceController } from '../thematic/DataSourceController';
-import type { GmlId, KvpResult } from '../thematic/types';
+import type { KvpResult, ObjectId } from '../thematic/types';
 
-const GMLID_KEYS = [
-  'gmlid',
-  'gml_id',
-  'gml:id',
-  'gml-id',
-  'objectid',
-  'object_id',
-  'object-id',
-  'id',
-];
-
-function findGmlId(kvp: KvpResult): GmlId | undefined {
-  for (const key of Object.keys(kvp)) {
-    if (!GMLID_KEYS.includes(key.toLowerCase())) continue;
-    const value = kvp[key];
-    if (value === undefined || value === null) continue;
-    return { key, value: String(value) };
-  }
-  return undefined;
+function findObjectId(kvp: KvpResult): ObjectId | undefined {
+  const keys = Object.keys(kvp);
+  // Prefer OBJECTID (case-insensitive); otherwise fall back to the first property.
+  const idKey = keys.find((k) => k.toUpperCase() === 'OBJECTID') ?? keys[0];
+  if (!idKey) return undefined;
+  const value = kvp[idKey];
+  if (value === undefined || value === null) return undefined;
+  return { key: idKey, value: String(value) };
 }
 
 function isValidUrl(str: unknown): boolean {
@@ -43,13 +32,13 @@ function escapeHtml(input: unknown): string {
     .replace(/"/g, '&quot;');
 }
 
-function renderTable(kvp: KvpResult, gmlid: GmlId | undefined): string {
+function renderTable(kvp: KvpResult, objectId: ObjectId | undefined): string {
   let html = '<table class="cesium-infoBox-defaultTable" style="font-size:10.5pt"><tbody>';
-  if (gmlid?.key && gmlid.value) {
-    html += `<tr><td>${escapeHtml(gmlid.key)}</td><td>${escapeHtml(gmlid.value)}</td></tr>`;
+  if (objectId?.key && objectId.value) {
+    html += `<tr><td>${escapeHtml(objectId.key)}</td><td>${escapeHtml(objectId.value)}</td></tr>`;
   }
   for (const key of Object.keys(kvp)) {
-    if (gmlid && key === gmlid.key) continue;
+    if (objectId && key === objectId.key) continue;
     if (!key || key.trim() === '') continue;
     const raw = kvp[key];
     const rendered = isValidUrl(raw)
@@ -77,18 +66,18 @@ export function fillInfoTable(
 ): void {
   entity.description = 'Loading feature information…';
 
-  const initialGmlid = embeddedKvp ? findGmlId(embeddedKvp) : undefined;
-  const fallbackGmlid: GmlId = initialGmlid ?? { key: 'gml_id', value: entity.name ?? '' };
+  const initialObjectId = embeddedKvp ? findObjectId(embeddedKvp) : undefined;
+  const fallbackObjectId: ObjectId = initialObjectId ?? { key: 'OBJECTID', value: entity.name ?? '' };
 
-  function render(kvp: KvpResult | undefined, gmlid: GmlId): void {
+  function render(kvp: KvpResult | undefined, objectId: ObjectId): void {
     if (!kvp) {
       entity.description = 'No feature information found';
       return;
     }
-    if (gmlid.value && entity.name !== gmlid.value) {
-      entity.name = gmlid.value;
+    if (objectId.value && entity.name !== objectId.value) {
+      entity.name = objectId.value;
     }
-    entity.description = renderTable(kvp, gmlid);
+    entity.description = renderTable(kvp, objectId);
   }
 
   const ds = dataSourceController?.dataSource;
@@ -96,18 +85,18 @@ export function fillInfoTable(
     ds instanceof GoogleSheets || ds instanceof PostgreSQL || ds instanceof OGCFeatureAPI;
 
   if (!isExternal) {
-    render(embeddedKvp, fallbackGmlid);
+    render(embeddedKvp, fallbackObjectId);
     return;
   }
 
-  if (!fallbackGmlid.value) {
-    entity.description = 'No GML id available to fetch external data';
+  if (!fallbackObjectId.value) {
+    entity.description = 'No object id available to fetch external data';
     return;
   }
 
   dataSourceController!.fetchData(
-    fallbackGmlid,
-    (kvp, gmlid) => render(kvp, gmlid),
+    fallbackObjectId,
+    (kvp, objectId) => render(kvp, objectId),
     1000,
     entity,
   );
