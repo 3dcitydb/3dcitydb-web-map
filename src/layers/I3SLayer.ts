@@ -50,13 +50,8 @@ export class I3SLayer extends LayerBase {
 
   dataSourceController?: DataSourceController;
 
-  highlightColor: Color = Color.AQUAMARINE;
-  mouseOverHighlightColor: Color = Color.YELLOW;
-
   private viewer?: Viewer;
   private i3sProvider?: I3SDataProvider;
-  private prevSelectedFeatures: I3SFeature[] = [];
-  private prevSelectedColors: Color[] = [];
   private hiddenObjects = new Set<I3SFeature>();
 
   constructor(options: LayerOptions) {
@@ -128,8 +123,6 @@ export class I3SLayer extends LayerBase {
 
   async reActivate(): Promise<this> {
     if (!this.viewer) throw new Error('Layer has not been added to a viewer yet');
-    this.prevSelectedFeatures = [];
-    this.prevSelectedColors = [];
     this.hiddenObjects.clear();
     if (this.i3sProvider) {
       this.viewer.scene.primitives.remove(this.i3sProvider);
@@ -168,47 +161,13 @@ export class I3SLayer extends LayerBase {
 
   isEqual(a: I3SFeature, b: I3SFeature): boolean {
     if (!this.contains(a) || !this.contains(b)) return false;
-    return a._batchId === b._batchId;
+    // _batchId is per-tile; use reference equality (Cesium caches feature wrappers).
+    return a === b;
   }
 
   inArray(array: I3SFeature[] | undefined, object: I3SFeature): boolean {
     if (!array) return false;
     return array.some((i) => this.isEqual(i, object));
-  }
-
-  isInHighlightedList(feature: I3SFeature): boolean {
-    return this.prevSelectedFeatures.includes(feature);
-  }
-
-  highlight(toHighlightFeatures: Iterable<I3SFeature>): void {
-    for (const feature of toHighlightFeatures) {
-      this.prevSelectedFeatures.push(feature);
-      this.prevSelectedColors.push(feature.color);
-      feature.color = this.highlightColor;
-    }
-  }
-
-  showAllObjects(): void {
-    for (const feature of this.hiddenObjects) {
-      feature.show = true;
-    }
-    this.hiddenObjects.clear();
-  }
-
-  unHighlightAllObjects(): void {
-    for (let i = 0; i < this.prevSelectedFeatures.length; i++) {
-      this.prevSelectedFeatures[i].color = this.prevSelectedColors[i];
-    }
-    this.prevSelectedFeatures = [];
-    this.prevSelectedColors = [];
-  }
-
-  getAllHighlightedObjects(): Record<string, I3SFeature> {
-    return this.indexByGmlId(this.prevSelectedFeatures);
-  }
-
-  getAllHiddenObjects(): Record<string, I3SFeature> {
-    return this.indexByGmlId(this.hiddenObjects);
   }
 
   getColor(colorOrFeature: unknown): Color | ColorMaterialProperty | undefined {
@@ -302,25 +261,5 @@ export class I3SLayer extends LayerBase {
       const tileset = (layer as unknown as { tileset?: TaggedTileset }).tileset;
       if (tileset) tileset.layerId = this.layerId;
     }
-  }
-
-  private indexByGmlId(features: Iterable<I3SFeature>): Record<string, I3SFeature> {
-    const result: Record<string, I3SFeature> = {};
-    for (const feature of features) {
-      const fields = feature.content.tile.i3sNode.getFieldsForFeature(feature.featureId);
-      let matched = false;
-      for (const key of GMLID_KEYS) {
-        const gmlid = fields[key];
-        if (gmlid != null) {
-          result[String(gmlid)] = feature;
-          matched = true;
-          break;
-        }
-      }
-      if (!matched) {
-        result[String(feature._batchId)] = feature;
-      }
-    }
-    return result;
   }
 }

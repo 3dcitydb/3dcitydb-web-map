@@ -258,12 +258,16 @@ export function useWebMap() {
       // InfoBox content: only on plain click, matching the original. CTRL+click is silent.
       if (!ctrlKey) {
         const props = o.getProperties(picked);
-        const idObj = o.getIdObject(picked);
-        if (props && idObj) {
-          lastInfo.value = { key: String(idObj.key), object: idObj.object, properties: props };
+        if (props) {
+          const idObj = o.getIdObject(picked);
+          if (idObj) {
+            lastInfo.value = { key: String(idObj.key), object: idObj.object, properties: props };
+          }
           const dsc = (layer as unknown as { dataSourceController?: DataSourceController })
             .dataSourceController;
-          const selectedEntity = (viewer.selectedEntity ?? idObj.object) as {
+          // fillInfoTable does its own gmlid extraction from props with a fallback to entity.name,
+          // so we don't need idObj to render embedded data.
+          const selectedEntity = (viewer.selectedEntity ?? idObj?.object) as {
             description?: string;
             name?: string;
           };

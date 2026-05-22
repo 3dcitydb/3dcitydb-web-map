@@ -163,7 +163,9 @@ export class Cesium3DTilesLayer extends LayerBase {
 
   isEqual(a: TaggedFeature, b: TaggedFeature): boolean {
     if (!this.contains(a) || !this.contains(b)) return false;
-    return a._batchId === b._batchId;
+    // _batchId is per-tile, not globally unique — two features in different tiles can share it.
+    // Cesium caches wrappers per (content, batchId), so reference equality is the right check.
+    return a === b;
   }
 
   inArray(array: TaggedFeature[] | undefined, object: TaggedFeature): boolean {
@@ -173,14 +175,6 @@ export class Cesium3DTilesLayer extends LayerBase {
 
   isInHighlightedList(feature: TaggedFeature): boolean {
     return this.prevSelectedFeatures.includes(feature);
-  }
-
-  unHighlightAllObjects(): void {
-    for (let i = 0; i < this.prevSelectedFeatures.length; i++) {
-      this.prevSelectedFeatures[i].color = this.prevSelectedColors[i];
-    }
-    this.prevSelectedFeatures = [];
-    this.prevSelectedColors = [];
   }
 
   getColor(colorOrFeature: unknown): Color | ColorMaterialProperty | undefined {
@@ -247,16 +241,18 @@ export class Cesium3DTilesLayer extends LayerBase {
     feature.show = true;
   }
 
-  getIdObject(feature: TaggedFeature): { key: string; object: TaggedFeature } | undefined {
+  getIdObject(feature: TaggedFeature): { key: string | number; object: TaggedFeature } | undefined {
     if (!this.contains(feature)) return undefined;
-    const gmlidKeys = ['gmlid', 'gml_id', 'gml-id', 'gml:id', 'id'];
+    const gmlidKeys = ['gmlid', 'gml_id', 'gml-id', 'gml:id', 'id', 'OBJECTID', 'object_id', 'object-id'];
     for (const key of gmlidKeys) {
       const gmlid = feature.getProperty(key);
       if (gmlid != null) {
-        return { key: gmlid as string, object: feature };
+        return { key: gmlid as string | number, object: feature };
       }
     }
-    return undefined;
+    // Fallback: batchId so the feature still surfaces in the "Highlighted objects" list,
+    // even when the tileset uses a non-standard id column or none at all.
+    return { key: feature._batchId as number, object: feature };
   }
 
   private configPointCloudShading(tileset: Cesium3DTileset): void {

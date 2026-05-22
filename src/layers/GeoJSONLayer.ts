@@ -48,13 +48,8 @@ export class GeoJSONLayer extends LayerBase {
 
   dataSourceController?: DataSourceController;
 
-  highlightColor: Color = Color.AQUAMARINE;
-  mouseOverHighlightColor: Color = Color.YELLOW;
-
   private viewer?: Viewer;
   private dataSource?: GeoJsonDataSourceType;
-  private prevSelectedFeatures: PickedGeoJsonObject[] = [];
-  private prevSelectedMaterials: (ColorMaterialProperty | undefined)[] = [];
   private hiddenObjects: PickedGeoJsonObject[] = [];
 
   constructor(options: GeoJSONLayerOptions) {
@@ -132,8 +127,6 @@ export class GeoJSONLayer extends LayerBase {
 
   async reActivate(): Promise<this> {
     if (!this.viewer) throw new Error('Layer has not been added to a viewer yet');
-    this.prevSelectedFeatures = [];
-    this.prevSelectedMaterials = [];
     this.hiddenObjects = [];
 
     if (this.dataSource && this.active) {
@@ -253,54 +246,6 @@ export class GeoJSONLayer extends LayerBase {
   getIdObject(feature: PickedGeoJsonObject): { key: string; object: TaggedEntity } | undefined {
     if (!this.contains(feature)) return undefined;
     return { key: feature.id.id, object: feature.id };
-  }
-
-  highlight(features: Iterable<PickedGeoJsonObject>): void {
-    for (const feature of features) {
-      if (!this.contains(feature) || !feature.id.polygon) continue;
-      this.prevSelectedFeatures.push(feature);
-      this.prevSelectedMaterials.push(
-        feature.id.polygon.material as ColorMaterialProperty | undefined,
-      );
-      feature.id.polygon.material = new ColorMaterialProperty(this.highlightColor);
-    }
-  }
-
-  unHighlightAllObjects(): void {
-    for (let i = 0; i < this.prevSelectedFeatures.length; i++) {
-      const feature = this.prevSelectedFeatures[i];
-      if (!feature.id.polygon) continue;
-      feature.id.polygon.material = this.prevSelectedMaterials[i] as ColorMaterialProperty;
-    }
-    this.prevSelectedFeatures = [];
-    this.prevSelectedMaterials = [];
-  }
-
-  isInHighlightedList(feature: PickedGeoJsonObject): boolean {
-    return this.prevSelectedFeatures.some((f) => this.isEqual(f, feature));
-  }
-
-  showAllObjects(): void {
-    for (const feature of this.hiddenObjects) {
-      feature.id.show = true;
-    }
-    this.hiddenObjects = [];
-  }
-
-  getAllHighlightedObjects(): Record<string, TaggedEntity> {
-    const result: Record<string, TaggedEntity> = {};
-    for (const feature of this.prevSelectedFeatures) {
-      result[feature.id.id] = feature.id;
-    }
-    return result;
-  }
-
-  getAllHiddenObjects(): Record<string, TaggedEntity> {
-    const result: Record<string, TaggedEntity> = {};
-    for (const feature of this.hiddenObjects) {
-      result[feature.id.id] = feature.id;
-    }
-    return result;
   }
 
   private tagEntities(dataSource: GeoJsonDataSourceType): void {

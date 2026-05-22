@@ -1,7 +1,7 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue';
 import { asBool } from '../state/useUrlState';
 
-export type MobileOS = 'iOS' | 'Android' | 'WindowsPhone' | 'unknown';
+type MobileOS = 'iOS' | 'Android' | 'WindowsPhone' | 'unknown';
 
 const MOBILE_RE = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
 
@@ -16,9 +16,7 @@ function detectOS(ua: string): MobileOS {
 
 interface MobileState {
   isMobile: Ref<boolean>;
-  mobileOS: MobileOS;
   isIOS: ComputedRef<boolean>;
-  isAndroid: ComputedRef<boolean>;
 }
 
 let cached: MobileState | undefined;
@@ -40,9 +38,7 @@ function create(): MobileState {
 
   return {
     isMobile,
-    mobileOS,
     isIOS: computed(() => mobileOS === 'iOS'),
-    isAndroid: computed(() => mobileOS === 'Android'),
   };
 }
 
