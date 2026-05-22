@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { ElSwitch } from 'element-plus';
 import CesiumViewer from './ui/CesiumViewer.vue';
-import Toolbox from './ui/Toolbox.vue';
+import LayersPanel from './ui/LayersPanel.vue';
 import ImageryPanel from './ui/ImageryPanel.vue';
 import TerrainPanel from './ui/TerrainPanel.vue';
 import ActionsPanel from './ui/ActionsPanel.vue';
@@ -50,7 +50,7 @@ onBeforeUnmount(() => {
         <span>Toolbox</span>
       </label>
       <div v-show="toolboxVisible" class="panels-stack">
-        <Toolbox />
+        <LayersPanel />
         <ImageryPanel />
         <TerrainPanel />
         <ActionsPanel />
@@ -193,7 +193,7 @@ body,
   max-height: 70vh !important;
 }
 
-/* ----- Shared panel skin (consumed by Toolbox/Imagery/Terrain/Actions) ----- */
+/* ----- Shared panel skin (consumed by Layers/Imagery/Terrain/Actions) ----- */
 .citydb-panel {
   background: var(--citydb-bg-translucent);
   color: var(--citydb-text);

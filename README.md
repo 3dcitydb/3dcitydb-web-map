@@ -1,11 +1,11 @@
-3DCityDB-Web-Map-Client
+3DCityDB-Web-Map
 ==================================
 
 News
 -------
 #### Version 3.0 (POC) — Vue 3 + Vite rewrite
 
-The next-generation 3DCityDB-Web-Map-Client is a ground-up rewrite of the v2 codebase
+The next-generation 3DCityDB-Web-Map is a ground-up rewrite of the v2 codebase
 using **Vue 3**, **TypeScript**, **Vite**, **Pinia** (state) and **Element Plus** (UI),
 on top of **CesiumJS 1.141**.
 
@@ -21,7 +21,7 @@ Thematic data sources: **Google Spreadsheets**, **PostgreSQL** (via PostgREST),
 
 Introduction
 -------
-The **3DCityDB-Web-Map-Client** is a web-based front-end for high-performance 3D visualization
+The **3DCityDB-Web-Map** is a web-based application for high-performance 3D visualization
 and interactive exploration of **arbitrarily large semantic 3D city models** and other geospatial
 data. The client uses the [Cesium Virtual Globe](https://cesium.com/) as its 3D geo-visualization
 engine — based on HTML5 and WebGL — providing hardware-accelerated cross-platform rendering in
@@ -55,7 +55,7 @@ Key features of the v3 client:
 Architecture
 -------
 <p align="center">
-<img src="theme/img/3dcitydb-web-map-client-architecture.jpg" width="800" />
+<img src="public/theme/img/3dcitydb-web-map-architecture.jpg" width="800" />
 </p>
 
 Tech stack
@@ -94,11 +94,11 @@ so they are not bundled into the application JS.
 
 License
 -------
-The 3DCityDB-Web-Map-Client is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0). See the `LICENSE` file for more details.
+The 3DCityDB-Web-Map is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0). See the `LICENSE` file for more details.
 
 System requirements
 -------
-The hardware running the 3DCityDB-Web-Map-Client must have a WebGL-capable graphics card,
+The hardware running the 3DCityDB-Web-Map must have a WebGL-capable graphics card,
 and the browser must provide appropriate WebGL support. You can check WebGL support at
 [https://get.webgl.org/](https://get.webgl.org).
 
@@ -155,7 +155,7 @@ Developers
 * Zhihang Yao
 <br>[Hochschule für Technik Stuttgart (HFT Stuttgart)](https://www.hft-stuttgart.de/)
 
-**v2 and earlier — original 3DCityDB-Web-Map-Client:**
+**v2 and earlier — original 3DCityDB-Web-Map-Client (legacy name):**
 
 * Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
 <br>[Chair of Geoinformatics, Technical University of Munich](https://www.asg.ed.tum.de/en/gis)
@@ -167,7 +167,7 @@ with the support of:
 
 More information
 -------
-The 3DCityDB-Web-Map-Client is part of the [3DCityDB Software Suite](https://www.3dcitydb.org)
+The 3DCityDB-Web-Map is part of the [3DCityDB Software Suite](https://www.3dcitydb.org)
 for managing large semantic 3D city models in CityGML. It can also be used as a standalone
 component.
 
