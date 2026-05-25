@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { ElButton } from 'element-plus';
 import { useMobile } from '../composables/useMobile';
 
 const props = defineProps<{
@@ -14,8 +13,8 @@ const STORAGE_KEY = 'citydb_splash_ignore';
 
 // When no URL is provided via the ?sw= param, fall back to the bundled instructions HTML.
 // On mobile, pick the mobile-friendly variant.
-// Resolve relative to the document so the bundle works under any deploy path:
-// Vite dev (/), IntelliJ static server (/<project>/dist/), CDN sub-folders, etc.
+// Resolve relative to the document so the bundle works under any deployment path:
+// Vite dev (/), IntelliJ static server (/<project>/dist/), CDN subfolders, etc.
 function bundled(name: string): string {
   return new URL(`splash/${name}`, document.baseURI).toString();
 }
@@ -23,9 +22,6 @@ const effectiveUrl = computed(() => {
   if (props.url) return props.url;
   return bundled(isMobile.value ? 'SplashWindow_Mobile.html' : 'SplashWindow.html');
 });
-
-// Treat undefined as "show by default", matching original behaviour. Explicit false suppresses.
-const effectiveShowOnStart = computed(() => props.showOnStart !== false);
 
 function open() {
   visible.value = true;
@@ -43,7 +39,10 @@ function ignore() {
 watch(
   effectiveUrl,
   (url) => {
-    if (!url || !effectiveShowOnStart.value) return;
+    // Default behaviour: show on start. Only an explicit `false` suppresses it —
+    // do NOT collapse to `!props.showOnStart`, that would also treat `undefined` as "don't show".
+    // noinspection PointlessBooleanExpressionJS
+    if (!url || props.showOnStart === false) return;
     if (localStorage.getItem(STORAGE_KEY) === url) return;
     open();
   },
@@ -57,7 +56,7 @@ defineExpose({ open, close });
   <Teleport to="body">
     <div v-if="visible" class="splash-overlay" :class="{ mobile: isMobile, ios: isIOS }">
       <div class="splash-content">
-        <iframe :src="effectiveUrl" class="splash-frame" frameborder="0" />
+        <iframe :src="effectiveUrl" class="splash-frame" />
         <div class="splash-buttons">
           <el-button @click="ignore">Don't show again</el-button>
           <el-button type="primary" @click="close">Close</el-button>

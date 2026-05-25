@@ -3,11 +3,10 @@ import { OGCFeatureAPI } from '../thematic/OGCFeatureAPI';
 import { PostgreSQL } from '../thematic/PostgreSQL';
 import type { DataSourceController } from '../thematic/DataSourceController';
 import type { KvpResult, ObjectId } from '../thematic/types';
+import { findObjectIdKey } from './objectId';
 
 function findObjectId(kvp: KvpResult): ObjectId | undefined {
-  const keys = Object.keys(kvp);
-  // Prefer OBJECTID (case-insensitive); otherwise fall back to the first property.
-  const idKey = keys.find((k) => k.toUpperCase() === 'OBJECTID') ?? keys[0];
+  const idKey = findObjectIdKey(Object.keys(kvp));
   if (!idKey) return undefined;
   const value = kvp[idKey];
   if (value === undefined || value === null) return undefined;
@@ -67,7 +66,10 @@ export function fillInfoTable(
   entity.description = 'Loading feature information…';
 
   const initialObjectId = embeddedKvp ? findObjectId(embeddedKvp) : undefined;
-  const fallbackObjectId: ObjectId = initialObjectId ?? { key: 'OBJECTID', value: entity.name ?? '' };
+  const fallbackObjectId: ObjectId = initialObjectId ?? {
+    key: 'OBJECTID',
+    value: entity.name ?? '',
+  };
 
   function render(kvp: KvpResult | undefined, objectId: ObjectId): void {
     if (!kvp) {

@@ -15,7 +15,7 @@ interface GeocoderViewModel {
   search: { call(thisArg: unknown, callGeocodingService: boolean): void };
   _searchCommand: {
     beforeExecute: {
-      addEventListener(cb: (info: { args: unknown[]; cancel: boolean }) => void): void;
+      addEventListener(cb: (info: { args: unknown[]; cancel: boolean }) => void): () => void;
     };
   };
 }
@@ -54,17 +54,18 @@ function parseCentroid(value: unknown): { lat: number; lon: number } | undefined
 }
 
 /**
- * Hook into Cesium's geocoder so typing an object id in the search box triggers a thematic-data
+ * Hook into Cesium's geocoder, so typing an object id in the search box triggers a thematic-data
  * CENTROID lookup. Falls back to the normal geocoder if no layer can resolve the id.
+ * Returns a disposer that removes the listener.
  */
-export function installObjectIdGeocoder(viewer: Viewer): void {
+export function installObjectIdGeocoder(viewer: Viewer): () => void {
   const vm = (viewer as unknown as { geocoder?: { viewModel?: GeocoderViewModel } }).geocoder
     ?.viewModel;
-  if (!vm) return;
+  if (!vm) return () => {};
 
   const layers = useLayersStore();
 
-  vm._searchCommand.beforeExecute.addEventListener((info) => {
+  return vm._searchCommand.beforeExecute.addEventListener((info) => {
     const callGeocodingService = info.args[0] === true;
     if (callGeocodingService) return; // normal geocoder pass — let it through
 

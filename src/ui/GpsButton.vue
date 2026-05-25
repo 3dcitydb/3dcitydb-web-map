@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { Cartesian3, Math as CesiumMath } from 'cesium';
 import { ElMessage } from 'element-plus';
 import { useViewerRef } from '../viewer/viewerRef';
+import { getErrorMessage } from '../utils/errorMessages';
 import gpsMain from '../assets/gps/GPS_main.png';
 import gpsSingle from '../assets/gps/GPS_single.png';
 import gpsOnOri from '../assets/gps/GPS_on_ori.png';
@@ -21,7 +22,7 @@ const ICONS: Record<Mode, string> = {
 
 const TOOLBAR_SELECTOR = '.cesium-viewer-toolbar';
 
-const { ready } = useViewerRef();
+const { ready, viewer } = useViewerRef();
 const mode = ref<Mode>('main');
 const expanded = ref(false);
 const toolbarEl = ref<Element | null>(null);
@@ -68,8 +69,6 @@ function getOrientation(): Promise<DeviceOrientationEvent> {
   });
 }
 
-const { viewer } = useViewerRef();
-
 function flyTo(position: GeolocationPosition, orientation?: DeviceOrientationEvent | null) {
   if (!viewer.value) return;
   const lon = position.coords.longitude;
@@ -105,17 +104,28 @@ async function activate(target: Mode) {
     const ori = target === 'single' ? null : await getOrientation();
     flyTo(pos, ori);
     mode.value = target;
+    // Tick errors abort tracking instead of escalating to unhandledRejection — GPS / orientation
+    // can fail mid-stream (permission revoked, sensor unavailable) and silent retries would mask it.
+    const onTickError = (err: unknown): void => {
+      clearTimer();
+      mode.value = 'main';
+      ElMessage.error(getErrorMessage(err));
+    };
     if (target === 'live-ori') {
-      timer = window.setInterval(async () => {
-        flyTo(pos, await getOrientation());
+      timer = window.setInterval(() => {
+        getOrientation()
+          .then((ori) => flyTo(pos, ori))
+          .catch(onTickError);
       }, 1000);
     } else if (target === 'live-pos-ori') {
-      timer = window.setInterval(async () => {
-        flyTo(await getPosition(), await getOrientation());
+      timer = window.setInterval(() => {
+        Promise.all([getPosition(), getOrientation()])
+          .then(([p, ori]) => flyTo(p, ori))
+          .catch(onTickError);
       }, 1000);
     }
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : String(err));
+    ElMessage.error(getErrorMessage(err));
     mode.value = 'main';
   }
 }
@@ -134,7 +144,7 @@ onBeforeUnmount(clearTimer);
 <template>
   <Teleport v-if="toolbarEl" :to="toolbarEl">
     <span
-      class="cesium-sceneModePicker-wrapper cesium-toolbar-button citydb-gps"
+      class="cesium-sceneModePicker-wrapper cesium-toolbar-button"
       tabindex="-1"
       @focusout="onBlur"
     >
@@ -186,7 +196,7 @@ onBeforeUnmount(clearTimer);
   </Teleport>
 </template>
 
-<style>
+<style scoped>
 .citydb-gps-button {
   background-size: cover !important;
   background-position: center center !important;

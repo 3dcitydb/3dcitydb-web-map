@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
-import { shallowRef, triggerRef } from 'vue';
 import { Cesium3DTilesLayer, GeoJSONLayer, I3SLayer, type LayerBase } from '../layers';
+import type { DataSourceKind, TableType } from '../thematic/types';
+import { getErrorMessage } from '../utils/errorMessages';
 import { useViewerRef } from '../viewer/viewerRef';
+import { createEntryRegistry } from './entryRegistry';
 
 export type LayerKind = '3dtiles' | 'i3s' | 'geojson';
 
@@ -12,22 +14,35 @@ export interface LayerSpec {
   maximumScreenSpaceError?: number;
   clampToGround?: boolean;
   thematicDataUrl?: string;
-  thematicDataSource?: string;
-  thematicDataProvider?: string;
-  tableType?: string;
+  thematicDataSource?: DataSourceKind;
+  tableType?: TableType;
 }
 
 export interface ActiveLayer {
   id: string;
   spec: LayerSpec;
   instance: LayerBase;
+  // Mirrors instance.active so the reactive list carries the toggle state.
+  // Maintained by toggleLayer alongside the Cesium-side mutation.
+  active: boolean;
   loading: boolean;
   error?: string;
 }
 
+// entry.instance is a LayerBase wrapping Cesium internals; mutating it is a
+// Cesium-side effect, and we mirror the relevant flags (active) on the entry
+// itself so consumers can rely on the reactive list as the source of truth.
+// IDs come from instance.layerId (not the registry's genId) so the LayerBase
+// and store entry share one identity.
+
 export const useLayersStore = defineStore('layers', () => {
-  // shallowRef keeps Cesium class instances un-proxied (preserves class identity + perf)
-  const layers = shallowRef<ActiveLayer[]>([]);
+  const {
+    list: layers,
+    findById,
+    append,
+    removeById,
+    updateEntry,
+  } = createEntryRegistry<ActiveLayer>('layer');
   const { viewer } = useViewerRef();
 
   async function addLayer(spec: LayerSpec): Promise<void> {
@@ -37,7 +52,6 @@ export const useLayersStore = defineStore('layers', () => {
     const thematic = {
       thematicDataUrl: spec.thematicDataUrl,
       thematicDataSource: spec.thematicDataSource,
-      thematicDataProvider: spec.thematicDataProvider,
       tableType: spec.tableType,
     };
     let instance: LayerBase;
@@ -47,7 +61,6 @@ export const useLayersStore = defineStore('layers', () => {
           url: spec.url,
           name: spec.name,
           maximumScreenSpaceError: spec.maximumScreenSpaceError,
-          layerDataType: 'Cesium 3D Tiles',
           ...thematic,
         });
         break;
@@ -56,7 +69,6 @@ export const useLayersStore = defineStore('layers', () => {
           url: spec.url,
           name: spec.name,
           maximumScreenSpaceError: spec.maximumScreenSpaceError,
-          layerDataType: 'i3s',
           ...thematic,
         });
         break;
@@ -65,7 +77,6 @@ export const useLayersStore = defineStore('layers', () => {
           url: spec.url,
           name: spec.name,
           clampToGround: spec.clampToGround,
-          layerDataType: 'geojson',
           ...thematic,
         });
         break;
@@ -79,42 +90,41 @@ export const useLayersStore = defineStore('layers', () => {
       id: instance.layerId,
       spec,
       instance,
+      active: true,
       loading: true,
     };
-    layers.value = [...layers.value, entry];
+    append(entry);
 
     try {
       await instance.addToCesium(viewer.value);
       instance.zoomToStartPosition();
-      entry.loading = false;
-      triggerRef(layers);
+      updateEntry(entry.id, { loading: false });
     } catch (err) {
-      entry.loading = false;
-      entry.error = err instanceof Error ? err.message : String(err);
-      triggerRef(layers);
+      updateEntry(entry.id, {
+        loading: false,
+        error: getErrorMessage(err),
+      });
       throw err;
     }
   }
 
   function removeLayer(id: string): void {
-    const idx = layers.value.findIndex((l) => l.id === id);
-    if (idx < 0) return;
-    const entry = layers.value[idx];
+    const entry = removeById(id);
+    if (!entry) return;
     if (viewer.value) {
       entry.instance.removeFromCesium(viewer.value);
     }
-    layers.value = layers.value.filter((l) => l.id !== id);
   }
 
   function toggleLayer(id: string, active: boolean): void {
-    const entry = layers.value.find((l) => l.id === id);
+    const entry = findById(id);
     if (!entry) return;
-    entry.instance.activate(active);
-    triggerRef(layers);
+    entry.instance.activate(active); // Cesium side effect on the LayerBase.
+    updateEntry(id, { active });
   }
 
   function zoomToLayer(id: string): void {
-    const entry = layers.value.find((l) => l.id === id);
+    const entry = findById(id);
     if (!entry || entry.loading || entry.error) return;
     entry.instance.zoomToStartPosition();
   }

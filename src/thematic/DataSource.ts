@@ -8,8 +8,6 @@ import {
   type ThirdPartyHandler,
 } from './types';
 
-export type QueryCallback = (kvp: KvpResult, objectId: ObjectId) => void;
-
 export abstract class DataSource {
   name: string;
   provider: string;
@@ -45,6 +43,3 @@ export abstract class DataSource {
     clickedObject?: unknown,
   ): void;
 }
-
-export abstract class SQLDataSource extends DataSource {}
-export abstract class XMLDataSource extends DataSource {}

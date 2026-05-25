@@ -1,7 +1,8 @@
-import { SQLDataSource } from './DataSource';
+import { ElMessage } from 'element-plus';
+import { DataSource } from './DataSource';
 import type { KvpResult, ObjectId } from './types';
 
-export class OGCFeatureAPI extends SQLDataSource {
+export class OGCFeatureAPI extends DataSource {
   responseToKvp(response: string): KvpResult {
     if (!response) return {};
     const responseJson = JSON.parse(response);
@@ -48,7 +49,13 @@ export class OGCFeatureAPI extends SQLDataSource {
 
     this.tryUrls(urls)
       .then(callback)
-      .catch((err) => console.warn('OGCFeatureAPI:', err.message));
+      .catch((err) => {
+        console.warn('OGCFeatureAPI:', err.message);
+        ElMessage.warning({
+          message: `Attribute lookup failed (OGC API): ${err.message}`,
+          grouping: true,
+        });
+      });
   }
 
   private async tryUrls(urls: string[]): Promise<string> {

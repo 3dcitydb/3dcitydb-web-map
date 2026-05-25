@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useViewerRef } from '../viewer/viewerRef';
 import { useAuthStore } from '../state/useAuthStore';
+import { getErrorMessage } from '../utils/errorMessages';
 
 const { ready } = useViewerRef();
 const auth = useAuthStore();
@@ -27,7 +28,11 @@ const label = computed(() => {
   return '🔓';
 });
 
-const title = computed(() => (auth.isSignedIn ? `Click to log out${auth.userName ? ` (${auth.userName})` : ''}` : 'Click to log in'));
+const title = computed(() =>
+  auth.isSignedIn
+    ? `Click to log out${auth.userName ? ` (${auth.userName})` : ''}`
+    : 'Click to log in',
+);
 
 async function onClick() {
   if (auth.isSignedIn) {
@@ -38,7 +43,7 @@ async function onClick() {
     await auth.signIn();
     ElMessage.success(`Welcome${auth.userName ? `, ${auth.userName}` : ''}!`);
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : String(err));
+    ElMessage.error(getErrorMessage(err));
   }
 }
 </script>
@@ -57,7 +62,7 @@ async function onClick() {
   </Teleport>
 </template>
 
-<style>
+<style scoped>
 .citydb-signin {
   color: #edffff !important;
   font-weight: bold !important;

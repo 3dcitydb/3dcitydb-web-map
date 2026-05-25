@@ -1,92 +1,25 @@
 import {
+  Cesium3DTileColorBlendMode,
   Cesium3DTileFeature,
   Cesium3DTileset,
   Cesium3DTilePointFeature,
-  Color,
-  ColorMaterialProperty,
-  Cartographic,
-  BoundingSphere,
-  Entity,
-  createGuid,
   type Viewer,
 } from 'cesium';
-import { LayerBase, type LayerConfigParameters, type LayerOptions } from './LayerBase';
-import { DataSourceController } from '../thematic/DataSourceController';
-import { DataSourceKind, type DataSourceOptions } from '../thematic/types';
+import { LayerBase, type LayerOptions } from './LayerBase';
+import { findObjectIdKey } from '../utils/objectId';
 
 interface TaggedTileset extends Cesium3DTileset {
   layerId?: string;
 }
 
 interface TaggedFeature extends Cesium3DTileFeature {
-  _storedBoundingSphere?: BoundingSphere;
-  _storedOrientation?: { heading: number; pitch: number; roll: number };
   _batchId?: number;
 }
 
 export class Cesium3DTilesLayer extends LayerBase {
-  readonly layerId: string = createGuid();
-  name: string;
-  url: string;
-  active: boolean;
-  region?: unknown;
-  cameraPosition: Record<string, unknown> = {};
-
-  thematicDataUrl: string;
-  thematicDataSource: string;
-  thematicDataProvider: string;
-  tableType: string;
-  layerDataType?: string;
-  maximumScreenSpaceError: number | '';
-
-  dataSourceController?: DataSourceController;
-
-  highlightColor: Color = Color.AQUAMARINE;
-  mouseOverHighlightColor: Color = Color.YELLOW;
-
-  private viewer?: Viewer;
-  private tileset?: TaggedTileset;
-  private prevSelectedFeatures: TaggedFeature[] = [];
-  private prevSelectedColors: Color[] = [];
-  // Set for O(1) lookup: tileVisible queries this once per feature every frame.
-  private hiddenObjects = new Set<TaggedFeature>();
-
   constructor(options: LayerOptions) {
-    super();
-    this.url = this.autofillUrl(options.url);
-    this.name = options.name;
-    this.region = options.region;
-    this.active = options.active ?? true;
-    this.thematicDataUrl = options.thematicDataUrl ?? '';
-    this.thematicDataSource = options.thematicDataSource ?? '';
-    this.thematicDataProvider = options.thematicDataProvider ?? '';
-    this.tableType = options.tableType ?? '';
-    this.maximumScreenSpaceError = options.maximumScreenSpaceError ?? '';
-    this.layerDataType = options.layerDataType;
-
-    if (this.thematicDataSource && this.thematicDataUrl) {
-      const dsOptions: DataSourceOptions = {
-        uri: this.thematicDataUrl,
-        tableType: this.tableType as DataSourceOptions['tableType'],
-      };
-      this.dataSourceController = new DataSourceController(
-        this.thematicDataSource as DataSourceKind,
-        null,
-        dsOptions,
-      );
-    }
-  }
-
-  get configParameters(): LayerConfigParameters {
-    return {
-      layerId: this.layerId,
-      name: this.name,
-      url: this.url,
-      layerDataType: this.layerDataType,
-      thematicDataUrl: this.thematicDataUrl,
-      thematicDataProvider: this.thematicDataProvider,
-      maximumScreenSpaceError: this.maximumScreenSpaceError,
-    };
+    super(options);
+    this.url = this.autofillUrl(this.url);
   }
 
   autofillUrl(strUrl: string): string {
@@ -96,62 +29,43 @@ export class Cesium3DTilesLayer extends LayerBase {
     return `${strUrl}${sep}tileset.json`;
   }
 
-  async addToCesium(viewer: Viewer): Promise<this> {
-    this.viewer = viewer;
-
-    const tilesetOptions: Record<string, unknown> = {};
-    if (typeof this.maximumScreenSpaceError === 'number') {
-      tilesetOptions.maximumScreenSpaceError = this.maximumScreenSpaceError;
-    }
-
-    const tileset = (await Cesium3DTileset.fromUrl(this.autofillUrl(this.url), tilesetOptions)) as TaggedTileset;
-    tileset.layerId = this.layerId;
-    this.tileset = tileset;
-    viewer.scene.primitives.add(tileset);
-    tileset.show = this.active;
-    this.configPointCloudShading(tileset);
-    this.registerTilesLoadedEventHandler();
-    return this;
-  }
-
-  removeFromCesium(_viewer: Viewer): void {
-    if (this.tileset && this.viewer) {
-      this.viewer.scene.primitives.remove(this.tileset);
-      this.tileset = undefined;
-    }
-    this.active = false;
-  }
-
-  activate(active: boolean): void {
-    if (this.tileset) this.tileset.show = active;
-    this.active = active;
-  }
-
-  async reActivate(): Promise<this> {
-    if (!this.viewer) throw new Error('Layer has not been added to a viewer yet');
-    this.prevSelectedFeatures = [];
-    this.prevSelectedColors = [];
-    this.hiddenObjects.clear();
-    if (this.tileset) {
-      this.viewer.scene.primitives.remove(this.tileset);
-    }
+  protected async loadPrimitive(_viewer: Viewer): Promise<TaggedTileset> {
     const options: Record<string, unknown> = {};
     if (typeof this.maximumScreenSpaceError === 'number') {
       options.maximumScreenSpaceError = this.maximumScreenSpaceError;
     }
-    const tileset = (await Cesium3DTileset.fromUrl(this.autofillUrl(this.url), options)) as TaggedTileset;
+    const tileset = (await Cesium3DTileset.fromUrl(
+      this.autofillUrl(this.url),
+      options,
+    )) as TaggedTileset;
     tileset.layerId = this.layerId;
-    this.tileset = tileset;
-    this.viewer.scene.primitives.add(tileset);
-    this.configPointCloudShading(tileset);
-    this.registerTilesLoadedEventHandler();
-    return this;
+    return tileset;
   }
 
-  zoomToStartPosition(): void {
-    if (this.viewer && this.tileset) {
-      this.viewer.scene.camera.flyToBoundingSphere(this.tileset.boundingSphere);
-    }
+  protected attachPrimitive(viewer: Viewer, primitive: TaggedTileset): void {
+    viewer.scene.primitives.add(primitive);
+  }
+
+  protected detachPrimitive(viewer: Viewer, primitive: TaggedTileset): void {
+    viewer.scene.primitives.remove(primitive);
+  }
+
+  protected setPrimitiveVisible(primitive: TaggedTileset, visible: boolean): void {
+    primitive.show = visible;
+  }
+
+  protected zoomToPrimitive(viewer: Viewer, primitive: TaggedTileset): void {
+    viewer.scene.camera.flyToBoundingSphere(primitive.boundingSphere);
+  }
+
+  protected setFeatureVisible(feature: TaggedFeature, visible: boolean): void {
+    feature.show = visible;
+  }
+
+  protected onAfterAttach(_viewer: Viewer, primitive: TaggedTileset): void {
+    this.configPointCloudShading(primitive);
+    this.configHighlightTint(primitive);
+    this.registerTilesLoadedEventHandler(primitive);
   }
 
   contains(object: unknown): object is TaggedFeature {
@@ -161,94 +75,19 @@ export class Cesium3DTilesLayer extends LayerBase {
     );
   }
 
-  isEqual(a: TaggedFeature, b: TaggedFeature): boolean {
-    if (!this.contains(a) || !this.contains(b)) return false;
-    // _batchId is per-tile, not globally unique — two features in different tiles can share it.
-    // Cesium caches wrappers per (content, batchId), so reference equality is the right check.
-    return a === b;
-  }
-
-  inArray(array: TaggedFeature[] | undefined, object: TaggedFeature): boolean {
-    if (!array) return false;
-    return array.some((i) => this.isEqual(i, object));
-  }
-
-  isInHighlightedList(feature: TaggedFeature): boolean {
-    return this.prevSelectedFeatures.includes(feature);
-  }
-
-  getColor(colorOrFeature: unknown): Color | ColorMaterialProperty | undefined {
-    if (colorOrFeature == null) return undefined;
-    // Cesium3DTileFeature#color is a cached `_color` instance mutated by batch-table reads,
-    // so we MUST clone — otherwise the stored "previous color" silently follows later edits.
-    if (this.contains(colorOrFeature)) return Color.clone(colorOrFeature.color);
-    if (colorOrFeature instanceof Color) return Color.clone(colorOrFeature);
-    if (colorOrFeature instanceof ColorMaterialProperty) return colorOrFeature;
-    return undefined;
-  }
-
-  setColor(feature: TaggedFeature, colorOrFeature: unknown): void {
-    if (!this.contains(feature)) return;
-    if (colorOrFeature == null) {
-      feature.color = undefined as unknown as Color;
-    } else if (colorOrFeature instanceof Color) {
-      feature.color = colorOrFeature;
-    } else {
-      const c = this.getColor(colorOrFeature);
-      if (c instanceof Color) feature.color = c;
-    }
-  }
-
-  setSelected(feature: TaggedFeature): void {
-    if (!this.viewer || !this.contains(feature)) return;
-    const entity = new Entity();
-    (entity as Entity & { _storedBoundingSphere?: BoundingSphere })._storedBoundingSphere =
-      feature._storedBoundingSphere;
-    this.viewer.selectedEntity = entity;
-  }
-
-  storeCameraPosition(viewer: Viewer, movement: { position: { x: number; y: number } }, feature: TaggedFeature): void {
-    if (!this.contains(feature)) return;
-    const cartesian = viewer.scene.pickPosition(movement.position as never);
-    if (!cartesian) return;
-    const destination = Cartographic.fromCartesian(cartesian);
-    feature._storedBoundingSphere = new BoundingSphere(Cartographic.toCartesian(destination), 40);
-    feature._storedOrientation = {
-      heading: viewer.camera.heading,
-      pitch: viewer.camera.pitch,
-      roll: viewer.camera.roll,
-    };
-  }
-
-  getProperties(feature: TaggedFeature): Record<string, unknown> | undefined {
-    if (!this.contains(feature)) return undefined;
-    const result: Record<string, unknown> = {};
-    for (const key of feature.getPropertyIds()) {
-      result[key] = feature.getProperty(key);
-    }
-    return result;
-  }
-
-  hideSelected(feature: TaggedFeature): void {
-    if (!this.contains(feature)) return;
-    this.hiddenObjects.add(feature);
-    feature.show = false;
-  }
-
-  show(feature: TaggedFeature): void {
-    if (!this.contains(feature)) return;
-    this.hiddenObjects.delete(feature);
-    feature.show = true;
-  }
-
   getIdObject(feature: TaggedFeature): { key: string | number; object: TaggedFeature } | undefined {
     if (!this.contains(feature)) return undefined;
-    const ids = feature.getPropertyIds();
-    // Prefer OBJECTID (case-insensitive); otherwise fall back to the first property.
-    const idKey = ids.find((k) => k.toUpperCase() === 'OBJECTID') ?? ids[0];
+    const idKey = findObjectIdKey(feature.getPropertyIds());
     if (!idKey) return { key: feature._batchId as number, object: feature };
     const value = feature.getProperty(idKey);
     return { key: (value ?? feature._batchId) as string | number, object: feature };
+  }
+
+  // MIX blends `feature.color` with the existing texture so highlight/selection don't replace
+  // the building skin outright. 0.5 keeps roughly equal contributions from tint and texture.
+  private configHighlightTint(tileset: Cesium3DTileset): void {
+    tileset.colorBlendMode = Cesium3DTileColorBlendMode.MIX;
+    tileset.colorBlendAmount = 0.5;
   }
 
   private configPointCloudShading(tileset: Cesium3DTileset): void {
@@ -259,37 +98,23 @@ export class Cesium3DTilesLayer extends LayerBase {
     tileset.pointCloudShading.eyeDomeLightingRadius = 0.5;
   }
 
-  private registerTilesLoadedEventHandler(): void {
-    if (!this.tileset) return;
-    this.tileset.tileVisible.addEventListener((tile) => {
+  private registerTilesLoadedEventHandler(tileset: TaggedTileset): void {
+    const remove = tileset.tileVisible.addEventListener((tile) => {
       const content = tile.content;
       if (content instanceof Cesium3DTilePointFeature) {
-        (content as Cesium3DTilePointFeature & { _pointCloud?: { _pointSize: number } })._pointCloud!._pointSize = 3;
+        (
+          content as Cesium3DTilePointFeature & { _pointCloud?: { _pointSize: number } }
+        )._pointCloud!._pointSize = 3;
         return;
       }
       const featuresLength = content?.featuresLength ?? 0;
       for (let k = 0; k < featuresLength; k++) {
         const feature = content?.getFeature(k) as TaggedFeature | undefined;
         if (!feature) continue;
-
-        if (this.isInHighlightedList(feature) && !Color.equals(feature.color, this.highlightColor)) {
-          feature.color = this.highlightColor;
-        }
-
-        // NOTE: original JS referenced an undefined `objectId` here, which was a latent bug;
-        // the intent is clearly to check the current `feature`.
-        if (!this.isInHighlightedList(feature) && Color.equals(feature.color, this.highlightColor)) {
-          const i = this.prevSelectedFeatures.indexOf(feature);
-          if (i >= 0) {
-            feature.color = this.prevSelectedColors[i];
-            this.prevSelectedFeatures.splice(i, 1);
-            this.prevSelectedColors.splice(i, 1);
-          }
-        }
-
-        const shouldShow = !this.hiddenObjects.has(feature);
+        const shouldShow = !this.isHidden(feature);
         if (feature.show !== shouldShow) feature.show = shouldShow;
       }
     });
+    this.addDisposer(remove);
   }
 }

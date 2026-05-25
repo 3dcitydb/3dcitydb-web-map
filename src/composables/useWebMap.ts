@@ -1,47 +1,28 @@
 import { ref, shallowRef } from 'vue';
 import {
-  Cartesian2,
+  type Cartesian2,
   Color,
-  ColorBlendMode,
   KeyboardEventModifier,
   ScreenSpaceEventType,
   type Viewer,
 } from 'cesium';
 import type { LayerBase } from '../layers';
 import { useLayersStore } from '../state/useLayersStore';
+import { useViewerRef } from '../viewer/viewerRef';
 import { fillInfoTable } from '../utils/infoTable';
-import type { DataSourceController } from '../thematic/DataSourceController';
 
-// The picked-feature shape varies across layer kinds (3DTileFeature vs Entity pick wrapper).
+// The picked-feature shape varies across layer kinds (3DTileFeature vs. Entity pick wrapper).
 // Each layer's own type guards know how to interpret it, so we treat it as opaque here.
 type PickedFeature = unknown;
 
-interface LayerOps {
-  contains(o: PickedFeature): boolean;
-  isEqual(a: PickedFeature, b: PickedFeature): boolean;
-  inArray(arr: PickedFeature[], o: PickedFeature): boolean;
-  getColor(f: PickedFeature): unknown;
-  setColor(f: PickedFeature, c: unknown, opts?: unknown): void;
-  setSelected(f: PickedFeature): void;
-  storeCameraPosition(v: Viewer, m: { position: Cartesian2 }, f: PickedFeature): void;
-  getProperties(f: PickedFeature): Record<string, unknown> | undefined;
-  getIdObject(f: PickedFeature): { key: string | number; object: unknown } | undefined;
-  hideSelected(f: PickedFeature): void;
-  show(f: PickedFeature): void;
-}
-
-function ops(layer: LayerBase): LayerOps {
-  return layer as unknown as LayerOps;
-}
-
-export interface InfoTableEntry {
+interface InfoTableEntry {
   key: string;
   object: unknown;
   properties: Record<string, unknown>;
 }
 
 // Track which viewer instances we've installed handlers on, so HMR / unmount-then-remount
-// reinstalls correctly on the new viewer instead of being short-circuited by a stale flag.
+// re-installs correctly on the new viewer instead of being short-circuited by a stale flag.
 const installedViewers = new WeakSet<Viewer>();
 const highlightColor = Color.AQUAMARINE;
 const mouseOverColor = Color.YELLOW;
@@ -56,16 +37,22 @@ let prevHoveredColor: unknown | undefined;
 
 export function useWebMap() {
   const layers = useLayersStore();
+  const { viewer: viewerRef } = useViewerRef();
 
   function getLayerByObject(object: PickedFeature | undefined): LayerBase | undefined {
     if (!object) return undefined;
     for (const entry of layers.layers) {
-      if (ops(entry.instance).contains(object)) return entry.instance;
+      if (entry.instance.contains(object)) return entry.instance;
     }
     return undefined;
   }
 
-  // Restore colors for all previously-selected features without touching hover state.
+  // The setColor catches throughout this module are intentionally silent: failures here are
+  // race conditions where the picked feature's tile was unloaded between pick and recolor.
+  // Surfacing them as toasts would spam on every mouse move. Real user-facing failures
+  // (thematic data fetches, layer load) are reported by their owners.
+
+  // Restore colors for all previously selected features without touching the hover state.
   // Used internally when a fresh click should replace the selection.
   function restoreSelected(): void {
     const selected = prevSelected.value;
@@ -74,7 +61,7 @@ export function useWebMap() {
       const layer = getLayerByObject(selected[i]);
       if (layer) {
         try {
-          ops(layer).setColor(selected[i], colors[i]);
+          layer.setColor(selected[i], colors[i]);
         } catch (err) {
           console.error(err);
         }
@@ -84,7 +71,7 @@ export function useWebMap() {
     prevSelectedColors.value = [];
   }
 
-  // Public reset: restore selection colors AND drop hover state.
+  // Public reset: restore selection colors AND drop the hover state.
   // Bound to the "Clear highlight" button.
   function clearSelected(): void {
     restoreSelected();
@@ -92,7 +79,7 @@ export function useWebMap() {
       const layer = getLayerByObject(prevHovered);
       if (layer) {
         try {
-          ops(layer).setColor(prevHovered, prevHoveredColor);
+          layer.setColor(prevHovered, prevHoveredColor);
         } catch (err) {
           console.error(err);
         }
@@ -100,6 +87,9 @@ export function useWebMap() {
     }
     prevHovered = undefined;
     prevHoveredColor = undefined;
+    // Also drop the InfoBox: setSelected populated viewer.selectedEntity (a synthetic
+    // Entity for 3DTiles/I3S, the real entity for GeoJSON); clearing it hides the panel.
+    if (viewerRef.value) viewerRef.value.selectedEntity = undefined;
   }
 
   function hideSelectedObjects(): void {
@@ -107,9 +97,8 @@ export function useWebMap() {
     for (const feature of prevSelected.value) {
       const layer = getLayerByObject(feature);
       if (!layer) continue;
-      const o = ops(layer);
-      if (!o.inArray(nextHidden, feature)) nextHidden.push(feature);
-      o.hideSelected(feature);
+      if (!layer.inArray(nextHidden, feature)) nextHidden.push(feature);
+      layer.hideSelected(feature);
     }
     hiddenFeatures.value = nextHidden;
   }
@@ -117,7 +106,7 @@ export function useWebMap() {
   function showHiddenObjects(): void {
     for (const feature of hiddenFeatures.value) {
       const layer = getLayerByObject(feature);
-      if (layer) ops(layer).show(feature);
+      if (layer) layer.show(feature);
     }
     hiddenFeatures.value = [];
   }
@@ -126,7 +115,7 @@ export function useWebMap() {
     const out: Record<string, unknown> = {};
     for (const feature of prevSelected.value) {
       const layer = getLayerByObject(feature);
-      const res = layer ? ops(layer).getIdObject(feature) : undefined;
+      const res = layer ? layer.getIdObject(feature) : undefined;
       if (res) out[String(res.key)] = res.object;
     }
     return out;
@@ -136,7 +125,7 @@ export function useWebMap() {
     const out: Record<string, unknown> = {};
     for (const feature of hiddenFeatures.value) {
       const layer = getLayerByObject(feature);
-      const res = layer ? ops(layer).getIdObject(feature) : undefined;
+      const res = layer ? layer.getIdObject(feature) : undefined;
       if (res) out[String(res.key)] = res.object;
     }
     return out;
@@ -145,7 +134,6 @@ export function useWebMap() {
   function installMouseHandlers(viewer: Viewer): void {
     if (installedViewers.has(viewer)) return;
     installedViewers.add(viewer);
-    const colorBlend = { colorBlendAmount: 0.7, colorBlendMode: ColorBlendMode.MIX };
 
     const defaultClick = viewer.screenSpaceEventHandler.getInputAction(
       ScreenSpaceEventType.LEFT_CLICK,
@@ -155,9 +143,9 @@ export function useWebMap() {
     function unhighlightHover(): void {
       if (!prevHovered) return;
       const layer = getLayerByObject(prevHovered);
-      if (layer && !ops(layer).inArray(prevSelected.value, prevHovered)) {
+      if (layer && !layer.inArray(prevSelected.value, prevHovered)) {
         try {
-          ops(layer).setColor(prevHovered, prevHoveredColor);
+          layer.setColor(prevHovered, prevHoveredColor);
         } catch (err) {
           console.error(err);
         }
@@ -166,48 +154,43 @@ export function useWebMap() {
       prevHoveredColor = undefined;
     }
 
-    viewer.screenSpaceEventHandler.setInputAction(
-      (movement: { endPosition: Cartesian2 }) => {
-        const picked = viewer.scene.pick(movement.endPosition);
+    viewer.screenSpaceEventHandler.setInputAction((movement: { endPosition: Cartesian2 }) => {
+      const picked = viewer.scene.pick(movement.endPosition);
 
-        // Mouse moved off any feature (sky / globe): restore the previous hover.
-        if (!picked) {
-          unhighlightHover();
-          return;
-        }
-
-        const layer = getLayerByObject(picked);
-
-        // Picked something that isn't ours (Cesium globe label, base entity, etc.):
-        // treat the same as moving off — clear our hover.
-        if (!layer) {
-          unhighlightHover();
-          return;
-        }
-
-        const o = ops(layer);
-
-        // Still hovering the same feature: nothing to do.
-        if (prevHovered && o.isEqual(prevHovered, picked)) return;
-
-        // Switching to a different feature: restore the old hover first.
+      // Mouse moved off any feature (sky / globe): restore the previous hover.
+      if (!picked) {
         unhighlightHover();
+        return;
+      }
 
-        // Skip if the new feature is already selected (it stays in highlight color).
-        if (o.inArray(prevSelected.value, picked)) return;
+      const layer = getLayerByObject(picked);
 
-        prevHovered = picked;
-        prevHoveredColor = o.getColor(picked);
+      // Picked something that isn't ours (Cesium globe label, base entity, etc.):
+      // treat the same as moving off — clear our hover.
+      if (!layer) {
+        unhighlightHover();
+        return;
+      }
 
-        try {
-          o.setColor(picked, mouseOverColor, colorBlend);
-        } catch (err) {
-          console.error(err);
-          clearSelected();
-        }
-      },
-      ScreenSpaceEventType.MOUSE_MOVE,
-    );
+      // Still hovering the same feature: nothing to do.
+      if (prevHovered && layer.isEqual(prevHovered, picked)) return;
+
+      // Switching to a different feature: restore the old hover first.
+      unhighlightHover();
+
+      // Skip if the new feature is already selected (it stays in highlight color).
+      if (layer.inArray(prevSelected.value, picked)) return;
+
+      prevHovered = picked;
+      prevHoveredColor = layer.getColor(picked);
+
+      try {
+        layer.setColor(picked, mouseOverColor);
+      } catch (err) {
+        console.error(err);
+        clearSelected();
+      }
+    }, ScreenSpaceEventType.MOUSE_MOVE);
 
     // ctrlKey=false → replace selection. ctrlKey=true → append (multi-select).
     function handleClick(position: Cartesian2, ctrlKey: boolean): void {
@@ -228,16 +211,13 @@ export function useWebMap() {
         defaultClick?.({ position } as never);
         return;
       }
-      const o = ops(layer);
-
-      o.storeCameraPosition(viewer, { position }, picked);
 
       // Already selected? Don't re-add.
-      if (o.inArray(prevSelected.value, picked)) return;
+      if (layer.inArray(prevSelected.value, picked)) return;
 
       // If the click hit the hovered feature, its current color is mouseOverColor — not the original.
-      const wasHovered = hoveredBeforeClick != null && o.isEqual(hoveredBeforeClick, picked);
-      const restoreColor = wasHovered ? originalColorBeforeHover : o.getColor(picked);
+      const wasHovered = hoveredBeforeClick != null && layer.isEqual(hoveredBeforeClick, picked);
+      const restoreColor = wasHovered ? originalColorBeforeHover : layer.getColor(picked);
 
       prevSelected.value = [...prevSelected.value, picked];
       prevSelectedColors.value = [...prevSelectedColors.value, restoreColor];
@@ -247,9 +227,9 @@ export function useWebMap() {
       prevHovered = undefined;
       prevHoveredColor = undefined;
 
-      o.setSelected(picked);
+      layer.setSelected(picked);
       try {
-        o.setColor(picked, highlightColor, colorBlend);
+        layer.setColor(picked, highlightColor);
       } catch (err) {
         console.error(err);
         clearSelected();
@@ -257,21 +237,19 @@ export function useWebMap() {
 
       // InfoBox content: only on plain click, matching the original. CTRL+click is silent.
       if (!ctrlKey) {
-        const props = o.getProperties(picked);
+        const props = layer.getProperties(picked);
         if (props) {
-          const idObj = o.getIdObject(picked);
+          const idObj = layer.getIdObject(picked);
           if (idObj) {
             lastInfo.value = { key: String(idObj.key), object: idObj.object, properties: props };
           }
-          const dsc = (layer as unknown as { dataSourceController?: DataSourceController })
-            .dataSourceController;
           // fillInfoTable does its own object id extraction from props with a fallback to
           // entity.name, so we don't need idObj to render embedded data.
           const selectedEntity = (viewer.selectedEntity ?? idObj?.object) as {
             description?: string;
             name?: string;
           };
-          if (selectedEntity) fillInfoTable(selectedEntity, props, dsc);
+          if (selectedEntity) fillInfoTable(selectedEntity, props, layer.dataSourceController);
         }
       }
     }

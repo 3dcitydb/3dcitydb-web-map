@@ -2,7 +2,13 @@ import type { DataSource } from './DataSource';
 import { GoogleSheets } from './GoogleSheets';
 import { PostgreSQL } from './PostgreSQL';
 import { OGCFeatureAPI } from './OGCFeatureAPI';
-import { DataSourceKind, type DataSourceOptions, type KvpResult, type ObjectId, type SignInController } from './types';
+import {
+  DataSourceKind,
+  type DataSourceOptions,
+  type KvpResult,
+  type ObjectId,
+  type SignInController,
+} from './types';
 import { useAuthStore } from '../state/useAuthStore';
 
 export type FetchCallback = (kvp: KvpResult, objectId: ObjectId) => void;
@@ -29,14 +35,19 @@ export class DataSourceController {
         break;
       case DataSourceKind.Embedded:
         throw new Error('Embedded data source is no longer supported (was KML-only).');
-      default: {
-        const _exhaustive: never = kind;
-        throw new Error(`Unknown data source kind: ${String(_exhaustive)}`);
-      }
+      default:
+        // `satisfies never` enforces compile-time exhaustiveness: adding a new
+        // DataSourceKind without a case here becomes a TS error rather than a runtime surprise.
+        throw new Error(`Unknown data source kind: ${String(kind satisfies never)}`);
     }
   }
 
-  fetchData(objectId: ObjectId, callback: FetchCallback, limit?: number, clickedObject?: unknown): void {
+  fetchData(
+    objectId: ObjectId,
+    callback: FetchCallback,
+    limit?: number,
+    clickedObject?: unknown,
+  ): void {
     this.dataSource.queryUsingId(
       objectId,
       (result) => callback(this.dataSource.responseToKvp(result), objectId),

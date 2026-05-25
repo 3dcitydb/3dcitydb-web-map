@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ['3d-city-web-map-next']
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run format:check
+
+      - run: npm run lint
+
+      - run: npm run test:run
+
+      # `npm run build` already runs `vue-tsc --noEmit` before `vite build`,
+      # so a separate `typecheck` step would be redundant.
+      - run: npm run build

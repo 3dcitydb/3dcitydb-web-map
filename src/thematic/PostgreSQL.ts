@@ -1,4 +1,5 @@
-import { SQLDataSource } from './DataSource';
+import { ElMessage } from 'element-plus';
+import { DataSource } from './DataSource';
 import { TableType, type KvpResult, type ObjectId } from './types';
 
 interface PostgrestRow extends Record<string, unknown> {
@@ -6,7 +7,7 @@ interface PostgrestRow extends Record<string, unknown> {
   value?: unknown;
 }
 
-export class PostgreSQL extends SQLDataSource {
+export class PostgreSQL extends DataSource {
   responseToKvp(response: string): KvpResult {
     const responseJson = JSON.parse(response) as PostgrestRow[];
     const result: KvpResult = {};
@@ -35,12 +36,25 @@ export class PostgreSQL extends SQLDataSource {
         return res.text();
       })
       .then(callback)
-      .catch((err) => console.warn('PostgreSQL:', err.message));
+      .catch((err) => {
+        console.warn('PostgreSQL:', err.message);
+        ElMessage.warning({
+          message: `Attribute lookup failed (PostgreSQL): ${err.message}`,
+          grouping: true,
+        });
+      });
   }
 
   queryUsingSql(sql: string, callback: (response: string) => void): void {
     fetch(this.uri + sql)
       .then((r) => r.text())
-      .then(callback);
+      .then(callback)
+      .catch((err) => {
+        console.warn('PostgreSQL:', err.message);
+        ElMessage.warning({
+          message: `Attribute query failed (PostgreSQL): ${err.message}`,
+          grouping: true,
+        });
+      });
   }
 }

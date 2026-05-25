@@ -9,7 +9,7 @@ function detectOS(ua: string): MobileOS {
   if (/windows phone/i.test(ua)) return 'WindowsPhone';
   if (/android/i.test(ua)) return 'Android';
   if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
-  // iPadOS 13+ reports as Mac; disambiguate with touch points.
+  // iPadOS 13+ reports as Mac; disambiguate with touchpoints.
   if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return 'iOS';
   return 'unknown';
 }
@@ -22,7 +22,7 @@ interface MobileState {
 let cached: MobileState | undefined;
 
 function create(): MobileState {
-  const ua = navigator.userAgent || navigator.vendor || '';
+  const ua = navigator.userAgent || '';
   const forced = asBool(new URLSearchParams(window.location.search).get('mobile') ?? undefined);
   const mobileFromUA = MOBILE_RE.test(ua);
   const coarseMq = window.matchMedia('(pointer: coarse)');

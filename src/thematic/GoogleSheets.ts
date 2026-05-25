@@ -1,12 +1,12 @@
-import { SQLDataSource } from './DataSource';
-import { TableType, type DataSourceOptions, type KvpResult, type ObjectId, type SignInController } from './types';
-
-interface GoogleSheetsOptions extends DataSourceOptions {
-  ranges?: string[];
-  apiKey?: string;
-  clientId?: string;
-  scope?: string;
-}
+import { ElMessage } from 'element-plus';
+import { DataSource } from './DataSource';
+import {
+  type DataSourceOptions,
+  type KvpResult,
+  type ObjectId,
+  type SignInController,
+  TableType,
+} from './types';
 
 interface GVizCell {
   v?: unknown;
@@ -21,22 +21,14 @@ interface GVizResponse {
   table: { rows: GVizRow[]; cols: GVizCol[] };
 }
 
-export class GoogleSheets extends SQLDataSource {
-  private spreadsheetId: string;
-  private ranges: string[];
-  private apiKey?: string;
-  private clientId: string;
-  private scope: string;
+export class GoogleSheets extends DataSource {
+  private readonly spreadsheetId: string;
 
-  constructor(signInController: SignInController | null, options: GoogleSheetsOptions) {
+  constructor(signInController: SignInController | null, options: DataSourceOptions) {
     super(signInController, { ...options, idColName: options.idColName ?? 'A' });
     this.spreadsheetId = options.uri
       .replace(/.+?(spreadsheets\/d\/)/, '')
       .replace(/(?=\/edit).+/, '');
-    this.ranges = options.ranges ?? ["'Sheet1'"];
-    this.apiKey = options.apiKey;
-    this.clientId = options.clientId ?? '';
-    this.scope = options.scope ?? 'https://www.googleapis.com/auth/spreadsheets';
   }
 
   responseToKvp(response: string | GVizResponse): KvpResult {
@@ -50,8 +42,7 @@ export class GoogleSheets extends SQLDataSource {
     if (this.tableType === TableType.Horizontal) {
       for (let i = 1; i < rows[0].c.length; i++) {
         const key = cols[i].label;
-        const value = rows[0].c[i]?.v;
-        result[key] = value;
+        result[key] = rows[0].c[i]?.v;
       }
     } else {
       for (let i = 1; i < rows.length; i++) {
@@ -82,6 +73,13 @@ export class GoogleSheets extends SQLDataSource {
           .replace('/*O_o*/', '')
           .replace(/(google\.visualization\.Query\.setResponse\(|\);$)/g, '');
         callback(cleaned);
+      })
+      .catch((err) => {
+        console.warn('GoogleSheets:', err.message);
+        ElMessage.warning({
+          message: `Attribute query failed (Google Sheets): ${err.message}`,
+          grouping: true,
+        });
       });
   }
 }

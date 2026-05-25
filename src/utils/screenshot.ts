@@ -12,20 +12,21 @@ export function takeScreenshot(viewer: Viewer): void {
 export function printCurrentView(viewer: Viewer): void {
   viewer.render();
   const dataUrl = viewer.scene.canvas.toDataURL('image/png');
-  const win = window.open('about:blank', 'print');
+  const win = window.open('', 'print');
   if (!win) return;
-  win.document.write(`<html><head><title>Print</title></head><body style="margin:0">
-    <img src="${dataUrl}" style="width:100%" onload="window.print()" />
-  </body></html>`);
-  win.document.close();
+  const doc = win.document;
+  doc.title = 'Print';
+  doc.body.style.margin = '0';
+  const img = doc.createElement('img');
+  img.style.width = '100%';
+  img.onload = () => win.print();
+  img.src = dataUrl;
+  doc.body.appendChild(img);
 }
 
 export type ExternalMap = 'google' | 'osm' | 'bing' | 'dual';
 
-export function openInExternalMap(
-  viewer: Viewer,
-  service: ExternalMap,
-): void {
+export function openInExternalMap(viewer: Viewer, service: ExternalMap): void {
   const carto = viewer.scene.camera.positionCartographic;
   const lat = (carto.latitude * 180) / Math.PI;
   const lon = (carto.longitude * 180) / Math.PI;

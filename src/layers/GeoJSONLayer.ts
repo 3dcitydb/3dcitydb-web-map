@@ -1,24 +1,17 @@
 import {
-  BoundingSphere,
-  Cartographic,
   Color,
   ColorMaterialProperty,
   Entity,
   GeoJsonDataSource,
   JulianDate,
-  createGuid,
   defined,
   type GeoJsonDataSource as GeoJsonDataSourceType,
   type Viewer,
 } from 'cesium';
-import { LayerBase, type LayerConfigParameters, type LayerOptions } from './LayerBase';
-import { DataSourceController } from '../thematic/DataSourceController';
-import { DataSourceKind, type DataSourceOptions } from '../thematic/types';
+import { LayerBase, type LayerOptions } from './LayerBase';
 
 interface TaggedEntity extends Entity {
   layerId?: string;
-  _storedBoundingSphere?: BoundingSphere;
-  _storedOrientation?: { heading: number; pitch: number; roll: number };
 }
 
 interface PickedGeoJsonObject {
@@ -32,120 +25,49 @@ export interface GeoJSONLayerOptions extends LayerOptions {
 const ID_PREFIXES = ['COLLADA_', 'KMLGeom_'] as const;
 
 export class GeoJSONLayer extends LayerBase {
-  readonly layerId: string = createGuid();
-  name: string;
-  url: string;
-  active: boolean;
-  region?: unknown;
-  cameraPosition: Record<string, unknown> = {};
-
-  thematicDataUrl: string;
-  thematicDataSource: string;
-  thematicDataProvider: string;
-  tableType: string;
-  layerDataType?: string;
   clampToGround: boolean;
 
-  dataSourceController?: DataSourceController;
-
-  private viewer?: Viewer;
-  private dataSource?: GeoJsonDataSourceType;
-  private hiddenObjects: PickedGeoJsonObject[] = [];
-
   constructor(options: GeoJSONLayerOptions) {
-    super();
-    this.url = options.url;
-    this.name = options.name;
-    this.region = options.region;
-    this.active = options.active ?? true;
-    this.thematicDataUrl = options.thematicDataUrl ?? '';
-    this.thematicDataSource = options.thematicDataSource ?? '';
-    this.thematicDataProvider = options.thematicDataProvider ?? '';
-    this.tableType = options.tableType ?? '';
-    this.layerDataType = options.layerDataType;
+    super(options);
     this.clampToGround = options.clampToGround ?? false;
-
-    if (this.thematicDataSource && this.thematicDataUrl) {
-      const dsOptions: DataSourceOptions = {
-        uri: this.thematicDataUrl,
-        tableType: this.tableType as DataSourceOptions['tableType'],
-      };
-      this.dataSourceController = new DataSourceController(
-        this.thematicDataSource as DataSourceKind,
-        null,
-        dsOptions,
-      );
-    }
   }
 
-  get configParameters(): LayerConfigParameters {
-    return {
-      layerId: this.layerId,
-      name: this.name,
-      url: this.url,
-      layerDataType: this.layerDataType,
-      thematicDataUrl: this.thematicDataUrl,
-      thematicDataProvider: this.thematicDataProvider,
-      maximumScreenSpaceError: '',
-    };
-  }
-
-  async addToCesium(viewer: Viewer): Promise<this> {
-    this.viewer = viewer;
-
+  protected async loadPrimitive(_viewer: Viewer): Promise<GeoJsonDataSourceType> {
     const dataSource = await GeoJsonDataSource.load(this.url, {
       clampToGround: this.clampToGround,
     });
     this.tagEntities(dataSource);
-    this.dataSource = dataSource;
-    await viewer.dataSources.add(dataSource);
-    return this;
+    return dataSource;
   }
 
-  removeFromCesium(_viewer: Viewer): void {
-    if (this.dataSource && this.viewer) {
-      this.viewer.dataSources.remove(this.dataSource, true);
-      this.dataSource = undefined;
-    }
-    this.active = false;
+  protected async attachPrimitive(viewer: Viewer, primitive: GeoJsonDataSourceType): Promise<void> {
+    await viewer.dataSources.add(primitive);
   }
 
-  activate(active: boolean): void {
-    if (!this.viewer || !this.dataSource) {
-      this.active = active;
-      return;
-    }
-    if (active) {
-      if (!this.viewer.dataSources.contains(this.dataSource)) {
-        this.viewer.dataSources.add(this.dataSource);
-      }
-    } else {
-      this.viewer.dataSources.remove(this.dataSource, false);
-    }
-    this.active = active;
+  protected detachPrimitive(viewer: Viewer, primitive: GeoJsonDataSourceType): void {
+    // destroy=true: we won't reuse this dataSource (either removed for good or about to reload).
+    viewer.dataSources.remove(primitive, true);
   }
 
-  async reActivate(): Promise<this> {
-    if (!this.viewer) throw new Error('Layer has not been added to a viewer yet');
-    this.hiddenObjects = [];
-
-    if (this.dataSource && this.active) {
-      this.viewer.dataSources.remove(this.dataSource, false);
-    }
-
-    const dataSource = await GeoJsonDataSource.load(this.url, {
-      clampToGround: this.clampToGround,
-    });
-    this.tagEntities(dataSource);
-    this.dataSource = dataSource;
-    await this.viewer.dataSources.add(dataSource);
-    return this;
+  protected setPrimitiveVisible(primitive: GeoJsonDataSourceType, visible: boolean): void {
+    // `DataSource.show` toggles visualizer + picking without removing from the collection.
+    // Synchronous + idempotent → no race against pending add/remove promises.
+    primitive.show = visible;
   }
 
-  zoomToStartPosition(): void {
-    if (this.viewer && this.dataSource) {
-      this.viewer.flyTo(this.dataSource);
-    }
+  protected zoomToPrimitive(viewer: Viewer, primitive: GeoJsonDataSourceType): void {
+    viewer.flyTo(primitive);
+  }
+
+  protected setFeatureVisible(feature: PickedGeoJsonObject, visible: boolean): void {
+    feature.id.show = visible;
+  }
+
+  /** GeoJSON pick wrappers (`{ id: Entity }`) are freshly allocated per pick, so
+   *  reference equality on the wrapper fails. Cesium reuses the underlying Entity instance,
+   *  so use that as the stable hidden-set identity. */
+  protected identityOf(feature: unknown): unknown {
+    return this.contains(feature) ? feature.id : feature;
   }
 
   contains(object: unknown): object is PickedGeoJsonObject {
@@ -157,11 +79,6 @@ export class GeoJSONLayer extends LayerBase {
   isEqual(a: PickedGeoJsonObject, b: PickedGeoJsonObject): boolean {
     if (!this.contains(a) || !this.contains(b)) return false;
     return a.id.id === b.id.id;
-  }
-
-  inArray(array: PickedGeoJsonObject[] | undefined, object: PickedGeoJsonObject): boolean {
-    if (!array) return false;
-    return array.some((i) => this.isEqual(i, object));
   }
 
   getColor(colorOrFeature: unknown): Color | ColorMaterialProperty | undefined {
@@ -195,23 +112,6 @@ export class GeoJSONLayer extends LayerBase {
     this.viewer.selectedEntity = feature.id;
   }
 
-  storeCameraPosition(
-    viewer: Viewer,
-    movement: { position: { x: number; y: number } },
-    feature: PickedGeoJsonObject,
-  ): void {
-    if (!this.contains(feature)) return;
-    const cartesian = viewer.scene.pickPosition(movement.position as never);
-    if (!cartesian) return;
-    const destination = Cartographic.fromCartesian(cartesian);
-    feature.id._storedBoundingSphere = new BoundingSphere(Cartographic.toCartesian(destination), 40);
-    feature.id._storedOrientation = {
-      heading: viewer.camera.heading,
-      pitch: viewer.camera.pitch,
-      roll: viewer.camera.roll,
-    };
-  }
-
   getProperties(feature: PickedGeoJsonObject): Record<string, unknown> | undefined {
     if (!this.contains(feature)) return undefined;
     const entity = feature.id;
@@ -228,19 +128,6 @@ export class GeoJSONLayer extends LayerBase {
       Object.assign(result, entity.properties.getValue(now));
     }
     return result;
-  }
-
-  hideSelected(feature: PickedGeoJsonObject): void {
-    if (!this.contains(feature)) return;
-    feature.id.show = false;
-    this.hiddenObjects.push(feature);
-  }
-
-  show(feature: PickedGeoJsonObject): void {
-    if (!this.contains(feature)) return;
-    feature.id.show = true;
-    const idx = this.hiddenObjects.findIndex((h) => this.isEqual(h, feature));
-    if (idx >= 0) this.hiddenObjects.splice(idx, 1);
   }
 
   getIdObject(feature: PickedGeoJsonObject): { key: string; object: TaggedEntity } | undefined {

@@ -24,7 +24,9 @@ declare namespace google {
       error_callback?: (error: { type: string; message?: string }) => void;
     }
     interface TokenClient {
-      requestAccessToken(overrideConfig?: { prompt?: '' | 'none' | 'consent' | 'select_account' }): void;
+      requestAccessToken(overrideConfig?: {
+        prompt?: '' | 'none' | 'consent' | 'select_account';
+      }): void;
     }
     function initTokenClient(config: TokenClientConfig): TokenClient;
     function revoke(accessToken: string, done?: () => void): void;

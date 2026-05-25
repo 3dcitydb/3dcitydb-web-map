@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { ElButton, ElCard, ElCheckbox, ElForm, ElFormItem, ElInput, ElInputNumber, ElSelect, ElOption, ElMessage, ElSwitch } from 'element-plus';
+import { ElMessage } from 'element-plus';
+import CollapsiblePanel from './CollapsiblePanel.vue';
 import { useLayersStore, type ActiveLayer, type LayerKind } from '../state/useLayersStore';
+import { type DataSourceKind, TableType } from '../thematic/types';
 import { useViewerRef } from '../viewer/viewerRef';
+import { getErrorMessage } from '../utils/errorMessages';
 
 const layers = useLayersStore();
 const { ready: viewerReady } = useViewerRef();
-const expanded = ref(false);
-
-type ThematicSource = '' | 'GoogleSheets' | 'PostgreSQL' | 'OGCFeatureAPI';
-type TableType = 'Horizontal' | 'Vertical';
 
 interface Draft {
   name: string;
@@ -17,7 +16,7 @@ interface Draft {
   kind: LayerKind;
   maximumScreenSpaceError: number;
   clampToGround: boolean;
-  thematicDataSource: ThematicSource;
+  thematicDataSource: DataSourceKind | '';
   thematicDataUrl: string;
   tableType: TableType;
 }
@@ -44,7 +43,7 @@ const draft = ref<Draft>({
   clampToGround: false,
   thematicDataSource: '',
   thematicDataUrl: '',
-  tableType: 'Horizontal',
+  tableType: TableType.Horizontal,
 });
 
 function onKindChange(kind: LayerKind) {
@@ -73,7 +72,7 @@ async function onAdd() {
     });
     ElMessage.success(`Layer "${draft.value.name}" loaded`);
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : String(err));
+    ElMessage.error(getErrorMessage(err));
   } finally {
     submitting.value = false;
   }
@@ -85,86 +84,85 @@ function canZoom(l: ActiveLayer): boolean {
 </script>
 
 <template>
-  <el-card class="citydb-panel" :class="{ collapsed: !expanded }" shadow="hover">
-    <template #header>
-      <div class="citydb-panel-header" @click="expanded = !expanded">
-        <span>Layers</span>
-        <el-button size="small" link>{{ expanded ? '−' : '+' }}</el-button>
+  <CollapsiblePanel title="Layers">
+    <el-form :model="draft" label-position="top" size="small">
+      <el-form-item label="Type">
+        <el-select v-model="draft.kind" @change="onKindChange">
+          <el-option label="Cesium 3D Tiles" value="3dtiles" />
+          <el-option label="I3S" value="i3s" />
+          <el-option label="GeoJSON" value="geojson" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="Name">
+        <el-input v-model="draft.name" />
+      </el-form-item>
+      <el-form-item label="URL">
+        <el-input v-model="draft.url" />
+      </el-form-item>
+      <el-form-item v-if="draft.kind !== 'geojson'" label="maximumScreenSpaceError">
+        <el-input-number v-model="draft.maximumScreenSpaceError" :min="1" :max="64" />
+      </el-form-item>
+      <el-form-item v-if="draft.kind === 'geojson'">
+        <el-checkbox v-model="draft.clampToGround">Clamp to ground</el-checkbox>
+      </el-form-item>
+
+      <div class="section-title">Thematic data</div>
+      <el-form-item label="Source">
+        <el-select v-model="draft.thematicDataSource" clearable placeholder="None (embedded only)">
+          <el-option label="Google Sheets" value="GoogleSheets" />
+          <el-option label="PostgreSQL / PostgREST" value="PostgreSQL" />
+          <el-option label="OGC Feature API" value="OGCFeatureAPI" />
+        </el-select>
+      </el-form-item>
+      <el-form-item v-if="draft.thematicDataSource" label="Thematic URL">
+        <el-input v-model="draft.thematicDataUrl" placeholder="https://…" />
+      </el-form-item>
+      <el-form-item v-if="draft.thematicDataSource" label="Table structure">
+        <el-select v-model="draft.tableType">
+          <el-option label="One row per object (Horizontal)" value="Horizontal" />
+          <el-option label="One row per attribute (Vertical)" value="Vertical" />
+        </el-select>
+      </el-form-item>
+
+      <div class="actions">
+        <el-button
+          type="primary"
+          size="small"
+          :loading="submitting"
+          :disabled="!viewerReady"
+          @click="onAdd"
+        >
+          {{ viewerReady ? 'Add layer' : 'Waiting for viewer…' }}
+        </el-button>
       </div>
-    </template>
+    </el-form>
 
-    <div v-show="expanded">
-      <el-form :model="draft" label-position="top" size="small">
-        <el-form-item label="Type">
-          <el-select v-model="draft.kind" @change="onKindChange">
-            <el-option label="Cesium 3D Tiles" value="3dtiles" />
-            <el-option label="I3S" value="i3s" />
-            <el-option label="GeoJSON" value="geojson" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Name">
-          <el-input v-model="draft.name" />
-        </el-form-item>
-        <el-form-item label="URL">
-          <el-input v-model="draft.url" />
-        </el-form-item>
-        <el-form-item v-if="draft.kind !== 'geojson'" label="maximumScreenSpaceError">
-          <el-input-number v-model="draft.maximumScreenSpaceError" :min="1" :max="64" />
-        </el-form-item>
-        <el-form-item v-if="draft.kind === 'geojson'">
-          <el-checkbox v-model="draft.clampToGround">Clamp to ground</el-checkbox>
-        </el-form-item>
-
-        <div class="section-title">Thematic data</div>
-        <el-form-item label="Source">
-          <el-select v-model="draft.thematicDataSource" clearable placeholder="None (embedded only)">
-            <el-option label="Google Sheets" value="GoogleSheets" />
-            <el-option label="PostgreSQL / PostgREST" value="PostgreSQL" />
-            <el-option label="OGC Feature API" value="OGCFeatureAPI" />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="draft.thematicDataSource" label="Thematic URL">
-          <el-input v-model="draft.thematicDataUrl" placeholder="https://…" />
-        </el-form-item>
-        <el-form-item v-if="draft.thematicDataSource" label="Table structure">
-          <el-select v-model="draft.tableType">
-            <el-option label="One row per object (Horizontal)" value="Horizontal" />
-            <el-option label="One row per attribute (Vertical)" value="Vertical" />
-          </el-select>
-        </el-form-item>
-
-        <div class="actions">
-          <el-button type="primary" size="small" :loading="submitting" :disabled="!viewerReady" @click="onAdd">
-            {{ viewerReady ? 'Add layer' : 'Waiting for viewer…' }}
-          </el-button>
-        </div>
-      </el-form>
-
-      <ul v-if="layers.layers.length" class="layer-list">
-        <li v-for="l in layers.layers" :key="l.id">
-          <span
-            class="layer-name"
-            :class="{ clickable: canZoom(l) }"
-            title="Click to zoom to layer"
-            @click="layers.zoomToLayer(l.id)"
+    <ul v-if="layers.layers.length" class="layer-list">
+      <li v-for="l in layers.layers" :key="l.id">
+        <span
+          class="layer-name"
+          :class="{ clickable: canZoom(l) }"
+          title="Click to zoom to layer"
+          @click="layers.zoomToLayer(l.id)"
+        >
+          <span class="kind-tag">{{ l.spec.kind }}</span>
+          {{ l.spec.name }}
+          <span v-if="l.loading" class="status">(loading…)</span>
+          <span v-if="l.error" class="status error">{{ l.error }}</span>
+        </span>
+        <span class="layer-actions">
+          <el-switch
+            :model-value="l.active"
+            size="small"
+            @update:model-value="(v: boolean) => layers.toggleLayer(l.id, v)"
+          />
+          <el-button size="small" link type="danger" @click="layers.removeLayer(l.id)"
+            >remove</el-button
           >
-            <span class="kind-tag">{{ l.spec.kind }}</span>
-            {{ l.spec.name }}
-            <span v-if="l.loading" class="status">(loading…)</span>
-            <span v-if="l.error" class="status error">{{ l.error }}</span>
-          </span>
-          <span class="layer-actions">
-            <el-switch
-              :model-value="l.instance.active"
-              size="small"
-              @update:model-value="(v: string | number | boolean) => layers.toggleLayer(l.id, Boolean(v))"
-            />
-            <el-button size="small" link type="danger" @click="layers.removeLayer(l.id)">remove</el-button>
-          </span>
-        </li>
-      </ul>
-    </div>
-  </el-card>
+        </span>
+      </li>
+    </ul>
+  </CollapsiblePanel>
 </template>
 
 <style scoped>
@@ -214,7 +212,9 @@ function canZoom(l: ActiveLayer): boolean {
   align-items: center;
   gap: 6px;
 }
-.actions { margin-top: 14px; }
+.actions {
+  margin-top: 14px;
+}
 .section-title {
   margin: 8px 0 4px;
   padding-bottom: 4px;

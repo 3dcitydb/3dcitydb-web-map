@@ -1,7 +1,9 @@
 import { Cartographic, Cartesian3, JulianDate, Math as CesiumMath, type Viewer } from 'cesium';
 import type { Viewer as CesiumViewer } from 'cesium';
-import type { ImageryConfig, TerrainConfig } from './useBasemapStore';
+import type { ImageryConfig } from './useImageriesStore';
+import type { TerrainConfig } from './useTerrainsStore';
 import type { LayerKind } from './useLayersStore';
+import { DataSourceKind, TableType } from '../thematic/types';
 
 const FORWARD: Record<string, string> = {
   title: 't',
@@ -14,6 +16,8 @@ const FORWARD: Record<string, string> = {
   pitch: 'p',
   roll: 'r',
   layer_: 'l_',
+  imagery_: 'im_',
+  terrain_: 'tr_',
   url: 'u',
   name: 'n',
   layerDataType: 'ld',
@@ -23,7 +27,6 @@ const FORWARD: Record<string, string> = {
   thematicDataSource: 'ds',
   tableType: 'tt',
   maximumScreenSpaceError: 'msse',
-  basemap: 'bm',
   imageryType: 'imageryType',
   iconUrl: 'iu',
   tooltip: 'ht',
@@ -32,7 +35,6 @@ const FORWARD: Record<string, string> = {
   proxyUrl: 'pu',
   tileStyle: 'tst',
   tileMatrixSetId: 'tmsi',
-  terrain: 'tr',
   splashWindow: 'sw',
   showOnStart: 'ss',
   ionToken: 'it',
@@ -43,9 +45,11 @@ const FORWARD: Record<string, string> = {
 };
 
 function fwd(name: string): string {
-  // Numbered layer keys: layer_0 → l_0, layer_1 → l_1, … (FORWARD only stores the prefix).
-  if (name.startsWith('layer_') && name.length > 'layer_'.length) {
-    return FORWARD['layer_'] + name.substring('layer_'.length);
+  // Numbered collection keys (layer_N, imagery_N, terrain_N) — FORWARD stores only the prefix.
+  for (const prefix of ['layer_', 'imagery_', 'terrain_']) {
+    if (name.startsWith(prefix) && name.length > prefix.length) {
+      return FORWARD[prefix] + name.substring(prefix.length);
+    }
   }
   return FORWARD[name] ?? name;
 }
@@ -74,7 +78,7 @@ function queryToObject(query: string): Record<string, string> {
   return out;
 }
 
-export interface ParsedCamera {
+interface ParsedCamera {
   latitude?: number;
   longitude?: number;
   height?: number;
@@ -83,19 +87,29 @@ export interface ParsedCamera {
   roll?: number;
 }
 
-export interface ParsedLayer {
+interface ParsedLayer {
   url: string;
   name: string;
   kind: LayerKind;
   clampToGround?: boolean;
   active?: boolean;
   thematicDataUrl?: string;
-  thematicDataSource?: string;
-  tableType?: string;
+  thematicDataSource?: DataSourceKind;
+  tableType?: TableType;
   maximumScreenSpaceError?: number;
 }
 
-export interface ParsedUrlState {
+interface ParsedImagery {
+  spec: ImageryConfig;
+  active: boolean;
+}
+
+interface ParsedTerrain {
+  spec: TerrainConfig;
+  active: boolean;
+}
+
+interface ParsedUrlState {
   title?: string;
   ionToken?: string;
   bingToken?: string;
@@ -106,10 +120,30 @@ export interface ParsedUrlState {
   terrainShadows?: number;
   camera: ParsedCamera;
   layers: ParsedLayer[];
-  imagery?: ImageryConfig;
-  terrain?: TerrainConfig;
+  imageries: ParsedImagery[];
+  terrains: ParsedTerrain[];
   splashUrl?: string;
   splashShowOnStart?: boolean;
+}
+
+// Scan a URLSearchParams for keys matching any of the given prefixes followed by a
+// non-negative integer (e.g. "im_0", "imagery_2"). Returns the raw values in ascending
+// index order. Tolerates sparse indices (?im_0=…&im_2=…) and keys arriving out of order.
+// First occurrence wins per index, so a URL containing both short and long forms
+// (?im_0=A&imagery_0=B) doesn't produce a duplicate entry.
+function collectIndexed(params: URLSearchParams, prefixes: string[]): string[] {
+  const byIdx = new Map<number, string>();
+  for (const [key, value] of params) {
+    for (const p of prefixes) {
+      if (!key.startsWith(p)) continue;
+      const tail = key.substring(p.length);
+      if (!/^\d+$/.test(tail)) continue;
+      const idx = Number(tail);
+      if (!byIdx.has(idx)) byIdx.set(idx, value);
+      break;
+    }
+  }
+  return [...byIdx.entries()].sort(([a], [b]) => a - b).map(([, raw]) => raw);
 }
 
 function asNumber(v: string | undefined): number | undefined {
@@ -128,6 +162,32 @@ function mapLayerDataType(v: string | undefined): LayerKind {
   if (v === 'i3s') return 'i3s';
   if (v === 'geojson') return 'geojson';
   return '3dtiles';
+}
+
+// Embedded is in the enum for legacy reasons but DataSourceController throws for it
+// (KML-only path was removed); accepting it from URLs would surface as an opaque ctor error.
+const ACCEPTED_DATA_SOURCE_KINDS = new Set<string>([
+  DataSourceKind.GoogleSheets,
+  DataSourceKind.PostgreSQL,
+  DataSourceKind.OGCFeatureAPI,
+]);
+
+function asDataSourceKind(v: string | undefined): DataSourceKind | undefined {
+  if (!v) return undefined;
+  if (!ACCEPTED_DATA_SOURCE_KINDS.has(v)) {
+    console.warn(`[useUrlState] Ignoring unknown thematicDataSource value: ${JSON.stringify(v)}`);
+    return undefined;
+  }
+  return v as DataSourceKind;
+}
+
+function asTableType(v: string | undefined): TableType | undefined {
+  if (!v) return undefined;
+  if (!(Object.values(TableType) as string[]).includes(v)) {
+    console.warn(`[useUrlState] Ignoring unknown tableType value: ${JSON.stringify(v)}`);
+    return undefined;
+  }
+  return v as TableType;
 }
 
 export function parseUrlState(href: string = window.location.href): ParsedUrlState {
@@ -155,12 +215,13 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
       url: cfg[fwd('url')] ?? cfg.url ?? '',
       name: cfg[fwd('name')] ?? cfg.name ?? '',
       kind: mapLayerDataType(cfg[fwd('layerDataType')] ?? cfg.layerDataType),
-      clampToGround:
-        asBool(cfg[fwd('layerClampToGround')] ?? cfg.layerClampToGround) ?? false,
+      clampToGround: asBool(cfg[fwd('layerClampToGround')] ?? cfg.layerClampToGround) ?? false,
       active: asBool(cfg[fwd('active')] ?? cfg.active) ?? true,
       thematicDataUrl: cfg[fwd('thematicDataUrl')] ?? cfg.thematicDataUrl,
-      thematicDataSource: cfg[fwd('thematicDataSource')] ?? cfg.thematicDataSource,
-      tableType: cfg[fwd('tableType')] ?? cfg.tableType,
+      thematicDataSource: asDataSourceKind(
+        cfg[fwd('thematicDataSource')] ?? cfg.thematicDataSource,
+      ),
+      tableType: asTableType(cfg[fwd('tableType')] ?? cfg.tableType),
       maximumScreenSpaceError: asNumber(
         cfg[fwd('maximumScreenSpaceError')] ?? cfg.maximumScreenSpaceError,
       ),
@@ -168,29 +229,49 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
     i++;
   }
 
-  const basemapRaw = readParam(params, 'basemap');
-  let imagery: ImageryConfig | undefined;
-  if (basemapRaw) {
-    const cfg = queryToObject(basemapRaw);
-    imagery = {
-      kind: (cfg.imageryType === 'wmts' ? 'wmts' : 'wms') as 'wms' | 'wmts',
-      url: cfg[fwd('url')] ?? cfg.url ?? '',
-      name: cfg[fwd('name')] ?? cfg.name ?? 'Imagery',
-      layers: cfg[fwd('layers')] ?? cfg.layers ?? '',
-      tileStyle: cfg[fwd('tileStyle')] ?? cfg.tileStyle,
-      tileMatrixSetId: cfg[fwd('tileMatrixSetId')] ?? cfg.tileMatrixSetId,
-      additionalParameters: cfg[fwd('additionalParameters')] ?? cfg.additionalParameters,
+  function parseImageryEntry(raw: string): ParsedImagery {
+    const cfg = queryToObject(raw);
+    return {
+      spec: {
+        kind: (cfg.imageryType === 'wmts' ? 'wmts' : 'wms') as 'wms' | 'wmts',
+        url: cfg[fwd('url')] ?? cfg.url ?? '',
+        name: cfg[fwd('name')] ?? cfg.name ?? 'Imagery',
+        layers: cfg[fwd('layers')] ?? cfg.layers ?? '',
+        tileStyle: cfg[fwd('tileStyle')] ?? cfg.tileStyle,
+        tileMatrixSetId: cfg[fwd('tileMatrixSetId')] ?? cfg.tileMatrixSetId,
+        additionalParameters: cfg[fwd('additionalParameters')] ?? cfg.additionalParameters,
+      },
+      active: asBool(cfg[fwd('active')] ?? cfg.active) ?? true,
     };
   }
 
-  const terrainRaw = readParam(params, 'terrain');
-  let terrain: TerrainConfig | undefined;
-  if (terrainRaw) {
-    const cfg = queryToObject(terrainRaw);
-    terrain = {
-      url: cfg[fwd('url')] ?? cfg.url ?? '',
-      name: cfg[fwd('name')] ?? cfg.name ?? 'Terrain',
+  function parseTerrainEntry(raw: string): ParsedTerrain {
+    const cfg = queryToObject(raw);
+    return {
+      spec: {
+        url: cfg[fwd('url')] ?? cfg.url ?? '',
+        name: cfg[fwd('name')] ?? cfg.name ?? 'Terrain',
+      },
+      active: asBool(cfg[fwd('active')] ?? cfg.active) ?? true,
     };
+  }
+
+  const imageryRaws = collectIndexed(params, [FORWARD['imagery_'], 'imagery_']);
+  const imageries: ParsedImagery[] = imageryRaws.map(parseImageryEntry);
+
+  const terrainRaws = collectIndexed(params, [FORWARD['terrain_'], 'terrain_']);
+  const terrains: ParsedTerrain[] = terrainRaws.map(parseTerrainEntry);
+  // Cesium only supports one terrain at a time — keep at most one active flag set.
+  const activeIdx = terrains.findIndex((t) => t.active);
+  const activeCount = terrains.reduce((n, t) => n + (t.active ? 1 : 0), 0);
+  if (activeCount > 1) {
+    console.warn(
+      `[useUrlState] ${activeCount} terrains marked active=true in the URL; only ` +
+        `terrain_${activeIdx} ("${terrains[activeIdx].spec.name}") will be activated.`,
+    );
+  }
+  for (let k = 0; k < terrains.length; k++) {
+    if (k !== activeIdx) terrains[k].active = false;
   }
 
   const splashRaw = readParam(params, 'splashWindow');
@@ -213,14 +294,14 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
     terrainShadows: asNumber(readParam(params, 'terrainShadows')),
     camera,
     layers,
-    imagery,
-    terrain,
+    imageries,
+    terrains,
     splashUrl,
     splashShowOnStart,
   };
 }
 
-export interface SerializeInput {
+interface SerializeInput {
   viewer: CesiumViewer;
   layers: Array<{
     spec: {
@@ -230,13 +311,13 @@ export interface SerializeInput {
       clampToGround?: boolean;
       maximumScreenSpaceError?: number;
       thematicDataUrl?: string;
-      thematicDataSource?: string;
-      tableType?: string;
+      thematicDataSource?: DataSourceKind;
+      tableType?: TableType;
     };
-    instance: { active: boolean };
+    active: boolean;
   }>;
-  imagery?: ImageryConfig;
-  terrain?: TerrainConfig;
+  imageries?: Array<{ spec: ImageryConfig; active: boolean }>;
+  terrains?: Array<{ spec: TerrainConfig; active: boolean }>;
   splash?: { url?: string; showOnStart?: boolean };
   tokens?: { ionToken?: string; bingToken?: string; googleClientId?: string };
 }
@@ -254,7 +335,7 @@ function getCurrentCamera(viewer: Viewer): Required<ParsedCamera> {
 }
 
 export function generateShareLink(input: SerializeInput): string {
-  const { viewer, layers, imagery, terrain, splash, tokens } = input;
+  const { viewer, layers, imageries = [], terrains = [], splash, tokens } = input;
   const cam = getCurrentCamera(viewer);
   const base = `${location.protocol}//${location.host}${location.pathname}?`;
 
@@ -266,7 +347,9 @@ export function generateShareLink(input: SerializeInput): string {
   Object.assign(top, {
     [fwd('title')]: document.title,
     [fwd('shadows')]: viewer.shadows,
-    [fwd('terrainShadows')]: Number.isNaN(viewer.terrainShadows as number) ? 0 : viewer.terrainShadows,
+    [fwd('terrainShadows')]: Number.isNaN(viewer.terrainShadows as number)
+      ? 0
+      : viewer.terrainShadows,
     [fwd('latitude')]: Math.round(cam.latitude * 1e6) / 1e6,
     [fwd('longitude')]: Math.round(cam.longitude * 1e6) / 1e6,
     [fwd('height')]: Math.round(cam.height * 1e3) / 1e3,
@@ -281,7 +364,7 @@ export function generateShareLink(input: SerializeInput): string {
       [fwd('name')]: entry.spec.name,
       [fwd('layerDataType')]: entry.spec.kind === '3dtiles' ? 'Cesium 3D Tiles' : entry.spec.kind,
       [fwd('layerClampToGround')]: entry.spec.clampToGround ?? '',
-      [fwd('active')]: entry.instance.active,
+      [fwd('active')]: entry.active,
       [fwd('maximumScreenSpaceError')]: entry.spec.maximumScreenSpaceError ?? 16,
       [fwd('thematicDataUrl')]: entry.spec.thematicDataUrl ?? '',
       [fwd('thematicDataSource')]: entry.spec.thematicDataSource ?? '',
@@ -290,24 +373,26 @@ export function generateShareLink(input: SerializeInput): string {
     top[`${fwd('layer_')}${idx}`] = objectToQuery(lc);
   });
 
-  if (imagery) {
-    top[fwd('basemap')] = objectToQuery({
-      imageryType: imagery.kind,
-      [fwd('url')]: imagery.url,
-      [fwd('name')]: imagery.name,
-      [fwd('layers')]: imagery.layers,
-      [fwd('tileStyle')]: imagery.tileStyle ?? '',
-      [fwd('tileMatrixSetId')]: imagery.tileMatrixSetId ?? '',
-      [fwd('additionalParameters')]: imagery.additionalParameters ?? '',
+  imageries.forEach((entry, idx) => {
+    top[`${fwd('imagery_')}${idx}`] = objectToQuery({
+      imageryType: entry.spec.kind,
+      [fwd('url')]: entry.spec.url,
+      [fwd('name')]: entry.spec.name,
+      [fwd('layers')]: entry.spec.layers,
+      [fwd('tileStyle')]: entry.spec.tileStyle ?? '',
+      [fwd('tileMatrixSetId')]: entry.spec.tileMatrixSetId ?? '',
+      [fwd('additionalParameters')]: entry.spec.additionalParameters ?? '',
+      [fwd('active')]: entry.active,
     });
-  }
+  });
 
-  if (terrain) {
-    top[fwd('terrain')] = objectToQuery({
-      [fwd('url')]: terrain.url,
-      [fwd('name')]: terrain.name,
+  terrains.forEach((entry, idx) => {
+    top[`${fwd('terrain_')}${idx}`] = objectToQuery({
+      [fwd('url')]: entry.spec.url,
+      [fwd('name')]: entry.spec.name,
+      [fwd('active')]: entry.active,
     });
-  }
+  });
 
   if (splash?.url) {
     top[fwd('splashWindow')] = objectToQuery({
@@ -324,11 +409,7 @@ export function generateShareLink(input: SerializeInput): string {
 }
 
 export function flyToCamera(viewer: Viewer, cam: ParsedCamera): void {
-  if (
-    cam.latitude === undefined ||
-    cam.longitude === undefined ||
-    cam.height === undefined
-  ) {
+  if (cam.latitude === undefined || cam.longitude === undefined || cam.height === undefined) {
     return;
   }
   viewer.scene.camera.setView({
