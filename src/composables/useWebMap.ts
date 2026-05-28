@@ -1,5 +1,11 @@
 import { ref } from 'vue';
-import { type Cartesian2, Color, KeyboardEventModifier, ScreenSpaceEventType, type Viewer } from 'cesium';
+import {
+  type Cartesian2,
+  Color,
+  KeyboardEventModifier,
+  ScreenSpaceEventType,
+  type Viewer,
+} from 'cesium';
 import type { LayerBase } from '../layers';
 import { useLayersStore } from '../state/useLayersStore';
 import { selectionVersion } from '../state/selectionVersion';

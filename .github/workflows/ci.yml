@@ -10,17 +10,17 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -34,3 +34,15 @@ jobs:
       # `npm run build` already runs `vue-tsc --noEmit` before `vite build`,
       # so a separate `typecheck` step would be redundant.
       - run: npm run build
+
+      - name: Deploy v3-preview to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/3d-city-web-map-next'
+        uses: peaceiris/actions-gh-pages@v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          destination_dir: v3-preview
+          keep_files: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: 'Deploy v3-preview from ${{ github.sha }}'
