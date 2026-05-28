@@ -1,0 +1,213 @@
+<!-- Page template taken from https://codepen.io/anon/pen/jJPBRd -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3DCityDB-Web-Map</title>
+
+    <style>
+        html {
+            box-sizing: border-box;
+            text-align: justify;
+            text-justify: inter-word;
+            font-size: small;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            line-height: 1.5;
+        }
+
+        h1 {
+            padding: 0 5% 20px;
+            text-align: left;
+        }
+
+        h2 {
+            color: white;
+            padding-left: 5px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            background-color: #2c7cff;
+            text-align: left;
+        }
+
+        .wrapper {
+            margin: 0 auto;
+            padding: 0 5% 50px;
+            width: 100%;
+        }
+
+        .scrollable-section {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        article {
+            position: absolute;
+            top: 5%;
+            left: 0%;
+            height: 90%;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>3DCityDB-Web-Map</h1>
+
+<article>
+    <section class="scrollable-section">
+        <div class="wrapper">
+            <h2 class="milestone">Introduction</h2>
+            <p>
+                The <b>3DCityDB-Web-Map</b> is a web-based front-end for high-performance 3D visualization and interactive exploration of <b>arbitrarily large semantic 3D city models</b> and other geospatial data. The web client utilizes the <a href="https://cesium.com/" target="_blank">Cesium Virtual Globe</a> as its 3D geo-visualization engine based on HTML5 and Web Graphics Library (WebGL) to provide hardware acceleration and cross-platform functionalities like displaying 3D graphic contents on web browsers without the needs of additional plugins.
+            </p>
+            <p>
+                The key features and functionalities of the 3DCityDB-Web-Map is summarized as follows:
+
+                <ul>
+                    <li>
+                        Add and remove an <b>arbitrary number of data layers</b> at runtime: <b>Cesium 3D Tiles</b>, <b>I3S</b>, and <b>GeoJSON</b>, together with a configurable <b>WMS / WMTS</b> imagery layer and Cesium digital terrain model
+                    </li>
+                    <li>
+                        Link visualization layers with <b>external thematic data sources</b> — <b>Google Sheets</b>, <b>PostgreSQL / PostgREST</b>, or <b>OGC Feature API</b> — and query attributes per 3D object
+                    </li>
+                    <li>
+                        Display <b>embedded thematic attributes</b> that ship inside the visualization datasets
+                    </li>
+                    <li>
+                        Rich interaction: <b>hover highlight</b>, <b>click select</b>, <b>CTRL+click multi-select</b>, hide / show, and fly-to-layer
+                    </li>
+                    <li>
+                        Explore 3D objects via third-party mapping services — <b>Google StreetView</b>, <b>Bing Maps oblique view</b>, <b>OpenStreetMap</b>, and <b>DualMaps</b>
+                    </li>
+                    <li>
+                        Toggle <b>scene shadows</b> and <b>terrain shadows</b> on the fly
+                    </li>
+                    <li>
+                        Collaborative workspace sharing via <b>scene links</b> that encode the camera perspective, shadows, layers, imagery / terrain and splash settings
+                    </li>
+                    <li>
+                        Support for <b>mobile devices</b> (smartphones, tablets) with live tracking of geolocation and orientation
+                    </li>
+                </ul>
+            </p>
+
+            <h2 class="milestone">Architecture</h2>
+            <a href="../theme/img/3dcitydb-web-map-architecture.jpg" target="_blank"><img src="../theme/img/3dcitydb-web-map-architecture.jpg" alt="Components used in the demonstrator" width="100%"></a>
+
+            <h2 class="milestone">License</h2>
+            <p>
+                The 3DCityDB-Web-Map is licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License, Version 2.0</a>. See the <samp>LICENSE</samp> file for more details.
+            </p>
+
+            <h2 class="milestone">Latest release</h2>
+            <p>
+                The current version is <b>v3.0 (POC)</b> — a Vue 3 / Vite / TypeScript rewrite. For the previous stable line, see <a href="https://github.com/3dcitydb/3dcitydb-web-map/releases/tag/v2.0.0" target="_blank">v2.0.0</a>; all releases are listed on the <a href="https://github.com/3dcitydb/3dcitydb-web-map/releases" target="_blank">GitHub releases page</a>.
+            </p>
+
+            <h2 class="milestone">System requirements</h2>
+            <p>
+                The hardware on which the 3DCityDB-Web-Map will be run must have a graphics card installed that supports WebGL. In addition, the web browser in use must also provide appropriate WebGL support.
+            </p>
+            <p>
+                You can visit the <a href="http://get.webgl.org" target="_blank">WebGL website</a> to check whether your web browser supports WebGL.
+            </p>
+            <p>
+                The 3DCityDB-Web-Map has been successfully tested on (but is not limited to) the following web browsers under different desktop operating systems like Microsoft Windows, Linux, Apple Mac OS X, and even on mobile operating systems like Android and iOS.
+                <ul>
+                    <li>
+                        Apple Safari
+                    </li>
+                    <li>
+                        Mozilla Firefox
+                    </li>
+                    <li>
+                        Google Chrome
+                    </li>
+                    <li>
+                        Opera
+                    </li>
+                </ul>
+            </p>
+            <p>
+                For best performance, it is recommended to use Google Chrome.
+            </p>
+
+            <h2 class="milestone">Documentation</h2>
+            <p>
+                A complete and comprehensive documentation on the 3DCityDB-Web-Map is installed with the 3DCityDB Importer/Exporter and is also available <a href="https://www.3dcitydb.org/3dcitydb/documentation/" target="_blank">online</a>.
+            </p>
+
+            <h2 class="milestone">Contributing</h2>
+            <p>
+                The source codes of this project are available on <a href="https://github.com/3dcitydb/3dcitydb-web-map" target="_blank">GitHub</a>. All releases can be found <a href="https://github.com/3dcitydb/3dcitydb-web-map/releases" target="_blank">here</a>.
+            </p>
+            <p>
+                The platform GitHub is also used for collaborating:
+                <ul>
+                    <li>
+                        To report bugs found in the software, please create a GitHub issue.
+                    </li>
+                    <li>
+                        To contribute code for fixing issues, please create a pull request with the issue id.
+                    </li>
+                    <li>
+                        To propose a new feature, please also create a GitHub issue and open a discussion.
+                    </li>
+                </ul>
+            </p>
+
+            <h2 class="milestone">Developers</h2>
+            <p>
+                <b>v3 (current) — Vue 3 / Vite / TypeScript rewrite:</b>
+                <ul>
+                    <li>
+                        Zhihang Yao
+                        <br>
+                        <a href="https://www.hft-stuttgart.de/" target="_blank">Hochschule für Technik Stuttgart (HFT Stuttgart)</a>
+                    </li>
+                </ul>
+            </p>
+            <p>
+                <b>v2 and earlier — original 3DCityDB-Web-Map:</b>
+                <ul>
+                    <li>
+                        Son H. Nguyen, Kanishk Chaturvedi, and Thomas H. Kolbe
+                        <br>
+                        <a href="https://www.asg.ed.tum.de/en/gis" target="_blank">Chair of Geoinformatics, Technical University of Munich</a>
+                    </li>
+                </ul>
+                with the support of:
+                <ul>
+                    <li>
+                        Zhihang Yao, Jannes Bolling, Lucas van Walstijn, and Claus Nagel
+                        <br>
+                        <a href="https://vc.systems" target="_blank">Virtual City Systems, Berlin</a>
+                    </li>
+                </ul>
+            </p>
+
+            <h2 class="milestone">More information</h2>
+            <p>
+                The 3DCityDB-Web-Map is a part of the <a href="https://www.3dcitydb.org" target="_blank">3DCityDB Software Suite</a> for managing and working with large semantic 3D city models in CityGML. However, the web client can also be used as a separate stand-alone component.
+            </p>
+            <p>
+                <a href="https://www.opengeospatial.org/standards/citygml" target="_blank">OGC CityGML</a> is an open data model and XML-based format for the storage and exchange of semantic 3D city models. It is an application schema for the <a href="https://www.opengeospatial.org/standards/gml" target="_blank">Geography Markup Language version 3 (GML3)</a>, the extendible international standard for spatial data exchange issued by the Open Geospatial Consortium (OGC) and the ISO TC211. The aim of the development of CityGML is to reach a common definition of the basic entities, attributes, and relations of a 3D city model. CityGML is an international OGC standard and can be used free of charge.
+            </p>
+        </div>
+    </section>
+</article>
+
+</body>
+</html>
