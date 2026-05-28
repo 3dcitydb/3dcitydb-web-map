@@ -105,7 +105,12 @@ async function onShareLink() {
   if (!viewer.value) return;
   const link = generateShareLink({
     viewer: viewer.value,
-    layers: layers.layers,
+    layers: layers.layers.map((entry) => ({
+      spec: entry.spec,
+      active: entry.active,
+      hiddenIds: entry.instance.hiddenIdList,
+      highlightedIds: entry.instance.highlightedIdList,
+    })),
     imageries: imageries.list,
     terrains: terrains.list,
     tokens: auth.isSignedIn ? { googleClientId: auth.clientId } : undefined,

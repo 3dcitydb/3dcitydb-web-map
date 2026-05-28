@@ -126,11 +126,14 @@ onMounted(async () => {
         name: layer.name,
         kind: layer.kind,
         url: layer.url,
+        active: layer.active,
         clampToGround: layer.clampToGround,
         maximumScreenSpaceError: layer.maximumScreenSpaceError,
         thematicDataUrl: layer.thematicDataUrl,
         thematicDataSource: layer.thematicDataSource,
         tableType: layer.tableType,
+        hiddenIds: layer.hiddenIds,
+        highlightedIds: layer.highlightedIds,
       });
     } catch (err) {
       ElMessage.error(`Layer "${layer.name}": ${getErrorMessage(err)}`);

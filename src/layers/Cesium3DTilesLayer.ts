@@ -111,8 +111,7 @@ export class Cesium3DTilesLayer extends LayerBase {
       for (let k = 0; k < featuresLength; k++) {
         const feature = content?.getFeature(k) as TaggedFeature | undefined;
         if (!feature) continue;
-        const shouldShow = !this.isHidden(feature);
-        if (feature.show !== shouldShow) feature.show = shouldShow;
+        this.applyStateToFeature(feature);
       }
     });
     this.addDisposer(remove);

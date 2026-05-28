@@ -42,7 +42,24 @@ const FORWARD: Record<string, string> = {
   googleClientId: 'gid',
   dayTime: 'd',
   debug: 'db',
+  hiddenIds: 'hi',
+  highlightedIds: 'hl',
 };
+
+// Per-id encoding lets gmlids / OBJECTIDs that contain the separator (or any URL-meta
+// character) round-trip losslessly. Without it, an id like "foo|bar" would split into
+// two ids on parse.
+const ID_SEP = '|';
+function joinIds(ids: Iterable<string>): string {
+  return [...ids].map(encodeURIComponent).join(ID_SEP);
+}
+function splitIds(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(ID_SEP)
+    .filter((s) => s.length > 0)
+    .map(decodeURIComponent);
+}
 
 function fwd(name: string): string {
   // Numbered collection keys (layer_N, imagery_N, terrain_N) — FORWARD stores only the prefix.
@@ -97,6 +114,8 @@ interface ParsedLayer {
   thematicDataSource?: DataSourceKind;
   tableType?: TableType;
   maximumScreenSpaceError?: number;
+  hiddenIds?: string[];
+  highlightedIds?: string[];
 }
 
 interface ParsedImagery {
@@ -225,6 +244,8 @@ export function parseUrlState(href: string = window.location.href): ParsedUrlSta
       maximumScreenSpaceError: asNumber(
         cfg[fwd('maximumScreenSpaceError')] ?? cfg.maximumScreenSpaceError,
       ),
+      hiddenIds: splitIds(cfg[fwd('hiddenIds')] ?? cfg.hiddenIds),
+      highlightedIds: splitIds(cfg[fwd('highlightedIds')] ?? cfg.highlightedIds),
     });
     i++;
   }
@@ -315,6 +336,9 @@ interface SerializeInput {
       tableType?: TableType;
     };
     active: boolean;
+    /** Current hidden/highlighted feature ids for this layer (live, not from URL). */
+    hiddenIds?: Iterable<string>;
+    highlightedIds?: Iterable<string>;
   }>;
   imageries?: Array<{ spec: ImageryConfig; active: boolean }>;
   terrains?: Array<{ spec: TerrainConfig; active: boolean }>;
@@ -369,6 +393,8 @@ export function generateShareLink(input: SerializeInput): string {
       [fwd('thematicDataUrl')]: entry.spec.thematicDataUrl ?? '',
       [fwd('thematicDataSource')]: entry.spec.thematicDataSource ?? '',
       [fwd('tableType')]: entry.spec.tableType ?? '',
+      [fwd('hiddenIds')]: entry.hiddenIds ? joinIds(entry.hiddenIds) : '',
+      [fwd('highlightedIds')]: entry.highlightedIds ? joinIds(entry.highlightedIds) : '',
     };
     top[`${fwd('layer_')}${idx}`] = objectToQuery(lc);
   });
@@ -412,6 +438,10 @@ export function flyToCamera(viewer: Viewer, cam: ParsedCamera): void {
   if (cam.latitude === undefined || cam.longitude === undefined || cam.height === undefined) {
     return;
   }
+  // Each `addLayer` kicks off `zoomToStartPosition` → `flyToBoundingSphere`, which queues
+  // a tween. `setView` doesn't cancel an in-flight tween (Cesium camera flights tick on
+  // the render loop), so without this the URL position is overwritten on the next frame.
+  viewer.scene.camera.cancelFlight();
   viewer.scene.camera.setView({
     destination: Cartesian3.fromDegrees(cam.longitude, cam.latitude, cam.height),
     orientation: {

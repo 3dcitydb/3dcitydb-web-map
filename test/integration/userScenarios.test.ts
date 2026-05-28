@@ -236,9 +236,9 @@ describe('user scenarios', () => {
     expect(viewer.selectedEntity!.description).toContain('23.5');
     expect(viewer.selectedEntity!.name).toBe('BLDG-42');
 
-    // Building is highlighted and tracked in selection state.
+    // Building is highlighted and tracked by id (OBJECTID).
     expect(building.color).toBe(Color.AQUAMARINE);
-    expect(webMap.prevSelected.value).toContain(building);
+    expect(webMap.getAllHighlightedObjects()['BLDG-42']).toBe(building);
 
     // --- Remove layer ---
     layers.removeLayer(entry.id);
@@ -315,7 +315,7 @@ describe('user scenarios', () => {
     viewer._setNextPick(b);
     viewer._click({ x: 200, y: 200 }, true); // ctrl+click
 
-    expect(webMap.prevSelected.value).toEqual([a, b]);
+    expect(Object.keys(webMap.getAllHighlightedObjects())).toEqual(['A', 'B']);
     expect(a.color).toBe(Color.AQUAMARINE);
     expect(b.color).toBe(Color.AQUAMARINE);
 
@@ -324,7 +324,7 @@ describe('user scenarios', () => {
     viewer._setNextPick(c);
     viewer._click({ x: 300, y: 300 });
 
-    expect(webMap.prevSelected.value).toEqual([c]);
+    expect(Object.keys(webMap.getAllHighlightedObjects())).toEqual(['C']);
   });
 
   it('switches between two terrains; the latest activation wins even if it resolves first', async () => {

@@ -143,11 +143,11 @@ onBeforeUnmount(clearTimer);
 
 <template>
   <Teleport v-if="toolbarEl" :to="toolbarEl">
-    <span
-      class="cesium-sceneModePicker-wrapper cesium-toolbar-button"
-      tabindex="-1"
-      @focusout="onBlur"
-    >
+    <!-- Wrapper intentionally has only the wrapper class, NOT cesium-toolbar-button —
+         matching native Cesium SceneModePicker. Adding cesium-toolbar-button to the span
+         forces it to a fixed 32×32 box without margins, while sibling toolbar buttons
+         have margin: 2px 3px (36×38 footprint), so vertical-align fails to line them up. -->
+    <span class="cesium-sceneModePicker-wrapper" tabindex="-1" @focusout="onBlur">
       <button
         type="button"
         class="cesium-button cesium-toolbar-button citydb-gps-button"
@@ -204,5 +204,13 @@ onBeforeUnmount(clearTimer);
 }
 .citydb-gps-button.citydb-gps-active {
   background-color: #0074d9 !important;
+}
+/* The wrapper already supplies horizontal spacing (margin: 0 3px from Cesium's
+   SceneModePicker.css). Without this override the main button keeps `.cesium-button`'s
+   own `margin: 2px 3px`, doubling the gap to ~12px and pushing the whole GPS group
+   away from its neighbours. Matches Cesium's own treatment in SceneModePicker.css
+   where `.cesium-sceneModePicker-button3D` zeroes horizontal margin. */
+.cesium-sceneModePicker-wrapper > .citydb-gps-button:first-child {
+  margin: 0 0 3px 0 !important;
 }
 </style>

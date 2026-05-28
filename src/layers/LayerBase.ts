@@ -10,6 +10,22 @@ export interface LayerOptions {
   thematicDataSource?: DataSourceKind;
   tableType?: TableType;
   maximumScreenSpaceError?: number;
+  /** Initial hidden / highlighted feature ids — used to restore a scene link before
+   *  the underlying tiles have streamed in. The first `tileVisible` pass per id then
+   *  captures the natural color and applies the highlight tint. */
+  hiddenIds?: Iterable<string>;
+  highlightedIds?: Iterable<string>;
+}
+
+type StoredColor = Color | ColorMaterialProperty | undefined;
+
+interface HighlightEntry {
+  /** Original color captured at highlight time, used to restore on removeHighlight. */
+  color: StoredColor;
+  /** Most recently seen wrapper for this id — refreshed by `applyStateToFeature` on tile
+   *  re-render. May go stale after LOD eviction; consumers must tolerate that. Used only
+   *  by `hide()` and the ActionsPanel fly-to (best-effort). */
+  latestWrapper?: unknown;
 }
 
 export abstract class LayerBase {
@@ -27,9 +43,37 @@ export abstract class LayerBase {
 
   protected viewer?: Viewer;
   protected primitive?: unknown;
-  /** Stores the *identity* of hidden features (see `identityOf`), not the pick wrapper itself,
-   *  so freshly-picked wrappers for the same underlying entity still resolve as hidden. */
-  protected hiddenObjects = new Set<unknown>();
+
+  /** Color applied to highlighted features. Subclasses' tileVisible loops re-apply this
+   *  when a streamed feature comes back into view. */
+  protected readonly highlightColor: Color = Color.AQUAMARINE;
+
+  /** IDs (from `getIdKey`) of features that should remain hidden. Survives LOD eviction —
+   *  the id, not the wrapper, is the persistent identity. */
+  protected hiddenIds = new Set<string>();
+  /** Most recently seen wrapper per hidden id — populated by `applyStateToFeature`. Lets
+   *  `getAllHiddenObjects` return a usable feature reference for the ActionsPanel fly-to
+   *  even when the id was restored from a URL and no live wrapper exists yet. */
+  protected hiddenWrappers = new Map<string, unknown>();
+  /** IDs of features that should remain highlighted, plus the original color to restore. */
+  protected highlightedIds = new Map<string, HighlightEntry>();
+
+  /** Snapshot of currently-hidden ids for serialization (e.g. scene link). */
+  get hiddenIdList(): string[] {
+    return [...this.hiddenIds];
+  }
+  /** Snapshot of currently-highlighted ids for serialization. */
+  get highlightedIdList(): string[] {
+    return [...this.highlightedIds.keys()];
+  }
+
+  /** Notified after any hidden/highlight state mutation (including async wrapper discovery
+   *  during tile streaming). Wired by `useLayersStore` to bump a shared reactive trigger,
+   *  so Vue computeds depending on `getAllHiddenObjects` / `getAllHighlightedObjects`
+   *  re-evaluate. Default no-op so unit tests that construct a layer directly don't have
+   *  to install a listener. */
+  onStateChange: () => void = () => {};
+
   /** Cleanup callbacks bound to the current primitive (Cesium Event remove handles, etc.).
    *  Run and cleared on every detach so re-attach via reActivate starts clean. */
   private disposers: Array<() => void> = [];
@@ -60,28 +104,189 @@ export abstract class LayerBase {
         dsOptions,
       );
     }
+
+    if (options.hiddenIds) {
+      for (const id of options.hiddenIds) this.hiddenIds.add(id);
+    }
+    if (options.highlightedIds) {
+      // No live wrapper yet — `applyStateToFeature` on first tileVisible will refresh
+      // latestWrapper and capture the natural color before applying the highlight tint.
+      for (const id of options.highlightedIds) {
+        this.highlightedIds.set(id, { color: undefined, latestWrapper: undefined });
+      }
+    }
   }
 
   /** Each layer kind defines what "belongs to this layer". */
   abstract contains(object: unknown): boolean;
 
-  hideSelected(feature: unknown): void {
-    if (!this.contains(feature)) return;
-    this.hiddenObjects.add(this.identityOf(feature));
-    this.setFeatureVisible(feature, false);
+  // --- Hide / show -----------------------------------------------------------
+
+  hide(feature: unknown): void {
+    const id = this.getIdKey(feature);
+    if (id === undefined) return;
+    this.hiddenWrappers.set(id, feature);
+    this.hideById(id);
+  }
+
+  /** Hide-by-id path so URL-restored hidden ids can be set up before any wrapper exists.
+   *  If a wrapper is already cached (either here or via an in-progress highlight), apply
+   *  visibility now; otherwise `applyStateToFeature` will pick it up on tileVisible. */
+  hideById(id: string): void {
+    this.hiddenIds.add(id);
+    const wrapper = this.hiddenWrappers.get(id) ?? this.highlightedIds.get(id)?.latestWrapper;
+    if (wrapper) this.setFeatureVisible(wrapper, false);
+    this.onStateChange();
   }
 
   show(feature: unknown): void {
-    if (!this.contains(feature)) return;
-    this.hiddenObjects.delete(this.identityOf(feature));
+    const id = this.getIdKey(feature);
+    if (id === undefined) return;
+    this.hiddenIds.delete(id);
+    this.hiddenWrappers.delete(id);
     this.setFeatureVisible(feature, true);
+    this.onStateChange();
   }
 
   isHidden(feature: unknown): boolean {
-    return this.hiddenObjects.has(this.identityOf(feature));
+    const id = this.getIdKey(feature);
+    return id !== undefined && this.hiddenIds.has(id);
   }
 
-  // --- Lifecycle hooks (subclasses MUST implement) ---
+  /** Clear all hidden state. For streamed layers (3D Tiles / I3S) the next `tileVisible`
+   *  pass restores `feature.show = true` on any currently-loaded feature. Persistent layers
+   *  (GeoJSON) must walk their entities — see `restoreAllVisibility`. */
+  showAll(): void {
+    this.hiddenIds.clear();
+    this.hiddenWrappers.clear();
+    this.restoreAllVisibility();
+    this.onStateChange();
+  }
+
+  /** Called by `showAll` after `hiddenIds` is cleared. Streamed layers can leave this as
+   *  a no-op (the tileVisible loop re-shows). GeoJSON overrides to iterate entities. */
+  protected restoreAllVisibility(): void {}
+
+  // --- Highlight -------------------------------------------------------------
+
+  addHighlight(feature: unknown): void {
+    const id = this.getIdKey(feature);
+    if (id === undefined) return;
+    if (this.highlightedIds.has(id)) return;
+    this.highlightedIds.set(id, {
+      color: this.getColor(feature),
+      latestWrapper: feature,
+    });
+    this.setColor(feature, this.highlightColor);
+    this.onStateChange();
+  }
+
+  removeHighlight(feature: unknown): void {
+    const id = this.getIdKey(feature);
+    if (id === undefined) return;
+    const entry = this.highlightedIds.get(id);
+    if (!entry) return;
+    this.setColor(feature, entry.color);
+    this.highlightedIds.delete(id);
+    this.onStateChange();
+  }
+
+  clearHighlights(): void {
+    for (const entry of this.highlightedIds.values()) {
+      if (entry.latestWrapper) {
+        try {
+          this.setColor(entry.latestWrapper, entry.color);
+        } catch (err) {
+          // Most likely a wrapper went stale post-LOD eviction (the fresh batch table
+          // already shows default color, so the missed write is harmless). Log anyway —
+          // a genuine bug here would otherwise be invisible.
+          console.error(err);
+        }
+      }
+    }
+    this.highlightedIds.clear();
+    this.onStateChange();
+  }
+
+  isHighlighted(feature: unknown): boolean {
+    const id = this.getIdKey(feature);
+    return id !== undefined && this.highlightedIds.has(id);
+  }
+
+  /** Iteration accessor for useWebMap / ActionsPanel — returns `{ id, latestWrapper }`
+   *  per currently-highlighted feature. Wrapper may be stale (LOD eviction). */
+  highlightEntries(): Array<{ id: string; latestWrapper?: unknown }> {
+    return [...this.highlightedIds.entries()].map(([id, entry]) => ({
+      id,
+      latestWrapper: entry.latestWrapper,
+    }));
+  }
+
+  /** Iteration accessor for hidden ids. `latestWrapper` is the most recently observed
+   *  wrapper from either the hidden- or highlight-side bookkeeping. */
+  hiddenEntries(): Array<{ id: string; latestWrapper?: unknown }> {
+    return [...this.hiddenIds].map((id) => ({
+      id,
+      latestWrapper: this.hiddenWrappers.get(id) ?? this.highlightedIds.get(id)?.latestWrapper,
+    }));
+  }
+
+  /** Apply persistent hidden/highlight state to a feature that's just (re)entered the
+   *  scene. Called by subclass `tileVisible` loops every frame, so we guard the writes —
+   *  Color.equals avoids dirtying the batch table when the feature is already the right
+   *  color, and the show check avoids needless property writes. */
+  protected applyStateToFeature(feature: unknown): void {
+    // Hot path: most users never hide or highlight anything. Short-circuit before doing
+    // the (per-feature) id resolution and getPropertyIds allocation.
+    if (this.hiddenIds.size === 0 && this.highlightedIds.size === 0) return;
+
+    const id = this.getIdKey(feature);
+    if (id === undefined) return;
+
+    // Track whether any wrapper transitioned from "never seen" to "seen" so we can fire
+    // exactly one onStateChange per id over the layer lifetime (matters for URL-restored
+    // ids whose dropdown fly-to should activate as soon as the tile streams in).
+    let firstWrapper = false;
+
+    const shouldShow = !this.hiddenIds.has(id);
+    const target = feature as { show?: boolean; color?: Color };
+    if (target.show !== shouldShow) this.setFeatureVisible(feature, shouldShow);
+
+    if (this.hiddenIds.has(id)) {
+      if (!this.hiddenWrappers.has(id)) firstWrapper = true;
+      this.hiddenWrappers.set(id, feature);
+    } else {
+      this.hiddenWrappers.delete(id);
+    }
+
+    const entry = this.highlightedIds.get(id);
+    if (entry) {
+      // URL-restored highlights enter the runtime with no captured color. Capture from
+      // the first live wrapper we see — before we overwrite it with the highlight tint —
+      // so a later Clear-highlight restores the natural color instead of clearing to
+      // undefined. `latestWrapper === undefined` is the "never seen a wrapper" signal;
+      // it can't be confused with the click-time path because `addHighlight` always
+      // sets latestWrapper before applyStateToFeature runs.
+      if (entry.latestWrapper === undefined) firstWrapper = true;
+      if (entry.color === undefined && entry.latestWrapper === undefined) {
+        entry.color = this.getColor(feature);
+      }
+      entry.latestWrapper = feature;
+      if (!target.color || !Color.equals(target.color, this.highlightColor)) {
+        this.setColor(feature, this.highlightColor);
+      }
+    }
+
+    if (firstWrapper) this.onStateChange();
+  }
+
+  /** Called once after `onAfterAttach` to apply seeded hidden/highlight state to features
+   *  that are already loaded. Streamed layers leave this as a no-op — their `tileVisible`
+   *  loop catches features as tiles become visible. Non-streamed layers (GeoJSON) override
+   *  to walk their entity collection. */
+  protected applyStateToAllLoadedFeatures(): void {}
+
+  // --- Lifecycle hooks (subclasses MUST implement) ---------------------------
 
   /** Fetch / load the underlying Cesium primitive and tag it with `layerId`. */
   protected abstract loadPrimitive(viewer: Viewer): Promise<unknown>;
@@ -97,26 +302,29 @@ export abstract class LayerBase {
   /** Toggle a single picked feature's visibility. */
   protected abstract setFeatureVisible(feature: unknown, visible: boolean): void;
 
-  /** Resolve a picked feature to a stable `{ key, object }` pair used by selection state,
-   *  highlight tracking, and the InfoBox. Returns `undefined` for features not in this layer. */
+  /** Resolve a picked feature to a stable `{ key, object }` pair used by the InfoBox and
+   *  by `getIdKey`. Returns `undefined` for features not in this layer. */
   abstract getIdObject(feature: unknown): { key: string | number; object: unknown } | undefined;
 
-  // --- Optional hooks ---
+  /** Stable string identity used by hidden/highlight tracking. Default: stringified
+   *  `getIdObject(...).key`. Returns undefined if the feature isn't ours. */
+  getIdKey(feature: unknown): string | undefined {
+    const idObj = this.getIdObject(feature);
+    return idObj === undefined ? undefined : String(idObj.key);
+  }
+
+  // --- Optional hooks --------------------------------------------------------
 
   /** Side-effects to run once the primitive is attached (point-cloud shading,
    *  tile event handlers, …). Default: no-op. */
   protected onAfterAttach(_viewer: Viewer, _primitive: unknown): void {}
-  /** The stable identity used to track hidden features. Default: the pick wrapper itself
-   *  (works for 3D Tiles / I3S, where Cesium caches wrappers per (content, batchId)).
-   *  Pick wrappers that are freshly allocated per pick (e.g. GeoJSON `{ id: Entity }`)
-   *  must override to return the underlying stable object. */
-  protected identityOf(feature: unknown): unknown {
-    return feature;
-  }
-  /** Clear cached selection / hidden state before a reload.
-   *  Default impl clears `hiddenObjects`; subclasses with extra state should `super.resetSelectionState()`. */
+
+  /** Clear cached selection / hidden state before a reload. */
   protected resetSelectionState(): void {
-    this.hiddenObjects.clear();
+    this.hiddenIds.clear();
+    this.hiddenWrappers.clear();
+    this.highlightedIds.clear();
+    this.onStateChange();
   }
 
   /** Register a cleanup callback (e.g. the remove handle returned by `Event#addEventListener`).
@@ -136,7 +344,7 @@ export abstract class LayerBase {
     this.disposers.length = 0;
   }
 
-  // --- Template methods ---
+  // --- Template methods ------------------------------------------------------
 
   async addToCesium(viewer: Viewer): Promise<this> {
     this.viewer = viewer;
@@ -194,6 +402,7 @@ export abstract class LayerBase {
     }
     this.setPrimitiveVisible(primitive, this.active);
     this.onAfterAttach(viewer, primitive);
+    this.applyStateToAllLoadedFeatures();
   }
 
   zoomToStartPosition(): void {
@@ -205,9 +414,10 @@ export abstract class LayerBase {
   // Default impls below targeted Cesium3DTileFeature-shaped picks (3D Tiles, I3S).
   // GeoJSONLayer overrides those that need to address the Entity-wrapped pick shape.
 
-  /** Cesium caches Cesium3DTileFeature wrappers per (content, batchId), so reference equality
-   *  is the right check. Subclasses with non-cached pick shapes (e.g. GeoJSON entity wrappers)
-   *  must override. */
+  /** Cesium caches Cesium3DTileFeature wrappers per (content, batchId) only while the tile
+   *  is loaded — across LOD eviction the wrappers are different instances. Reference
+   *  equality is still useful for short-lived "is this the same pick?" checks (hover
+   *  vs. click within one frame). Persistent identity is handled by `getIdKey`. */
   isEqual(a: unknown, b: unknown): boolean {
     if (!this.contains(a) || !this.contains(b)) return false;
     return a === b;

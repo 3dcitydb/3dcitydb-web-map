@@ -1,13 +1,8 @@
-import { ref, shallowRef } from 'vue';
-import {
-  type Cartesian2,
-  Color,
-  KeyboardEventModifier,
-  ScreenSpaceEventType,
-  type Viewer,
-} from 'cesium';
+import { ref } from 'vue';
+import { type Cartesian2, Color, KeyboardEventModifier, ScreenSpaceEventType, type Viewer } from 'cesium';
 import type { LayerBase } from '../layers';
 import { useLayersStore } from '../state/useLayersStore';
+import { selectionVersion } from '../state/selectionVersion';
 import { useViewerRef } from '../viewer/viewerRef';
 import { fillInfoTable } from '../utils/infoTable';
 
@@ -24,14 +19,15 @@ interface InfoTableEntry {
 // Track which viewer instances we've installed handlers on, so HMR / unmount-then-remount
 // re-installs correctly on the new viewer instead of being short-circuited by a stale flag.
 const installedViewers = new WeakSet<Viewer>();
-const highlightColor = Color.AQUAMARINE;
 const mouseOverColor = Color.YELLOW;
 
-const prevSelected = shallowRef<PickedFeature[]>([]);
-const prevSelectedColors = shallowRef<unknown[]>([]);
-const hiddenFeatures = shallowRef<PickedFeature[]>([]);
+// Persistent hidden/highlight state lives on each LayerBase. `selectionVersion` (imported
+// from ../state/selectionVersion) is bumped by LayerBase.onStateChange — wired by
+// useLayersStore — so Vue computeds reading it via `void selectionVersion.value` re-run.
 const lastInfo = ref<InfoTableEntry | undefined>(undefined);
 
+// Hover state is ephemeral — cleared on every mouse move — and never needs to survive LOD
+// eviction, so it stays wrapper-keyed here rather than moving onto the layer.
 let prevHovered: PickedFeature | undefined;
 let prevHoveredColor: unknown | undefined;
 
@@ -52,23 +48,16 @@ export function useWebMap() {
   // Surfacing them as toasts would spam on every mouse move. Real user-facing failures
   // (thematic data fetches, layer load) are reported by their owners.
 
-  // Restore colors for all previously selected features without touching the hover state.
+  // Restore colors for all previously highlighted features without touching the hover state.
   // Used internally when a fresh click should replace the selection.
   function restoreSelected(): void {
-    const selected = prevSelected.value;
-    const colors = prevSelectedColors.value;
-    for (let i = 0; i < selected.length; i++) {
-      const layer = getLayerByObject(selected[i]);
-      if (layer) {
-        try {
-          layer.setColor(selected[i], colors[i]);
-        } catch (err) {
-          console.error(err);
-        }
+    for (const entry of layers.layers) {
+      try {
+        entry.instance.clearHighlights();
+      } catch (err) {
+        console.error(err);
       }
     }
-    prevSelected.value = [];
-    prevSelectedColors.value = [];
   }
 
   // Public reset: restore selection colors AND drop the hover state.
@@ -93,40 +82,50 @@ export function useWebMap() {
   }
 
   function hideSelectedObjects(): void {
-    const nextHidden = [...hiddenFeatures.value];
-    for (const feature of prevSelected.value) {
-      const layer = getLayerByObject(feature);
-      if (!layer) continue;
-      if (!layer.inArray(nextHidden, feature)) nextHidden.push(feature);
-      layer.hideSelected(feature);
+    // Iterate by id (not wrapper) so URL-restored highlights whose tile hasn't streamed
+    // in yet still enter hiddenIds; applyStateToFeature will apply visibility on arrival.
+    for (const entry of layers.layers) {
+      for (const { id } of entry.instance.highlightEntries()) {
+        try {
+          entry.instance.hideById(id);
+        } catch (err) {
+          console.error(err);
+        }
+      }
     }
-    hiddenFeatures.value = nextHidden;
   }
 
   function showHiddenObjects(): void {
-    for (const feature of hiddenFeatures.value) {
-      const layer = getLayerByObject(feature);
-      if (layer) layer.show(feature);
+    for (const entry of layers.layers) {
+      try {
+        entry.instance.showAll();
+      } catch (err) {
+        console.error(err);
+      }
     }
-    hiddenFeatures.value = [];
   }
 
   function getAllHighlightedObjects(): Record<string, unknown> {
+    // Read the reactive trigger so consumers (Vue computeds) re-run on mutation.
+    void selectionVersion.value;
     const out: Record<string, unknown> = {};
-    for (const feature of prevSelected.value) {
-      const layer = getLayerByObject(feature);
-      const res = layer ? layer.getIdObject(feature) : undefined;
-      if (res) out[String(res.key)] = res.object;
+    for (const entry of layers.layers) {
+      for (const { id, latestWrapper } of entry.instance.highlightEntries()) {
+        const obj = latestWrapper ? entry.instance.getIdObject(latestWrapper)?.object : undefined;
+        out[id] = obj;
+      }
     }
     return out;
   }
 
   function getAllHiddenObjects(): Record<string, unknown> {
+    void selectionVersion.value;
     const out: Record<string, unknown> = {};
-    for (const feature of hiddenFeatures.value) {
-      const layer = getLayerByObject(feature);
-      const res = layer ? layer.getIdObject(feature) : undefined;
-      if (res) out[String(res.key)] = res.object;
+    for (const entry of layers.layers) {
+      for (const { id, latestWrapper } of entry.instance.hiddenEntries()) {
+        const obj = latestWrapper ? entry.instance.getIdObject(latestWrapper)?.object : undefined;
+        out[id] = obj;
+      }
     }
     return out;
   }
@@ -143,7 +142,7 @@ export function useWebMap() {
     function unhighlightHover(): void {
       if (!prevHovered) return;
       const layer = getLayerByObject(prevHovered);
-      if (layer && !layer.inArray(prevSelected.value, prevHovered)) {
+      if (layer && !layer.isHighlighted(prevHovered)) {
         try {
           layer.setColor(prevHovered, prevHoveredColor);
         } catch (err) {
@@ -179,7 +178,7 @@ export function useWebMap() {
       unhighlightHover();
 
       // Skip if the new feature is already selected (it stays in highlight color).
-      if (layer.inArray(prevSelected.value, picked)) return;
+      if (layer.isHighlighted(picked)) return;
 
       prevHovered = picked;
       prevHoveredColor = layer.getColor(picked);
@@ -212,15 +211,20 @@ export function useWebMap() {
         return;
       }
 
-      // Already selected? Don't re-add.
-      if (layer.inArray(prevSelected.value, picked)) return;
+      // Already highlighted? Don't re-add.
+      if (layer.isHighlighted(picked)) return;
 
-      // If the click hit the hovered feature, its current color is mouseOverColor — not the original.
+      // If the click hit the hovered feature, its current color is mouseOverColor — restore
+      // the natural color before addHighlight captures it (addHighlight immediately overwrites
+      // with highlightColor, so this is invisible to the user).
       const wasHovered = hoveredBeforeClick != null && layer.isEqual(hoveredBeforeClick, picked);
-      const restoreColor = wasHovered ? originalColorBeforeHover : layer.getColor(picked);
-
-      prevSelected.value = [...prevSelected.value, picked];
-      prevSelectedColors.value = [...prevSelectedColors.value, restoreColor];
+      if (wasHovered) {
+        try {
+          layer.setColor(picked, originalColorBeforeHover);
+        } catch (err) {
+          console.error(err);
+        }
+      }
 
       // We've absorbed the hover into the selection; clear hover state so a later move-off
       // doesn't try to restore the now-selected feature back to mouseOverColor.
@@ -229,7 +233,7 @@ export function useWebMap() {
 
       layer.setSelected(picked);
       try {
-        layer.setColor(picked, highlightColor);
+        layer.addHighlight(picked);
       } catch (err) {
         console.error(err);
         clearSelected();
@@ -267,8 +271,7 @@ export function useWebMap() {
   }
 
   return {
-    prevSelected,
-    hiddenFeatures,
+    selectionVersion,
     lastInfo,
     getLayerByObject,
     clearSelected,

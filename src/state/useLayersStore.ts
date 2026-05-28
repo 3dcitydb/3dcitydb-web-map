@@ -4,6 +4,7 @@ import type { DataSourceKind, TableType } from '../thematic/types';
 import { getErrorMessage } from '../utils/errorMessages';
 import { useViewerRef } from '../viewer/viewerRef';
 import { createEntryRegistry } from './entryRegistry';
+import { bumpSelectionVersion } from './selectionVersion';
 
 export type LayerKind = '3dtiles' | 'i3s' | 'geojson';
 
@@ -11,11 +12,16 @@ export interface LayerSpec {
   name: string;
   kind: LayerKind;
   url: string;
+  /** Initial visibility — defaults to true. URL-restored layers may start inactive. */
+  active?: boolean;
   maximumScreenSpaceError?: number;
   clampToGround?: boolean;
   thematicDataUrl?: string;
   thematicDataSource?: DataSourceKind;
   tableType?: TableType;
+  /** Initial hidden / highlighted feature ids — typically from a scene link URL. */
+  hiddenIds?: string[];
+  highlightedIds?: string[];
 }
 
 export interface ActiveLayer {
@@ -54,6 +60,12 @@ export const useLayersStore = defineStore('layers', () => {
       thematicDataSource: spec.thematicDataSource,
       tableType: spec.tableType,
     };
+    const active = spec.active ?? true;
+    const initialState = {
+      active,
+      hiddenIds: spec.hiddenIds,
+      highlightedIds: spec.highlightedIds,
+    };
     let instance: LayerBase;
     switch (spec.kind) {
       case '3dtiles':
@@ -62,6 +74,7 @@ export const useLayersStore = defineStore('layers', () => {
           name: spec.name,
           maximumScreenSpaceError: spec.maximumScreenSpaceError,
           ...thematic,
+          ...initialState,
         });
         break;
       case 'i3s':
@@ -70,6 +83,7 @@ export const useLayersStore = defineStore('layers', () => {
           name: spec.name,
           maximumScreenSpaceError: spec.maximumScreenSpaceError,
           ...thematic,
+          ...initialState,
         });
         break;
       case 'geojson':
@@ -78,6 +92,7 @@ export const useLayersStore = defineStore('layers', () => {
           name: spec.name,
           clampToGround: spec.clampToGround,
           ...thematic,
+          ...initialState,
         });
         break;
       default: {
@@ -86,11 +101,16 @@ export const useLayersStore = defineStore('layers', () => {
       }
     }
 
+    // Wire the layer to bump the shared reactive trigger so Vue computeds reading
+    // getAllHighlightedObjects / getAllHiddenObjects re-evaluate on state changes
+    // (including async wrapper discovery during tile streaming).
+    instance.onStateChange = bumpSelectionVersion;
+
     const entry: ActiveLayer = {
       id: instance.layerId,
       spec,
       instance,
-      active: true,
+      active,
       loading: true,
     };
     append(entry);

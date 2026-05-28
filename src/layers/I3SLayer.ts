@@ -1,6 +1,7 @@
 import {
   Cesium3DTileColorBlendMode,
   Cesium3DTileFeature,
+  Cesium3DTilePointFeature,
   type Cesium3DTileset,
   I3SDataProvider,
   type Viewer,
@@ -67,6 +68,31 @@ export class I3SLayer extends LayerBase {
 
   protected setFeatureVisible(feature: I3SFeature, visible: boolean): void {
     feature.show = visible;
+  }
+
+  protected onAfterAttach(_viewer: Viewer, primitive: I3SDataProvider): void {
+    this.registerTilesLoadedEventHandlers(primitive);
+  }
+
+  // Mirror Cesium3DTilesLayer's tileVisible loop, one listener per underlying tileset —
+  // I3SDataProvider itself has no equivalent event. Without this, hidden/highlighted
+  // features lose their state as soon as their tile is re-rendered.
+  private registerTilesLoadedEventHandlers(provider: I3SDataProvider): void {
+    for (const layer of provider.layers) {
+      const tileset = (layer as unknown as { tileset?: Cesium3DTileset }).tileset;
+      if (!tileset) continue;
+      const remove = tileset.tileVisible.addEventListener((tile) => {
+        const content = tile.content;
+        if (content instanceof Cesium3DTilePointFeature) return;
+        const featuresLength = content?.featuresLength ?? 0;
+        for (let k = 0; k < featuresLength; k++) {
+          const feature = content?.getFeature(k) as I3SFeature | undefined;
+          if (!feature) continue;
+          this.applyStateToFeature(feature);
+        }
+      });
+      this.addDisposer(remove);
+    }
   }
 
   contains(object: unknown): object is I3SFeature {

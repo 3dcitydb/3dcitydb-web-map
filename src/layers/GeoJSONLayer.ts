@@ -63,11 +63,34 @@ export class GeoJSONLayer extends LayerBase {
     feature.id.show = visible;
   }
 
-  /** GeoJSON pick wrappers (`{ id: Entity }`) are freshly allocated per pick, so
-   *  reference equality on the wrapper fails. Cesium reuses the underlying Entity instance,
-   *  so use that as the stable hidden-set identity. */
-  protected identityOf(feature: unknown): unknown {
-    return this.contains(feature) ? feature.id : feature;
+  /** GeoJSON entities don't go through a tileVisible pass, so `showAll` has to walk
+   *  the dataSource directly. We iterate every entity rather than just the ones whose
+   *  ids were in `hiddenIds`: cheap, and correct even if the caller cleared hiddenIds
+   *  out-of-band. */
+  protected restoreAllVisibility(): void {
+    const ds = this.primitive as GeoJsonDataSourceType | undefined;
+    if (!ds) return;
+    for (const entity of ds.entities.values) {
+      if (entity.show === false) entity.show = true;
+    }
+  }
+
+  /** Streamed layers rely on tileVisible to seed URL-restored state. GeoJSON has no such
+   *  event — entities are persistent — so we apply state once, here, immediately after
+   *  the dataSource is attached. Iterates by id (not by entity) so a 1-of-1000 hidden
+   *  feature doesn't trigger 999 redundant visualizer updates. */
+  protected applyStateToAllLoadedFeatures(): void {
+    if (this.hiddenIds.size === 0 && this.highlightedIds.size === 0) return;
+    const ds = this.primitive as GeoJsonDataSourceType | undefined;
+    if (!ds) return;
+    const relevantIds = new Set<string>([...this.hiddenIds, ...this.highlightedIds.keys()]);
+    for (const id of relevantIds) {
+      const entity = ds.entities.getById(id);
+      if (!entity) continue;
+      // applyStateToFeature uses getIdKey → getIdObject, which for GeoJSON expects the
+      // `{ id: Entity }` pick-wrapper shape. Synthesize one per matched entity.
+      this.applyStateToFeature({ id: entity } as PickedGeoJsonObject);
+    }
   }
 
   contains(object: unknown): object is PickedGeoJsonObject {
